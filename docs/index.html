@@ -1,0 +1,656 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="江添 亮" />
+  <meta name="date" content="2018-02-27" />
+  <title>江添亮のプログラマーのためのC++入門</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <style>
+  pre > code
+  {
+      display : block ;
+      font-family : monospace ;
+      font-size : x-large ;
+      border-style : solid ;
+      border-width : medium ;
+      border-color : black ;
+      border-radius : 0.4em ;
+      padding : 0.5em ;
+      word-wrap : break-word ;
+      white-space : pre-wrap ;
+  }
+  
+  h1,h2,h3,h4,h5,h6
+  {
+      font-size : 2em ;
+      font-weight : bold ;
+  }
+  
+  table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding : 0.5em ;
+  }
+  </style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">江添亮のプログラマーのためのC++入門</h1>
+<h2 class="author">江添 亮</h2>
+<h3 class="date">2018-02-27</h3>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#序">序</a></li>
+<li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
+<li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
+<li><a href="#define">#define</a><ul>
+<li><a href="#オブジェクト風マクロ">オブジェクト風マクロ</a></li>
+<li><a href="#関数風マクロ">関数風マクロ</a></li>
+<li><a href="#va_args__可変長引数マクロ"><code>__VA_ARGS__</code>(可変長引数マクロ)</a></li>
+<li><a href="#va_opt__"><code>__VA_OPT__</code></a></li>
+<li><a href="#演算子">#演算子</a></li>
+<li><a href="#演算子-1">##演算子</a></li>
+<li><a href="#複数行の置換リスト">複数行の置換リスト</a></li>
+<li><a href="#undefディレクティブ">#undefディレクティブ</a></li>
+</ul></li>
+<li><a href="#条件付きソースファイル選択">条件付きソースファイル選択</a><ul>
+<li><a href="#プリプロセッサーの定数式">プリプロセッサーの定数式</a></li>
+<li><a href="#ifディレクティブ">#ifディレクティブ</a></li>
+<li><a href="#elifディレクティブ">#elifディレクティブ</a></li>
+<li><a href="#elseディレクティブ">#elseディレクティブ</a></li>
+<li><a href="#ifdef-ifndefディレクティブ">#ifdef, #ifndefディレクティブ</a></li>
+</ul></li>
+<li><a href="#lineディレクティブ">#lineディレクティブ</a></li>
+<li><a href="#errorディレクティブ">#errorディレクティブ</a></li>
+<li><a href="#pragmra">#pragmra</a></li>
+<li><a href="#nullディレクティブ">Nullディレクティブ</a></li>
+<li><a href="#定義済みマクロ名">定義済みマクロ名</a></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="序">序</h1>
+<p>本書はプログラミング経験者向けのC++入門書である。</p>
+<p>本書の対象読者は、すでに何らかの実用的なプログラミング言語を習得していることを想定し、プログラミングの初歩的な概念はすべて理解しているものとして説明しない。そのため、本書には、「変数は箱のようなものである」といったような説明は出てこない。ただし、主要な他の言語とC++として特別に注意が必要な差は解説している。</p>
+<h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
+<p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
+<p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
+<p>Cプリプロセッサーはプリプロセッシングディレクティブ(preprocessing directive)を認識し、トークン列を処理する。ディレクティブはソースファイルの文頭に文字<code>#</code>から始まり、改行文字で終わる。<code>#</code>とディレクティブの間に空白文字を入れてもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define NOSPACE</span>
+<span class="pp">#    define SPACE</span></code></pre></div>
+<h2 id="includeディレクティブ">#includeディレクティブ</h2>
+<p><code>#include</code>は指定したファイルの内容をその場に挿入する。本質的にはコピペだ。C++では<code>#include</code>はライブラリを利用するのに使われる。</p>
+<p><code>#include</code>は以下のいずれかの文法を持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;ヘッダーファイルパス&gt;</span><span class="pp"> 改行文字</span>
+<span class="pp">#include </span><span class="im">&quot;ヘッダーファイルパス&quot;</span><span class="pp"> 改行文字</span></code></pre></div>
+<p><code>#include</code>は指定したファイルパスのファイルの内容をその場所に挿入する。このファイルをヘッダーファイルという。<code>&lt;&gt;</code>によるファイルパスは、標準ライブラリやシステムのヘッダーファイルを格納したディレクトリーからヘッダーファイルを探す。<code>&quot;&quot;</code>によるファイルパスは、システム以外のディレクトリーからもヘッダーファイルを探す。例えばカレントディレクトリーなどだ。</p>
+<p>例えば、以下のようなヘッダーファイル<code>foo.h</code>があり、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// foo.h</span>
+foo foo foo</code></pre></div>
+<p>以下のようなソースファイル<code>bar.cpp</code>がある場合、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// bar.cpp</span>
+
+<span class="pp">#include </span><span class="im">&quot;foo.h&quot;</span>
+
+<span class="co">// end bar.cpp</span></code></pre></div>
+<p><code>bar.cpp</code>をCプリプロセッサーにかけると、以下のようなソースファイルが出力される</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// bar.cpp</span>
+
+<span class="co">// foo.h</span>
+foo foo foo
+
+<span class="co">// end bar.h</span></code></pre></div>
+<p>このソースファイルはC++のソースファイルとしてはエラーとなるが、Cプリプロセッサーは単純にトークン列で分割したテキストファイルとしてソースファイルを処理するため、Cプリプロセッサーとしてはエラーにはならない。</p>
+<p>冒頭で述べたように、<code>#include</code>の本質はコンパイラーによるコピペである。あるテキストファイルの内容をその場に挿入するコピペ機能を提供する。</p>
+<p><code>#include</code>は、他の言語でモジュール、importなどと呼ばれている機能を簡易的に提供する。C++の標準ライブラリを使うには、<code>&lt;iostream&gt;</code>や<code>&lt;string&gt;</code>や<code>&lt;vector&gt;</code>のようなヘッダーファイルを<code>#include</code>する必要がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// iostreamライブラリを使う</span>
+<span class="pp">#include </span><span class="im">&lt;iostream&gt;</span>
+<span class="co">// stringライブラリを使う</span>
+<span class="pp">#include </span><span class="im">&lt;string&gt;</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// &lt;string&gt;のライブラリ</span>
+    <span class="bu">std::</span>string s(<span class="st">&quot;hello&quot;</span>) ;
+    <span class="co">// iostreamのライブラリ</span>
+    <span class="bu">std::</span>cout &lt;&lt; s ;
+}</code></pre></div>
+<p>すでに述べたように<code>#include</code>はファイルの内容をその場に挿入するだけであり、他の言語にあるモジュールのための高級な機能ではない。本書を執筆時点で規格策定中のC++20では、より高級なモジュール機能を追加する予定がある。</p>
+<p>同じヘッダーファイルを複数回<code>#include</code>すると、当然複数回挿入される。</p>
+<p>以下のような<code>val.h</code>を、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// val.h</span>
+<span class="kw">inline</span> <span class="dt">int</span> val ;</code></pre></div>
+<p>以下のように複数回<code>#include</code>すると、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span>
+<span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></code></pre></div>
+<p>以下のように置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// val.h</span>
+<span class="kw">inline</span> <span class="dt">int</span> val ;
+<span class="co">// val.h</span>
+<span class="kw">inline</span> <span class="dt">int</span> val ;</code></pre></div>
+<p>これはvalの定義が重複しているためエラーとなる。</p>
+<p>しかし、ヘッダーファイルを一度しか<code>#include</code>しないようにするのは困難だ。なぜならば、ヘッダーファイルは他のヘッダーファイルから間接的に<code>#include</code>されることもあるからだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// lib_f.h</span>
+
+<span class="pp">#include </span><span class="im">&quot;val.h&quot;</span>
+
+<span class="dt">int</span> f() ;</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// lib_g.h</span>
+
+<span class="pp">#include </span><span class="im">&quot;val.h&quot;</span>
+
+<span class="dt">int</span> g() ;</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// main.cpp</span>
+
+<span class="pp">#include </span><span class="im">&quot;lib_f.h&quot;</span>
+<span class="pp">#include </span><span class="im">&quot;lib_g.h&quot;</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> result = f() + g() ;
+}</code></pre></div>
+<p>この<code>main.cpp</code>をCプリプロセッサーにかけると以下のように置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// main.cpp</span>
+
+<span class="co">// lib_f.h</span>
+
+<span class="co">// val.h</span>
+<span class="kw">inline</span> <span class="dt">int</span> val ;
+
+<span class="dt">int</span> f() ;
+
+<span class="co">// lib_g.h</span>
+
+<span class="co">// val.h</span>
+<span class="kw">inline</span> <span class="dt">int</span> val ;
+
+<span class="dt">int</span> g() ;
+
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> result = f() + g() ;
+}</code></pre></div>
+<p>これはvalの定義が重複しているためエラーとなる。</p>
+<p>この問題に対処するためには、複数回<code>#include</code>されると困るヘッダーファイルでは、インクルードガード(include guard)と呼ばれている方法を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// val.h</span>
+
+<span class="pp">#ifdef INCLUDE_GUARD_HEADER_VAL_H</span>
+<span class="pp">#define INCLUDE_GUARD_HEADER_VAL_H</span>
+
+<span class="kw">inline</span> <span class="dt">int</span> val ;
+
+<span class="pp">#endif</span></code></pre></div>
+<p>このように記述した<code>val.h</code>を複数回<code>#include</code>しても、最初のifdefのみがコンパイル対象になるため、問題は起こらない。</p>
+<p>インクルードガードは以下の様式を持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#ifdef 十分にユニークなマクロ名</span>
+<span class="pp">#define 十分にユニークなマクロ名 </span>
+
+<span class="co">// 重複してコンパイルされたくないコードをここに書く</span>
+
+<span class="pp">#endif</span></code></pre></div>
+<p><code>十分にユニークなマクロ名</code>は全ソースファイル中で衝突しないそのヘッダーに固有のマクロ名を使う。慣習的に推奨される方法としてはすべて大文字を使い、十分に長いマクロ名にすることだ。</p>
+<h2 id="define">#define</h2>
+<p><code>#define</code>はマクロ置換を行う。マクロにはオブジェクト風マクロ(object-like macro)と関数風マクロ(function-like macro)がある。風というのは、マクロはオブジェクトでも関数でもないからだ。ただ、文法上オブジェクトや関数の似ているだけで、実態はトークン列の愚直な置換だ。</p>
+<h3 id="オブジェクト風マクロ">オブジェクト風マクロ</h3>
+<p>オブジェクト風マクロの文法は以下の通り</p>
+<pre><code>#define マクロ名 置換リスト　改行文字</code></pre>
+<p><code>#define</code>以降の行では、マクロ名が置換リストに置き換わる</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define ONE             1</span>
+<span class="pp">#define ONE_PLUS_ONE    ONE + ONE</span>
+<span class="pp">#define GNU GNU&#39;s is NOT UNIX</span>
+
+ONE
+ONE_PLUS_ONE</code></pre></div>
+<p>これをプリプロセスすると以下のソースコードになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dv">1</span>
+<span class="dv">1</span> + <span class="dv">1</span></code></pre></div>
+<p>マクロ名<code>ONE</code>は<code>1</code>に置換される。</p>
+<p>マクロ名<code>ONE_PLUS_ONE</code>は<code>ONE + ONE</code>に置換される。置換された結果に別のマクロ名があれば、そのマクロ名も置換される。</p>
+<p>あるマクロ名を置換した結果、そのマクロ名が現れても再帰的に置換されることはない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define GNU GNU&#39;s NOT UNIX!</span>
+
+GNU</code></pre></div>
+<p>これは以下のように置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">GNU<span class="st">&#39;s NOT UNIX!</span></code></pre></div>
+<p>マクロ名<code>GNU</code>を展開するとトークン`GNU'が現れるが、これは置換されたマクロ名と同じなので、再帰的に置換されることはない。</p>
+<h3 id="関数風マクロ">関数風マクロ</h3>
+<p>関数風マクロの文法は以下の通り。</p>
+<pre><code>#define マクロ名( 識別子リスト ) 置換リスト 改行文字</code></pre>
+<p>関数風マクロはあたかも関数のように記述できる。関数風マクロに実引数として渡したトークン列は、置換リスト内で仮引数としての識別子で参照できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define NO_ARGUMENT()           No argument</span>
+<span class="pp">#define ONE_ARGUMENT( ARG )     begin ARG end</span>
+<span class="pp">#define MAKE_IT_DOUBLE( ARG )   ONE_ARGUMENT( ARG ARG )</span>
+
+NO_ARGUMENT()
+ONE_ARGUMENT( foo bar )
+MAKE_IT_DOUBLE( foo bar )</code></pre></div>
+<p>これは以下のように置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">No argument
+begin foo bar end
+begin foo bar foo bar end</code></pre></div>
+<p>複数の引数を取るマクロへの実引数は、カンマで区切られたトークン列を渡す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define TWO( A, B ) A B</span>
+<span class="pp">#define THREE( A, B, C ) C B A</span>
+
+TWO( <span class="dv">1</span> <span class="dv">2</span>, <span class="dv">3</span> <span class="dv">4</span> )
+THREE( <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span> )</code></pre></div>
+<p>これは以下のように置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>
+<span class="dv">3</span> <span class="dv">2</span> <span class="dv">1</span></code></pre></div>
+<p>ただし、括弧で囲まれたトークン列の中にあるカンマは、マクロの実引数の区切りとはみなされない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define MACRO( A ) A</span>
+
+MACRO( (a,b) )</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>(a,b)</code></pre>
+<h3 id="va_args__可変長引数マクロ"><code>__VA_ARGS__</code>(可変長引数マクロ)</h3>
+<p><code>#define</code>の識別子リストを<code>...</code>だけにしたマクロは、可変長引数マクロになる。このときマクロの実引数のトークン列は、置換リストのなかで<code>__VA_ARGS__</code>として参照できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define MACRO(...) </span><span class="ot">__VA_ARGS__</span>
+
+MACRO( You can write , <span class="kw">and</span> ,, <span class="kw">or</span> even ,,,, )</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>You can write , and ,, or even ,,,,</code></pre>
+<p>カンマも含めてすべてのトークン列がそのまま<code>__VA_ARGS__</code>で参照できる。</p>
+<p>可変長引数マクロの識別子リストに仮引数と<code>...</code>を書いたマクロの置換リストでは、仮引数の数だけの実引数は仮引数で参照され、残りが<code>__VA_ARGS__</code>で参照される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define MACRO( X, Y, Z, ... ) X Y Z and </span><span class="ot">__VA_ARGS__</span>
+
+MACRO( <span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span> )</code></pre></div>
+<p>これは以下のように置換される</p>
+<pre><code>1 2 3 and 4,5,6</code></pre>
+<p>X, Y, Zにそれぞれ1, 2, 3が入り、<code>__VA_ARGS__</code>には<code>4,5,6</code>が入る。</p>
+<h3 id="va_opt__"><code>__VA_OPT__</code></h3>
+<p><code>__VA_OPT__</code>は可変長引数マクロで<code>__VA_ARGS__</code>にトークン列が渡されたかどうかで置換結果を変えることができる。</p>
+<p><code>__VA_OPT__</code>は可変引数マクロの置換リストでのみ使える。<code>__VA_OPT__(content)</code>は<code>__VA_ARGS__</code>にトークンがない場合はトークンなしに置換され、トークンがある場合はトークン列<code>content</code>に置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define MACRO( X, ... ) f( X __VA_OPT__(,) </span><span class="ot">__VA_ARGS__</span><span class="pp"> )</span>
+
+MACRO(<span class="dv">1</span>)
+MACRO(<span class="dv">1</span>,<span class="dv">2</span>)</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>f( 1 )
+f( 1, 2 )</code></pre>
+<p><code>MACRO(1)</code>は<code>X</code>が<code>1</code>になり、<code>__VA_ARGS__</code>にはトークンがないので、<code>__VA_OPT__(,)</code>は空に置換される。結果として<code>f(1)</code>となる。</p>
+<p><code>MACRO(1,2)</code>は、Xが1になり、<code>__VA_ARGS__'にはトークン</code>2<code>が入るので、</code><strong>VA_OPT</strong>(,)<code>は</code>,<code>に置換される。結果として</code>f(1,2)`となる。</p>
+<p><code>__VA_OPT__</code>は<code>__VA_ARGS__</code>に実引数となるトークン列がなければ空に置換されるので、このようにトークン列の有無によってカンマなどの文法上必須のトークン列の有無を切り替えたい場合に使うことができる。</p>
+<h3 id="演算子">#演算子</h3>
+<p><code>#</code>はマクロ実引数を文字列リテラルにする。</p>
+<p><code>#</code>は関数風マクロの置換リストの中のみで使うことができる。<code>#</code>は関数風マクロの仮引数の識別子の直前に書くことができる。<code>#</code>が直前に書かれた識別子は、マクロ実引数のトークン列の文字列リテラルになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define STRING( X ) # X</span>
+
+STRING( hello )
+STRING( hello world )</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>&quot;hello&quot;
+&quot;hello world&quot;</code></pre>
+<p>また、可変長マクロと組み合わせた場合、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define STRING( ... ) # </span><span class="ot">__VA_ARGS__</span>
+
+STRING()
+STRING( hello,world )</code></pre></div>
+<p>以下のように置換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="st">&quot;&quot;</span>
+<span class="st">&quot;hello,world&quot;</span></code></pre></div>
+<h3 id="演算子-1">##演算子</h3>
+<p><code>##</code>はマクロ実引数の結合を行う。</p>
+<p><code>##</code>は関数風マクロの置換リストの中にしか書けない。<code>##</code>は両端にマクロの仮引数の識別子を書かなければならない。<code>##</code>は両端の識別子の参照するマクロ実引数のトークン列を結合した置換を行う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define CONCAT( A, B ) A ## B</span>
+
+CONCAT( foo, bar )
+CONCAT( aaa bbb, ccc ddd)</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>foobar
+aaa bbbccc ddd</code></pre>
+<p>結合した結果のトークンは更にマクロ置換の対象となる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define CONCAT( A, B ) A ## B</span>
+<span class="pp">#define FOOBAR hello</span>
+
+CONCAT( FOO, BAR )</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>hello</code></pre>
+<p><code>CONCAT(FOO,BAR)</code>は<code>FOOBAR</code>に置換され、FOOBARという名前のマクロ名があるためにさらに<code>hello</code>に置換される。</p>
+<h3 id="複数行の置換リスト">複数行の置換リスト</h3>
+<p><code>#define</code>ディレクティブの置換リストは複数行に渡って書くことができない。これは文法上の制約によるものだ。<code>#define</code>ディレクティブは改行文字で終端される。</p>
+<p>しかし、関数やクラスを生成するような複雑なマクロは、複数行に分けて書きたい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE</span>
+<span class="pp">#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )</span>
+
+<span class="pp">#define DEFINE_LIST( TYPE ) struct LIST_NAME(TYPE){TYPE value ;LIST_NAME(TYPE) * prev ;LIST_NAME(TYPE) * next ;} ; </span>
+
+DEFINE_LIST(<span class="dt">int</span>)
+DEFINE_LIST(<span class="dt">double</span>)</code></pre></div>
+<p>この場合、行末にバックスラッシュに続けて改行を書くと、バックスラッシュと改行がプリプロセッサーによって削除される。</p>
+<p>上の例は以下のように、プリプロセッサーとしては比較的わかりやすく書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE</span>
+<span class="pp">#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )</span>
+
+<span class="pp">#define DEFINE_LIST( TYPE )</span>\
+<span class="pp">struct LIST_NAME(TYPE)</span>\
+<span class="pp">{</span>\
+<span class="pp">    TYPE value ;</span>\
+<span class="pp">    LIST_NAME(TYPE) * prev ;</span>\
+<span class="pp">    LIST_NAME(TYPE) * next ;</span>\
+<span class="pp">} ; </span>
+
+DEFINE_LIST(<span class="dt">int</span>)
+DEFINE_LIST(<span class="dt">double</span>)</code></pre></div>
+<p>C++ではテンプレートがあるために、このようなマクロを書く必要はない。</p>
+<h3 id="undefディレクティブ">#undefディレクティブ</h3>
+<p><code>#undef</code>はそれ以前に定義されたマクロを削除する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define FOO BAR</span>
+FOO
+<span class="pp">#undef FOO</span>
+FOO</code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>BAR
+FOO</code></pre>
+<h2 id="条件付きソースファイル選択">条件付きソースファイル選択</h2>
+<p><code>#if</code>, <code>#elif</code>, <code>#else</code>, <code>#endif</code>, <code>#ifdef</code>, <code>#ifndef</code>は条件付きのソースファイルの選択(conditinal inclusion)を行う。これは条件付きコンパイルに近い機能を提供する。</p>
+<h3 id="プリプロセッサーの定数式">プリプロセッサーの定数式</h3>
+<p>プリプロセッサーで使える条件式は、C++の条件式とは比べてだいぶ制限がある。基本的には整数定数式で、<code>true</code>, <code>false</code>が使える他、<code>123</code>, <code>1+1</code>, <code>1 == 1</code>, <code>1 &lt; 1</code>のような式も使える。ただし、識別子はすべてマクロ名として置換できるものは置換され、置換できない識別子は、<code>true</code>, <code>false</code>以外はキーワードも含めてすべて0に置換される。</p>
+<p>したがって、プリプロセッサーで以下のように書くと、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#if UNDEFINED</span>
+<span class="pp">#endif</span></code></pre></div>
+<p>以下のように書いたものと同じになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#if 0</span>
+<span class="pp">#endif</span></code></pre></div>
+<p>プリプロセッサーであるので、C++としてのconstexpr変数やconstexpr関数も使えない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="dt">int</span> x = <span class="dv">1</span> ;
+
+<span class="pp">#if x</span>
+hello
+<span class="pp">#endif</span></code></pre></div>
+<p>これは以下のように置換される。</p>
+<pre><code>constexpr int x = 1 ;</code></pre>
+<p>プリプロセッサーはC++の文法と意味を理解しない。単にトークン列として処理する。</p>
+<p>以下の例はエラーになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }
+
+<span class="pp">#if f()</span>
+<span class="pp">#endif</span></code></pre></div>
+<p>なぜならば、<code>0()</code>は整数定数式として合法なコードではないからだ。何度も言うように、プリプロセッサーはC++の文法と意味を理解しない。</p>
+<p>プリプロセッサーの定数式では、特殊なマクロ風の式を使うことができる。<code>defined</code>と<code>__has_include</code>だ。</p>
+<p><code>defined</code>は以下の文法を持つ</p>
+<pre><code>defined 識別子
+defined ( 識別子 )</code></pre>
+<p><code>defined</code>は識別子がそれ以前の行で<code>#define</code>でマクロとして定義されていて<code>#undef</code>で取り消されていない場合<code>1</code>になり、それ以外の場合0になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// #if 0</span>
+<span class="pp">#if defined MACRO</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#define MACRO</span>
+
+<span class="co">// #if 1</span>
+<span class="pp">#if defined MACRO</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#undef MACRO</span>
+
+<span class="co">// #if 0</span>
+<span class="pp">#if defined MACRO</span>
+<span class="pp">#endif</span></code></pre></div>
+<p><code>__has_include</code>は以下の文法を持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">__has_include ( &lt; ヘッダーファイル名 &gt; )
+__has_include ( <span class="st">&quot; ヘッダーファイル名 &quot;</span> )
+__has_include ( 文字列リテラル )
+__has_include ( &lt; マクロ &gt; )</code></pre></div>
+<p>1番目と2番目は、指定されたヘッダーファイル名がシステムに存在する場合<code>1</code>に、そうでない場合0になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// &lt;filesystem&gt;の存在を確認してから#includeする</span>
+<span class="pp">#if __has_include(&lt;filesystem&gt;)</span>
+<span class="pp">#   include </span><span class="im">&lt;filesystem&gt;</span>
+<span class="pp">#endif</span>
+
+<span class="co">// &quot;mylibrary.h&quot;の存在を確認してから#includeする</span>
+<span class="pp">#if __has_include(&quot;mylibrary.h&quot;)</span>
+<span class="pp">#   include </span><span class="im">&quot;mylibrary.h&quot;</span>
+<span class="pp">#endif</span></code></pre></div>
+<p>3番目と4番目は、1番目と2番目が適用できない場合に初めて考慮される。その場合、まず通常通りにプリプロセッサーのマクロ置換が行われる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define STDIO &quot;stdio.h&quot;</span>
+
+<span class="pp">#if __has_include( STDIO )</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#define STDLIB stdlib.h</span>
+
+<span class="pp">#if __has_include( &lt;STDLIB&gt; )</span>
+<span class="pp">#endif</span></code></pre></div>
+<h3 id="ifディレクティブ">#ifディレクティブ</h3>
+<p><code>#if</code>ディレクティブは以下の文法を持つ。</p>
+<pre><code>#if 定数式 改行文字
+
+#endif</code></pre>
+<p>もし定数式がゼロの場合、<code>#if</code>と<code>#endif</code>で囲まれたトークン列は処理されない。定数式が非ゼロの場合、処理される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#if 0</span>
+<span class="co">This line will be skipped.</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#if 1</span>
+This line will be processed.
+<span class="pp">#endif</span></code></pre></div>
+<p>これをプリプロセスすると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">This line will be processed.</code></pre></div>
+<p><code>#if 0</code>は処理されないので、<code>#endif</code>までのトークン列は消える。</p>
+<h3 id="elifディレクティブ">#elifディレクティブ</h3>
+<p><code>#elif</code>ディレクティブは、C++でいう<code>else if</code>に相当する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="pp">#elif 定数式 改行文字</span></code></pre></div>
+<p><code>#elif</code>ディレクティブは<code>#if</code>ディレクティブと<code>#endif</code>ディレクティブの間に複数書くことができる。<code>#elif</code>のある<code>#if</code>が処理される場合、<code>#if</code>から<code>#elif</code>の間のトークン列が処理される、<code>#if</code>が処理されない場合、<code>#elif</code>が<code>#if</code>と同じように定数式を評価して処理されるかどうかが判断される。<code>#elif</code>が処理される場合、処理されるトークン列は次の<code>#elif</code>もしくは<code>#endif</code>までの間のトークン列になる。</p>
+<p>以下の例は、すべてYESのトークンがある行のみ処理される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#if 1</span>
+YES
+<span class="pp">#elif</span><span class="co"> 1</span>
+<span class="co">NO</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#if 0</span>
+<span class="co">NO</span>
+<span class="pp">#elif</span> <span class="dv">1</span>
+YES
+<span class="pp">#endif</span>
+
+<span class="pp">#if 0</span>
+<span class="co">NO</span>
+<span class="pp">#elif</span> <span class="dv">1</span>
+YES
+<span class="pp">#elif 1</span>
+NO
+<span class="pp">#endif</span>
+
+<span class="pp">#if 0</span>
+<span class="co">NO</span>
+<span class="pp">#elif</span> <span class="dv">0</span>
+NO
+<span class="pp">#elif 1</span>
+YES
+<span class="pp">#endif</span></code></pre></div>
+<p>プリプロセスした結果は以下の通り、</p>
+<pre><code>YES
+YES
+YES
+YES</code></pre>
+<h3 id="elseディレクティブ">#elseディレクティブ</h3>
+<p><code>#else</code>ディレクティブはC++でいう<code>else</code>に相当する。</p>
+<p><code>#else</code>ディレクティブは<code>#if</code>ディレクティブと<code>#endif</code>ディレクティブの間に書くことができる。もし<code>#if</code>と<code>#elif</code>ディレクティブが処理されない場合で<code>#else</code>ディレクティブがある場合、<code>#else</code>から<code>#endif</code>までのトークン列が処理される。</p>
+<p>以下の例は、YESのトークンがある行のみ処理される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#if 1</span>
+YES
+<span class="pp">#else</span>
+<span class="co">NO</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#if 0</span>
+<span class="co">NO</span>
+<span class="pp">#else</span>
+YES
+<span class="pp">#endif</span>
+
+<span class="pp">#if 0</span>
+<span class="co">NO</span>
+<span class="pp">#elif</span> <span class="dv">1</span>
+YES
+<span class="pp">#else</span>
+NO
+<span class="pp">#endif</span></code></pre></div>
+<h3 id="ifdef-ifndefディレクティブ">#ifdef, #ifndefディレクティブ</h3>
+<pre><code>#ifdef 識別子
+#ifndef 識別子</code></pre>
+<p>は、それぞれ以下と同じ意味になる。</p>
+<pre><code>#if defined 識別子
+#if !defined 識別子</code></pre>
+<p>例、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#ifdef MACRO</span>
+<span class="pp">#endif</span>
+
+<span class="co">// 上と同じ</span>
+<span class="pp">#if defined MACRO</span>
+<span class="pp">#endif</span>
+
+
+<span class="pp">#ifndef MACRO</span>
+<span class="pp">#endif</span>
+
+<span class="co">// 上と同じ</span>
+<span class="pp">#if !defined MACRO</span>
+<span class="pp">#endif</span></code></pre></div>
+<h2 id="lineディレクティブ">#lineディレクティブ</h2>
+<p><code>#line</code>ディレクティブはディレクティブの次の行の行番号と、ソースファイル名を変更する。これは人間が使うのではなく、ツールによって生成されることを想定した機能だ。</p>
+<p>以下の文法の<code>#line</code>ディレクティブは、<code>#line</code>ディレクティブの次の行の行番号をあたかも数値で指定した行番号であるかのように振る舞わせる。</p>
+<pre><code>#line 数値 改行文字</code></pre>
+<p>数値として0もしくは2147483647より大きい数を指定した場合の挙動は未定義となる。</p>
+<p>以下の例はコンパイルエラーになるが、コンパイルエラーメッセージはあたかも102行目に問題があるかのように表示される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 1行目</span>
+<span class="co">// 2行目</span>
+<span class="pp">#line 100 </span><span class="co">// 3行目</span>
+<span class="co">// 100行目</span>
+<span class="co">// 101行目</span>
+ill-formed line <span class="co">// 102行目</span></code></pre></div>
+<p>以下の例は999を出力するコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span>
+<span class="dt">int</span> main()
+{
+<span class="pp">#line 999</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="ot">__LINE__</span> ;
+}</code></pre></div>
+<p>以下の文法の<code>#line</code>ディレクティブは、次の行の行番号を数値にした上で、ソースファイル名をソースファイル名にする。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#line 数値 &quot;ソースファイル名&quot; 改行文字</span></code></pre></div>
+<p>例、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#line 42 &quot;answer.cpp&quot;</span></code></pre></div>
+<p>以下の文法の<code>#line</code>ディレクティブは、プリプロセッサートークン列をプリプロセスし、上の2つの文法のいずれかに合致させる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#line プリプロセッサートークン列 改行文字</span></code></pre></div>
+<p>例、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define LINE_NUMBER 123</span>
+<span class="pp">#line LINE_NUMBER</span></code></pre></div>
+<h2 id="errorディレクティブ">#errorディレクティブ</h2>
+<p><code>#error</code>ディレクティブはコンパイルエラーを引き起こす。</p>
+<pre><code>#error 改行文字
+#error トークン列 改行文字</code></pre>
+<p><code>#error</code>によるコンパイラーのエラーメッセージには<code>#error</code>のトークン列を含む。</p>
+<p><code>#error</code>の利用例としては、<code>#if</code>と組み合わせるものがある。以下の例はCHAR_BITが8でなければコンパイルエラーになるソースファイルだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;climits&gt;</span>
+
+<span class="pp">#if CHAR_BIT != 8</span>
+<span class="pp">#error CHAR_BIT != 8 implementation is not supported.</span>
+<span class="pp">#endif</span></code></pre></div>
+<p><code>#if</code>が処理されなければ、その中にある<code>#error</code>も処理されないので、コンパイルエラーにはならない。</p>
+<h2 id="pragmra">#pragmra</h2>
+<p><code>#pragmra</code>ディレクティブは実装依存の処理を行う。<code>#pragma</code>はコンパイラー独自の拡張機能を追加する文法として使われている。</p>
+<p>文法は以下の通り。</p>
+<pre><code>#pragma プリプロセッサートークン列 改行文字</code></pre>
+<p>C++では属性が追加されたために、<code>#pragma</code>を使う必要はほとんどなくなっている。</p>
+<h2 id="nullディレクティブ">Nullディレクティブ</h2>
+<p><code>Null</code>ディレクティブとは何もしないプリプロセッサーディレクティブだ。</p>
+<pre><code># 改行文字</code></pre>
+<p>つまり、単に<code>#</code>とだけ書いた行はエラーにはならない。</p>
+<h2 id="定義済みマクロ名">定義済みマクロ名</h2>
+<p>いくつかのマクロ名がプリプロセッサーによって予め定義されている。</p>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="17%" />
+<col width="39%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>マクロ名</th>
+<th align="left">値</th>
+<th align="left">意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>__cplusplus</td>
+<td align="left">201703L</td>
+<td align="left">C++17時点での値<br />
+将来の規格で増やされる</td>
+</tr>
+<tr class="even">
+<td>__DATE__</td>
+<td align="left">&quot;Mmm dd yyyy&quot;</td>
+<td align="left">ソースファイルがプリプロセスされた日付 Mmmは月、ddは日、yyyyは年<br />
+月の文字列はasctimeが生成するものと同じ<br />
+日が1桁の場合、ddの最初の文字は空白文字</td>
+</tr>
+<tr class="odd">
+<td>__FILE__</td>
+<td align="left">文字列リテラル</td>
+<td align="left">ソースファイルの名前の文字列リテラル</td>
+</tr>
+<tr class="even">
+<td>__LINE__</td>
+<td align="left">整数リテラル</td>
+<td align="left">ソースファイルの現在の行番号</td>
+</tr>
+<tr class="odd">
+<td>__STDC_HOSTED__</td>
+<td align="left">整数リテラル</td>
+<td align="left">ホスト実装の場合1<br />
+フリースタンディング実装の場合0</td>
+</tr>
+<tr class="even">
+<td>__STDCPP_DEFAULT_NEW_ALIGNMENT__</td>
+<td align="left">整数リテラル</td>
+<td align="left">アライメント</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

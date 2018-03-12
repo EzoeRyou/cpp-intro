@@ -1,0 +1,27 @@
+<style>
+pre > code
+{
+    display : block ;
+    font-family : monospace ;
+    font-size : x-large ;
+    border-style : solid ;
+    border-width : medium ;
+    border-color : black ;
+    border-radius : 0.4em ;
+    padding : 0.5em ;
+    word-wrap : break-word ;
+    white-space : pre-wrap ;
+}
+
+h1,h2,h3,h4,h5,h6
+{
+    font-size : 2em ;
+    font-weight : bold ;
+}
+
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding : 0.5em ;
+}
+</style>
