@@ -82,6 +82,28 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="TOC">
 <ul>
 <li><a href="#序">序</a></li>
+<li><a href="#cの概要">C++の概要</a></li>
+<li><a href="#cの実行">C++の実行</a><ul>
+<li><a href="#cの実行の仕組み">C++の実行の仕組み</a></li>
+<li><a href="#簡単な一つのソースファイルからなるプログラムの実行">簡単な一つのソースファイルからなるプログラムの実行</a><ul>
+<li><a href="#サンプルコード">サンプルコード</a></li>
+<li><a href="#コンパイル">コンパイル</a></li>
+<li><a href="#実行">実行</a></li>
+</ul></li>
+<li><a href="#gcc-cコンパイラー">GCC: C++コンパイラー</a><ul>
+<li><a href="#コンパイラーオプション">コンパイラーオプション</a></li>
+<li><a href="#ヘッダーファイルの省略">ヘッダーファイルの省略</a></li>
+<li><a href="#コンパイル済みヘッダーprecompiled-header">コンパイル済みヘッダー(precompiled header)</a></li>
+</ul></li>
+<li><a href="#make-ビルドシステム">Make: ビルドシステム</a><ul>
+<li><a href="#コンパイルと実行のまとめ">コンパイルと実行のまとめ</a></li>
+<li><a href="#依存関係を解決するビルドシステム">依存関係を解決するビルドシステム</a></li>
+<li><a href="#依存関係を記述するルール">依存関係を記述するルール</a></li>
+<li><a href="#コメント">コメント</a></li>
+<li><a href="#変数">変数</a></li>
+<li><a href="#自動変数">自動変数</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -112,6 +134,365 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1 id="序">序</h1>
 <p>本書はプログラミング経験者向けのC++入門書である。</p>
 <p>本書の対象読者は、すでに何らかの実用的なプログラミング言語を習得していることを想定し、プログラミングの初歩的な概念はすべて理解しているものとして説明しない。そのため、本書には、「変数は箱のようなものである」といったような説明は出てこない。ただし、主要な他の言語とC++として特別に注意が必要な差は解説している。</p>
+<h1 id="cの概要">C++の概要</h1>
+<p>C++とは何か。C++の原作者にして最初の実装者であるBjarne Stroustrupは、以下のように簡潔にまとめている。</p>
+<blockquote>
+<p>C++は、Simulaのプログラム構造化のための機構と、Cのシステムプログラミング用の効率性と柔軟性を提供するために設計された。C++は半年ほどで現場で使えることを見込んでいた。結果として成功した。</p>
+<p>Bjarne Stroustrup, A Hisotory of C++: 1979-1991, HOPL2</p>
+</blockquote>
+<p>プログラミング言語史に詳しくない読者は、Simulaというプログラミング言語について知らないことだろう。Simulaというのは、初めてオブジェクト指向プログラミングを取り入れたプログラミング言語だ。当時と言えばまだ高級なプログラミング言語はほとんどなく、if else, whileなどのIBMの提唱した構造化プログラミングを可能にする文法を提供しているプログラミング言語すら、多くは研究段階であった。いわんやオブジェクト指向など、当時はまだアカデミックにおいて可能性の一つとして研究されている程度の地に足のついていない夢の機能であった。そのような粗野な時代において、Simulaは先進的なオブジェクト指向プログラミングを実現していた。</p>
+<p>問題は、Simulaの設計と実装では実行速度が遅く、大規模なプログラムを開発するには適さなかった。</p>
+<p>Cの効率性と柔軟性というのは、要するに実行速度が速いとかメモリ消費量が少ないということだ。なぜCは他の言語に比べて効率と柔軟に優れているのか。これには2つの理由がある。</p>
+<p>ひとつ、Cのコードは直接ハードウェアがサポートする命令にまでマッピング可能であるということ。現実のハードウェアにはストレージがあり、メモリがあり、キャッシュがあり、レジスターがあり、命令は投機的に並列実行される泥臭い計算機能を提供している。</p>
+<p>ひとつ、使わない機能のコストを支払う必要がないというゼロオーバーヘッドの原則。例えばあらゆるメモリ利用がGCによって管理されている言語では、たとえメモリをすべて明示的に管理していたとしても、GCのコストを支払わなければならない。実行時にメモリレイアウトを判定して実行時に分岐処理ができる言語では、たとえコンパイル時にメモリレイアウトが決定されていたとしても、実行時にメモリレイアウトを判定して条件分岐するコストを支払わなければならない。</p>
+<p>C++は、「アセンブリ言語をおいて、C++より下に言語を置かない」と宣言するほど、ハードウェア機能への直接マッピングとゼロオーバーヘッドの原則を重視している。</p>
+<p>C++の他の特徴としては、委員会方式による国際標準規格を定めていることがある。特定の一個人や一法人が所有する言語は、個人や法人の意思で簡単に仕様が変わってしまう。短期的な利益を追求するために長期的に問題となる変更をしたり、単一の実装が仕様だと言わんばかりの振る舞いをする。特定の個人や法人に所有されていないこと、実装が従うべき標準規格があること、独立した実装が複数あること、言語に利害関係を持つ関係者が議論して投票で変更を可決すること、これがC++が長期に渡って使われてきた理由でもある。</p>
+<p>委員会方式の規格制定では、下位互換性の破壊は忌避される。なぜならば、既存の動いているコードを壊すということは、それまで存在していた資産の価値を毀損することであり、利害関係を持つ委員が反対するからだ。</p>
+<p>下位互換性を壊した結果何が起こるかと言うと、単に言語が新旧2つに分断される。Python 2とPython 3がその最たる例だ。</p>
+<p>C++には今日の最新で高級な言語からみれば古風な制約が数多く残っているが、いずれも理由がある。下位互換性を壊すことができないという理由。効率的な実装方法が存在しないという理由。仮に効率的な実装が存在するにしても、様々な環境で実装可能でなければ規格化はできないという理由。</p>
+<p>C++には良し悪しがある。Bjarne StroustrupはC++への批判にこう答えている。</p>
+<blockquote>
+<p>言語には2種類ある。文句を言われる言語と、誰も使わない言語。</p>
+</blockquote>
+<p>C++は文句を言われる方の言語だ。</p>
+<h1 id="cの実行">C++の実行</h1>
+<p>プログラミング言語を学ぶには、まず書いたソースコードをプログラムとして実行できるようになることが重要だ。自分が正しく理解しているかどうかを確認するために書いたコードが期待通りに動くことを確かめてこそ、正しい理解が確認できる。</p>
+<h2 id="cの実行の仕組み">C++の実行の仕組み</h2>
+<p>C++は慣習的に、ソースファイルをコンパイルしてオブジェクトファイルを生成し、オブジェクトファイルをリンクして実行可能ファイルを生成し、実行可能ファイルを直接実行することで実行する言語だ。</p>
+<p>他の言語では、ソースファイルをそのままパースし、解釈して実行するインタープリター形式の言語が多い。もっとも、今となってはソースファイルから中間言語に変換してVMで実行するとか、JITコンパイルしてネイティブコードを生成して実行するといった実装もあるため、昔のように単純にインタープリター型の言語ということはできなくなっている事情はある。ただし、最終的にJITコンパイルされてネイティブコードが実行される言語でも、コンパイルやコード生成はプログラマーが意識しない形で行われるため、プログラマーはコンパイラーを直接使う必要のない言語も多い。</p>
+<p>C++はプログラマーが直接コンパイラーを使い、ソースファイルをプログラムに変換する言語だ。</p>
+<h2 id="簡単な一つのソースファイルからなるプログラムの実行">簡単な一つのソースファイルからなるプログラムの実行</h2>
+<p>ここでは、典型的なC++のソースファイルをどのようにコンパイルし実行するか、一連の流れを学ぶ。</p>
+<h3 id="サンプルコード">サンプルコード</h3>
+<p>以下のC++のソースファイルは標準出力にhelloと出力するものだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span> ;
+}</code></pre></div>
+<p>コードの詳細な意味はさておくとして、このサンプルコードを使ってC++の実行までの流れを見ていこう。</p>
+<p>まずは端末から作業用の適当な名前のディレクトリーを作る。ここでは<code>cpp</code>としておこう。ディレクトリーの作成は<code>mkdir</code>コマンドで行える。</p>
+<pre><code>$ mkdir cpp
+$ cd cpp</code></pre>
+<p>好きなテキストエディターを使って上のサンプルコードをテキストファイルとして記述する。ファイル名は<code>hello.cpp</code>としておこう。</p>
+<pre><code>$ vim hello.cpp</code></pre>
+<p>C++のソースファイルの名前は何でもよいが、慣習で使われている拡張子がいくつかある。本書では<code>.cpp</code>を使う。</p>
+<p>無事にソースファイルが作成できたかどうか確認してみよう。</p>
+<pre><code>$ ls
+hello.cpp
+$ cat hello.cpp
+#include &lt;iostream&gt;
+
+int main()
+{
+    std::cout &lt;&lt; &quot;hello&quot; ;
+}</code></pre>
+<h3 id="コンパイル">コンパイル</h3>
+<p>さて、ソースファイルが用意できたならば、いよいよコンパイルだ。</p>
+<p>C++のソースファイルから、実行可能ファイルを生成するソフトウェアをC++コンパイラーという。C++コンパイラーとしては、GCC(GNU Compiler Collection)とClang(クラン)がある。使い方はどちらもほぼ同じだ。</p>
+<p>GCCを使って先程の<code>hello.cpp</code>をコンパイルするには以下のようにする。</p>
+<pre><code>$ g++ -o hello hello.cpp</code></pre>
+<p>GCCという名前のC++コンパイラーなのに<code>g++</code>なのは、<code>gcc</code>はC言語コンパイラーの名前としてすでに使われているからだ。この慣習はClangも引き継いでいて、ClangのC++コンパイラーは<code>clang++</code>だ。</p>
+<p>サンプルコードを間違いなくタイプしていれば、カレントディレクトリに<code>hello</code>とぃう実行可能ファイルが作成されるはずだ。確認してみよう。</p>
+<pre><code>$ ls
+hello hello.cpp</code></pre>
+<h3 id="実行">実行</h3>
+<p>さて、いよいよ実行だ。通常のOSではカレントディレクトリがPATHに含まれていないため、実行するにはカレントディレクトリからパスを指定する必要がある。</p>
+<pre><code>$ ./hello
+hello</code></pre>
+<p>上出来だ。初めてのC++プログラムが実行できた。さっそくC++を学んでいきたいところだが、その前にC++プログラミングに必要なツールの使い方を学ぶ必要がある。</p>
+<h2 id="gcc-cコンパイラー">GCC: C++コンパイラー</h2>
+<p>GCCはC++のソースファイルからプログラムを生成するC++コンパイラーだ。</p>
+<p>GCCの基本的な使い方は以下の通り。</p>
+<pre><code>g++ その他のオプション -o 出力するファイル名 ソースファイル名</code></pre>
+<p>ソースファイル名は複数指定することができる。</p>
+<pre><code>g++ -o abc a.cpp b.cpp c.cpp</code></pre>
+<p>これについては分割コンパイルの章で詳しく解説する。</p>
+<p>コンパイラーはメッセージを出力することがある。コンパイルメッセージには、エラーメッセージと警告メッセージとがある。</p>
+<p>エラーメッセージというのは、ソースコードに文法上、意味上の誤りがあるため、コンパイルできない場合に生成される。エラーメッセージはエラーの箇所も教えてくれる。ただし、文法エラーは往々にして適切な誤りの箇所を指摘できないこともある。これは、C++の文法としては正しくないテキストファイルから、妥当なC++であればどういう間違いなのかを推測する必要があるためだ。</p>
+<p>警告メッセージというのは、ソースコードにコンパイルを妨げる文法上、意味上の誤りは存在しないが、誤りの可能性が疑われる場合に出力される。</p>
+<h3 id="コンパイラーオプション">コンパイラーオプション</h3>
+<p>GCCのコンパイラーオプションをいくつか学んでいこう。</p>
+<p><code>-std=</code>はC++の規格を選択するオプションだ。C++17に準拠したいのであれば<code>-std=c++17</code>を指定する。読者が本書を読む頃には、C++20や、あるいはもっと未来の規格が発行されているかもしれない。常に最新のC++規格を選択するオプションを指定するべきだ。</p>
+<p><code>-Wall</code>はコンパイラーの便利な警告メッセージのほとんどすべてを有効にするオプションだ。コンパイラーによる警告メッセージはプログラムの不具合を未然に発見できるので、このオプションは指定すべきだ。</p>
+<p><code>--pedantic-errors</code>はC++の規格を厳格に守るオプションだ。規格に違反しているコードがコンパイルエラー扱いになる。</p>
+<p>これをまとめると、GCCは以下のように使う。</p>
+<pre><code>g++ -std=c++17 -Wall --pedantic-errors -o 出力ファイル名 入力ファイル名</code></pre>
+<p>ところで、GCCのオプションはとても多い。すべてを知りたい読者は、gccのマニュアルを読むとよい。</p>
+<pre><code>$ man gcc</code></pre>
+<h3 id="ヘッダーファイルの省略">ヘッダーファイルの省略</h3>
+<p>先程のソースコードをもう一度見てみよう。冒頭に以下のような行がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></code></pre></div>
+<p>これは<code>#includeディレクティブ</code>(#include directive)といい、プリプロセッサー(preprocessor)の一部だ。プリプロセッサーについて詳しくは煩雑になるので巻末資料を参照してもらうとして、このコードは<code>iostream</code>ライブラリを使うために必要で、その意味としてはヘッダーファイル<code>iostream</code>を取り込みだ。</p>
+<p>C++の標準ライブラリを使うには、ライブラリごとに対応した<code>#includeディレクティブ</code>を書かなければならない。それはあまりにも煩雑なので、本書では標準ライブラリのヘッダーファイルをすべて<code>#include</code>した<code>ヘッダーファイル</code>(header file)を作成し、それを<code>#include</code>することで、<code>#include</code>を書かなくてすむようにする。</p>
+<p>そのためにはまず標準ライブラリのヘッダーファイルのほとんどすべてを<code>#include</code>したヘッダーファイル、<code>all.h</code>を作成する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;cstddef&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;limits&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;climits&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cfloat&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cstdint&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cstdlib&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;new&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;typeinfo&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;exception&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;initializer_list&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cstdalign&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;stdexcept&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cassert&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cerrno&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;system_error&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;string&gt;</span>
+
+<span class="pp">#if __has_include(&lt;string_view&gt;)</span>
+<span class="pp">#   include </span><span class="im">&lt;string_view&gt;</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#include </span><span class="im">&lt;array&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;deque&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;forward_list&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;list&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;vector&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;map&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;set&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;unordered_map&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;unordered_set&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;queue&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;stack&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;iterator&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;algorithm&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cfenv&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;random&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;numeric&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cmath&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;iosfwd&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;iostream&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;ios&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;streambuf&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;istream&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;ostream&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;iomanip&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;sstream&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;fstream&gt;</span>
+
+<span class="pp">#if __has_include(&lt;filesystem&gt;)</span>
+<span class="pp">#   include </span><span class="im">&lt;filesystem&gt;</span>
+<span class="pp">#endif</span>
+
+<span class="pp">#include </span><span class="im">&lt;cstdio&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;cinttypes&gt;</span>
+
+
+<span class="pp">#include </span><span class="im">&lt;regex&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;atomic&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;thread&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;mutex&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;shared_mutex&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;condition_variable&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;future&gt;</span>
+
+<span class="kw">using</span> <span class="kw">namespace</span> <span class="bu">std::</span>literals ;</code></pre></div>
+<p>このようなヘッダーファイル<code>all.h</code>を作成した後に、ソースファイルで以下のように書けば、他のヘッダーファイルを<code>#include</code>する必要がなくなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&quot;all.h&quot;</span>
+
+<span class="co">// その他のコード</span></code></pre></div>
+<p><code>//</code>から行末まではコメントで、好きなテキストを書くことができる。</p>
+<p>しかし、この最初の一行の<code>#include</code>も面倒だ。そこでGCCのオプション<code>-include</code>を使い、<code>all.h</code>を常に<code>#include</code>した扱いにする。</p>
+<pre><code>$ g++ -include all.h -o program main.cpp</code></pre>
+<p>このようにすると、<code>main.cpp</code>が以下のコードでもコンパイルできるようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// main.cpp</span>
+<span class="co">// 面倒な#includeなどなし</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span> ;
+}</code></pre></div>
+<p>これでヘッダーファイルが省略できるようになった。</p>
+<h3 id="コンパイル済みヘッダーprecompiled-header">コンパイル済みヘッダー(precompiled header)</h3>
+<p>C++はソースファイルをコンパイルする必要がある言語だ。コンパイルには時間がかかる。コンパイルにどれだけ時間がかかっているかを計測するには、以下のようにするとよい。</p>
+<pre><code>$ time g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp</code></pre>
+<p>どうだろうか。読者の環境にもよるが、近くできるぐらいの時間がかかっているのではないだろうか。プログラミングの習得にはコードを書いてから実行までの時間が短い方がよい。そこで本格的にC++を学ぶ前に、コンパイル時間を短縮する方法を学ぶ。</p>
+<p>プログラムで変更しないファイルを事前にコンパイルしておくと、変更した部分だけコンパイルすれば良いので、コンパイル時間の短縮になる。GCCでは、ヘッダーファイルを事前にコンパイルする特別な機能がある。標準ライブラリのヘッダーファイルは変更しないので、事前にコンパイルしておけばコンパイル時間の短縮になる。</p>
+<p>事前にコンパイルしたヘッダーファイルのことをコンパイル済みヘッダー(precompiled header)という。</p>
+<p>すでに作成した<code>all.h</code>はコンパイル済みヘッダーとするのに適切なヘッダーファイルだ。</p>
+<p>コンパイル済みヘッダーファイルを作成するには、ヘッダーファイル単体をGCCに与え、出力するファイルを<code>ヘッダーファイル名.gch</code>とする。ヘッダーファイル名が<code>all.h</code>の場合、<code>all.h.gch</code>となる。</p>
+<p>GCCのオプションには他のソースファイルをコンパイルするときと同じオプションを与えるほか、ヘッダーファイルがC++で書かれていることを示すオプション<code>-x c++-header</code>を与える。</p>
+<pre><code>g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h</code></pre>
+<p>こうすると、コンパイル済みヘッダーファイル<code>all.h.gch</code>が生成できる。</p>
+<p>GCCはヘッダーファイルを使うときに、同名の.gchファイルが存在する場合は、そちらをコンパイル済みヘッダーファイルとして使うことで、ヘッダーファイルの処理を省略する。</p>
+<pre><code>g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp</code></pre>
+<p>コンパイル済みヘッダーは一回のコンパイルにつき一つしか使うことができない。そのため、コンパイル済みヘッダーとするヘッダーファイルを定め、そのヘッダーファイル内に他のヘッダーをすべて記述する。本書ではコンパイル済みヘッダーファイルとする元のヘッダーファイルの名前を<code>all.h</code>とする。</p>
+<p>さっそくコンパイル時間の短縮効果を確かめてみよう。</p>
+<pre><code>$ ls
+all.h main.cpp
+$ g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h
+$ ls
+all.h all.h.gch main.cpp
+$ time g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp</code></pre>
+<h2 id="make-ビルドシステム">Make: ビルドシステム</h2>
+<h3 id="コンパイルと実行のまとめ">コンパイルと実行のまとめ</h3>
+<p>ここまで、我々はソースファイルをコンパイルして実行可能ファイルを生成し、プログラムを実行する方法について学んできた。これまでに学んできたことを一連のコマンドで振り返ってみよう。</p>
+<pre><code>$ ls
+all.h main.cpp
+$ cat all.h
+#include &lt;iostream&gt;
+$ cat main.cpp
+int main() { std::cout &lt;&lt; &quot;hello&quot;s ; }</code></pre>
+<p>まず、カレントディレクトリには<code>all.h</code>と<code>main.cpp</code>がある。この2つのファイルは実行可能ファイルを生成するために必要なファイルだ。今回、その中身は最小限にしてある。本当の<code>all.h</code>は、実際には前回書いたように長い内容になる。</p>
+<pre><code>$ g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h
+$ ls
+all.h all.h.gch main.cpp</code></pre>
+<p>次に、ソースファイルのコンパイルを高速化するために、ヘッダーファイル<code>all.h</code>から、コンパイル済みヘッダーファイル<code>all.h.gch</code>を生成する。</p>
+<pre><code>$ g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
+$ ls
+all.h all.h.gch main.cpp program</code></pre>
+<p>プリコンパイル済みヘッダーファイル<code>all.h.gch</code>とC++ソースファイル<code>main.cpp</code>から、実行可能ファイル<code>program</code>を生成する。</p>
+<pre><code>$ ./program
+hello</code></pre>
+<p>実行可能ファイル<code>program</code>を実行する。</p>
+<p>これで読者はC++のプログラミングを学び始めるに当たって必要なことは全て学んだ。さっそくC++を学んでいきたいところだが、その前にもう一つ、ビルドシステムを学ぶ必要がある。</p>
+<h3 id="依存関係を解決するビルドシステム">依存関係を解決するビルドシステム</h3>
+<p>以上のC++のソースファイルからプログラムを実行するまでの流れは、C++のプログラムとしてはとても単純なものだが、それでも依存関係が複雑だ。</p>
+<p>プログラムの実行にあたって最終的に必要なのはファイル<code>program</code>だが、このファイルはGCCで生成しなければならない。ところでGCCでファイル<code>program</code>を生成するには、事前に<code>all.h</code>, <code>all.h.gch</code>, <code>main.cpp</code>が必要だ。<code>all.h.gch</code>は<code>all.h</code>からGCCで生成しなければならない。</p>
+<p>一度コンパイルしたプログラムのソースファイルを書き換えて再びコンパイルする場合はどうすればいいだろう。<code>main.cpp</code>だけを書き換えた場合、<code>all.h</code>は何も変更されていないので、コンパイル済みヘッダーファイル<code>all.h.gch</code>の再生性は必要ない。<code>all.h</code>だけを書き換えた場合は、<code>all.h.gch</code>を生成するだけでなく、<code>program</code>も再生成しなければならない。</p>
+<p>プログラムのコンパイルには、このような複雑な依存関係の解決が必要になる。依存関係の解決を人間の手で行うのは大変だ。例えば読者が他人によって書かれた何千ものソースファイルと、プログラムをコンパイルする手順書だけを渡されたとしよう。手順書に従ってコンパイルをしたとして、ソースファイルの一部だけを変更した場合、一体どの手順は省略できるのか、手順書から導き出すのは難しい。するとコンパイルを最初からやり直すべきだろうか。しかし、一つのソースファイルのコンパイルに1秒かかるとして、何千ものソースファイルがある場合、何千秒もかかってしまう。たった一つのソースファイルを変更しただけですべてをコンパイルし直すのは時間と計算資源の無駄だ。</p>
+<p>この依存関係の問題は、ビルドシステムによって解決できる。本書ではGNU Makeというビルドシステムを学ぶ。読者がこれから学ぶビルドシステムによって、以下のような簡単なコマンドだけで、他人の書いた何千ものソースファイルからなるプログラムがコンパイル可能になる。</p>
+<p>何千ものソースファイルから実行可能ファイルを生成したい。</p>
+<pre><code>$ make</code></pre>
+<p>これだけだ。<code>make</code>というコマンド一つでプログラムのコンパイルは自動的に行われる。</p>
+<p>何千ものソースファイルのうち、一つのソースファイルだけを変更し、必要な部分だけを効率よく再コンパイルしたい。</p>
+<pre><code>$ make</code></pre>
+<p>これだけだ。<code>make</code>というコマンド一つでプログラムの再コンパイルは自動的に行われる。</p>
+<p>ところで、生成される実行可能ファイルの名前はプログラムごとに様々だ。プログラムの開発中は、共通の方法でプログラムを実行したい。</p>
+<pre><code>$ make run</code></pre>
+<p>これでどんなプログラム名でも共通の方法で実行できる。</p>
+<p>ソースファイルから生成されたプログラムなどのファイルをすべて削除したい。</p>
+<pre><code>$ make clean</code></pre>
+<p>これで生成されたファイルをすべて削除できる</p>
+<p>テキストエディターにはVimを使っているがわざわざVimからターミナルに戻るのが面倒だ。</p>
+<pre><code>:make</code></pre>
+<p>VimはノーマルモードからMakeを呼び出すことができる。もちろん、<code>:make run</code>や<code>:make clean</code>もできる</p>
+<h3 id="依存関係を記述するルール">依存関係を記述するルール</h3>
+<p>依存関係はどのように表現したらいいのだろうか。GNU makeでは<code>Makefile</code>という名前のファイルの中に、<code>ターゲット'(targets)、</code>事前要件<code>(prerequisites)、</code>レシピ<code>(recipes)という3つの概念で依存関係を</code>ルール<code>(rules)として記述する。</code>ルール`は以下の文法だ。</p>
+<pre><code>ターゲット : 事前要件
+[TAB文字]レシピ</code></pre>
+<p>レシピは必ず<code>TAB文字</code>を直前に書かなければならない。スペース文字ではだめだ。これは<code>make</code>の初心者を混乱させる落とし穴の一つとなっている。忘れずに<code>TAB文字</code>を打とう。</p>
+<p>問題を簡単に理解するために、以下のような状況を考えよう。</p>
+<pre><code>$ ls
+source
+$ cat source &gt; program</code></pre>
+<p>この例では、ファイル<code>program</code>を生成するためにはファイル<code>source</code>が必要だ。ファイル<code>source</code>はすでに存在している。</p>
+<p><code>ターゲット</code>は生成されるファイル名だ。この場合<code>program</code>となる。</p>
+<pre><code>program : 事前要件
+    レシピ</code></pre>
+<p><code>事前要件</code>は<code>ターゲット</code>を生成するために必要なファイル名だ。この場合<code>source</code>となる。</p>
+<pre><code>program : source
+    レシピ</code></pre>
+<p><code>レシピ</code>は<code>ターゲット</code>を生成するために必要な動作だ。この場合、<code>cat source &gt; program</code>となる</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">program :</span><span class="dt"> source</span>
+    cat source &gt; program</code></pre></div>
+<p>さっそくこのルールを、ファイル<code>Makefile</code>に書き込み、makeを呼び出してみよう。</p>
+<pre><code>$ ls
+Makefile source 
+$ cat Makefile
+program : source
+    cat source &gt; program
+$ make
+cat source &gt; program
+$ ls
+Makefile program source</code></pre>
+<p>これがMakeの仕組みだ。<code>ターゲット</code>の生成に必要な<code>事前要件</code>と、<code>ターゲット</code>を生成する<code>レシピ</code>を組み合わせた<code>ルール</code>で依存関係を記述する。makeを実行すると、実行した<code>レシピ</code>が表示される。</p>
+<p>もうすこしMakeの<code>ルール</code>を追加してみよう。例えばファイル<code>source</code>は予め存在するのではなく、ファイル<code>source01</code>, <code>source02</code>, <code>source03</code>の中身をこの順番で連結して生成するとしよう。以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">program :</span><span class="dt"> source</span>
+    cat source &gt; program
+
+<span class="dv">source :</span><span class="dt"> source01 source02 source03</span>
+    cat source01 source02 source03 &gt; source</code></pre></div>
+<p>GNU Makeはカレントディレクトリにあるファイル<code>Makefile</code>の一番上に書かれたルールを実行しようとする。<code>program</code>を生成するには<code>source</code>が必要だが、<code>source</code>の生成には別のルールの実行が必要だ。Makefileはこの依存関係を自動で解決してくれる。</p>
+<pre><code>$ touch source01 source02 source03
+$ ls
+Makefile source01 source03 source03
+$ make
+cat source01 source02 source03 &gt; source
+cat source &gt; program
+$ ls
+Makefile program source source01 source02 source03</code></pre>
+<p>すでに<code>make</code>を実行した後で、もう一度<code>make</code>を実行するとどうなるだろうか。</p>
+<pre><code>$make
+make: &#39;program&#39; is up to date.</code></pre>
+<p>このメッセージの意味は「programは最新だ」という意味だ。<code>make</code>はファイルのタイムスタンプを調べ、もしファイル<code>program</code>より<code>source</code>のタイムスタンプの方が若い場合、つまり<code>program</code>が変更されたよりも後に<code>source</code>が変更された場合、<code>ルール</code>を実行する。</p>
+<p>ためしにファイル<code>source02</code>のタイムスタンプを更新してみよう。</p>
+<pre><code>$ touch source02
+$ make
+cat source01 source02 source03 &gt; source
+cat source &gt; program</code></pre>
+<p>ファイル<code>source</code>は<code>事前要件</code>に<code>source02</code>を含む。<code>source02</code>のタイムスタンプが<code>source</code>より若いので、<code>source</code>が再び生成される。すると、<code>source</code>のタイムスタンプが<code>program</code>のタイムスタンプよりも若くなったので、<code>program</code>も生成される。</p>
+<p>もう一つ例を見てみよう。</p>
+<pre><code>$ touch a b c
+$ ls
+a b c Makefile</code></pre>
+<p>あるディレクトリにファイル<code>a</code>, <code>b</code>, <code>c</code>がある。</p>
+<p><code>Makefile</code>は以下の内容になっている。</p>
+<pre><code>D : A B C
+    cat A B C &gt; D
+
+A : a
+    cat a &gt; A
+
+B : b
+    cat b &gt; B
+
+C : c
+    cat c &gt; C</code></pre>
+<p>この<code>Makefile</code>を呼び出したときに作られるのはファイル<code>D</code>だ。ファイル<code>D</code>を作るにはファイル<code>A</code>, <code>B</code>, <code>C</code>が必要だ。このファイルはそれぞれファイル<code>a</code>, <code>b</code>, <code>c</code>から生成されるルールが記述してある。</p>
+<p>これを<code>make</code>すると以下のようにファイル<code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>が作られる。</p>
+<pre><code>$ ls
+a b c Makefile
+$ make
+cat a &gt; A
+cat b &gt; B
+cat c &gt; C
+cat A B C &gt; D</code></pre>
+<p>ここで、ファイル<code>b</code>のタイムスタンプだけを更新して<code>make</code>してみよう。</p>
+<pre><code>$ touch b
+$ make
+cat b &gt; B
+cat A B C &gt; D</code></pre>
+<p>ファイル<code>b</code>のタイムスタンプがファイル<code>B</code>より若くなったので、ファイル<code>B</code>がターゲットとなったルールが再び実行される。ファイル<code>A</code>, <code>C</code>のルールは実行されない。そしてファイル<code>B</code>のタイムスタンプがファイル<code>D</code>より若くなったので、ファイル<code>D</code>がターゲットとなったルールが再び実行される。</p>
+<p><code>make</code>により、処理する必要のあるルールだけが部分的に処理されていることがわかる。</p>
+<p><code>make</code>は適切な<code>ルール</code>さえ書けば、依存関係の解決を自動的に行ってくれる。</p>
+<h3 id="コメント">コメント</h3>
+<p><code>Makefile</code>にはコメントを書くことができる。<code>#</code>で始まる行はコメント扱いされる。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="co"># programを生成するルール</span>
+<span class="dv">program :</span><span class="dt"> source</span>
+    cat source &gt; program
+
+<span class="co"># sourceを生成するルール</span>
+<span class="dv">source :</span><span class="dt"> source01 source02 source03</span>
+    cat source01 source02 source03 &gt; source</code></pre></div>
+<h3 id="変数">変数</h3>
+<p><code>Makefile</code>には<code>変数</code>を書くことができる。</p>
+<p>変数の文法は以下の通り</p>
+<pre><code>variable = foobar
+
+target : $(variable)</code></pre>
+<p>これは、</p>
+<pre><code>target : foobar</code></pre>
+<p>と書いたものと同じように扱われる。</p>
+<p>変数は<code>=</code>の左側に変数名、右側に変数の内容を書く。</p>
+<p>変数を使うときは、<code>$(変数名)</code>のように、<code>$()</code>で変数名を包む。</p>
+<h3 id="自動変数">自動変数</h3>
+<dl>
+<dt>$@</dt>
+<dd>ターゲット
+</dd>
+<dt>$&lt;</dt>
+<dd>最初の事前要件
+</dd>
+<dt>$^</dt>
+<dd>すべての事前要件
+</dd>
+</dl>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>

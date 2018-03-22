@@ -30,6 +30,10 @@ std::string all_std_headers = R"(
 #include <system_error>
 #include <string>
 
+#if __has_include(<string_view>)
+#   include <string_view>
+#endif
+
 #include <array>
 #include <deque>
 #include <forward_list>
@@ -57,11 +61,13 @@ std::string all_std_headers = R"(
 #include <sstream>
 #include <fstream>
 
-#include <filesystem>
+#if __has_include(<filesystem>)
+#   include <filesystem>
+#endif
 
 #include <cstdio>
 #include <cinttypes>
-#include <csetjmp>
+
 
 #include <regex>
 #include <atomic>
@@ -71,6 +77,7 @@ std::string all_std_headers = R"(
 #include <condition_variable>
 #include <future>
 
+using namespace std::literals ;
 )" ;   
 
 std::string get_unique_file_name()
@@ -93,7 +100,7 @@ std::string create_temp_source_file( std::string sample_code )
 
 bool compile_check_gcc( std::string const & file_name )
 {
-    std::string command = std::string("g++ -fsyntax-only -D _ISOC11_SOURCE -std=c++1z --pedantic-errors -Wall -pthread -include /tmp/sample-code-checker/all_std_headers.hpp ") + file_name ;
+    std::string command = std::string("g++ -fsyntax-only -D _ISOC11_SOURCE -std=c++1z --pedantic-errors -Wall -pthread -include /tmp/sample-code-checker/all.h ") + file_name ;
 
     int result = system( command.c_str() ) ;
 
@@ -103,7 +110,7 @@ bool compile_check_gcc( std::string const & file_name )
 
 bool compile_check_clang( std::string const & file_name )
 {
-    std::string command = std::string("clang++ -fsyntax-only -D _ISOC11_SOURCE -std=c++1z -stdlib=libc++ --pedantic-errors -Wall -pthread -include-pch /tmp/sample-code-checker/all_std_headers.hpp.pch ") + file_name ;
+    std::string command = std::string("clang++ -fsyntax-only -D _ISOC11_SOURCE -std=c++1z -stdlib=libc++ --pedantic-errors -Wall -pthread -include-pch /tmp/sample-code-checker/all.h.pch ") + file_name ;
 
     int result = system( command.c_str() ) ;
 
@@ -176,14 +183,14 @@ bool prepare_compile()
     mkdir("/tmp/sample-code-checker",   S_IRWXU | S_IRWXG) ;
 
     {
-        std::ofstream precompiled_header("/tmp/sample-code-checker/all_std_headers.hpp" ) ;
+        std::ofstream precompiled_header("/tmp/sample-code-checker/all.h" ) ;
 
         precompiled_header.write( all_std_headers.c_str(), all_std_headers.size() ) ;
     }
 
-    int r1 = std::system("g++ -D _ISOC11_SOURCE -std=c++1z --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all_std_headers.hpp.gch /tmp/sample-code-checker/all_std_headers.hpp") ;
+    int r1 = std::system("g++ -D _ISOC11_SOURCE -std=c++1z --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all.h.gch /tmp/sample-code-checker/all.h") ;
     
-    int r2 = std::system("clang++ -D _ISOC11_SOURCE -std=c++14 --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all_std_headers.hpp.pch /tmp/sample-code-checker/all_std_headers.hpp") ;
+    int r2 = std::system("clang++ -D _ISOC11_SOURCE -std=c++14 --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all.h.pch /tmp/sample-code-checker/all.h") ;
 
     return r1 == 0 && r2 == 0 ;
 }
