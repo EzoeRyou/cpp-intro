@@ -101,8 +101,30 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#依存関係を記述するルール">依存関係を記述するルール</a></li>
 <li><a href="#コメント">コメント</a></li>
 <li><a href="#変数">変数</a></li>
-<li><a href="#自動変数">自動変数</a></li>
+<li><a href="#自動変数">自動変数</a><ul>
+<li><a href="#ターゲット"><code>$@</code> ターゲット</a></li>
+<li><a href="#最初の事前要件"><code>$&lt;</code> 最初の事前要件</a></li>
+<li><a href="#すべての事前要件"><code>$^</code> すべての事前要件</a></li>
+<li><a href="#自動変数の組み合わせ">自動変数の組み合わせ</a></li>
 </ul></li>
+<li><a href="#phonyターゲット">PHONYターゲット</a></li>
+</ul></li>
+<li><a href="#入門用の環境構築">入門用の環境構築</a></li>
+</ul></li>
+<li><a href="#c観光案内">C++観光案内</a><ul>
+<li><a href="#最小のコード">最小のコード</a></li>
+<li><a href="#標準出力">標準出力</a></li>
+<li><a href="#文字列">文字列</a></li>
+<li><a href="#整数と浮動小数点数">整数と浮動小数点数</a></li>
+<li><a href="#変数variable">変数(variable)</a></li>
+<li><a href="#関数function">関数(function)</a></li>
+<li><a href="#本当の関数">本当の関数</a></li>
+<li><a href="#条件分岐if文">条件分岐(if文)</a></li>
+<li><a href="#ループwhile文-for文">ループ(while文, for文)</a></li>
+<li><a href="#コンテナーvector">コンテナー(vector)</a></li>
+<li><a href="#コンテナーの全要素へのアクセス">コンテナーの全要素へのアクセス</a></li>
+<li><a href="#標準入力">標準入力</a></li>
+<li><a href="#section"></a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -482,17 +504,566 @@ target : $(variable)</code></pre>
 <p>変数は<code>=</code>の左側に変数名、右側に変数の内容を書く。</p>
 <p>変数を使うときは、<code>$(変数名)</code>のように、<code>$()</code>で変数名を包む。</p>
 <h3 id="自動変数">自動変数</h3>
+<p>GNU Makeは便利なことに、いくつかの変数を自動で作ってくれる。</p>
+<h4 id="ターゲット"><code>$@</code> ターゲット</h4>
+<p><code>$@</code>はルールのターゲットのファイル名になる。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">target :</span>
+    echo <span class="ch">$@</span></code></pre></div>
+<p>このMakefileを実行すると以下のように出力される。</p>
+<pre><code>$ make
+echo target</code></pre>
+<h4 id="最初の事前要件"><code>$&lt;</code> 最初の事前要件</h4>
+<p><code>$&lt;</code>はルールの最初の事前要件のファイル名になる。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">target :</span><span class="dt"> A B C</span>
+    echo <span class="ch">$&lt;</span></code></pre></div>
+<p>このMakefileを実行すると以下のように出力される。</p>
+<pre><code>$ make
+echo A</code></pre>
+<h4 id="すべての事前要件"><code>$^</code> すべての事前要件</h4>
+<p><code>$^</code>はすべての事前要件のファイル名が空白区切りされたものになる</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">target :</span><span class="dt"> A B C</span>
+    echo <span class="ch">$^</span></code></pre></div>
+<p>このMakefileを実行すると以下のように出力される。</p>
+<pre><code>$ make
+echo A B C</code></pre>
+<h4 id="自動変数の組み合わせ">自動変数の組み合わせ</h4>
+<p>例えば<code>ターゲット</code>を生成するために<code>事前要件</code>と<code>ターゲット</code>のファイル名をレシピに書く場合、</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">target :</span><span class="dt"> prerequisite</span>
+    cat prerequisite &gt; target</code></pre></div>
+<p>と書く代わりに、</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">target :</span><span class="dt"> prerequisite</span>
+    cat <span class="ch">$&lt;</span> &gt; <span class="ch">$@</span></code></pre></div>
+<p>と書ける。</p>
+<h3 id="phonyターゲット">PHONYターゲット</h3>
+<p>PHONYターゲットとは、ファイル名を意味せず、単にレシピを実行するターゲット名としてのみ機能するターゲットのことだ。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">hi :</span>
+    echo hi
+
+<span class="dv">hello :</span>
+    echo hello</code></pre></div>
+<p>これを実行すると以下のようになる。</p>
+<pre><code>$ make
+echo hi
+hi
+$make hi
+echo hi
+hi
+$ make hello
+echo hello
+hello</code></pre>
+<p><code>make</code>を引数を付けずに実行すると、一番上に書かれたルールが実行される。引数としてターゲットを指定すると、そのターゲットのルールと、依存するルールが実行される。</p>
+<p>ただし、ターゲットと同じファイル名が存在すると、ルールは実行されない。</p>
+<pre><code>$ touch hello
+$ make hello
+make: &#39;hello&#39; is up to date.</code></pre>
+<p>GNU makeはこの問題に対処するため、<code>.PHONY</code>ターゲットという特殊な機能がある。これはPHONYターゲットを<code>.PHONY</code>ターゲットの事前要件とすることで、ターゲットと同じファイル名の存在の有無にかかわらずルールを実行させられる。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">hello :</span>
+    echo hello
+
+<span class="ot">.PHONY</span> <span class="ot">:</span><span class="dt"> hello</span></code></pre></div>
+<p>PHONYターゲットはコンパイルしたプログラムの実行や削除に使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">hello :</span><span class="dt"> hello.cpp</span>
+    g++ -o <span class="ch">$@</span> <span class="ch">$&lt;</span>
+
+<span class="dv">run :</span><span class="dt"> hello</span>
+    ./hello
+
+<span class="dv">clean :</span>
+    rm -rf ./hello
+
+<span class="ot">.PHONY</span> <span class="ot">:</span><span class="dt"> run clean</span></code></pre></div>
+<h2 id="入門用の環境構築">入門用の環境構築</h2>
+<p>以上を踏まえて、C++入門用の環境構築をしてこの章のまとめとする。</p>
+<p>今回構築する環境のファイル名とその意味は以下の通り。</p>
 <dl>
-<dt>$@</dt>
-<dd>ターゲット
+<dt>main.cpp</dt>
+<dd>C++のコードを書く all.h
 </dd>
-<dt>$&lt;</dt>
-<dd>最初の事前要件
+<dd>標準ライブラリのヘッダーファイルを書く all.h.gch
 </dd>
-<dt>$^</dt>
-<dd>すべての事前要件
+<dd>コンパイル済みヘッダー program
+</dd>
+<dd>実行可能ファイル Makefile
+</dd>
+<dd>GNU makeのルールを書く
 </dd>
 </dl>
+<p>使い方は以下の通り。</p>
+<dl>
+<dt>make</dt>
+<dd>コンパイルする make run
+</dd>
+<dd>コンパイルして実行 make clean
+</dd>
+<dd>コンパイル結果を削除
+</dd>
+</dl>
+<p>GCCに与えるコンパイラーオプションを変数にまとめる。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dt">gcc_options </span><span class="ch">=</span><span class="st"> -std=c++17 -Wall --pedantic-error</span></code></pre></div>
+<p>言語はC++17、すべての警告を有効にし、企画準拠ではないコードはエラーとする。</p>
+<p>プログラムをコンパイルする部分は以下の通り。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">program :</span><span class="dt"> main.cpp all.h all.h.gch</span>
+    g++ <span class="ch">$(</span><span class="dt">gcc_options</span><span class="ch">)</span> -include all.h <span class="ch">$&lt;</span> -o <span class="ch">$@</span>
+
+<span class="dv">all.h.gch :</span><span class="dt"> all.h</span>
+    g++ <span class="ch">$(</span><span class="dt">gcc_options</span><span class="ch">)</span> -x c++-header -o <span class="ch">$@</span> <span class="ch">$&lt;</span></code></pre></div>
+<p>実行可能ファイル<code>program</code>と、コンパイル済みヘッダー<code>all.h.gch</code>をコンパイルするルールだ。</p>
+<p>PHONYターゲットは以下の通り。</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dv">run :</span><span class="dt"> program</span>
+    ./program
+
+<span class="dv">clean :</span>
+    rm -f ./program
+    rm -f ./all.h.gch
+
+<span class="ot">.PHONY</span> <span class="ot">:</span><span class="dt"> run clean</span></code></pre></div>
+<p><code>make</code>でコンパイル。<code>make run</code>で実行。<code>make clean</code>でコンパイル結果の削除。</p>
+<p>Makefile全体は以下のようになる。</p>
+<p><sub>~</sub>makefile gcc_options = -std=c++17 -Wall --pedantic-error</p>
+<p>program : main.cpp all.h all.h.gch g++ $(gcc_options) -include all.h $&lt; -o $@</p>
+<p>all.h.gch : all.h g++ $(gcc_options) -x c++-header -o $@ $&lt;</p>
+<p>run : program ./program</p>
+<p>clean : rm -f ./program rm -f ./all.h.gch</p>
+<p>.PHONY : run clean ~~</p>
+<h1 id="c観光案内">C++観光案内</h1>
+<p>プログラミング言語の個々の機能の解説を理解するためには、まず言語の全体像を掴まなければならない。この章ではC++の様々なコードを一通り観光していく。ここではコードの詳細な解説はしない。</p>
+<h2 id="最小のコード">最小のコード</h2>
+<p>以下はC++の最小のコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main(){}</code></pre></div>
+<p>暗号のようなコードで訳がわからないが、これが最小のコードだ。<code>main</code>というのは<code>main関数</code>のことだ。C++ではプログラムの実行はmain関数から始まる。</p>
+<p>ソースコードにコメントを記述して、もう少しわかりやすく書いてみよう。</p>
+<pre><code>int     // 関数の戻り値の型
+main    // 関数名
+()      // 関数の引数
+{       // 関数の始まり
+    // 実行される処理
+}       // 関数の終わり</code></pre>
+<p><code>//</code>から行末まではコメントだ。コメントには好きなことを書くことができる。</p>
+<p>このコードと一つ前のコードは、コメントの有無を別にすれば何の違いもない。このコードで使っている、<code>int</code>とか<code>main</code>とか記号文字の一つ一つをトークン(token)と呼ぶ。C++ではトークンの間に空白文字や改行文字をいくら使ってもよい。</p>
+<p>なので、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main(){ }</code></pre></div>
+<p>と書くこともできるし、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span>    main    (    )    {   }</code></pre></div>
+<p>と書くこともできるし、紙に印刷するととても読みづらくなるかもしれないが</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span>
+main
+(
+)
+{
+}</code></pre></div>
+<p>と書くこともできる。</p>
+<p>ただし、トークンの途中で空白文字や改行文字を使うことはできない。以下のコードは間違っている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">i
+nt ma in(){}</code></pre></div>
+<h2 id="標準出力">標準出力</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// helloと改行を出力するプログラム</span>
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span>s ;
+}</code></pre></div>
+<p>標準出力はプログラムの基本だ。C++で標準出力する方法はいくつもあるが、&lt;iostream&gt;ライブラリを利用するものが最も簡単だ。</p>
+<p><code>std::cout</code>は標準出力を使うためのライブラリだ。</p>
+<p><code>&lt;&lt;</code>は<code>operator &lt;&lt;</code>という演算子だ。C++では演算子にも名前がついていて、例えば<code>+</code>は<code>operator +</code>となる。<code>&lt;&lt;</code>も演算子の一種だ。</p>
+<p><code>&quot;hello&quot;s</code>というのは文字列で、二重引用符で囲まれた中の文字列が標準出力に出力される。</p>
+<p>セミコロン<code>;</code>は文の区切り文字だ。C++では文の区切りは明示的にセミコロンを書く必要がある。他の言語では改行文字を文脈から判断して文の区切りとみなすこともあるが、C++では明示的に文の区切り文字としてセミコロンを書かなければならない。</p>
+<p>セミコロンを書き忘れるとエラーとなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// エラー！　セミコロンがない</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;error&quot;</span>s
+}</code></pre></div>
+<p>複数の文を書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;one &quot;</span>s ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;two &quot;</span>s ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;three &quot;</span>s ;
+}</code></pre></div>
+<p>C++は他の多くの言語と同じように、逐次実行される。つまり、コードは書いた順番に実行される。そして標準出力のような外部への副作用は、実行された順番で出力される。このコードを実行した結果は以下の通り。</p>
+<pre><code>one two three </code></pre>
+<p>&quot;three two one &quot;や&quot;two one three &quot;のような出力結果にはならない。</p>
+<p>C++を含む多くの言語で<code>a + b + c</code>と書けるように、<code>opeartor &lt;&lt;</code>も<code>a &lt;&lt; b &lt;&lt; c</code>と書ける。<code>operator &lt;&lt;</code>で標準出力をするには、左端は<code>std::cout</code>でなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;aaa&quot;</span>s &lt;&lt; <span class="st">&quot;bbb&quot;</span>s &lt;&lt; <span class="st">&quot;ccc&quot;</span>s ;
+}</code></pre></div>
+<p>出力は<code>aaabbbccc</code>となる。</p>
+<h2 id="文字列">文字列</h2>
+<p>二重引用符で囲まれた文字列を、文字通り<code>文字列</code>という。文字列には末尾にsがつくものとつかないものがある。これには違いがあるのだが、わからないうちはsを付けておいたほうが便利だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// これは文字列</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span>s ;
+    <span class="co">// これも文字列、ただし不便</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span> ;
+}</code></pre></div>
+<p>文字列リテラルの中にバックスラッシュを書くと、エスケープシーケンスとして扱われる。最もよく使われるのは改行文字を表す<code>\n</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;aaa</span><span class="sc">\n</span><span class="st">bbb</span><span class="sc">\n</span><span class="st">ccc&quot;</span>s ;
+}</code></pre></div>
+<p>これは以下のように出力される。</p>
+<pre><code>aaa
+bbb
+ccc</code></pre>
+<p>バックスラッシュを文字列で使いたい場合は<code>\\</code>と書かなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// </span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\\</span><span class="st">n is a new-line.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>文字列は演算子<code>operator +</code>で「足す」ことができる。「文字列を足す」というのは、「文字列を結合する」という意味だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span>s + <span class="st">&quot;world&quot;</span>s ;
+}</code></pre></div>
+<h2 id="整数と浮動小数点数">整数と浮動小数点数</h2>
+<p>iostreamは文字列の他にも、整数や浮動小数点数を出力できる。早速試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="st">&quot;Integer: &quot;</span>s &lt;&lt; <span class="dv">42</span> &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;Floating Point: &quot;</span>s &lt;&lt; <span class="fl">3.14</span> ;
+}</code></pre></div>
+<p><code>-123</code>や<code>0</code>や<code>123</code>といった数値を整数という。<code>3.14</code>のような数値を浮動小数点数という。</p>
+<p>数値を扱えるのだから、計算をしてみたいところだ。C++は整数同士の演算子として、四則演算(<code>+-*/</code>)や剰余(<code>%</code>)をサポートしている</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="dv">3</span> + <span class="dv">5</span> &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; <span class="dv">3</span> - <span class="dv">5</span> &lt;&lt; <span class="st">&quot; &quot;</span>s
+        &lt;&lt; <span class="dv">3</span> * <span class="dv">5</span> &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; <span class="dv">3</span> / <span class="dv">5</span> &lt;&lt; <span class="st">&quot; &quot;</span>s
+        &lt;&lt; <span class="dv">3</span> % <span class="dv">5</span> ;
+}</code></pre></div>
+<p>浮動小数点数同士でも四則演算ができる。剰余はできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="fl">3.5</span> + <span class="fl">7.11</span> &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; <span class="fl">3.5</span> - <span class="fl">7.11</span> &lt;&lt; <span class="st">&quot; &quot;</span>s
+        &lt;&lt; <span class="fl">3.5</span> * <span class="fl">7.11</span> &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; <span class="fl">3.5</span> / <span class="fl">7.11</span> ;
+}</code></pre></div>
+<p>では整数と浮動小数点数を演算した場合どうなるのだろう。さっそく試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> + <span class="fl">0.1</span> ;
+}</code></pre></div>
+<p>結果は<code>1.1</code>だ。整数と浮動小数点数を演算した結果は浮動小数点数になる。</p>
+<p>そういえばC++には文字列もあるのだった。文字列と文字列は足すことができる。数値と数値も足すことができる。では数値と文字列を足すとどうなるのだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> + <span class="st">&quot;234&quot;</span>s ;
+}</code></pre></div>
+<p>この結果はエラーになる。</p>
+<p>いやまて、C++には末尾にsをつけない文字列もあるのだった。これも試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> + <span class="st">&quot;234&quot;</span> ;
+}</code></pre></div>
+<p>結果はなんと<code>34</code>になるではないか。C++では謎の数学により<code>1 + &quot;234&quot; = &quot;34&quot;</code>であることが判明した。この謎はいずれ解き明かすとして、今は文字列には必ず末尾にsをつけることにしよう。そのほうが安全だ。</p>
+<h2 id="変数variable">変数(variable)</h2>
+<p>さあどんどんプログラミング言語によくある機能を見ていこう。次は変数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 整数の変数</span>
+    <span class="kw">auto</span> answer = <span class="dv">42</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; answer &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="co">// 浮動小数点数の変数</span>
+    <span class="kw">auto</span> pi = <span class="fl">3.14</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; pi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// 文字列の変数</span>
+    <span class="kw">auto</span> question = <span class="st">&quot;Life, The Universe, and Everything.&quot;</span>s ;
+    <span class="bu">std::</span>cout &lt;&lt; question ;
+}</code></pre></div>
+<p>変数はキーワード<code>auto</code>に続いて変数名を書き、<code>=</code>に続いて値を書くことで宣言できる。変数の宣言は文なので、文末にはセミコロンが必要だ。</p>
+<pre><code>auto 変数名 = 値 ;</code></pre>
+<p><code>変数名</code>はキーワード、アンダースコア(_)で始まる名前、アンダースコア2つ(__)を含む名前以外は自由に名付けることができる。</p>
+<p>変数の最初の値は、<code>= 値</code>のかわりに<code>(値)</code>や<code>{値}</code>と書いてもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">1</span> ;
+    <span class="kw">auto</span> b(<span class="dv">2</span>) ;
+    <span class="kw">auto</span> c{<span class="dv">3</span>} ;
+}</code></pre></div>
+<p>この<code>=</code>, <code>()</code>, <code>{}</code>による変数の初期値の指定を、<code>初期化</code>という。</p>
+<p>変数は使う前に宣言しなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// エラー、名前xは宣言されていない</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+    <span class="kw">auto</span> x = <span class="dv">123</span> ;
+}</code></pre></div>
+<p>変数の値は初期化した後にも演算子<code>=</code>で変更できる。これを<code>代入</code>という。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 変数の宣言</span>
+    <span class="kw">auto</span> x
+    <span class="co">// 初期化</span>
+    = <span class="dv">123</span> ;
+
+    <span class="co">// 123</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+
+    <span class="co">// 代入</span>
+    x = <span class="dv">456</span> ;
+
+    <span class="co">// 456</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+
+    <span class="co">// もう一度代入</span>
+    x = <span class="dv">789</span> ;
+    <span class="co">// 789</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>代入演算子<code>operator =</code>は左辺に変数名を、右辺に代入する値を書く。面白いこととして、右辺には代入する変数名そのものを書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">10</span> ;
+    x = x + <span class="dv">5</span> ;
+
+    <span class="co">// 15</span>
+    <span class="bu">std::</span>cout &lt;&lt; c ;
+}</code></pre></div>
+<p><code>operator =</code>は「代入」という意味で、「等号」という意味ではないからだ。<code>x=x+5</code>は、「<code>x</code>と<code>x+5</code>は等しい」という独創的な数学上の定義ではなく、「変数xに代入前の変数xの値に5を加えた数を代入する」という意味だ。</p>
+<p>変数の今の値に対して演算した結果を変数に代入するという処理はとても良く使うので、C++には<code>x = x + a</code>と同じ意味で使える演算子、<code>operator +=</code>もある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">1</span> ;
+    <span class="co">// x = x + 5と同じ</span>
+    x += <span class="dv">5</span> ;
+}</code></pre></div>
+<p><code>operator +=</code>と同様に、<code>operator -=</code>, <code>operator *=</code>, <code>operator /=</code>, <code>operator %=</code>もある。</p>
+<p>C++の変数は、専門用語を使うと「静的型付け」になる。静的型付けと対比されるのが「動的型付け」だ。もっと難しく書くと、動的型付け言語の変数は、C++で言えば型情報付きの<code>void *</code>型の変数のような扱いを受ける。</p>
+<p>C++の変数には<code>型</code>がある。<code>型</code>というのは値の種類を表す情報のことだ。</p>
+<p>例えば、以下は変数が動的型付けの言語JavaScriptのコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> x <span class="op">=</span> <span class="dv">1</span> <span class="op">;</span>
+x <span class="op">=</span> <span class="st">&quot;hello&quot;</span> <span class="op">;</span>
+x <span class="op">=</span> <span class="dv">2</span> <span class="op">;</span></code></pre></div>
+<p>JavaScriptではこのコードは正しい。変数<code>x</code>は数値型であり、文字列型に代わり、また数値型に戻る。</p>
+<p>C++ではこのようなコードは書けない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">1</span> ;
+    <span class="co">// エラー</span>
+    x = <span class="st">&quot;hello&quot;</span>s ;
+    x = <span class="dv">2</span> ;
+}</code></pre></div>
+<p>C++では、変数<code>x</code>は整数型であり、文字列型に変わることはない。整数型の変数に文字列型を代入しようとするとエラーとなる。</p>
+<p>C++では型に名前がついている。整数型はint、浮動小数点数型はdouble、文字列型はstd::stringだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// iはint型</span>
+    <span class="kw">auto</span> i = <span class="dv">123</span> ;
+    <span class="co">// dはdouble型</span>
+    <span class="kw">auto</span> d = <span class="fl">1.23</span> ;
+    <span class="co">// sはstd::string型</span>
+    <span class="kw">auto</span> s = <span class="st">&quot;123&quot;</span>s ;
+}</code></pre></div>
+<p>実は変数の宣言で<code>auto</code>と書くかわりに、具体的な型を書いてもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> i           = <span class="dv">123</span> ;
+    <span class="dt">double</span> d        = <span class="fl">1.23</span> ;
+    <span class="bu">std::</span>string s   = <span class="st">&quot;123&quot;</span>s ;
+}</code></pre></div>
+<p>整数型(int)と浮動小数点数型(double)はそれぞれお互いの型の変数に代入できる。ただし、変数の型は変わらない。単に一方の型の値がもう一方の型の値に変換されるだけだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 浮動小数点数型を整数型に変換</span>
+    <span class="dt">int</span> a = <span class="fl">3.14</span> ;
+    <span class="co">// 3</span>
+    <span class="bu">std::</span>cout &lt;&lt; a &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// 整数型を浮動小数点数型に変換</span>
+    <span class="dt">double</span> d = <span class="dv">1</span> ;
+    <span class="co">// 123</span>
+    <span class="bu">std::</span>cout &lt;&lt; d ;
+}</code></pre></div>
+<p>浮動小数点数型を整数型に変換すると、小数部が切り捨てられる。この場合、<code>3.14</code>の小数部<code>0.14</code>が切り捨てられ<code>3</code>となる。<code>0.9999</code>も小数部が切り捨てられ<code>0</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> i = <span class="fl">0.9999</span> ;
+    <span class="co">// 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; i ;
+}</code></pre></div>
+<p>整数型を浮動小数点数型に変換すると、値を正確に表現できる場合はその値になる。正確に表現できない場合は近い値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> d = <span class="dv">1234567890</span> ;
+    <span class="co">// 正確に表現できるかどうかわからない</span>
+    <span class="bu">std::</span>cout &lt;&lt; d ;
+}</code></pre></div>
+<p>整数型と浮動小数点数型の挙動については後の章で詳しく解説する。また、これ以外にも型はいくらでもあるし、読者が新しい型を作り出すこともできる。これも後の章で詳しく解説する。</p>
+<h2 id="関数function">関数(function)</h2>
+<p>「変数ぐらい知っている。さっさと教えてもらいたい。どうせC++の関数は書きづらいのだろう」と考える読者の皆さん、おまたせしました。こちらがC++の関数でございます。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 関数</span>
+    <span class="kw">auto</span> print = [](<span class="kw">auto</span> x)
+    {
+        <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    } ;
+
+    <span class="co">// 関数呼び出し</span>
+    print(<span class="dv">123</span>) ;
+    print(<span class="fl">3.14</span>) ;
+    print(<span class="st">&quot;hello&quot;</span>) ;
+}</code></pre></div>
+<p>C++では関数も変数として扱える。<code>auto print =</code>までは変数だ。変数の初期化として関数を書いている。より正確にはラムダ式と呼ばれる関数を値として書くための文法だ。</p>
+<p>ラムダ式は以下のような文法を持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[] <span class="co">// ラムダ式導入部</span>
+() <span class="co">// 引数</span>
+{} <span class="co">// 本体</span></code></pre></div>
+<p>ラムダ式は<code>[]</code>で始まり、<code>()</code>の中に引数を書き、<code>{}</code>の中の文が実行される。</p>
+<p>例えば以下は引数を2回標準出力する関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> twice = [](<span class="kw">auto</span> x)
+    {
+        <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; x &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    } ;
+
+    twice(<span class="dv">5</span>) ;
+}</code></pre></div>
+<p>引数は<code>auto 引数名</code>で受け取れる。引数を複数取る場合は、カンマ<code>,</code>で区切る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> print_two = []( <span class="kw">auto</span> x, <span class="kw">auto</span> y )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; y &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    } ;
+
+    print_two( <span class="dv">1</span>, <span class="dv">2</span> ) ;
+    print_two( <span class="st">&quot;Pi is&quot;</span>, <span class="fl">3.14</span> ) ;
+}</code></pre></div>
+<p>引数を取らないラムダ式を書く場合は、単に<code>()</code>と書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> no_args = []()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Nothing.</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    } ;
+
+    no_args() ;
+}</code></pre></div>
+<p>関数は演算子<code>operator ()</code>を関数の直後に書いて呼び出す。これが演算子であるというのは少し不思議な感じがするが、C++では紛れもなく演算子だ。<code>operator +</code>とか<code>operator -</code>などと同じ演算子だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 何もしない関数</span>
+    <span class="kw">auto</span> func = [](){} ;
+
+    <span class="co">// operator ()の適用</span>
+    func() ;
+    <span class="co">// これもoperator ()</span>
+    func    (   ) ;
+}</code></pre></div>
+<p>演算子<code>operator ()</code>は、ラムダ式そのものに対して適用することもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 変数fをラムダ式で初期化</span>
+    <span class="kw">auto</span> f = [](){} ;
+    <span class="co">// 変数fを関数呼び出し</span>
+    f() ;
+
+    <span class="co">// ラムダ式を関数呼び出し</span>
+    [](){}() ;
+}</code></pre></div>
+<p>このコードを見ると、<code>operator ()</code>が単なる演算子であることがよくわかるだろう。<code>[](){}</code>がラムダ式でその直後の<code>()</code>が関数呼び出し演算子だ。</p>
+<p>関数は値を返すことができる。関数から値を返すには、<code>return文</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> plus = []( <span class="kw">auto</span> x, <span class="kw">auto</span> y )
+        { <span class="cf">return</span> x + y ; } ;
+
+    <span class="bu">std::</span>cout
+        &lt;&lt; plus( <span class="dv">1</span>, <span class="dv">2</span> ) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; plus( <span class="fl">1.5</span>, <span class="fl">0.5</span> ) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; plus( <span class="st">&quot;123&quot;</span>, <span class="st">&quot;456&quot;</span>) ;
+}</code></pre></div>
+<p>関数はreturn文を実行すると処理を関数の呼び出し元に返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> f = []()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;f is called.</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+        <span class="cf">return</span> <span class="dv">0</span> ; <span class="co">// ここで処理が戻る</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;f returned zero.</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    } ;
+
+    <span class="kw">auto</span> result = f() ;
+}</code></pre></div>
+<p>これを実行すると以下のようになる。</p>
+<pre><code>$ make
+f is called.</code></pre>
+<p>return文以降の文が実行されていないことがわかる。</p>
+<h2 id="本当の関数">本当の関数</h2>
+<p>実はラムダ式は本当のC++の<code>関数</code>ではない。本当の<code>関数</code>はとても書きづらいので心して読むべきだ。</p>
+<p>読者は本書の冒頭で使った<code>main関数</code>という言葉を覚えているだろうか。覚えていないとしても、サンプルコードに必ずと行っていいほど出てくる<code>main</code>という名前は気になっていたことだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main(){}</code></pre></div>
+<p>これをみると、聡明な読者はラムダ式と似通ったところがあることに気づくだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[](){}</code></pre></div>
+<p>末尾の<code>(){}</code>が同じだ。これは同じ意味だ。<code>()</code>は関数の引数で、<code>{}</code>は関数の本体だ。</p>
+<p>では残りの部分はどうだろうか。<code>int</code>は関数の戻り値の型、<code>main</code>は関数の名前だ。</p>
+<p>C++の本当の関数は以下のような文法で定義される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span>     <span class="co">// 戻り値の型</span>
+main    <span class="co">// 関数名</span>
+()      <span class="co">// 関数の引数</span>
+{}      <span class="co">// 関数の本体</span></code></pre></div>
+<p>ためしに、int型の引数を2つ取り足して返す関数`plus'を書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> plus( <span class="dt">int</span> x, <span class="dt">int</span> y )
+{
+    <span class="cf">return</span> x + y ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = plus( <span class="dv">1</span>, <span class="dv">2</span> ) ;
+}</code></pre></div>
+<p>では次に、double型の引数を2つ取り足して返す関数<code>plus</code>を書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">double</span> plus( <span class="dt">double</span> x, <span class="dt">double</span> y )
+{
+    <span class="cf">return</span> x + y ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = plus( <span class="fl">1.0</span>, <span class="fl">2.0</span> ) ;
+}</code></pre></div>
+<p>最後のstd::string型の引数を2つ取り足して返す関数<code>plus</code>は読者への課題とする。</p>
+<p>これがC++の本当の関数だ。C++の関数では、型をすべて明示的に書かなければならない。型を間違えるとエラーだ。</p>
+<p>しかも、C++の関数は、戻り値の型を正しく返さなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> f()
+{
+    <span class="co">// エラー、return文がない</span>
+}</code></pre></div>
+<p>もし、何も値を返さない関数を書く場合は、どの値でもないという特別な型、<code>void</code>型を関数の戻り値の型として書かなければならないという特別なルールまである。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="co">// OK</span>
+}</code></pre></div>
+<p>ただし、戻り値の型については、具体的な型の代わりに<code>auto</code>を書くこともできる。その場合、return文で同じ型さえ返していれば、気にする必要はない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// void</span>
+<span class="kw">auto</span> a() { }
+<span class="co">// int</span>
+<span class="kw">auto</span> b() { <span class="cf">return</span> <span class="dv">0</span> ; }
+<span class="co">// double</span>
+<span class="kw">auto</span> c() { <span class="cf">return</span> <span class="fl">0.0</span> ; }
+<span class="co">// std::string</span>
+<span class="kw">auto</span> d() { <span class="cf">return</span> <span class="st">&quot;&quot;</span>s ; }
+
+<span class="co">// エラー</span>
+<span class="co">// return文の型が一致しない。</span>
+<span class="kw">auto</span> e()
+{
+    <span class="cf">return</span> <span class="dv">0</span> ;
+    <span class="cf">return</span> <span class="fl">0.0</span> ;
+}</code></pre></div>
+<h2 id="条件分岐if文">条件分岐(if文)</h2>
+<h2 id="ループwhile文-for文">ループ(while文, for文)</h2>
+<h2 id="コンテナーvector">コンテナー(vector)</h2>
+<h2 id="コンテナーの全要素へのアクセス">コンテナーの全要素へのアクセス</h2>
+<h2 id="標準入力">標準入力</h2>
+<h2 id="section"></h2>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
