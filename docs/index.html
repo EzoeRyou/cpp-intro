@@ -119,12 +119,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#変数variable">変数(variable)</a></li>
 <li><a href="#関数function">関数(function)</a></li>
 <li><a href="#本当の関数">本当の関数</a></li>
-<li><a href="#条件分岐if文">条件分岐(if文)</a></li>
-<li><a href="#ループwhile文-for文">ループ(while文, for文)</a></li>
-<li><a href="#コンテナーvector">コンテナー(vector)</a></li>
-<li><a href="#コンテナーの全要素へのアクセス">コンテナーの全要素へのアクセス</a></li>
-<li><a href="#標準入力">標準入力</a></li>
-<li><a href="#section"></a></li>
+</ul></li>
+<li><a href="#デバッグコンパイルエラー">デバッグ：コンパイルエラー</a><ul>
+<li><a href="#文法エラー">文法エラー</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -734,6 +731,20 @@ ccc</code></pre>
         &lt;&lt; <span class="dv">3</span> * <span class="dv">5</span> &lt;&lt; <span class="st">&quot; &quot;</span>s &lt;&lt; <span class="dv">3</span> / <span class="dv">5</span> &lt;&lt; <span class="st">&quot; &quot;</span>s
         &lt;&lt; <span class="dv">3</span> % <span class="dv">5</span> ;
 }</code></pre></div>
+<p>演算子は組み合わせて使うこともできる。その場合、演算子<code>*/%</code>は演算子<code>+-</code>よりも優先される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 7</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> + <span class="dv">2</span> * <span class="dv">3</span> ;
+}</code></pre></div>
+<p>この場合、まず<code>2*3</code>が計算され6となり、<code>1+6</code>が計算され<code>7</code>となる。</p>
+<p><code>1+2</code>の法を先に計算したい場合、括弧<code>()</code>で囲むことにより、計算の優先度を帰ることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 9</span>
+    <span class="bu">std::</span>cout &lt;&lt; (<span class="dv">1</span> + <span class="dv">2</span>) * <span class="dv">3</span> ;
+}</code></pre></div>
+<p>これは<code>1+2</code>が先に計算され<code>3</code>となり、<code>3*3</code>が計算され<code>9</code>となる。</p>
 <p>浮動小数点数同士でも四則演算ができる。剰余はできない。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -1058,12 +1069,123 @@ main    <span class="co">// 関数名</span>
     <span class="cf">return</span> <span class="dv">0</span> ;
     <span class="cf">return</span> <span class="fl">0.0</span> ;
 }</code></pre></div>
-<h2 id="条件分岐if文">条件分岐(if文)</h2>
-<h2 id="ループwhile文-for文">ループ(while文, for文)</h2>
-<h2 id="コンテナーvector">コンテナー(vector)</h2>
-<h2 id="コンテナーの全要素へのアクセス">コンテナーの全要素へのアクセス</h2>
-<h2 id="標準入力">標準入力</h2>
-<h2 id="section"></h2>
+<h1 id="デバッグコンパイルエラー">デバッグ：コンパイルエラー</h1>
+<p>やれやれ疲れた。この辺で一休みして、デバッグについて考えよう。まずはコンパイルエラーについてだ。</p>
+<p>プログラムには様々なバグがあるが、コンパイルエラーは最も簡単なバグだ。というのも、プログラムのバグの存在が実行前に発覚したわけだから、手間が省ける。もしコンパイルエラーにならない場合、実行した結果から、バグがあるかどうかを判断しなければならない。</p>
+<p>読者の中には、せっかく書いたソースコードをコンパイルしたらコンパイルエラーが出たので、運が悪かったとか、失敗したとか、怒られてつらい気持ちになったなどと感じることがあるかもしれない。しかしそれは大違いだ。コンパイラーによって読者はプログラムを実行することなくバグが発見できたのだから、読者は運が良かった、大成功した、褒められて最高の気持ちになったと感じるべきなのだ。</p>
+<p>さあ皆さんご一緒に、</p>
+<ul>
+<li>コンパイルエラーは普通</li>
+<li>コンパイルエラーが出たらありがとう</li>
+<li>コンパイルエラーがでたら大喜び</li>
+</ul>
+<p>熟練のプログラマーは自分の書いたコードがコンパイルエラーを出さずに一発でコンパイルが通った場合、逆に不安になるくらいだ。</p>
+<p>もしバグがあるのにコンパイルエラーが出なければ、バグの存在に気が付かないまま、読者の書いたソフトウェアは広く世の中に使われ、10年後、20年後に最もバグが発見されてほしくない方法で発見されてしまうかもしれない。すなわち、セキュリティ上問題となる脆弱性という形での発覚だ。しかし安心してほしい。今読者が出したコンパイルエラーによって、そのような悲しい未来の可能性は永久に排除されたのだ。コンパイルエラーはどんどん出すとよい。</p>
+<p>コンパイルエラーの原因は2つ。</p>
+<ol style="list-style-type: decimal">
+<li>文法エラー</li>
+<li>意味エラー</li>
+<li>コンパイラーのバグ</li>
+</ol>
+<p>3つだった。コンパイルエラーの原因は3つ。</p>
+<ol style="list-style-type: decimal">
+<li>文法エラー</li>
+<li>意味エラー</li>
+<li>コンパイラーのバグ</li>
+<li>コンピューターの故障</li>
+</ol>
+<p>4つだった。ただ、3.と4.はめったにないから無視してよい。</p>
+<h2 id="文法エラー">文法エラー</h2>
+<p>文法エラーとは、C++というプログラミング言語の文法に従っていないエラーのことだ。これはC++として解釈できないので、当然エラーになる。</p>
+<p>よくある文法エラーとしては、文末のセミコロンを打ち忘れたものがある。例えば以下のコードには間違いがある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">1</span> + <span class="dv">1</span> 
+    <span class="kw">auto</span> y = x + <span class="dv">1</span> ;
+}</code></pre></div>
+<p>これをコンパイルすると以下のようにコンパイルエラーメッセージが出力される。</p>
+<pre><code>$ make
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+main.cpp: In function ‘int main()’:
+main.cpp:4:5: error: expected ‘,’ or ‘;’ before ‘auto’
+     auto y = x + 1 ;
+     ^~~~
+main.cpp:3:10: warning: unused variable ‘x’ [-Wunused-variable]
+     auto x = 1 + 1
+          ^
+Makefile:4: recipe for target &#39;program&#39; failed
+make: *** [program] Error 1</code></pre>
+<p>コンパイラーのメッセージを読み慣れていない読者はここで考えることを放棄してコンピューターの電源を落とし家を出て街を徘徊し夕日を見つめて人生、宇宙、すべてについての究極の質問への答えを模索してしまうことだろう。</p>
+<p>しかし恐れるなかれ。コンパイラーのエラーメッセージを読み解くのは難しくない。</p>
+<p>まず最初の2行を見てみよう。</p>
+<pre><code>$ make
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program</code></pre>
+<p>1行目はシェルにmakeを実行させるためのコマンド、二行目はmakeが実行したレシピの中身だ。これはコンパイラーによるメッセージではない。</p>
+<p>3行目からはコンパイラーによる出力だ。</p>
+<pre><code>main.cpp: In function ‘int main()’:</code></pre>
+<p>コンパイラーはソースファイル<code>main.cpp</code>の中の、<code>int main()</code>という関数について、特に言うべきことがあると主張している。</p>
+<p>言うべきこととは以下だ。</p>
+<pre><code>main.cpp:4:5: error: expected ‘,’ or ‘;’ before ‘auto’
+     auto y = x + 1 ;
+     ^~~~</code></pre>
+<p>GCCというコンパイラーのエラーメッセージは、以下のフォーマットを採用している。</p>
+<pre><code>ソースファイル名:行番号:列番号: メッセージの種類: メッセージの内容</code></pre>
+<p>ここでのメッセージの種類は<code>error</code>、つまりこのメッセージはエラーを伝えるものだ。</p>
+<p>ソースファイル名は<code>main.cpp</code>、つまりエラーは<code>main.cpp</code>の中にあるということだ。</p>
+<p>行番号というのは、最初の行を1行目とし、改行ごとにインクリメントされていく。今回のソースファイルの場合、以下のようになる。</p>
+<pre><code>1 int main()
+2 {
+3     auto x = 1 + 1 
+4     auto y = x + 1 ;
+5 }</code></pre>
+<p>もし読者が素晴らしいテキストエディターであるVimを使っている場合、<code>:set nu</code>すると行番号を表示できる。</p>
+<p>その上でエラーメッセージの行番号を確認すると<code>4</code>とある。つまりコンパイラーは4行目に問題があると考えているわけだ。</p>
+<p>4行目を確認してみよう。</p>
+<pre><code>    auto y = x + 1 ;</code></pre>
+<p>何の問題もないように見える。更にエラーメッセージを読んでみよう。</p>
+<p>列番号が<code>5</code>となっている。列番号というのは、行頭からの文字数だ。最初の文字を1文字目とし、文字ごとにインクリメントされていく。</p>
+<pre><code>123456789...
+    auto y = x + 1 ;</code></pre>
+<p>4行目は空白文字を4つ使ってインデントしているので、autoのaの列番号は5だ。ここに問題があるのだろうか。何も問題がないように見える。</p>
+<p>この謎を解くためには、メッセージの内容を読まなければならない。</p>
+<pre><code>expected ‘,’ or ‘;’ before ‘auto’
+     auto y = x + 1 ;
+     ^~~</code></pre>
+<p>これは日本語に翻訳すると以下のようになる。</p>
+<pre><code>‘auto’の前に&#39;,&#39;か&#39;;&#39;があるべき
+     auto y = x + 1 ;
+     ^~~</code></pre>
+<p>1行目はエラー内容をテキストで表現したものだ。これによると、'auto'の前に','か';'があるべきとあるが、やはりまだわからない。</p>
+<p>2行目は問題のある箇所のソースコードを部分的に抜粋したもので、3行目はそのソースコードの問題のある文字を視覚的にわかりやすく示しているものだ。</p>
+<p>ともかく、コンパイラーの支持に従って'auto'の前に','を付けてみよう。</p>
+<pre><code>    ,auto y = x + 1 ;</code></pre>
+<p>これをコンパイルすると、また違ったエラーメッセージが表示される。</p>
+<pre><code>main.cpp: In function ‘int main()’:
+main.cpp:4:6: error: expected unqualified-id before ‘auto’
+     ,auto y = x + 1 ;
+      ^~~~</code></pre>
+<p>では';'ならばどうか。</p>
+<pre><code>    ;auto y = x + 1 ;</code></pre>
+<p>これはコンパイルが通るようだ。</p>
+<p>しかしなぜこれでコンパイルが通るのだろう。そのためには、コンパイラーが問題だとした行の一つ上の行を見る必要がある。</p>
+<pre><code>    auto x = 1 + 1
+    auto y = x + 1 ;</code></pre>
+<p>コンパイラーにとって、改行は空白文字と同じくソースファイル中の意味のあるトークン(キーワードや名前や記号)を区切る文字でしかない。コンパイラーにとって、このコードは実質以下のように見えてる。</p>
+<pre><code>auto x=1+1 auto y=x+1;</code></pre>
+<p>&quot;1 auto&quot;というのは文法エラーだ。なのでコンパイラーは文法エラーが発覚する最初の文字である'auto'の'a'を指摘したのだ。</p>
+<p>人間にとって自然になるように修正すると、コンパイラーが指摘した行の一つ上の行の行末に';'を追加すべきだ。</p>
+<pre><code>    auto x = 1 + 1 ;
+    auto y = x + 1 ;</code></pre>
+<p>文法エラーというのは厄介なバグだ。というのも、コンパイラーというのは正しい文法のソースファイルを処理するように作られている。文法を間違えた場合、ソースファイル全体が正しくないということになる。コンパイラーは文法違反に遭遇した場合、なるべく人間がよく間違えそうなパターンをヒューリスティックに指摘することもしている。そのため、エラーメッセージに指摘された行番号と列番号は、必ずしも人間にとっての問題の箇所と一致しない。</p>
+<p>もうひとつ例を見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 引数を3つとって足して返す関数</span>
+    <span class="kw">auto</span> f = [](<span class="kw">auto</span> a, <span class="kw">auto</span> b, <span class="kw">auto</span> c)
+    { <span class="cf">return</span> a + b + c ; } ;
+
+    <span class="bu">std::</span>cout &lt;&lt; f(<span class="dv">1</span>+(<span class="dv">2</span>*<span class="dv">3</span>),<span class="dv">4-5</span>,<span class="dv">6</span>/(<span class="dv">7-8</span>))) ;
+}</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
