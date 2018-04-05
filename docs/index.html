@@ -111,7 +111,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li><a href="#入門用の環境構築">入門用の環境構築</a></li>
 </ul></li>
-<li><a href="#c観光案内">C++観光案内</a><ul>
+<li><a href="#cヒッチハイクガイド">C++ヒッチハイクガイド</a><ul>
 <li><a href="#最小のコード">最小のコード</a></li>
 <li><a href="#標準出力">標準出力</a></li>
 <li><a href="#文字列">文字列</a></li>
@@ -120,8 +120,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#関数function">関数(function)</a></li>
 <li><a href="#本当の関数">本当の関数</a></li>
 </ul></li>
-<li><a href="#デバッグコンパイルエラー">デバッグ：コンパイルエラー</a><ul>
+<li><a href="#デバッグコンパイルエラーメッセージの読み方">デバッグ：コンパイルエラーメッセージの読み方</a><ul>
 <li><a href="#文法エラー">文法エラー</a></li>
+<li><a href="#意味エラー">意味エラー</a></li>
+<li><a href="#コンパイラーのバグ">コンパイラーのバグ</a></li>
+</ul></li>
+<li><a href="#条件分岐とループの果てのレストラン">条件分岐とループの果てのレストラン</a><ul>
+<li><a href="#ブロック文">ブロック文</a></li>
+<li><a href="#条件分岐">条件分岐</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -622,7 +628,7 @@ make: &#39;hello&#39; is up to date.</code></pre>
 <p>run : program ./program</p>
 <p>clean : rm -f ./program rm -f ./all.h.gch</p>
 <p>.PHONY : run clean ~~</p>
-<h1 id="c観光案内">C++観光案内</h1>
+<h1 id="cヒッチハイクガイド">C++ヒッチハイクガイド</h1>
 <p>プログラミング言語の個々の機能の解説を理解するためには、まず言語の全体像を掴まなければならない。この章ではC++の様々なコードを一通り観光していく。ここではコードの詳細な解説はしない。</p>
 <h2 id="最小のコード">最小のコード</h2>
 <p>以下はC++の最小のコードだ。</p>
@@ -641,7 +647,7 @@ main    // 関数名
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main(){ }</code></pre></div>
 <p>と書くこともできるし、</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span>    main    (    )    {   }</code></pre></div>
-<p>と書くこともできるし、紙に印刷するととても読みづらくなるかもしれないが</p>
+<p>と書くこともできるし、紙に印刷する都合上とても読みづらくなるかもしれないが</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span>
 main
 (
@@ -1069,7 +1075,7 @@ main    <span class="co">// 関数名</span>
     <span class="cf">return</span> <span class="dv">0</span> ;
     <span class="cf">return</span> <span class="fl">0.0</span> ;
 }</code></pre></div>
-<h1 id="デバッグコンパイルエラー">デバッグ：コンパイルエラー</h1>
+<h1 id="デバッグコンパイルエラーメッセージの読み方">デバッグ：コンパイルエラーメッセージの読み方</h1>
 <p>やれやれ疲れた。この辺で一休みして、デバッグについて考えよう。まずはコンパイルエラーについてだ。</p>
 <p>プログラムには様々なバグがあるが、コンパイルエラーは最も簡単なバグだ。というのも、プログラムのバグの存在が実行前に発覚したわけだから、手間が省ける。もしコンパイルエラーにならない場合、実行した結果から、バグがあるかどうかを判断しなければならない。</p>
 <p>読者の中には、せっかく書いたソースコードをコンパイルしたらコンパイルエラーが出たので、運が悪かったとか、失敗したとか、怒られてつらい気持ちになったなどと感じることがあるかもしれない。しかしそれは大違いだ。コンパイラーによって読者はプログラムを実行することなくバグが発見できたのだから、読者は運が良かった、大成功した、褒められて最高の気持ちになったと感じるべきなのだ。</p>
@@ -1176,6 +1182,40 @@ main.cpp:4:6: error: expected unqualified-id before ‘auto’
 <p>人間にとって自然になるように修正すると、コンパイラーが指摘した行の一つ上の行の行末に';'を追加すべきだ。</p>
 <pre><code>    auto x = 1 + 1 ;
     auto y = x + 1 ;</code></pre>
+<p>さて、問題自体は解決したわけだが、残りのメッセージも見ていこう。</p>
+<pre><code>main.cpp:3:10: warning: unused variable ‘x’ [-Wunused-variable]
+     auto x = 1 + 1</code></pre>
+<p>これはコンパイラーによる警告メッセージだ。警告メッセージについて詳しくは、デバッグ：警告メッセージの章で解説する。</p>
+<pre><code>Makefile:4: recipe for target &#39;program&#39; failed
+make: *** [program] Error 1</code></pre>
+<p>これはGNU makeによるメッセージだ。GCCがソースファイルを正しくコンパイルできず、実行が失敗したとエラーを返したので、レシピの実行が失敗したことを伝えるメッセージだ。</p>
+<p>プログラムはどうやってエラーを通知するのか。main関数の戻り値によってだ。main関数は関数であるので、戻り値がある。main関数の戻り値はint型だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 戻り値の型</span>
+<span class="dt">int</span>
+<span class="co">// main関数の残りの部分</span>
+main() { }</code></pre></div>
+<p>main関数が何も値を返さない場合、<code>return 0</code>したものとみなされる。main関数が<code>0</code>もしくは<code>EXIT_SUCCESS</code>を返した場合、プログラムの実行の成功を通知したことになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 必ず実行が成功したと通知するプログラム</span>
+<span class="dt">int</span> main()
+{
+    <span class="cf">return</span> <span class="dv">0</span> ;
+}</code></pre></div>
+<p>プログラムの実行が失敗した場合、main関数は<code>EXIT_FAILURE</code>を返すことでエラーを通知できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 必ず実行が失敗したと通知するプログラム</span>
+<span class="dt">int</span> main()
+{
+    <span class="cf">return</span> EXIT_FAILURE ;
+}</code></pre></div>
+<p><code>EXIT_SUCCESS</code>と<code>EXIT_FAILURE</code>はマクロだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#define EXIT_SUCCESS</span>
+<span class="pp">#define EXIT_FAILURE</span></code></pre></div>
+<p>その中身はC++標準規格では規定されていない。どうしても値を知りたい場合は以下のプログラムを実行してみるとよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="st">&quot;EXIT_SUCCESS: &quot;</span>s &lt;&lt; EXIT_SUCCESS &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;EXIT_FAILURE: &quot;</span>s   &lt;&lt; EXIT_FAILURE ;  
+}</code></pre></div>
 <p>文法エラーというのは厄介なバグだ。というのも、コンパイラーというのは正しい文法のソースファイルを処理するように作られている。文法を間違えた場合、ソースファイル全体が正しくないということになる。コンパイラーは文法違反に遭遇した場合、なるべく人間がよく間違えそうなパターンをヒューリスティックに指摘することもしている。そのため、エラーメッセージに指摘された行番号と列番号は、必ずしも人間にとっての問題の箇所と一致しない。</p>
 <p>もうひとつ例を見てみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -1186,6 +1226,228 @@ main.cpp:4:6: error: expected unqualified-id before ‘auto’
 
     <span class="bu">std::</span>cout &lt;&lt; f(<span class="dv">1</span>+(<span class="dv">2</span>*<span class="dv">3</span>),<span class="dv">4-5</span>,<span class="dv">6</span>/(<span class="dv">7-8</span>))) ;
 }</code></pre></div>
+<p>GCCによるコンパイルエラーメッセージだけ抜粋すると以下の通り、</p>
+<pre><code>main.cpp: In function ‘int main()’:
+main.cpp:7:40: error: expected ‘;’ before ‘)’ token
+     std::cout &lt;&lt; f(1+(2*3),4-5,6/(7-8))) ;
+                                        ^</code></pre>
+<p>さて早速読んでみよう。すでに学んだように、GCCのメッセージのフォーマットは以下の通りだ。</p>
+<pre><code>ソースファイル名:行番号:列番号: メッセージの種類: メッセージの内容</code></pre>
+<p>これに当てはめると、問題はソースファイル<code>main.cpp</code>の7行目の40列目にある。</p>
+<p>エラーメッセージは、「';'か')'がトークンの前にあるべき」だ。</p>
+<p>トークン(token)というのは'std'とか'::'とか'cout'といったソースファイルの空白文字で区切られた最小の文字列の単位のことだ。</p>
+<p>抜粋されたソースコードに示された問題の箇所、つまり7行目40列目にあるトークンは')'だ。この前に';'が必要とはどういうことだろう。</p>
+<p>問題を探るため、7行目のトークンを詳しく分解してみよう。以下は7行目と同じソースコードだが、トークンをわかりやすく分解してある</p>
+<pre><code>std::cout &lt;&lt; // 標準出力
+f // 関数名
+    ( // 空き括弧
+        1+(2*3),    // 第1引数
+        4-5,        // 第2引数
+        6/(7-8)     // 第3引数
+    ) // 空き括弧に対応する閉じ括弧
+    ) // ???
+    ; // 終端文字</code></pre>
+<p>これを見ると、閉じ括弧が一つ多いことがわかる。</p>
+<h2 id="意味エラー">意味エラー</h2>
+<p>意味エラーとは、ソースファイルは文法的に正しいが、意味的に間違っているコンパイルエラーのことだ。</p>
+<p>早速例を見ていこう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="fl">1.0</span> % <span class="fl">1.0</span> ;
+}</code></pre></div>
+<p>このコードをコンパイルすると出力されるエラーメッセージは以下の通り。</p>
+<pre><code>main.cpp: In function ‘int main()’:
+main.cpp:3:18: error: invalid operands of types ‘double’ and ‘double’ to binary ‘operator%’
+     auto x = 1.0 % 1.0 ;
+              ~~~~^~~~~</code></pre>
+<p>問題の箇所は3行目の18列目、'%'だ。</p>
+<p>エラーメッセージは、「二項 'operator%'に対して不適切なオペランドである型'double'と'double'」とある。</p>
+<p>前の章を読み直すとわかるとおり、<code>operator %</code>は剰余を計算する演算子だが、この演算子には<code>double</code>型を渡すことはできない。</p>
+<p>このコードはどうだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 引数を一つ取る関数</span>
+<span class="dt">void</span> f( <span class="dt">int</span> x ) { }
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 引数を2つ渡す</span>
+    f( <span class="dv">1</span>, <span class="dv">2</span> ) ;
+}</code></pre></div>
+<p>このようなエラーメッセージになる。</p>
+<pre><code>
+main.cpp: In function ‘int main()’:
+main.cpp:7:13: error: too many arguments to function ‘void f(int)’
+     f( 1, 2 ) ;
+             ^
+main.cpp:2:6: note: declared here
+ void f( int x ) { }
+      ^</code></pre>
+<p>問題の箇所は7行目。「関数'void f(int)'に対して実引数が多すぎる」とある。<code>関数f</code>は引数を一つしか取らないのに、2つの引数を渡しているのがエラーの原因だ。</p>
+<p>2つめのメッセージはエラーではなくて、エラーを補足説明するための注記(note)メッセージだ。ここで言及している<code>関数f</code>とは、2行目に宣言されていることを説明してくれている。</p>
+<h2 id="コンパイラーのバグ">コンパイラーのバグ</h2>
+<p>C++コンパイラーもソフトウェアであり、バグがある。コンパイラーにバグがある場合、正しいC++のソースファイルがコンパイルできないことがある。</p>
+<p>読者がそのようなコンパイラーの秘孔を突くコードを書くことはまれだ。しかし、もしそのようなコードを偶然にも書いてしまった場合、GCCは、</p>
+<pre><code>gcc: internal compiler error: エラー内容
+Please submit a full bug report,
+with preprocessed source if appropriate.
+See &lt;ドキュメントへのファイルパス&gt; for instructions.</code></pre>
+<p>のようなメッセージを出力する。</p>
+<p>これはGCCのバグなので、見つけた読者は適切な方法でバグ報告をしよう。</p>
+<h1 id="条件分岐とループの果てのレストラン">条件分岐とループの果てのレストラン</h1>
+<p>さてC++の勉強に戻ろう。この章では条件分岐とループについて学ぶ。</p>
+<h2 id="ブロック文">ブロック文</h2>
+<p>条件分岐とループについて学ぶ前に、まず'複合文(compound statement)'や`ブロック(block)'と呼ばれている、複数の文をひとまとめにする文について学ばなければならない。</p>
+<p>C++では<code>文(statement)</code>が実行される。<code>文</code>については詳しく説明すると長くなるが、';'で区切られたものが<code>文</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 文</span>
+    <span class="kw">auto</span> x = <span class="dv">1</span> + <span class="dv">1</span> ;
+    <span class="co">// 文</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+
+    <span class="co">// 空文</span>
+    <span class="co">// 実は空っぽの文も書ける。</span>
+    ;
+}</code></pre></div>
+<p>複数の<code>文</code>を<code>{}</code>で囲むことで、一つの文として扱うことができる。これを<code>複合文</code>という</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 複合文開始</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    } <span class="co">// 複合文終了</span>
+
+    <span class="co">// 別の複合文</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;world</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+
+    <span class="co">// 空の複合文</span>
+    { }
+}</code></pre></div>
+<p><code>複合文</code>には';'はいらない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// ;はいらない</span>
+    { }
+
+    <span class="co">// これは空の複合文に続いて</span>
+    <span class="co">// 空文があるだけのコード</span>
+    { } ;
+}</code></pre></div>
+<p><code>複合文</code>の中に<code>複合文</code>を書くこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    {{{}}} ;
+}</code></pre></div>
+<p><code>関数の本体</code>としての一番外側'{}'はこの<code>複合文</code>とは別のものだが、読者はまだ気にする必要はない。</p>
+<p><code>複合文</code>は複数の<code>文</code>をひとまとめにして、ひとつの<code>文</code>として扱えるようにするぐらいの意味しか持っていない。ただし、変数の見え方に影響する。変数は宣言された最も内側の複合文の中でしか使えない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">0</span> ;
+
+    {
+        <span class="kw">auto</span> b = <span class="dv">0</span> ;
+        {
+            <span class="kw">auto</span> c = <span class="dv">0</span> ;
+            <span class="co">// cはここまで使える</span>
+        }
+        <span class="co">// bはここまで使える</span>
+    }
+    <span class="co">// aはここまで使える</span>
+}</code></pre></div>
+<p>これを専門用語では<code>変数</code>の<code>寿命</code>とか<code>ブロックスコープ(block-scope)</code>という。</p>
+<p>内側のブロックスコープの変数が、外側のブロックスコープの変数と同じ名前を持っていた場合はエラーではない。外側の変数が内側の変数で隠される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">0</span> ;
+    {
+        <span class="kw">auto</span> x = <span class="dv">1</span> ;
+        {
+            <span class="kw">auto</span> x = <span class="dv">2</span> ;
+            <span class="co">// 2</span>
+            <span class="bu">std::</span>cout &lt;&lt; x ;
+        }
+        <span class="co">// 1</span>
+        <span class="bu">std::</span>cout &lt;&lt; x ;
+        x = <span class="dv">42</span> ;
+        <span class="co">// 42</span>
+        <span class="bu">std::</span>cout &lt;&lt; x ;
+    }
+    <span class="co">// 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>なれないうちは驚くかもしれないが、多くのプログラミング言語はこのような挙動になっているものだ。</p>
+<h2 id="条件分岐">条件分岐</h2>
+<p>すでに読者は様々な数値計算を学んだ。読者は<code>12345 + 6789</code>の答えや、<code>8073 * 132 / 5</code>の答えを計算できる上、この2つの答えをさらにかけ合わせた結果だって計算できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">12345</span> + <span class="dv">6789</span> ;
+    <span class="kw">auto</span> b = <span class="dv">8073</span> * <span class="dv">132</span> / <span class="dv">5</span> ;
+    <span class="kw">auto</span> sum = a + b ;
+
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="st">&quot;a=12345 + 6789=&quot;</span> &lt;&lt; a &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;b=8073 * 132 / 5=&quot;</span> &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;a+b=&quot;</span> &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>なるほど、答えがわかった。ところで変数<code>a</code>と変数`b'はどちらが大きいのだろうか。大きい変数だけ出力したい。</p>
+<p>条件分岐には<code>if文</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">12345</span> + <span class="dv">6789</span> ;
+    <span class="kw">auto</span> b = <span class="dv">8073</span> * <span class="dv">132</span> / <span class="dv">5</span> ;
+
+
+    <span class="cf">if</span> ( a &lt; b )
+    {
+        <span class="co">// bが大きい</span>
+        <span class="bu">std::</span>cout &lt;&lt; b ;
+    } <span class="cf">else</span>
+    {
+        <span class="co">// aが大きい</span>
+        <span class="bu">std::</span>cout &lt;&lt; a ;
+    }
+}</code></pre></div>
+<p><code>if文</code>は以下のように書く。</p>
+<pre><code>if ( 条件 )
+文1
+else
+文2</code></pre>
+<p><code>条件</code>が真(true)のときは<code>文1</code>が実行され、偽(false)のときは<code>文2</code>が実行される。</p>
+<p><code>条件</code>とか<code>真偽</code>についてはとてもとても深い話があるのだが、その解説は後の章に回すとして、まずは以下の比較演算子を覚えよう。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">演算子</th>
+<th align="left">意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">a == b</td>
+<td align="left">aはbと等しい</td>
+</tr>
+<tr class="even">
+<td align="left">a != b</td>
+<td align="left">aはbと等しくない</td>
+</tr>
+<tr class="odd">
+<td align="left">a &lt; b</td>
+<td align="left">aはbより小さい</td>
+</tr>
+<tr class="even">
+<td align="left">a &lt;= b</td>
+<td align="left">aはbより小さい、もしくは等しい</td>
+</tr>
+<tr class="odd">
+<td align="left">a &gt; b</td>
+<td align="left">aはbより大きい</td>
+</tr>
+<tr class="even">
+<td align="left">a &gt;= b</td>
+<td align="left">aはbより大きい、もしくは等しい</td>
+</tr>
+</tbody>
+</table>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
