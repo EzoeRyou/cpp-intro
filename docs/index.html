@@ -125,9 +125,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#意味エラー">意味エラー</a></li>
 <li><a href="#コンパイラーのバグ">コンパイラーのバグ</a></li>
 </ul></li>
-<li><a href="#条件分岐とループの果てのレストラン">条件分岐とループの果てのレストラン</a><ul>
-<li><a href="#ブロック文">ブロック文</a></li>
+<li><a href="#条件分岐の果てのレストラン">条件分岐の果てのレストラン</a><ul>
+<li><a href="#複合文">複合文</a></li>
 <li><a href="#条件分岐">条件分岐</a></li>
+<li><a href="#条件式">条件式</a><ul>
+<li><a href="#条件とは何だろう">条件とは何だろう</a></li>
+</ul></li>
+<li><a href="#bool型">bool型</a></li>
+<li><a href="#bool型の演算">bool型の演算</a><ul>
+<li><a href="#論理否定-operator">論理否定: operator !</a></li>
+<li><a href="#論理積-operator">論理積: operator &amp;</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -1283,6 +1291,12 @@ main.cpp:2:6: note: declared here
       ^</code></pre>
 <p>問題の箇所は7行目。「関数'void f(int)'に対して実引数が多すぎる」とある。<code>関数f</code>は引数を一つしか取らないのに、2つの引数を渡しているのがエラーの原因だ。</p>
 <p>2つめのメッセージはエラーではなくて、エラーを補足説明するための注記(note)メッセージだ。ここで言及している<code>関数f</code>とは、2行目に宣言されていることを説明してくれている。</p>
+<p>意味エラーは時としておぞましいほどのエラーメッセージを生成することがある。例えば以下の一件無害そうなコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="st">&quot;hello&quot;</span>s &lt;&lt; <span class="dv">1</span> ;
+}</code></pre></div>
+<p>このコードは文法的に正しいが、意味的に間違っているコードだ。このコードをコンパイルすると膨大なエラーメッセージが出力される。しかも問題の行番号特定以外、大して役に立たない。</p>
 <h2 id="コンパイラーのバグ">コンパイラーのバグ</h2>
 <p>C++コンパイラーもソフトウェアであり、バグがある。コンパイラーにバグがある場合、正しいC++のソースファイルがコンパイルできないことがある。</p>
 <p>読者がそのようなコンパイラーの秘孔を突くコードを書くことはまれだ。しかし、もしそのようなコードを偶然にも書いてしまった場合、GCCは、</p>
@@ -1292,9 +1306,9 @@ with preprocessed source if appropriate.
 See &lt;ドキュメントへのファイルパス&gt; for instructions.</code></pre>
 <p>のようなメッセージを出力する。</p>
 <p>これはGCCのバグなので、見つけた読者は適切な方法でバグ報告をしよう。</p>
-<h1 id="条件分岐とループの果てのレストラン">条件分岐とループの果てのレストラン</h1>
-<p>さてC++の勉強に戻ろう。この章では条件分岐とループについて学ぶ。</p>
-<h2 id="ブロック文">ブロック文</h2>
+<h1 id="条件分岐の果てのレストラン">条件分岐の果てのレストラン</h1>
+<p>さてC++の勉強に戻ろう。この章では条件分岐について学ぶ。</p>
+<h2 id="複合文">複合文</h2>
 <p>条件分岐とループについて学ぶ前に、まず'複合文(compound statement)'や`ブロック(block)'と呼ばれている、複数の文をひとまとめにする文について学ばなければならない。</p>
 <p>C++では<code>文(statement)</code>が実行される。<code>文</code>については詳しく説明すると長くなるが、';'で区切られたものが<code>文</code>だ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -1389,8 +1403,8 @@ See &lt;ドキュメントへのファイルパス&gt; for instructions.</code><
         &lt;&lt; <span class="st">&quot;b=8073 * 132 / 5=&quot;</span> &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
         &lt;&lt; <span class="st">&quot;a+b=&quot;</span> &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 }</code></pre></div>
-<p>なるほど、答えがわかった。ところで変数<code>a</code>と変数`b'はどちらが大きいのだろうか。大きい変数だけ出力したい。</p>
-<p>条件分岐には<code>if文</code>を使う。</p>
+<p>なるほど、答えがわかった。ところで変数<code>a</code>と変数`b'はどちらが大きいのだろうか。大きい変数だけ出力したい。この場合は条件分岐を使う。</p>
+<p>C++では条件分岐に<code>if文</code>を使う。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="kw">auto</span> a = <span class="dv">12345</span> + <span class="dv">6789</span> ;
@@ -1413,6 +1427,27 @@ See &lt;ドキュメントへのファイルパス&gt; for instructions.</code><
 else
 文2</code></pre>
 <p><code>条件</code>が真(true)のときは<code>文1</code>が実行され、偽(false)のときは<code>文2</code>が実行される。</p>
+<p>elseの部分は書かなくてもよい。</p>
+<pre><code>if ( 条件 )
+文1
+文2</code></pre>
+<p>その場合、<code>条件</code>が真の時だけ<code>文1</code>が実行される。条件の真偽にかかわらず<code>文2</code>は実行される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">if</span> ( <span class="dv">2</span> &lt; <span class="dv">1</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;sentence 1.</span><span class="sc">\n</span><span class="st">&quot;</span> ; <span class="co">// 文1</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;sentence 2.</span><span class="sc">\n</span><span class="st">&quot;</span> ; <span class="co">// 文2</span>
+}</code></pre></div>
+<p>この例では、2が1より小さい場合は<code>文1</code>が実行される。<code>文2</code>は必ず実行される。</p>
+<p>条件次第で複数の文を実行したい場合、<code>複合文</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">if</span> ( <span class="dv">1</span> &lt; <span class="dv">2</span> )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;yes!</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;yes!</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+}</code></pre></div>
 <p><code>条件</code>とか<code>真偽</code>についてはとてもとても深い話があるのだが、その解説は後の章に回すとして、まずは以下の比較演算子を覚えよう。</p>
 <table>
 <thead>
@@ -1445,6 +1480,314 @@ else
 <tr class="even">
 <td align="left">a &gt;= b</td>
 <td align="left">aはbより大きい、もしくは等しい</td>
+</tr>
+</tbody>
+</table>
+<p>真(true)というのは、意味が真であるときだ。正しい、成り立つ、正解などと言い換えてもよい。それ以外の場合はすべて偽(false)だ。正しくない、成り立たない、不正解などと言い換えてもいい。</p>
+<p>整数や浮動小数点数の場合、話は簡単だ。</p>
+<pre><code>int main()
+{
+    // 1は2より小さいか？
+    if ( 1 &lt; 2 )
+    {   // 真、お使いのコンピューターは正常です
+        std::cout &lt;&lt; &quot;Your computer works just fine.\n&quot;s ;
+    }
+    else
+    {
+        // 偽、お使いのコンピューターには深刻な問題があります
+        std::cout &lt;&lt; &quot;Your computer has serious issues.&quot;
+    }
+}</code></pre>
+<p>文字列の場合、内容が同じであれば等しい。違うのであれば等しくない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="st">&quot;dog&quot;</span>s ;
+    <span class="kw">auto</span> b = <span class="st">&quot;dog&quot;</span>s ;
+    <span class="kw">auto</span> c = <span class="st">&quot;cat&quot;</span>s ;
+
+    <span class="cf">if</span> ( a == b )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;a == b</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+    <span class="cf">else</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;a != b</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+
+    <span class="cf">if</span> ( a == c )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;a == c</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+    <span class="cf">else</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;a != c</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+}</code></pre></div>
+<p>では文字列に大小はあるのだろうか。文字列に大小はある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> cat = <span class="st">&quot;cat&quot;</span>s ;
+    <span class="kw">auto</span> dog = <span class="st">&quot;dog&quot;</span>s ;
+
+    <span class="cf">if</span> ( cat &lt; dog )
+    {   <span class="co">// 猫は小さい</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;cat is smaller.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+    <span class="cf">else</span>
+    {   <span class="co">// 犬は小さい</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;dog is smaller.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+
+    <span class="kw">auto</span> longcat = <span class="st">&quot;longcat&quot;</span>s ;
+
+    <span class="cf">if</span> ( longcat &gt; cat )
+    {   <span class="co">// longcatは長い</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Longcat is Looong.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+    <span class="cf">else</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Longcat isn&#39;t that long. Sigh.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>実行して確かめてみよう。ほとんどの読者の実行環境では以下のようになるはずだ。ほとんどの、というのは、そうではない環境も存在するからだ。読者がそのような稀有な環境を使っている可能性はまずないだろうが。</p>
+<pre><code>cat is smaller.
+Longcat is Looong.</code></pre>
+<p>なるほど。&quot;cat&quot;sは&quot;dog&quot;sよりも小さく(？)、&quot;longcat&quot;sは&quot;cat&quot;sよりも長い(大きい？)ようだ。なんだかよくわからない結果になった。</p>
+<p>これはどういうことなのか。もっと簡単な文字列で試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="st">&quot;&quot;</span>s ;
+
+    <span class="co">// aとbはどちらが小さいのだろうか？</span>
+    <span class="cf">if</span> ( <span class="st">&quot;a&quot;</span>s &lt; <span class="st">&quot;b&quot;</span>s )
+    {   x = <span class="st">&quot;a&quot;</span>s ; }
+    <span class="cf">else</span>
+    {   x = <span class="st">&quot;b&quot;</span>s ; }
+ 
+    <span class="co">// 小さい方の文字が出力される</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>これを実行するとaと出力される。すると&quot;a&quot;sは&quot;b&quot;sより小さいようだ。</p>
+<p>もっと試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="st">&quot;&quot;</span>s ;
+    <span class="cf">if</span> ( <span class="st">&quot;aa&quot;</span>s &lt; <span class="st">&quot;ab&quot;</span>s )
+    { x = <span class="st">&quot;aa&quot;</span>s ; }
+    <span class="cf">else</span>
+    { x = <span class="st">&quot;ab&quot;</span>s ; }
+
+    <span class="co">// 小さい文字列が出力される</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>これを実行すると、aaと出力される。すると&quot;aa&quot;sは&quot;ab&quot;sより小さいことになる。</p>
+<p>文字列の大小比較は文字単位で行われる。まず最初の文字が大小比較される。もし等しい場合は、次の文字が大小比較される。等しくない最初の文字の結果が、文字列の大小比較の結果となる。</p>
+<h2 id="条件式">条件式</h2>
+<h3 id="条件とは何だろう">条件とは何だろう</h3>
+<p><code>if文</code>の中で書く<code>条件(condition)</code>は、<code>条件式(conditional expression)</code>とも呼ばれている<code>式(expression)</code>の一種だ。<code>式</code>というのは例えば&quot;1+1&quot;のようなものだ。<code>式</code>は<code>文</code>の中に書くことができ、これを<code>式文(expression statement)</code>という。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dv">1</span> + <span class="dv">1</span> ; <span class="co">// 式文</span>
+}</code></pre></div>
+<p>&quot;a==b&quot;や&quot;a&lt;b&quot;のような<code>条件</code>も<code>式</code>なので、<code>文</code>として書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dv">1</span> == <span class="dv">1</span> ;
+    <span class="dv">1</span> &lt; <span class="dv">2</span> ;
+}</code></pre></div>
+<p>C++では多くの式には型がある。たとえば&quot;123&quot;はint型で、&quot;123+4&quot;もint型だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">123</span> ; <span class="co">// int</span>
+    <span class="kw">auto</span> b = a + <span class="dv">4</span> ; <span class="co">// int</span>
+    <span class="kw">auto</span> c = <span class="fl">1.0</span> ; <span class="co">// double</span>
+    <span class="kw">auto</span> d = <span class="st">&quot;hello&quot;</span>s ; <span class="co">// std::string</span>
+}</code></pre></div>
+<p>とすると、&quot;1==2&quot;や&quot;3!=3&quot;のような条件式にも型があるのではないか。型があるのであれば変数に入れられるはずだ。試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">if</span> (  <span class="dv">1</span> == <span class="dv">1</span> )
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1 == 1 is true.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+    <span class="cf">else</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1 == 1 is false.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+
+    <span class="kw">auto</span> x = <span class="dv">1</span> == <span class="dv">1</span> ;
+    <span class="cf">if</span> ( x )
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1 == 1 is true.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+    <span class="cf">else</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1 == 1 is false.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+}</code></pre></div>
+<p>&quot;if(x)&quot;は&quot;if(1==1)&quot;と書いた場合と同じように動く。</p>
+<p>変数に入れられるのであれば出力もできるのではないだろうか。試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">1</span> == <span class="dv">1</span> ; <span class="co">// 正しい</span>
+    <span class="kw">auto</span> b = <span class="dv">1</span> != <span class="dv">1</span> ; <span class="co">// 間違い</span>
+    <span class="bu">std::</span>cout &lt;&lt; a &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; b ;
+}</code></pre></div>
+<pre><code>1
+0</code></pre>
+<p>なるほど、条件が正しい場合&quot;1&quot;になり、条件が間違っている場合&quot;0&quot;になるようだ。</p>
+<p>では<code>if文</code>の中に1や0を入れたらどうなるのだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 条件が正しい値だけ出力される。</span>
+<span class="dt">int</span> main()
+{
+    <span class="cf">if</span> ( <span class="dv">1</span> ) <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">if</span> ( <span class="dv">0</span> ) <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;0</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">if</span> ( <span class="dv">123</span> ) <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;123</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">if</span> ( <span class="dv">-1</span> ) <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;-1</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>実行結果は以下のようになる。</p>
+<pre><code>1
+123
+-1</code></pre>
+<p>この結果を見ると、条件として1, 123, -1は正しく、0は間違っているということになる。ますます訳がわからなくなってきた。</p>
+<h2 id="bool型">bool型</h2>
+<p>そろそろ種明かしをしよう。条件式の結果は、<code>bool型</code>という特別な型を持っている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="dv">1</span> == <span class="dv">1</span> ; <span class="co">// bool型</span>
+    <span class="dt">bool</span> A = <span class="dv">1</span> == <span class="dv">1</span> ; <span class="co">// 型を書いてもよい</span>
+}</code></pre></div>
+<p>int型の変数には整数の値が入る。double型の変数には浮動小数点数の値が入る。std::string型の変数には文字列の値が入る。</p>
+<p>すると、bool型の変数にはbool型の値が入る。</p>
+<p>bool型には2つの値がある。条件が正しいことを意味する<code>true</code>と、条件が間違っていることを意味する<code>false</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">bool</span> correct = <span class="kw">true</span> ;
+    <span class="dt">bool</span> wrong = <span class="kw">false</span> ;
+}</code></pre></div>
+<p>bool型にこれ以外の値は存在しない。</p>
+<p>bool型の値を正しく出力するには、std::boolalphaを出力する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">true</span> &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt;<span class="kw">false</span> ;
+}</code></pre></div>
+<pre><code>true
+false</code></pre>
+<p>std::boolalpha自体は何も出力をしない。一度std::boolalphaを出力すると、それ以降のbool値がtrue/falseで出力されるようになる。</p>
+<p>元に戻すにはstd::noboolalphaを使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">true</span> &lt;&lt; <span class="kw">false</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>noboolalpha ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">true</span> &lt;&lt; <span class="kw">false</span> ;
+}</code></pre></div>
+<p>以下のように出力される。</p>
+<pre><code>truefalse10</code></pre>
+<p>すでに学んだ比較演算子は、正しい場合に<code>bool</code>型の値<code>true</code>を、間違っている場合に<code>bool</code>型の値<code>false</code>を返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// true</span>
+    <span class="dt">bool</span> a = <span class="dv">1</span> == <span class="dv">1</span> ;
+    <span class="co">// false</span>
+    <span class="dt">bool</span> b = <span class="dv">1</span> != <span class="dv">1</span> ;
+
+    <span class="co">// true</span>
+    <span class="dt">bool</span> c = <span class="dv">1</span> &lt; <span class="dv">2</span> ;
+    <span class="co">// false</span>
+    <span class="dt">bool</span> d = <span class="dv">1</span> &gt; <span class="dv">2</span> ;
+}</code></pre></div>
+<p><code>if文</code>の中の<code>条件</code>はbool型の値を取る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">if</span> ( <span class="kw">true</span> )
+    <span class="co">// 実行される</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Vim is the best text editor.</span><span class="sc">\n</span><span class="st">&quot;</span> ; }
+
+    <span class="cf">if</span> ( <span class="kw">false</span> )
+    <span class="co">// 実行されない</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Vim is hard to learn.</span><span class="sc">\n</span><span class="st">&quot;</span> ; }
+}</code></pre></div>
+<h2 id="bool型の演算">bool型の演算</h2>
+<p>bool型には様々な演算が用意されている。</p>
+<h3 id="論理否定-operator">論理否定: operator !</h3>
+<p>&quot;!a&quot;はaが<code>true</code>の場合<code>false</code>に、<code>false</code>の場合<code>true</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+
+    <span class="co">// false</span>
+    <span class="bu">std::</span>cout &lt;&lt; !<span class="kw">true</span> &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// true</span>
+    <span class="bu">std::</span>cout &lt;&lt; !<span class="kw">false</span> &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>論理否定演算子を使うと、falseのときのみ実行されてほしい条件分岐が書きやすくなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// ロケットが発射可能かどうかを返す関数</span>
+<span class="dt">bool</span> is_rocket_ready_to_launch()
+{
+    <span class="co">// まだだよ</span>
+    <span class="cf">return</span> <span class="kw">false</span> ;
+}
+
+<span class="dt">int</span> main()
+{
+
+    <span class="co">// ロケットが発射可能ではないときに実行される</span>
+    <span class="cf">if</span> ( !is_rocket_ready_to_launch() )
+    {   <span class="co">// もうしばらくそのままでお待ちください</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Standby...</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+}</code></pre></div>
+<p>この例では、ロケットが発射可能でない場合のみ、待つようにアナウンスする。</p>
+<p>同じように、trueのときに実行されてほしくない条件分岐も書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// ロケットが発射可能かどうかを返す関数</span>
+<span class="dt">bool</span> is_rocket_ready_to_launch()
+{
+    <span class="co">// もういいよ</span>
+    <span class="cf">return</span> <span class="kw">true</span> ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// ロケットが発射可能なときに実行される</span>
+    <span class="cf">if</span> ( !is_rocket_ready_to_launch() )
+    {   <span class="co">// カウントダウン</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;3...2...1...Hallelujah!</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+
+}</code></pre></div>
+<p>この2つの例では、ロケットの状態が実行すべき条件ではないので、正しく何も出力されない。</p>
+<h3 id="論理積-operator">論理積: operator &amp;</h3>
+<p>&quot;a &amp;&amp; b&quot;は<code>a</code>と<code>b</code>がともに<code>true</code>のときに<code>true</code>となる。それ以外の場合は<code>false</code>となる。これを論理積という。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+    <span class="kw">auto</span> print = []( <span class="kw">auto</span> b )
+    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    print( <span class="kw">false</span> &amp;&amp; <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">false</span> &amp;&amp; <span class="kw">true</span>  ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  &amp;&amp; <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  &amp;&amp; <span class="kw">true</span>  ) ; <span class="co">// true</span>
+}</code></pre></div>
+<p>表にまとめると以下のようになる。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">式</th>
+<th align="left">結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">false &amp;&amp; false</td>
+<td align="left">false</td>
+</tr>
+<tr class="even">
+<td align="left">false &amp;&amp; true</td>
+<td align="left">false</td>
+</tr>
+<tr class="odd">
+<td align="left">true &amp;&amp; false</td>
+<td align="left">false</td>
+</tr>
+<tr class="even">
+<td align="left">true &amp;&amp; true</td>
+<td align="left">true</td>
 </tr>
 </tbody>
 </table>
