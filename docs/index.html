@@ -134,9 +134,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#bool型">bool型</a></li>
 <li><a href="#bool型の演算">bool型の演算</a><ul>
 <li><a href="#論理否定-operator">論理否定: operator !</a></li>
-<li><a href="#論理積-operator">論理積: operator &amp;</a></li>
+<li><a href="#同値比較-operator">同値比較: operator ==, !=</a></li>
+<li><a href="#論理積-operator">論理積: operator &amp;&amp;</a></li>
+<li><a href="#論理和-operator">論理和: operator ||</a></li>
+<li><a href="#短絡評価">短絡評価</a></li>
 </ul></li>
+<li><a href="#boolの変換">boolの変換</a></li>
 </ul></li>
+<li><a href="#デバッグ-コンパイル警告メッセージ">デバッグ: コンパイル警告メッセージ</a></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -1690,19 +1695,19 @@ false</code></pre>
     <span class="co">// false</span>
     <span class="dt">bool</span> d = <span class="dv">1</span> &gt; <span class="dv">2</span> ;
 }</code></pre></div>
-<p><code>if文</code>の中の<code>条件</code>はbool型の値を取る。</p>
+<p>先に説明した<code>if文</code>の<code>条件</code>が「正しい」というのは<code>true</code>のことで、「間違っている」というのは<code>false</code>のことだ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
+    <span class="co">// 出力される</span>
     <span class="cf">if</span> ( <span class="kw">true</span> )
-    <span class="co">// 実行される</span>
-    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Vim is the best text editor.</span><span class="sc">\n</span><span class="st">&quot;</span> ; }
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;true</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 
+    <span class="co">// 出力されない。</span>
     <span class="cf">if</span> ( <span class="kw">false</span> )
-    <span class="co">// 実行されない</span>
-    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Vim is hard to learn.</span><span class="sc">\n</span><span class="st">&quot;</span> ; }
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;false`n&quot;</span>s ; 
 }</code></pre></div>
 <h2 id="bool型の演算">bool型の演算</h2>
-<p>bool型には様々な演算が用意されている。</p>
+<p>bool型にはいくつかの演算が用意されている。</p>
 <h3 id="論理否定-operator">論理否定: operator !</h3>
 <p>&quot;!a&quot;はaが<code>true</code>の場合<code>false</code>に、<code>false</code>の場合<code>true</code>になる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -1751,19 +1756,33 @@ false</code></pre>
 
 }</code></pre></div>
 <p>この2つの例では、ロケットの状態が実行すべき条件ではないので、正しく何も出力されない。</p>
-<h3 id="論理積-operator">論理積: operator &amp;</h3>
-<p>&quot;a &amp;&amp; b&quot;は<code>a</code>と<code>b</code>がともに<code>true</code>のときに<code>true</code>となる。それ以外の場合は<code>false</code>となる。これを論理積という。</p>
+<h3 id="同値比較-operator">同値比較: operator ==, !=</h3>
+<p>bool型の値の同値比較はわかりやすい。<code>true</code>は<code>true</code>と等しく、<code>false</code>は<code>false</code>と等しく、<code>true</code>と<code>false</code>は等しくない。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
-    <span class="kw">auto</span> print = []( <span class="kw">auto</span> b )
-    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+    <span class="kw">auto</span> print = [](<span class="kw">auto</span> b)
+    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s } ;
 
-    print( <span class="kw">false</span> &amp;&amp; <span class="kw">false</span> ) ; <span class="co">// false</span>
-    print( <span class="kw">false</span> &amp;&amp; <span class="kw">true</span>  ) ; <span class="co">// false</span>
-    print( <span class="kw">true</span>  &amp;&amp; <span class="kw">false</span> ) ; <span class="co">// false</span>
-    print( <span class="kw">true</span>  &amp;&amp; <span class="kw">true</span>  ) ; <span class="co">// true</span>
+    print( <span class="kw">true</span>  == <span class="kw">true</span>  ) ; <span class="co">// true</span>
+    print( <span class="kw">true</span>  == <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">false</span> == <span class="kw">true</span>  ) ; <span class="co">// false</span>
+    print( <span class="kw">false</span> == <span class="kw">false</span> ) ; <span class="co">// true</span>
+
+    print( <span class="kw">true</span>  != <span class="kw">true</span>  ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  != <span class="kw">false</span> ) ; <span class="co">// true</span>
+    print( <span class="kw">false</span> != <span class="kw">true</span>  ) ; <span class="co">// true</span>
+    print( <span class="kw">false</span> != <span class="kw">false</span> ) ; <span class="co">// false</span>
 }</code></pre></div>
+<p>比較演算子の結果はbool値になるということを覚えてるだろうか。&quot;1 &lt; 2&quot;は<code>true</code>になり、&quot;1 &gt; 2&quot;はfalseになる。</p>
+<p>bool値同士も同値比較ができるということは、&quot;(1 &lt; 2) == true&quot;のように書くことも可能だということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">bool</span> b = (<span class="dv">1</span> &lt; <span class="dv">2</span>) == <span class="kw">true</span> ;
+}</code></pre></div>
+<p>&quot;(1&lt;2)&quot;はtrueなので、&quot;(1&lt;2)==true&quot;は&quot;true==true&quot;と同じ意味になる。この結果はもちろん&quot;true&quot;だ。</p>
+<h3 id="論理積-operator">論理積: operator &amp;&amp;</h3>
+<p>&quot;a &amp;&amp; b&quot;は<code>a</code>と<code>b</code>がともに<code>true</code>のときに<code>true</code>となる。それ以外の場合は<code>false</code>となる。これを論理積という。</p>
 <p>表にまとめると以下のようになる。</p>
 <table>
 <thead>
@@ -1791,6 +1810,248 @@ false</code></pre>
 </tr>
 </tbody>
 </table>
+<p>早速確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+    <span class="kw">auto</span> print = []( <span class="kw">auto</span> b )
+    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    print( <span class="kw">false</span> &amp;&amp; <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">false</span> &amp;&amp; <span class="kw">true</span>  ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  &amp;&amp; <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  &amp;&amp; <span class="kw">true</span>  ) ; <span class="co">// true</span>
+}</code></pre></div>
+<p>論理積は、「AかつB」を表現するのに使える。</p>
+<p>例えば、人間の体温が平熱かどうかを判断するプログラムを書くとする。36.1℃以上、37.2℃以下を平熱とすると、if文を使って以下のように書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 体温</span>
+    <span class="dt">double</span> temperature = <span class="fl">36.6</span> ;
+
+    <span class="co">// 36.1度以上</span>
+    <span class="cf">if</span> ( temperature &gt;= <span class="fl">36.1</span> )
+        <span class="cf">if</span> ( temperature &lt;= <span class="fl">37.2</span> )
+        { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Good.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+        <span class="cf">else</span>
+        { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Bad.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+}</code></pre></div>
+<p>このコードは、<code>operator &amp;&amp;</code>を使えば簡潔に書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> temperature = <span class="fl">36.6</span> ;
+
+    <span class="cf">if</span> ( ( temperature &gt;= <span class="fl">36.1</span> ) &amp;&amp; ( temperature &lt;= <span class="fl">37.2</span> ) )
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Good.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+    <span class="cf">else</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Bad.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+}</code></pre></div>
+<h3 id="論理和-operator">論理和: operator ||</h3>
+<p>&quot;a || b&quot;は<code>a</code>と<code>b</code>がともにfalseのときに<code>false</code>となる。それ以外の場合は<code>true</code>となる。これを論理和という。</p>
+<p>表にまとめると以下のようになる。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">式</th>
+<th align="left">結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">false || false</td>
+<td align="left">false</td>
+</tr>
+<tr class="even">
+<td align="left">false || true</td>
+<td align="left">true</td>
+</tr>
+<tr class="odd">
+<td align="left">true || false</td>
+<td align="left">true</td>
+</tr>
+<tr class="even">
+<td align="left">true || true</td>
+<td align="left">true</td>
+</tr>
+</tbody>
+</table>
+<p>早速確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+    <span class="kw">auto</span> print = []( <span class="kw">auto</span> b )
+    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    print( <span class="kw">false</span> || <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">false</span> || <span class="kw">true</span>  ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  || <span class="kw">false</span> ) ; <span class="co">// false</span>
+    print( <span class="kw">true</span>  || <span class="kw">true</span>  ) ; <span class="co">// true</span>
+}</code></pre></div>
+<p>論理和は、「AもしくはB」を表現するのに使える。</p>
+<p>例えば、ある遊園地の乗り物には安全上の理由で身長が1.1m未満、あるいは1.9mを超える人は乗れないものとする。この場合、乗り物に乗れる身長かどうかを確かめるコードは、<code>if文</code>を使うと以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> height = <span class="fl">1.3</span> ;
+
+    <span class="cf">if</span> ( height &lt; <span class="fl">1.1</span> )
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;No.&quot;</span>s ; }
+    <span class="cf">else</span> <span class="cf">if</span> ( height &gt; <span class="fl">1.9</span> )
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;No.&quot;</span>s ; }
+    <span class="cf">else</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Yes.&quot;</span>s ; }
+}</code></pre></div>
+<p>論理和を使うと以下のように簡潔に書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> height = <span class="fl">1.3</span> ;
+
+    <span class="cf">if</span> ( ( height &lt; <span class="fl">1.1</span> ) || ( height &gt; <span class="fl">1.9</span> ) )
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;No.&quot;</span>s ; }
+    <span class="cf">else</span>
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Yes.&quot;</span>s ; }
+}</code></pre></div>
+<h3 id="短絡評価">短絡評価</h3>
+<p>論理積と論理和は短絡評価と呼ばれる特殊な評価が行われる。これは、左から右に最小限の評価をするという意味だ。</p>
+<p>論理積では、&quot;a &amp;&amp; b&quot;とある場合、<code>a</code>と<code>b</code>が共に<code>true</code>である場合のみ、結果は<code>true</code>になる。もし、<code>a</code>が<code>false</code>であった場合、'b'の結果如何にかかわらず結果は<code>false</code>となるので、<code>b</code>は評価されない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = []()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;a</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">return</span> <span class="kw">false</span> ;
+    } ;
+    <span class="kw">auto</span> b = []()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;b</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">return</span> <span class="kw">true</span> ;
+    } ;
+
+    <span class="dt">bool</span> c = a() &amp;&amp; b() ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha &lt;&lt; c ; 
+}</code></pre></div>
+<p>これを実行すると以下のようになる。</p>
+<pre><code>a
+false</code></pre>
+<p>関数呼び出し&quot;a()&quot;の結果は<code>false</code>なので、&quot;b()&quot;は評価されない。評価されないということは関数呼び出しが行われず、当然標準出力も行われない。</p>
+<p>同様に、論理和では、&quot;a || b&quot;とある場合、<code>a</code>と'b'のどちらか片方でも<code>true</code>であれば、結果は<code>true</code>となる。もし、<code>a</code>が<code>true</code>であった場合、<code>b</code>の結果如何にかかわらず結果は<code>true</code>となるので、<code>b</code>は評価されない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = []()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;a</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">return</span> <span class="kw">true</span> ;
+    } ;
+    <span class="kw">auto</span> b = []()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;b</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">return</span> <span class="kw">false</span> ;
+    } ;
+
+    <span class="dt">bool</span> c = a() &amp;&amp; b() ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha &lt;&lt; c ; 
+}</code></pre></div>
+<p>結果、</p>
+<pre><code>a
+true</code></pre>
+<p>&quot;b()&quot;が評価されていないことがわかる。</p>
+<h2 id="boolの変換">boolの変換</h2>
+<p><code>bool</code>型の値と演算はこれで全部だ。値は<code>true</code>/<code>false</code>の2つのみ。演算は==, !=, !と&amp;&amp;と||の5つだけだ。</p>
+<p>読者の中には納得の行かないものもいるだろう。ちょっとまってもらいたい。boolの大小比較できないのだろうか。boolの四則演算はできないのか。&quot;if(123)&quot;などと書けてしまうのはなんなのか。</p>
+<p>好奇心旺盛な読者は本書の解説を待たずしてすでに自分で色々とコードを書いて試してしまっていることだろう。</p>
+<p>boolの大小比較はどうなるのだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+
+    <span class="dt">bool</span> b = <span class="kw">true</span> &lt; <span class="kw">false</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; b ;
+}</code></pre></div>
+<p>このコードを実行すると、出力は&quot;false&quot;だ。&quot;true &lt; false&quot;の結果が&quot;false&quot;だということは、<code>true</code>は<code>false</code>より大きいということになる</p>
+<p>四則演算はどうか？</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> print = [](<span class="kw">auto</span> x)
+    { <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    print( <span class="kw">true</span>  + <span class="kw">true</span>  ) ;
+    print( <span class="kw">true</span>  + <span class="kw">false</span> ) ;
+    print( <span class="kw">false</span> + <span class="kw">true</span>  ) ;
+    print( <span class="kw">false</span> + <span class="kw">false</span> ) ;
+}</code></pre></div>
+<p>結果、</p>
+<pre><code>2
+1
+1
+0</code></pre>
+<p>不思議な結果だ。&quot;true+true&quot;は&quot;2&quot;、&quot;true+false&quot;は&quot;1&quot;、&quot;false+false&quot;は&quot;0&quot;。これは<code>true</code>が1で<code>false</code>が0ならば納得の行く結果だ。大小比較の結果としても矛盾していない。</p>
+<p>すでに見たように、std::boolalphaを出力していない状態でboolを出力すると<code>true</code>が1、<code>false</code>が0となる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">true</span> &lt;&lt; <span class="kw">false</span> ;
+}</code></pre></div>
+<p>結果、</p>
+<pre><code>10</code></pre>
+<p>これは<code>bool型</code>と<code>整数型</code>が変換されているのだ。</p>
+<p>ことなる型の値が変換されるというのは、すでに例がある。<code>整数型</code>と<code>浮動小数点数型</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 3</span>
+    <span class="dt">int</span> i = <span class="fl">3.14</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; i &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// 123.0</span>
+    <span class="dt">double</span> d = <span class="dv">123</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; d &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p><code>浮動小数点数型</code>は<code>整数型</code>に変換できる。その際に小数部は切り捨てられる。<code>整数型</code>は<code>浮動小数点数型</code>に変換できる。小数部はない。</p>
+<p>これと同じように、<code>bool型</code>も<code>整数型</code>と変換ができる。</p>
+<p>bool型の<code>true</code>を<code>整数型</code>に変換すると1になる。<code>false</code>は0になる。</p>
+<pre><code>int main()
+{
+    // 1
+    int True = true ;
+    // 0
+    int False = false ;
+}</code></pre>
+<p>同様に、<code>整数型</code>のゼロを<code>bool型</code>に変換すると<code>false</code>になる。非ゼロは<code>true</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// false</span>
+    <span class="dt">bool</span> Zero = <span class="dv">0</span> ;
+
+    <span class="co">// すべてtrue</span>
+    <span class="dt">bool</span> One = <span class="dv">1</span> ;
+    <span class="dt">bool</span> minus_one = <span class="dv">-1</span> ;
+    <span class="dt">bool</span> OneTwoThree = <span class="dv">123</span> ;  
+}</code></pre></div>
+<p>したがって、&quot;if (0)&quot;は&quot;if (false)&quot;と等しく、&quot;if (1)&quot;や&quot;if(-1)&quot;など非ゼロな値は&quot;if (true)&quot;と等しい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 出力されない</span>
+    <span class="cf">if</span> ( <span class="dv">0</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;No output.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// 出力される</span>
+    <span class="cf">if</span> ( <span class="dv">1</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Output.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>大小比較は単にboolを整数に変換した結果を比較しているだけだ。&quot;true &lt; false&quot;は&quot;1 &lt; 0&quot;と書くのと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
+
+    <span class="co">// 1 &lt; 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; (<span class="kw">true</span> &lt; <span class="kw">false</span>) ;
+}</code></pre></div>
+<p>同様に四則演算もbool型を整数型に変換した上で計算をしているだけだ。&quot;true + true&quot;は&quot;1 + 1&quot;と書くのと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 1 + 1</span>
+    <span class="bu">std::</span>cout &lt;&lt; (<span class="kw">true</span> + <span class="kw">true</span>) ;
+}</code></pre></div>
+<p>C++では、<code>bool型</code>と<code>整数型</code>の変換は暗黙に行われてしまうので注意が必要だ。</p>
+<h1 id="デバッグ-コンパイル警告メッセージ">デバッグ: コンパイル警告メッセージ</h1>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
