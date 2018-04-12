@@ -45,6 +45,7 @@ code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Ann
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
   <style>
   pre > code
   {
@@ -142,6 +143,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#boolの変換">boolの変換</a></li>
 </ul></li>
 <li><a href="#デバッグ-コンパイル警告メッセージ">デバッグ: コンパイル警告メッセージ</a></li>
+<li><a href="#最近体重が気になるあなたのための標準入力">最近体重が気になるあなたのための標準入力</a><ul>
+<li><a href="#これまでのおさらい">これまでのおさらい</a></li>
+<li><a href="#標準入力">標準入力</a></li>
+<li><a href="#入力エラー">入力エラー</a></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -2052,6 +2058,293 @@ true</code></pre>
 }</code></pre></div>
 <p>C++では、<code>bool型</code>と<code>整数型</code>の変換は暗黙に行われてしまうので注意が必要だ。</p>
 <h1 id="デバッグ-コンパイル警告メッセージ">デバッグ: コンパイル警告メッセージ</h1>
+<p>やれやれ、条件分岐は難しかった。この辺でもう一度一休みして、息抜きとしてデバッグの話をしよう。今回はコンパイラーの警告メッセージ(warning messages)についてだ。</p>
+<p>コンパイラーはソースコードに文法エラーや意味エラーがあると、エラーメッセージを出すことはすでに学んだ。</p>
+<p>コンパイラーがエラーメッセージを出さなかったとき、コンパイラーはソースコードには文法エラーや意味エラーを発見できず、コンパイラーは意味のあるプログラムを生成することができたということを意味する。しかし、コンパイルが通って実行可能なプログラムが生成できたからと行って、プログラムにバグがないことは保証できない。</p>
+<p>たとえば、変数xとyを足して出力するプログラムを考える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">1</span> ;
+    <span class="kw">auto</span> y = <span class="dv">2</span> ;
+
+    <span class="bu">std::</span>cout &lt;&lt; x + x ;
+}</code></pre></div>
+<p>このプログラムにはバグがある。プログラムの仕様は変数xとyを足すはずだったが変数xとxを足してしまっている。</p>
+<p>コンパイラーはこのソースコードをコンパイルエラーにはしない。なぜならば上のコードは文法的に正しく、意味的にも正しいコードだからだ。</p>
+<p>警告メッセージはこのような疑わしいコードについて、エラーとまでは行かないまでも、文字通り警告を出す機能だ。例えば上のコードをGCCでコンパイルすると以下のような警告メッセージを出す</p>
+<pre><code>$ make
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+main.cpp: In function ‘int main()’:
+main.cpp:5:10: warning: unused variable ‘y’ [-Wunused-variable]
+     auto y = 2 ;
+          ^</code></pre>
+<p>すでに説明したように、GCCのメッセージは</p>
+<pre><code>ソースファイル名:行番号:列番号:メッセージの種類:メッセージの内容</code></pre>
+<p>というフォーマットを取る。</p>
+<p>このメッセージのフォーマットに照らし合わせると、このメッセージはソースファイルmain.cppの5行目の10列目について何かを警告している。警告はメッセージの種類として<code>warning</code>が使われる。</p>
+<p>警告メッセージの内容は、「未使用の変数'y' [-Wunused-variable]」だ。コード中で'y'という名前の変数を宣言しているにもかかわらず、使っている場所がない。使わない変数を宣言するのはバグの可能性が高いので警告しているのだ。</p>
+<p>[-Wunused-variable]というのはGCCに与えるこの警告を有効にするためのオプション名だ。GCCに-Wunused-variableというオプションを与えると、未使用の変数を警告するようになる。</p>
+<pre><code>$ g++ -Wunused-variable その他のオプション</code></pre>
+<p>今回は-Wallというすべての警告を有効にするオプションを使っているので、このオプションを使う必要はない。</p>
+<p>もう一つ例を出そう。以下のソースコードは変数xの値が123と等しいかどうかを調べるものだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// xの値は0</span>
+    <span class="kw">auto</span> x = <span class="dv">0</span> ;
+
+    <span class="co">// xが123と等しいかどうか比較する</span>
+    <span class="cf">if</span> ( x = <span class="dv">123</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;x is 123.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">else</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;x is NOT 123.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>これを実行すると、&quot;x is 123.&quot;と出力される。しかし、変数xの値は0のはずだ。なぜか0と123は等しいと判断されてしまった。一体どういうことだろう。</p>
+<p>この謎は警告メッセージを読むと解ける。</p>
+<pre><code>g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+main.cpp: In function ‘int main()’:
+main.cpp:5:12: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+     if ( x = 123 )
+          ~~^~~~~</code></pre>
+<p>main.cppの5行目の12列目、「真偽値として使われている代入は括弧で囲むべき」とある。これは一体どういうことか。よく見てみると、演算子が同値比較につかう==ではなく、=だ。=は代入演算子だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">0</span> ;
+
+    <span class="co">// 代入</span>
+    <span class="co">// xの値は1</span>
+    x = <span class="dv">1</span> ;
+
+    <span class="co">// 同値比較</span>
+    x == <span class="dv">1</span> ;
+}</code></pre></div>
+<p>実は<code>if文</code>の<code>条件</code>にはあらゆる<code>式</code>を書くことができる。代入というのは、実は<code>代入式</code>という式なので、<code>if文</code>の中にも書くことができる。その場合、式の結果の値は代入される変数の値になる。</p>
+<p>そして思い出してほしいのは、整数型はbool型に変換されるということだ。0は<code>false</code>、非ゼロは<code>true</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">0</span> ;
+    <span class="co">// 1はtrue</span>
+    <span class="dt">bool</span> b1 = x = <span class="dv">1</span> ;
+    <span class="cf">if</span> ( x = <span class="dv">1</span> ) ;
+
+    <span class="co">// 0はfalse</span>
+    <span class="dt">bool</span> b0 = x = <span class="dv">0</span> ;
+    <span class="cf">if</span> ( x = <span class="dv">0</span> ) ;
+}</code></pre></div>
+<p>つまり、&quot;if(x=1)&quot;というのは、&quot;if(1)&quot;と書くのと同じで、これは最終的に、&quot;if(true)&quot;と同じ意味になる。</p>
+<p>警告メッセージの「括弧で囲むべき」というのは、括弧で囲んだ場合、この警告メッセージはでなくなるからだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> x = <span class="dv">0</span> ;
+
+    <span class="cf">if</span> ( (x = <span class="dv">0</span>) )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;x is 123.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">else</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;x is NOT 123.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>このコードをコンパイルしても警告メッセージはでない。</p>
+<p>わざわざ括弧で囲むということは、ちゃんと代入を意図して使っていることがわかっていると意思表示したことになり、結果として警告メッセージはなくなる。</p>
+<p>この警告メッセージ単体を有効にするオプションは<code>-Wparentheses</code>だ。</p>
+<p>警告メッセージは万能ではない。時には全く問題ないコードに対して警告メッセージがでたりする。これは仕方がないことだ。というのもコンパイラーはソースコード中に表現されていない、人間の脳内にある意図を読むことはできないからだ。ただし、警告メッセージには一通り目を通して、それが問題ない誤検知であるかどうかを確認することは重要だ。</p>
+<h1 id="最近体重が気になるあなたのための標準入力">最近体重が気になるあなたのための標準入力</h1>
+<h2 id="これまでのおさらい">これまでのおさらい</h2>
+<p>ここまで学んできた範囲でも、かなりのプログラムが書けるようになってきた。試しにちょっとプログラムを書いてみよう。</p>
+<p>最近肥満が気になる読者は、肥満度を把握するためにBMI(Body Mass Index)を計算して出力するプログラムを書くことにした。</p>
+<p>BMIの計算は以下の通り。</p>
+<p><span class="math display">\[
+BMI = \frac{体重_{kg}}{身長^2_{m}}
+\]</span></p>
+<p>本書をここまで読み進めた読者ならば、このようなプログラムは簡単に書けるだろう。計算は小数点以下の値を扱う必要があるために、変数は浮動小数点数型(double)にする。掛け算は<code>operator *</code>で、割り算は<code>operator /</code>だ。出力にはstd::coutを使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 身長1.63m</span>
+    <span class="dt">double</span> height = <span class="fl">1.63</span> ; 
+    <span class="co">// 体重73kg</span>
+    <span class="dt">double</span> mass = <span class="fl">73.0</span> ;
+
+    <span class="co">// BMIの計算</span>
+    dublle bmi = mass / (height*height) ;
+
+    <span class="co">// BMIの出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>結果は&quot;27.4756&quot;となった。これだけでは太っているのか痩せているのかよくわからない。調べてみると、BMIの数値と肥満との関係は以下の表のとおりになるそうだ。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">BMI</th>
+<th align="left">状態</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">18.5未満</td>
+<td align="left">痩せすぎ(Underweight)</td>
+</tr>
+<tr class="even">
+<td align="left">18.5以上、25未満</td>
+<td align="left">普通(Normal)</td>
+</tr>
+<tr class="odd">
+<td align="left">25以上、30未満</td>
+<td align="left">太り気味(Overweight)</td>
+</tr>
+<tr class="even">
+<td align="left">30以上</td>
+<td align="left">肥満(Obese)</td>
+</tr>
+</tbody>
+</table>
+<p>では早速、この表のようにBMIから肥満状態も出力してくれるように、プログラムを書き換えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 身長1.6m</span>
+    <span class="dt">double</span> height = <span class="fl">1.63</span> ; 
+    <span class="co">// 体重73kg</span>
+    <span class="dt">double</span> mass = <span class="fl">73.0</span> ;
+
+    <span class="co">// BMIの計算</span>
+    <span class="dt">double</span> bmi = mass / (height*height) ;
+
+    <span class="co">// BMIの出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// 状態の判定をする関数</span>
+    <span class="kw">auto</span> status = []( <span class="dt">double</span> bmi )
+    {
+        <span class="cf">if</span> ( bmi &lt; <span class="fl">18.5</span> )
+            <span class="cf">return</span> <span class="st">&quot;Underweight.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">else</span> <span class="cf">if</span> ( bmi &lt; <span class="fl">25.0</span> )
+            <span class="cf">return</span> <span class="st">&quot;Nomarl.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">else</span> <span class="cf">if</span> ( bmi &lt; <span class="fl">30.0</span> )
+            <span class="cf">return</span> <span class="st">&quot;Overweight.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">else</span>
+            <span class="cf">return</span> <span class="st">&quot;Obese.&quot;</span>s ;
+    } ;
+
+    <span class="co">// 状態の出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; status(bmi) ;
+}</code></pre></div>
+<p>ここまで問題なく読むことができただろうか。ここまでのコードはすべて、本書をはじめからから読めば理解できる機能しか使っていない。わからない場合、この先に進む前に本書をもう一度はじめから読みなすべきだろう。</p>
+<h2 id="標準入力">標準入力</h2>
+<p>上のプログラムには実用にする上で一つ問題がある。身長と体重の値を変えたい場合、ソースコードを書き換えてコンパイルしなければならないのだ。</p>
+<p>例えば読者の身長が1.8mで体重が80kgの場合、以下のように書き換えなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 身長1.63m</span>
+    <span class="dt">double</span> height = <span class="fl">1.80</span> ; 
+    <span class="co">// 体重73kg</span>
+    <span class="dt">double</span> mass = <span class="fl">80.0</span> ;
+
+    <span class="co">// BMIの計算</span>
+    dublle bmi = mass / (height*height) ;
+
+    <span class="co">// BMIの出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>すると今度は身長が1.48mで体重が48kgの人がやってきて私のBMIも計測しろとうるさい。しかも昨日と今日で体重が変わったからどちらも計測したいと言い出す始末。</p>
+<p>こういうとき、プログラムのコンパイル時ではなく、実行時に値を入力できたならば、いちいちプログラムをコンパイルし直す必要がなくなる。</p>
+<p>入力には<code>std::cin</code>を使う。<code>std::cout</code>は標準出力を扱うのに対し、<code>std::cin</code>は標準入力を扱う。<code>std::cout</code>が<code>operator &lt;&lt;</code>を使って値を出力したのに対し、<code>std::cin</code>は<code>opeartor &gt;&gt;</code>を使って値を変数に入れる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 入力を受け取るための変数</span>
+    <span class="bu">std::</span>string x{} ;
+    <span class="co">// 変数に入力を受け取る</span>
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="co">// 入力された値を出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>実行結果、</p>
+<pre><code>$ make run
+hello
+hello</code></pre>
+<p><code>std::cin</code>は入力された文字列を変数に入れる。入力は空白文字や改行で区切られる。そのため、空白で区切られた文字列を渡すと、以下のようになる。</p>
+<pre><code>$ make run
+hello world
+hello</code></pre>
+<p>入力は複数取ることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>string x{} ;
+    <span class="bu">std::</span>string y{} ;
+    <span class="bu">std::</span>cin &gt;&gt;  x &gt;&gt; y ;
+    <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; y ;
+}</code></pre></div>
+<p>実行結果、</p>
+<pre><code>$ make run
+hello world
+helloworld</code></pre>
+<p>空白文字は文字列の区切り文字として認識されるので変数x, yには入らない。</p>
+<p><code>std::cin</code>では文字列の他にも整数や浮動小数点数、boolを入力として得ることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 整数</span>
+    <span class="dt">int</span> i{} ;
+    <span class="bu">std::</span>cin &gt;&gt; i ;
+    <span class="co">// 浮動小数点数</span>
+    <span class="dt">double</span> d{} ;
+    <span class="bu">std::</span>cin &gt;&gt; d ;
+}</code></pre></div>
+<p>実行結果、</p>
+<pre><code>$ make run
+123 1.23</code></pre>
+<p>数値はデフォルトで10進数として扱われる。</p>
+<p>boolの入力には注意が必要だ。普通に書くと、ゼロが<code>false</code>, 非ゼロが<code>true</code>として扱われる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">bool</span> b{} ;
+    <span class="bu">std::</span>cin &gt;&gt; b ;
+
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>実行結果、</p>
+<pre><code>$ make run
+1
+true
+$ make run
+0
+false
+$ make run
+123
+true
+$ make run
+-1
+true</code></pre>
+<p>&quot;true&quot;, &quot;false&quot;という文字列で<code>true</code>, <code>false</code>の入力をしたい場合、<code>std::cin</code>に<code>std::boolalpha</code>を「入力」させる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 整数</span>
+    <span class="dt">bool</span> b{} ;
+    <span class="bu">std::</span>cin &gt;&gt; <span class="bu">std::</span>boolalpha &gt;&gt; b ;
+
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha &lt;&lt; b ;
+}</code></pre></div>
+<p>実行結果</p>
+<pre><code>$ make run
+true
+true
+$ make run
+false
+false</code></pre>
+<p>std::boolalphaを入出力するというのは、実際には何も入出力しないので奇妙に見えるが、そういう設計になっているので仕方がない。</p>
+<p>では標準入力を学んだので、さっそくBMIを計算するプログラムを標準入力に対応させよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 身長の入力</span>
+    <span class="dt">double</span> height{} ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;height(m)&gt;&quot;</span> ;
+    <span class="bu">std::</span>cin &gt;&gt; height ;
+
+    <span class="co">// 体重の入力</span>
+    <span class="dt">double</span> mass{} ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;mass(kg)&gt;&quot;</span> ;
+    <span class="bu">std::</span>cin &gt;&gt; mass ;
+
+    <span class="dt">double</span> bmi = mass / (height*height) ;
+
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>上出来だ。</p>
+<h2 id="入力エラー">入力エラー</h2>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
