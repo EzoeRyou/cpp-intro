@@ -146,7 +146,24 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#最近体重が気になるあなたのための標準入力">最近体重が気になるあなたのための標準入力</a><ul>
 <li><a href="#これまでのおさらい">これまでのおさらい</a></li>
 <li><a href="#標準入力">標準入力</a></li>
-<li><a href="#入力エラー">入力エラー</a></li>
+<li><a href="#リダイレクト">リダイレクト</a></li>
+<li><a href="#パイプ">パイプ</a></li>
+<li><a href="#プログラムの組み合わせ">プログラムの組み合わせ</a></li>
+</ul></li>
+<li><a href="#ループ">ループ</a><ul>
+<li><a href="#これまでのおさらい-1">これまでのおさらい</a></li>
+<li><a href="#goto文">goto文</a><ul>
+<li><a href="#無限ループ">無限ループ</a></li>
+<li><a href="#終了条件付きループ">終了条件付きループ</a></li>
+<li><a href="#インデックスループ">インデックスループ</a></li>
+</ul></li>
+<li><a href="#while文">while文</a><ul>
+<li><a href="#無限ループ-1">無限ループ</a></li>
+</ul></li>
+<li><a href="#終了条件付きループ-1">終了条件付きループ</a><ul>
+<li><a href="#インデックスループ-1">インデックスループ</a></li>
+</ul></li>
+<li><a href="#for文">for文</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -2257,6 +2274,7 @@ BMI = \frac{体重_{kg}}{身長^2_{m}}
 <pre><code>$ make run
 hello
 hello</code></pre>
+<p>標準入力はデフォルトでは、プログラムを実行したユーザーがターミナルから入力する。上の実行結果の2行目は、ユーザーの入力だ。</p>
 <p><code>std::cin</code>は入力された文字列を変数に入れる。入力は空白文字や改行で区切られる。そのため、空白で区切られた文字列を渡すと、以下のようになる。</p>
 <pre><code>$ make run
 hello world
@@ -2344,7 +2362,868 @@ false</code></pre>
     <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 }</code></pre></div>
 <p>上出来だ。</p>
-<h2 id="入力エラー">入力エラー</h2>
+<h2 id="リダイレクト">リダイレクト</h2>
+<p>標準入出力が扱えるようになれば、もう自分の好きなプログラムを書くことができる。プログラムというのは結局、入力を得て、処理して、出力するだけのものだからだ。入力はテキストだったりグラフィックだったり何らかの特殊なデバイスだったりするが、基本は変わらない。</p>
+<p>たとえば読者はまだC++でファイルを読み書きする方法を知らないが、標準入出力さえ使えれば、ファイルの読み書きはリダイレクトを使うだけでできるのだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span> ;
+}</code></pre></div>
+<p>これは&quot;hello&quot;と標準出力するだけの簡単なプログラムだ。このプログラムをコンパイルしたプログラム名を<code>program</code>としよう。標準出力の出力先はデフォルトで、ユーザーのターミナルになる。</p>
+<pre><code>$ ./program
+hello</code></pre>
+<p>リダイレクトを使えば、この出力先をファイルにできる。リダイレクトを使うには&quot;プログラム &gt; ファイル名&quot;とする</p>
+<pre><code>$ ./program &gt; hello.txt
+$ cat hello.txt
+hello</code></pre>
+<p>ファイルへの簡単な書き込みは、リダイレクトを使うことで後から簡単に実現可能だ。</p>
+<p>リダイレクトはファイルの読み込みにも使える。例えば先程のBMIを計算するプログラムを用意しよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// bmi</span>
+<span class="dt">int</span> main()
+{
+    <span class="dt">double</span> height{ } ;
+    <span class="dt">double</span> mass { } ;
+
+    <span class="bu">std::</span>cin &gt;&gt; height &gt;&gt; mass ;
+
+    <span class="bu">std::</span>cout &lt;&lt; mass / (height*height) ;
+}</code></pre></div>
+<p>このプログラム名を<code>bmi</code>として、通常通り実行すると以下のようになる。</p>
+<pre><code>$　./bmi
+1.63
+73
+27.4756</code></pre>
+<p>このうち、1.63と73はユーザーによる入力だ。これを毎回手で入力するのではなく、ファイルから入力することができる。つまり以下のようなファイルを用意して、</p>
+<pre><code>1.63
+73</code></pre>
+<p>このファイルを例えば、&quot;bodymass.txt&quot;とする。手で入力する代わりに、このファイルを入力として使いたい。これにはリダイレクトとして&quot;プログラム名 &lt; ファイル名&quot;とする。</p>
+<pre><code>$ ./bmi &lt; bodymass.txt
+27.4756</code></pre>
+<p>リダイレクトの入出力を組み合わせることも可能だ。</p>
+<pre><code>$ cat bodymass.txt
+1.63
+73
+$ ./bmi &lt; bodymass.txt &gt; index.txt
+$ cat index.text
+27.4756</code></pre>
+<p>もちろん、このようなファイルの読み書きは簡易的なものだが、かなりの処理がこの程度のファイル操作でも行えるのだ。</p>
+<h2 id="パイプ">パイプ</h2>
+<p>プログラムが出力した結果をさらに入力にすることだってできる。</p>
+<p>例えば、先程のプログラム<code>bmi</code>に入力するファイル<code>bodymass.txt</code>の身長の単位がメートルではなくセンチメートルだったとしよう。</p>
+<pre><code>163
+73</code></pre>
+<p>この場合、プログラム<code>bmi</code>を書き換えて対処することもできるが、プログラムに入力させる前にファイルを読み込み、書き換えて出力し、その出力を入力とすることもできる。</p>
+<p>まず、身長の単位をセンチメートルからメートルに直すプログラムを書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// convert</span>
+<span class="dt">int</span> main()
+{
+    <span class="dt">double</span> height{} ;
+    <span class="dt">double</span> mass{} ;
+
+    <span class="bu">std::</span>cin &gt;&gt; height &gt;&gt; mass ;
+
+    <span class="co">// 身長をセンチメートルからメートルに直す</span>
+    <span class="co">// 体重はそのままでよい</span>
+    <span class="bu">std::</span>cout &lt;&lt; height/<span class="fl">100.0</span> &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; mass ;
+}</code></pre></div>
+<p>このプログラムを<code>convert</code>と名付け、さっそく使ってみよう。</p>
+<pre><code>$ ./convert
+163
+73
+1.63
+73</code></pre>
+<p>身長の単位がセンチメートルからメートルに正しく直されている。</p>
+<p>これをリダイレクトで使うとこうなる。</p>
+<pre><code>$ ./convert &lt; bodymass.txt &gt; fixed_bodymass.txt
+$ ./bmi &lt; fixed_bodymass.txt
+27.4756</code></pre>
+<p>しかしこれではファイルが増えて面倒だ。この場合、パイプを使うとスッキリと書ける。</p>
+<p>パイプはプログラムの標準出力をプログラムの標準入力とするの使い方は、&quot;プログラム名 | プログラム名&quot;だ。</p>
+<pre><code>$ ./convert &lt; bodymass.txt | ./bmi
+27.4756</code></pre>
+<p>ところで、すでに何度か説明無しで使っているが、POSIX規格を満たすOSには<code>cat</code>というプログラムが標準で入っている。<code>cat ファイル名</code>は指定したファイル名の内容を標準出力する。標準出力はパイプで標準入力にできる。</p>
+<pre><code>$ cat bodymass.txt | ./convert | ./bmi
+27.4756</code></pre>
+<h2 id="プログラムの組み合わせ">プログラムの組み合わせ</h2>
+<p>現代のプログラミングというのは、すでに存在するプログラムを組み合わせて作るものだ。もし、自分の必要とする処理がすでに実装されているのであれば、自分で書く必要はない。</p>
+<p>例えば、読者はまだカレントディレクトリー下のファイルの一覧を列挙する方法を知らない。しかしPOSIX規格を満たすOSには<code>ls</code>というカレントディレクトリー下のファイルの一覧を列挙するプログラムが存在する。これを先程までBMIの計算などの作業をしていたディレクトリ下で実行してみよう。</p>
+<pre><code>$ ls
+all.h  all.h.gch  bmi  bodymass.txt  convert  data  main.cpp  Makefile  program</code></pre>
+<p>ファイルの一覧が列挙される。そしてこれはプログラム<code>ls</code>による標準出力だ。標準出力ということは、リダイレクトしてファイルに書き込んだり、パイプで別のプログラムに渡したりできるということだ。</p>
+<pre><code>$ ls &gt; files.txt
+$ ls | ./program</code></pre>
+<p>標準入出力が扱えれば、ネットワークごしにWebサイトをダウンロードすることもできる。これにはほとんどのGNU/LinuxベースのOSに入っている<code>curl</code>というプログラムを使う。</p>
+<pre><code>$ curl https://example.com</code></pre>
+<p>プログラム<code>curl</code>は指定されたURLからデータをダウンロードして、標準出力する。標準出力するということは、パイプによって標準入力にできるということだ。</p>
+<pre><code>$ curl https://example.com | ./program</code></pre>
+<p>読者はC++でネットワークアクセスする方法を知らないが、すでにネットワークアクセスは可能になった。</p>
+<p>他にも便利なプログラムはたくさんある。プログラミングの学び始めはできることが少なくて退屈になりがちだが、読者はもうファイルの読み書きやネットワークアクセスまでできるようになったのだから、退屈はしないはずだ。</p>
+<h1 id="ループ">ループ</h1>
+<p>さて、ここまでで変数や関数、標準入出力といったプログラミングの基礎的な概念を教えてきた。あと一つでプログラミングに必要な基礎的な概念はすべて説明し終わる。ループだ。</p>
+<h2 id="これまでのおさらい-1">これまでのおさらい</h2>
+<p>C++では、プログラムは書いた順番に実行される。これを<code>逐次実行</code>という。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">3</span> ;
+}</code></pre></div>
+<p>実行結果、</p>
+<pre><code>123</code></pre>
+<p>この実行結果が&quot;123&quot;以外の結果になることはない。C++ではプログラムは書かれた順番に実行されるからだ。</p>
+<p>条件分岐は、プログラムの実行を条件付きで行うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> ;
+
+    <span class="cf">if</span> ( <span class="kw">false</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> ;
+
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">3</span> ;
+
+    <span class="cf">if</span> ( <span class="kw">true</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="dv">4</span> ;
+    <span class="cf">else</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="dv">5</span> ;
+}</code></pre></div>
+<p>実行結果、</p>
+<pre><code>134</code></pre>
+<p>条件分岐によって、プログラムの一部を実行しないということが可能になる。</p>
+<h2 id="goto文">goto文</h2>
+<p>ここでは繰り返し(ループ)の基礎的な仕組みを理解するために、最も原始的で最も使いづらい繰り返しの機能である<code>goto文</code>を学ぶ。<code>goto文</code>で実用的な繰り返し処理をするのは面倒だが、恐れることはない。より簡単な方法もすぐに説明するからだ。なぜ本書で<code>goto文</code>を先に教えるかと言うと、あらゆる繰り返しは、結局のところ<code>if文</code>と<code>goto文</code>へのシンタックスシュガーにすぎないからだ。<code>goto文</code>を学ぶことにより、繰り返しを恐れることなく使う本物のプログラマーになれる。</p>
+<h3 id="無限ループ">無限ループ</h3>
+<p>&quot;hello&quot;と3回出力するプログラムはどうやって書くのだろうか。&quot;hello&quot;を1回出力するプログラムの書き方はすでにわかっているので、同じ文を3回書けばよい。。</p>
+<pre><code>// 1回&quot;hello\n&quot;を出力する関数
+void hello()
+{
+    std::cout &lt;&lt; &quot;hello\n&quot;s ;
+}
+
+int main()
+{
+    hello() ;
+    hello() ;
+    hello() ;
+}</code></pre>
+<p>10回出力する場合はどうするのだろう。10回書けばよい。コードは省略する。</p>
+<p>では100回出力する場合はどうするのだろう。100回書くのだろうか。100回も同じコードを書くのはとても面倒だ。読者がVimのような優秀なテキストエディターを使っていない限り100回も同じコードを間違えずに書くことは不可能だろう。Vimならば1回書いた後にノーマルモードで&quot;100.&quot;するだけで100回書ける。</p>
+<p>実際のところ、100回だろうが、1000回だろうが、あらかじめ回数がコンパイル時に決まっているのであれば、その回数だけ同じ処理を書くことで実現可能だ。</p>
+<p>しかし、プログラムを外部から強制的に停止させるまで、無限に出力し続けるプログラムはどう書けばいいのだろうか。そういった停止しないプログラムを外部から強制的に停止させるには<code>Ctrl-C</code>を使う。</p>
+<p>以下はそのようなプログラムの実行例だ。</p>
+<pre><code>$ make run
+hello
+hello
+hello
+hello
+...
+[Ctrl-Cを押す]</code></pre>
+<p><code>goto文</code>は指定したラベルに実行を移す機能だ。</p>
+<pre><code>ラベル名 : 文
+
+goto ラベル名 ;</code></pre>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> ;
+
+    <span class="co">// ラベルskipまで飛ぶ</span>
+    <span class="cf">goto</span> skip ; 
+
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> ;
+
+<span class="co">// ラベルskip</span>
+skip :
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">3</span> ;
+}</code></pre></div>
+<p>これを実行すると以下のようになる。</p>
+<pre><code>13</code></pre>
+<p><code>2</code>を出力すべき文の実行が飛ばされていることがわかる。</p>
+<p>これだけみると&quot;if (false)&quot;と同じように見えるが、<code>goto文</code>はソースコードの上に飛ぶこともできるのだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+<span class="dt">int</span> main()
+{
+loop :
+    hello() ;
+    <span class="cf">goto</span> loop ; 
+}</code></pre></div>
+<p>これは&quot;hello&quot;を無限に出力するプログラムだ。</p>
+<p>このプログラムを実行すると、</p>
+<ol style="list-style-type: decimal">
+<li>関数helloが呼ばれる</li>
+<li>goto文でラベルloopまで飛ぶ</li>
+<li>1に戻る</li>
+</ol>
+<p>という処理を行う。</p>
+<h3 id="終了条件付きループ">終了条件付きループ</h3>
+<p>ひたすら同じ文字列を出力し続けるだけのプログラムというのも味気ない。もっと面白くてためになるプログラムを作ろう。例えば、ユーザーから入力された数値を合計し続けるプログラムはどうだろう。</p>
+<p>今から作るプログラムを実行すると以下のようになる。</p>
+<pre><code>$ make run
+&gt; 10
+10
+&gt; 5
+15
+&gt; 999
+1014
+&gt; -234
+780</code></pre>
+<p>このプログラムは、</p>
+<ol style="list-style-type: decimal">
+<li>&quot;&gt;&quot;と表示してユーザーから整数値を入力</li>
+<li>これまでの入力との合計値を出力</li>
+<li>1.に戻る</li>
+</ol>
+<p>という動作を繰り返す。先程学んだ無限ループと同じだ。</p>
+<p>さっそく作っていこう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> input()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;&gt;&quot;</span>s ;
+    <span class="dt">int</span> x {} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> sum = <span class="dv">0</span> ;
+loop :
+    sum = sum + input() ;
+    <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">goto</span> loop ;
+}</code></pre></div>
+<p>関数inputは&quot;&gt;&quot;を表示してユーザーからの入力を得て戻り値として返すだけの関数だ。</p>
+<p>&quot;sum = sum + input()&quot;は、変数sumに新しい値を代入するもので、その代入する値というのは、代入する前の変数sumの値と関数inputの戻り値を足した値だ。</p>
+<p>このような変数xに何らかの値nを足した結果を元の変数xに代入するという処理はとても多く使われるので、C++では&quot;x = x + n&quot;を意味する省略記法&quot;x += x&quot;がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">1</span> ;
+    <span class="dt">int</span> n = <span class="dv">5</span> ;
+
+    x = x + n ; <span class="co">// 6</span>
+    x += n ; <span class="co">// 11</span>
+}</code></pre></div>
+<p>さて、本題に戻ろう。上のプログラムは動く。しかし、プログラムを停止するにはCtrl-Cを押すしかない。できればプログラム自ら終了してもらいたいものだ。</p>
+<p>そこで、ユーザーが0を入力したときはプログラムを終了するようにしよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> input()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;&gt;&quot;</span>s ;
+    <span class="dt">int</span> x {} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> sum = <span class="dv">0</span> ;
+loop :
+    <span class="co">// 一度入力を変数に代入</span>
+    <span class="dt">int</span> x = input() ;
+    <span class="co">// 変数xが0でない場合</span>
+    <span class="cf">if</span> ( x != <span class="dv">0</span> )
+    {<span class="co">// 実行</span>
+        sum = sum + x ;
+        <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">goto</span> loop ;
+    }
+    <span class="co">// x == 0の場合、ここに実行が移る</span>
+    <span class="co">// main関数の最後なのでプログラムが終了</span>
+}</code></pre></div>
+<p>うまくいった。このループは、ユーザーが0を入力した場合に繰り返しを終了する、条件付きのループだ。</p>
+<h3 id="インデックスループ">インデックスループ</h3>
+<p>最後に紹介するループは、インデックスループだ。n回&quot;hello&quot;sを出力するプログラムを書こう。問題は、このnはコンパイル時には与えられず、実行時にユーザーからの入力で与えられる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// n回出力する関数の宣言</span>
+<span class="dt">void</span> hello_n( <span class="dt">int</span> n ) ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// ユーザーからの入力</span>
+    <span class="dt">int</span> n {} ;
+    <span class="bu">std::</span>cin &gt;&gt; n ;
+    <span class="co">// n回出力</span>
+    hello_n( n ) ;
+}</code></pre></div>
+<p>このコードをコンパイルしようとするとエラーになる。これは実はコンパイルエラーではなくてリンクエラーという種類のエラーだ。その理由は、関数hello_nに対する関数の定義が存在しないからだ。</p>
+<p>関数というのは宣言と定義に分かれている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 関数の宣言</span>
+<span class="dt">void</span> f( ) ;
+
+<span class="co">// 宣言</span>
+<span class="dt">void</span> f( )
+<span class="co">// 定義</span>
+{ }</code></pre></div>
+<p>関数の宣言というのは何度書いても大丈夫だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 宣言</span>
+<span class="dt">int</span> f( <span class="dt">int</span> x ) ;
+
+<span class="co">// 再宣言</span>
+<span class="dt">int</span> f( <span class="dt">int</span> x ) ;
+
+<span class="co">// 再宣言</span>
+<span class="dt">int</span> f( <span class="dt">int</span> x ) ;</code></pre></div>
+<p>関数の宣言というのは戻り値の型や関数名や引数リストだけで、&quot;;&quot;で終わる。</p>
+<p>関数の定義とは、関数の宣言の後の&quot;{}&quot;だ。この場合、宣言のあとに&quot;;&quot;は書かない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> f( <span class="dt">int</span> x ) { <span class="cf">return</span> x ; }</code></pre></div>
+<p>関数の定義は一度しか書けない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 定義</span>
+<span class="dt">void</span> f() {}
+<span class="co">// エラー、再定義</span>
+<span class="dt">void</span> f() {}</code></pre></div>
+<p>なぜ関数は宣言と定義とに別れているかというと、C++では名前は宣言しないと使えないためだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// エラー</span>
+    <span class="co">// 名前fは宣言されていない</span>
+    f() ;
+}
+
+<span class="co">// 定義</span>
+<span class="dt">void</span> f() { }</code></pre></div>
+<p>なので、必ず名前は使う前に宣言しなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 名前fの宣言</span>
+<span class="dt">void</span> f() ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// OK、名前fは関数</span>
+    f() ;
+}
+
+<span class="co">// 名前fの定義</span>
+<span class="dt">void</span> f() { }</code></pre></div>
+<p>さて、話をもとに戻そう。これから学ぶのはn回&quot;hello&quot;sと出力するプログラムの書き方だ。ただしnはユーザーが入力するので実行時にしかわからない。すでに我々はユーザーからnの入力を受け取る部分のプログラムは書いた。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// n回出力する関数の宣言</span>
+<span class="dt">void</span> hello_n( <span class="dt">int</span> n ) ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// ユーザーからの入力</span>
+    <span class="dt">int</span> n {} ;
+    <span class="bu">std::</span>cin &gt;&gt; n ;
+    <span class="co">// n回出力</span>
+    hello_n( n ) ;
+}</code></pre></div>
+<p>あとは関数<code>hello_n(n)</code>がn回&quot;hello&quot;sと出力するようなループを実行すればいいのだ。</p>
+<p>すでに我々は無限回&quot;hello&quot;sと出力する方法を知っている。まずは無限回ループを書こう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )
+{
+loop :
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">goto</span> loop ;
+}</code></pre></div>
+<p>終了条件付きループで学んだように、このループをn回繰り返した場合に終了させるには、<code>if文</code>を使って、終了条件に達したかどうかで実行を分岐させればよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )
+{
+loop :
+    <span class="co">// まだn回繰り返していない場合</span>
+    <span class="cf">if</span> ( ??? )
+    { <span class="co">// 以下を実行</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">goto</span> loop ;
+    }
+}</code></pre></div>
+<p>このコードを完成させるにはどうすればいいのか。まず、現在何回繰り返しを行ったのか記録する必要がある。このために変数を作る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> i = <span class="dv">0</span> ;</code></pre></div>
+<p>変数iの初期値は0だ。まだ繰り返し実行を1回も行っていないということは、つまり0回繰り返し実行をしたということだ。</p>
+<p>1回繰り返し実行をするたびに、変数iの値を1増やす。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">i = i + <span class="dv">1</span> ;</code></pre></div>
+<p>これはすでに学んだように、もっと簡単に書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">i += <span class="dv">1</span> ;</code></pre></div>
+<p>実は、更に簡単に書くこともできる。変数の代入前の値に1を足した値を代入する、つまり変数の値を1増やすというのはとてもよく書くコードなので、とても簡単な演算子が用意されている。<code>operator ++</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+    ++i ; <span class="co">// 1</span>
+    ++i ; <span class="co">// 2</span>
+    ++i ; <span class="co">// 3</span>
+}</code></pre></div>
+<p>これで変数iの値は1増える。これをインクリメント(increment)という。</p>
+<p>インクリメントと対になるのがデクリメント(decrement)だ。これは変数の値を1減らす。演算子は<code>operator --</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+    --i ; <span class="co">// -1</span>
+    --i ; <span class="co">// -2</span>
+    --i ; <span class="co">// -3</span>
+}</code></pre></div>
+<p>さて、必要な知識は学び終えたので本題に戻ろう。n回の繰り返しをした後にループを終了するには、まず今何回繰り返し実行しているのかを記録する必要がある。その方法を学ぶために、0, 1, 2, 3, 4...と無限に出力されるプログラムを書いてみよう。</p>
+<p>このプログラムを実行すると以下のように表示される。</p>
+<pre><code>$ make run
+1, 2, 3, 4, 5, 6, [Ctrl-C]</code></pre>
+<p>Ctrl-Cを押すまでプログラムは無限に実行される。</p>
+<p>ではどうやって書くのか。以下のようにする。</p>
+<ol style="list-style-type: decimal">
+<li>変数iを作り、値を0にする</li>
+<li>変数iと&quot;, &quot;sを出力する</li>
+<li>変数iをインクリメントする</li>
+<li>goto 2</li>
+</ol>
+<p>この処理を素直に書くと以下のコードになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 1. 変数iを作り、値を0にする</span>
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+loop :
+    <span class="co">// 2. 変数iと&quot;, &quot;sを出力する</span>
+    <span class="bu">std::</span>cout &lt;&lt; i &lt;&lt; <span class="st">&quot;, &quot;</span>s ;
+    <span class="co">// 3. 変数iをインクリメントする</span>
+    ++i ;
+    <span class="co">// 4. goto 2</span>
+    <span class="cf">goto</span> loop ;
+}</code></pre></div>
+<p>どうやら、いま何回繰り返し実行しているか記録することはできるようになったようだ。</p>
+<p>ここまでくればしめたもの。あとは<code>goto文</code>を実行するかどうかを<code>if文</code>で条件分岐すればよい。しかし、<code>if文</code>の中にどんな条件を書けばいいのだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )
+{
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+loop :
+    <span class="co">// まだn回繰り返し実行をしていなければ実行</span>
+    <span class="cf">if</span> ( ??? )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++i ;
+        <span class="cf">goto</span> loop ;
+    }
+}</code></pre></div>
+<p>具体的に考えてみよう。n == 3のとき、つまり3回繰り返すときを考えよう。</p>
+<ol style="list-style-type: decimal">
+<li>1回目のif文実行の時、i == 0</li>
+<li>2回めのif文実行の時、i == 1</li>
+<li>3回目のif文実行の時、i == 2</li>
+<li>4回目のif文実行の時、i == 3</li>
+</ol>
+<p>ここではn == 3なので、3回まで実行してほしい。つまり3回目まではtrueになり、4回目のif文実行のときにはfalseになるような式を書く。そのような式とは、ズバリ&quot;i != n&quot;だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )
+{
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+loop :
+    <span class="cf">if</span> ( i != n )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++i ;
+        <span class="cf">goto</span> loop ;
+    }
+}</code></pre></div>
+<p>早速実行してみよう。</p>
+<pre><code>$ make run
+3
+hello
+hello
+hello
+$ make run
+2
+hello
+hello</code></pre>
+<p>なるほど、動くようだ。しかしこのプログラムにはバグがある。-1を入力すると、何故か大量のhelloが出力されてしまうのだ。</p>
+<pre><code>$ make run
+-1
+hello
+hello
+hello
+hello
+[Ctrl-C]</code></pre>
+<p>この原因はまだ現時点の読者には難しい。この謎はいずれ明らかにするとして、今はnが負数の場合にプログラムを0回の繰り返し分の実行で終了するように書き換えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )
+{
+    <span class="co">// nが負数ならば</span>
+    <span class="cf">if</span> ( n &lt; <span class="dv">0</span> )
+        <span class="co">// 関数の実行を終了</span>
+        <span class="cf">return</span> ;
+
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+loop :
+    <span class="cf">if</span> ( i != n )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++i ;
+        <span class="cf">goto</span> loop ;
+    }
+}</code></pre></div>
+<h2 id="while文">while文</h2>
+<p><code>goto文</code>は極めて原始的で使いづらい機能だ。現実のC++プログラムでは<code>goto文</code>はめったに使われない。もっと簡単な機能を使う。ではなぜ<code>goto文</code>が存在するかというと、<code>goto文</code>は最も原始的で基礎的で、他の繰り返し機能は<code>if文</code>と<code>goto文</code>に変換することで実現できるからだ。</p>
+<p><code>goto文</code>より簡単な繰り返し文に、<code>while文</code>がある。ここでは<code>goto文</code>と<code>while文</code>を比較することで、<code>while文</code>を学んでいこう。</p>
+<h3 id="無限ループ-1">無限ループ</h3>
+<p>無限ループを<code>goto文</code>で書く方法を思い出してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> hello = []()
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+loop :
+    <span class="co">// 繰り返し実行される文</span>
+    hello() ;
+    <span class="cf">goto</span> loop ;
+}</code></pre></div>
+<p>このコードで本当に重要なのは関数helloを呼び出している部分だ。ここが繰り返し実行される文で、<code>ラベル文</code>と<code>goto文</code>は、繰り返し実行を実現するために必要な記述でしかない。</p>
+<p>そこで<code>while(true)</code>だ。<code>while(true)</code>は<code>goto文</code>と<code>ラベル文</code>よりも簡単に無限ループを実現できる。</p>
+<pre><code>while (true)
+    文</code></pre>
+<p><code>while文</code>は文を無限に繰り返して実行してくれる。試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> hello = []()
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    <span class="cf">while</span> (<span class="kw">true</span>)
+        hello() ;
+}</code></pre></div>
+<p>このコードの重要な部分は以下の2行。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span> (<span class="kw">true</span>)
+    hello() ;</code></pre></div>
+<p>これを<code>goto文</code>と<code>ラベル文</code>を使った無限ループと比べてみよう。</p>
+<pre><code>loop:
+    hello() ;
+    goto loop ;</code></pre>
+<p>どちらも同じ意味のコードだが、<code>while文</code>の方が明らかに書きやすくなっているのがわかる。</p>
+<p><code>goto文</code>で学んだ、ユーザーからの整数値の入力の合計の計算を繰り返すプログラムを<code>while(true)</code>で書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> input()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;&gt;&quot;</span>s ;
+    <span class="dt">int</span> x {} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> sum = <span class="dv">0</span> ;
+
+    <span class="cf">while</span>( <span class="kw">true</span> )
+    {
+        sum += input() ;
+        <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>重要なのは以下の4行だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span>( <span class="kw">true</span> )
+{
+    sum += input() ;
+    <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>これを<code>goto文</code>で書いた場合と比べてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">loop :
+    sum += input() ;
+    <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="cf">goto</span> loop ;</code></pre></div>
+<p>本当に重要で本質的な、繰り返し実行をする部分の2行のコードは全く変わっていない。それでいて<code>while(true)</code>の方が圧倒的に簡単に書ける。</p>
+<h2 id="終了条件付きループ-1">終了条件付きループ</h2>
+<p>なるほど、無限ループを書くのに、<code>goto文</code>を使うより<code>while(true)</code>を使ったほうがいいことがわかった。では他のループの場合でも、<code>while文</code>の方が使いやすいだろうか。</p>
+<p>本書を先頭から読んでいる優秀な読者は<code>while(true)</code>の<code>true</code>はbool型の値であることに気がついているだろう。実は<code>while(E)</code>の括弧の中Eは、<code>if(E)</code>と書くのと全く同じ<code>条件</code>なのだ。<code>条件</code>が<code>true</code>であれば繰り返し実行される。<code>false</code>なら繰り返し実行されない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 実行されない</span>
+    <span class="cf">while</span> ( <span class="kw">false</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;No&quot;</span>s ;
+
+    <span class="co">// 実行されない</span>
+    <span class="cf">while</span> ( <span class="dv">1</span> &gt; <span class="dv">2</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;No&quot;</span>s ;
+
+    <span class="co">// 実行される</span>
+    <span class="co">// 無限ループ</span>
+    <span class="cf">while</span> ( <span class="dv">1</span> &lt; <span class="dv">2</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Yes&quot;</span>s ;
+}</code></pre></div>
+<p><code>while文</code>を使って、0が入力されたら終了する合計値計算プログラムを書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> input()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;&gt;&quot;</span>s ;
+    <span class="dt">int</span> x {} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> sum = <span class="dv">0</span> ;
+    <span class="dt">int</span> x {} ;
+
+    <span class="cf">while</span>( ( x = input() ) != <span class="dv">0</span> )
+    {
+        sum += x ;
+        <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>重要なのはこの5行。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span>( ( x = input() ) != <span class="dv">0</span> )
+{
+    sum += x ;
+    <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>ここではちょっとむずかしいコードが出てくる。<code>while</code>の中の<code>条件</code>が、&quot;( x = input() ) != 0&quot;になっている。これはどういうことか。</p>
+<p>実は<code>条件</code>は<code>bool型</code>に変換さえできればどんな式でも書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x { } ;
+
+    <span class="cf">if</span> ( (x = <span class="dv">1</span>) == <span class="dv">1</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;(x = 1) is 1.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>このコードでは、&quot;(x=1)&quot;と&quot;1&quot;が等しいか&quot;==&quot;どうかを判断している。&quot;(x=1)&quot;という式は変数xに1を代入する式だ。<code>代入式</code>の値は、代入された変数の値になる。この場合変数xの値だ。変数xには1が代入されているので、その値は1、つまり&quot;(x=1) == 1&quot;は&quot;1 == 1&quot;と書くのと同じ意味になる。この結果は<code>true</code>だ。</p>
+<p>さて、このことを踏まえて、&quot;( x = input() ) != 0&quot;を考えてみよう。</p>
+<p>&quot;( x = input() )&quot;は変数xに関数inputを呼び出した結果を代入している。関数inputはユーザーから入力を得て、その入力をそのまま返す。つまり変数xにはユーザーの入力した値が代入される。その結果が0と等しくないか&quot;!=&quot;どうかを判断している。つまり、ユーザーが0を入力した場合はfalse、非ゼロを入力した場合はtrueとなる。</p>
+<p><code>while(条件)</code>は<code>条件</code>が<code>true</code>となる場合に繰り返し実行をする。結果として、ユーザーが0を入力するまで繰り返し実行をするコードになる。</p>
+<p><code>goto文</code>を使った終了条件付きループと比較してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">loop:
+    <span class="cf">if</span> ( (x = input() ) != <span class="dv">0</span> )
+    {
+        sum += x ;
+        <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="cf">goto</span> loop ;
+    }</code></pre></div>
+<p><code>while文</code>の方が圧倒的に書きやすいことがわかる。</p>
+<h3 id="インデックスループ-1">インデックスループ</h3>
+<p>n回&quot;hello&quot;sと出力するプログラムを<code>while文</code>で書いてみよう。ただしnはユーザーが入力するものとする。</p>
+<p>まずは<code>goto文</code>でも使ったループ以外の処理をするコードから。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n ) ;
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> n {} ;
+    <span class="bu">std::</span>cin &gt;&gt; n ;
+    hello_n( n ) ;
+}</code></pre></div>
+<p>後は関数hello_n(n)がインデックスループを実装するだけだ。ただしnが負数ならば何も実行しないように仕様。</p>
+<p><code>goto文</code>でインデックスループを書くときに学んだように、</p>
+<ol style="list-style-type: decimal">
+<li>n &lt; 0ならば関数を終了</li>
+<li>変数iを作り値を0にする</li>
+<li>i != nならば繰り返し実行</li>
+<li>出力</li>
+<li>++i</li>
+<li>goto 3.</li>
+</ol>
+<p>を<code>while文</code>で書くだけだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )
+{
+    <span class="co">// 1. n &lt; 0ならば関数を終了</span>
+    <span class="cf">if</span> ( n &lt; <span class="dv">0</span> )
+        <span class="cf">return</span> ;
+
+    <span class="co">// 2. 変数iを作り値を0にする</span>
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+
+    <span class="co">//3. i != nならば繰り返し実行</span>
+    <span class="cf">while</span>( i != n )
+    {   <span class="co">// 4. 出力</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="co">// 5. ++i</span>
+        ++i ;
+    } <span class="co">// 6. goto 3</span>
+}</code></pre></div>
+<p>重要な部分だけ抜き出すと以下の通り。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span>( i != n )
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    ++i ;
+}</code></pre></div>
+<p><code>goto文</code>を使ったインデックスループと比較してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">loop :
+    <span class="cf">if</span> ( i != n )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++i ;
+        <span class="cf">goto</span> loop ;
+    }</code></pre></div>
+<p>読者の中にはあまり変わらないのではないかと思う人もいるかもしれない。しかし、次の問題を解くプログラムを書くと、<code>while文</code>がいかに楽に書けるかを実感するだろう。</p>
+<p>問題：以下のような九九の表を出力するプログラムを書きなさい</p>
+<pre><code>1   2   3   4   5   6   7   8   9   
+2   4   6   8   10  12  14  16  18  
+3   6   9   12  15  18  21  24  27  
+4   8   12  16  20  24  28  32  36  
+5   10  15  20  25  30  35  40  45  
+6   12  18  24  30  36  42  48  54  
+7   14  21  28  35  42  49  56  63  
+8   16  24  32  40  48  56  64  72  
+9   18  27  36  45  54  63  72  81</code></pre>
+<p>もちろん、このような文字列を愚直に出力しろという問題ではない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 違う！</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1 2 3 4 5...&quot;</span>s ;
+}</code></pre></div>
+<p>逐次実行、条件分岐、ループまでを習得した誇りある本物のプログラマーである我々は、もちろん九九の表はループを書いて出力する。</p>
+<p>まず出力すべき表をみると、数値が左揃えになっていることに気がつくだろう。</p>
+<pre><code>4   8   12
+5   10  15</code></pre>
+<p>8は1文字、10は2文字にもかかわらず、12と15は同じ列目から始まっている。これは出力するスペース文字を調整することでも実現できるが、ここでは単にタブ文字を使っている。</p>
+<p>タブ文字はMakefileを書くのにも使った文字で、C++の文字列中に直接書くこともできるが、エスケープ文字<code>\t</code>を使ってもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">4</span>\t8\t12\n5\t10\t15<span class="st">&quot;s ;</span>
+}</code></pre></div>
+<p>エスケープ文字<code>\n</code>が改行文字に置き換わるように、エスケープ文字<code>\t</code>はタブ文字に置き換わる。</p>
+<p>九九の表はどうやって出力すればよいだろうか。計算自体はC++では&quot;a*b&quot;でできる。上の表がどのように計算されているかを考えてみよう。</p>
+<pre><code>1*1 1*2 1*3 1*4 1*5 1*6 1*7 1*8 1*9 
+2*1 2*2 2*3 2*4 2*5 2*6 2*7 2*8 2*9 
+3*1 3*2 3*3 3*4 3*5 3*6 3*7 3*8 3*9 
+4*1 4*2 4*3 4*4 4*5 4*6 4*7 4*8 4*9 
+5*1 5*2 5*3 5*4 5*5 5*6 5*7 5*8 5*9 
+6*1 6*2 6*3 6*4 6*5 6*6 6*7 6*8 6*9 
+7*1 7*2 7*3 7*4 7*5 7*6 7*7 7*8 7*9 
+8*1 8*2 8*3 8*4 8*5 8*6 8*7 8*8 8*9 
+9*1 9*2 9*3 9*4 9*5 9*6 9*7 9*8 9*9</code></pre>
+<p>これをみると、&quot;a*b&quot;のうちのaを1から9までインクリメントし、それに対してbを1から9までインクリメントさせればよい。つまり、9回のインデックスループの中で9回のインデックスループを実行することになる。ループの中のループだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span> ( 条件 )
+    <span class="cf">while</span> ( 条件 )
+        文</code></pre></div>
+<p>早速そのようなコードを書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 1から9まで</span>
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="cf">while</span> ( a &lt;= <span class="dv">9</span> )
+    {
+        <span class="co">// 1から9まで</span>
+        <span class="dt">int</span> b = <span class="dv">1</span> ;
+        <span class="cf">while</span> ( b &lt;= <span class="dv">9</span> )
+        {
+            <span class="co">// 計算結果を出力</span>
+            <span class="bu">std::</span>cout &lt;&lt; a * b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
+            ++b ;
+        }
+        <span class="co">// 段の終わりに改行</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++a ;
+    }
+}</code></pre></div>
+<p>うまくいった。</p>
+<p>ところで、このコードを<code>goto文</code>で書くとどうなるだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+loop_outer :
+    <span class="cf">if</span> ( a &lt;= <span class="dv">9</span> )
+    {
+        <span class="dt">int</span> b = <span class="dv">1</span> ;
+loop_inner :
+        <span class="cf">if</span> ( b &lt;= <span class="dv">9</span> )
+        {
+            <span class="bu">std::</span>cout &lt;&lt; a * b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
+            ++b ;
+            <span class="cf">goto</span> loop_inner ;
+        }
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++a ;
+        <span class="cf">goto</span> loop_outer ;
+    }
+}</code></pre></div>
+<p>とてつもなく読みにくい。</p>
+<h2 id="for文">for文</h2>
+<p>ところで今まで<code>while文</code>で書いてきたインデックスループには特徴がある。</p>
+<p>試しに1から100までの整数を出力するコードを見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> i = <span class="dv">1</span> ;
+    <span class="cf">while</span> ( i &lt;= <span class="dv">100</span> )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; i &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+        ++i ;
+    }
+}</code></pre></div>
+<p>このコードを読むと、以下のようなパターンがあることがわかる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// ループ実行前の変数の宣言と初期化</span>
+    <span class="dt">int</span> i = <span class="dv">1</span> ;
+    <span class="co">// ループ中の終了条件の確認</span>
+    <span class="cf">while</span> ( i &lt;= <span class="dv">100</span> )
+    {
+        <span class="co">// 実際に繰り返したい文</span>
+        <span class="bu">std::</span>cout &lt;&lt; i &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+        <span class="co">// 各ループの最後に必ず行う処理</span>
+        ++i ;
+    }
+}</code></pre></div>
+<p>ここで真に必要なのは、「実際に繰り返したい文」だ。その他の処理は、ループを実現するために必要なコードだ。ループの実現に必要な処理が飛び飛びの場所にあるのは甚だわかりにくい。</p>
+<p><code>for文</code>はそのような問題を解決するための機能だ。</p>
+<pre><code>for ( 変数の宣言 ; 終了条件の確認 ; 各ループの最後に必ず行う処理 )</code></pre>
+<p><code>for文</code>を使うと、上のコードは以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">1</span> ; i &lt;= <span class="dv">100</span> ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; i &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+    } 
+}</code></pre></div>
+<p>ループの実現に必要な部分だけ抜き出すと以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// for文の開始</span>
+<span class="cf">for</span> (
+<span class="co">// 変数の宣言と初期化</span>
+<span class="dt">int</span> i = <span class="dv">1</span> ;
+<span class="co">// 終了条件の確認</span>
+i &lt;= <span class="dv">100</span> ;
+<span class="co">// 各ループの最後に必ず行う処理</span>
+++i )</code></pre></div>
+<p><code>for文</code>はインデックスループによくあるパターンをわかりやすく書くための機能だ。例えば<code>while文</code>のときに書いた九九の表を出力するプログラムは、<code>for文</code>ならばこんなに簡潔に書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">for</span> ( <span class="dt">int</span> a = <span class="dv">1</span> ; a &lt;= <span class="dv">9</span> ; ++a )
+    {
+        <span class="cf">for</span> ( <span class="dt">int</span> b = <span class="dv">1</span> ; b &lt;= <span class="dv">9</span> ; ++b )
+        { <span class="bu">std::</span>cout &lt;&lt; a*b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ; }
+
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p><code>while文</code>を使ったコードと比べてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="cf">while</span> ( a &lt;= <span class="dv">9</span> )
+    {
+        <span class="dt">int</span> b = <span class="dv">1</span> ;
+        <span class="cf">while</span> ( b &lt;= <span class="dv">9</span> )
+        {
+            <span class="bu">std::</span>cout &lt;&lt; a * b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
+            ++b ;
+        }
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        ++a ;
+    }
+}</code></pre></div>
+<p>格段に読みやすくなっていることがわかる。</p>
+<p>C++ではカンマ','を使うことで、複数の<code>式</code>をひとつの<code>文</code>に書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">0</span>, b = <span class="dv">0</span> ;
+    ++a, ++b ;
+}</code></pre></div>
+<p><code>for文</code>でもカンマが使える。九九の表を出力するプログラムは、以下のように書くこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">for</span> ( <span class="dt">int</span> a = <span class="dv">1</span> ; a &lt;= <span class="dv">9</span> ; ++a, <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s )
+        <span class="cf">for</span> ( <span class="dt">int</span> b = <span class="dv">1</span> ; b &lt;= <span class="dv">9</span> ; ++b )
+            <span class="bu">std::</span>cout &lt;&lt; a*b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>変数もカンマで複数宣言できると知った読者は、以下のように書きたくなるだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">for</span> (   <span class="dt">int</span> a = <span class="dv">1</span>, b = <span class="dv">1</span> ;
+            a &lt;= <span class="dv">9</span> ;
+            +++a, ++b,
+            <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        )
+            <span class="bu">std::</span>cout &lt;&lt; a*b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>これは動かない。なぜならば、<code>for文</code>を2つネストさせたループは、<span class="math inline">\(a \times b\)</span>回のループで、変数aが1から9まで変化するそれぞれに対して、変数bが1から9まで変化する。しかし、上の<code>for文</code>ひとつのコードは、変数a, bともに同時に1から9まで変化する。したがって、これは単にa回のループでしかない。</p>
+<p><code>for文</code>では使わない部分を省略することができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">bool</span> b = <span class="kw">true</span>
+    <span class="co">// for文による変数宣言は使わない</span>
+    <span class="cf">for</span> ( ; b ; b = <span class="kw">false</span> )
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span>s ;
+}</code></pre></div>
+<p><code>for文</code>で終了条件を省略した場合、<code>true</code>と同じになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">for</span> (;;)
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>このプログラムは&quot;hello&quot;sと無限に出力し続けるプログラムだ。&quot;for(;;)&quot;は&quot;for(;true;)&quot;と同じ意味であり、&quot;while(true)&quot;とも同じ意味だ。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
