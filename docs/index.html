@@ -6,7 +6,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="author" content="江添 亮" />
   <meta name="date" content="2018-02-27" />
-  <title>江添亮のプログラマーのためのC++入門</title>
+  <title>江添亮のC++入門</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
 div.sourceCode { overflow-x: auto; }
@@ -76,7 +76,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </head>
 <body>
 <div id="header">
-<h1 class="title">江添亮のプログラマーのためのC++入門</h1>
+<h1 class="title">江添亮のC++入門</h1>
 <h2 class="author">江添 亮</h2>
 <h3 class="date">2018-02-27</h3>
 </div>
@@ -164,7 +164,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#インデックスループ-1">インデックスループ</a></li>
 </ul></li>
 <li><a href="#for文">for文</a></li>
+<li><a href="#do文">do文</a></li>
+<li><a href="#break文">break文</a></li>
+<li><a href="#continue文">continue文</a></li>
 </ul></li>
+<li><a href="#vector">vector</a></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -2856,8 +2860,7 @@ loop :
 }</code></pre></div>
 <p>このコードで本当に重要なのは関数helloを呼び出している部分だ。ここが繰り返し実行される文で、<code>ラベル文</code>と<code>goto文</code>は、繰り返し実行を実現するために必要な記述でしかない。</p>
 <p>そこで<code>while(true)</code>だ。<code>while(true)</code>は<code>goto文</code>と<code>ラベル文</code>よりも簡単に無限ループを実現できる。</p>
-<pre><code>while (true)
-    文</code></pre>
+<pre><code>while (true) 文</code></pre>
 <p><code>while文</code>は文を無限に繰り返して実行してくれる。試してみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -2909,6 +2912,7 @@ loop :
 <h2 id="終了条件付きループ-1">終了条件付きループ</h2>
 <p>なるほど、無限ループを書くのに、<code>goto文</code>を使うより<code>while(true)</code>を使ったほうがいいことがわかった。では他のループの場合でも、<code>while文</code>の方が使いやすいだろうか。</p>
 <p>本書を先頭から読んでいる優秀な読者は<code>while(true)</code>の<code>true</code>はbool型の値であることに気がついているだろう。実は<code>while(E)</code>の括弧の中Eは、<code>if(E)</code>と書くのと全く同じ<code>条件</code>なのだ。<code>条件</code>が<code>true</code>であれば繰り返し実行される。<code>false</code>なら繰り返し実行されない。</p>
+<pre><code>while ( 条件 ) 文</code></pre>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="co">// 実行されない</span>
@@ -3137,7 +3141,7 @@ loop_inner :
 }</code></pre></div>
 <p>ここで真に必要なのは、「実際に繰り返したい文」だ。その他の処理は、ループを実現するために必要なコードだ。ループの実現に必要な処理が飛び飛びの場所にあるのは甚だわかりにくい。</p>
 <p><code>for文</code>はそのような問題を解決するための機能だ。</p>
-<pre><code>for ( 変数の宣言 ; 終了条件の確認 ; 各ループの最後に必ず行う処理 )</code></pre>
+<pre><code>for ( 変数の宣言 ; 終了条件の確認 ; 各ループの最後に必ず行う処理 ) 文</code></pre>
 <p><code>for文</code>を使うと、上のコードは以下のように書ける。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -3208,7 +3212,7 @@ i &lt;= <span class="dv">100</span> ;
         )
             <span class="bu">std::</span>cout &lt;&lt; a*b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
 }</code></pre></div>
-<p>これは動かない。なぜならば、<code>for文</code>を2つネストさせたループは、<span class="math inline">\(a \times b\)</span>回のループで、変数aが1から9まで変化するそれぞれに対して、変数bが1から9まで変化する。しかし、上の<code>for文</code>ひとつのコードは、変数a, bともに同時に1から9まで変化する。したがって、これは単にa回のループでしかない。</p>
+<p>これは動かない。なぜならば、<code>for文</code>を2つネストさせたループは、<span class="math inline">\(a \times b\)</span>回のループで、変数aが1から9まで変化するそれぞれに対して、変数bが1から9まで変化する。しかし、上の<code>for文</code>ひとつのコードは、変数a, bともに同時に1から9まで変化する。したがって、これは単にa回のループでしかない。a回のループの中でb回のループをすることで<span class="math inline">\(a \times b\)</span>回のループを実現できる。</p>
 <p><code>for文</code>では使わない部分を省略することができる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -3224,6 +3228,132 @@ i &lt;= <span class="dv">100</span> ;
         <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 }</code></pre></div>
 <p>このプログラムは&quot;hello&quot;sと無限に出力し続けるプログラムだ。&quot;for(;;)&quot;は&quot;for(;true;)&quot;と同じ意味であり、&quot;while(true)&quot;とも同じ意味だ。</p>
+<h2 id="do文">do文</h2>
+<p><code>do文</code>は<code>while文</code>に似ている。</p>
+<pre><code>do 文 while ( 条件 ) ;</code></pre>
+<p>比較のために<code>while文</code>の文法も書いてみると以下のようになる。</p>
+<pre><code>while ( 条件 ) 文</code></pre>
+<p><code>while文</code>はまず<code>条件</code>を確認し<code>true</code>の場合<code>文</code>を実行する。これを繰り返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">false</span> )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p><code>do文</code>はまず<code>文</code>を実行する。しかる後に<code>条件</code>を確認し<code>true</code>の場合繰り返しを行う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">do</span> {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    } <span class="cf">while</span> ( <span class="kw">false</span> ) ;
+}</code></pre></div>
+<p>違いがわかっただろうか。<code>do文</code>は繰り返し実行する<code>文</code>を、<code>条件</code>がなんであれ、最初に一度実行する。</p>
+<p><code>do文</code>を使うと条件にかかわらず文を1回は実行するコードが、文の重複なく書けるようになる。</p>
+<h2 id="break文">break文</h2>
+<p>ループの実行の途中で、ループの中から外に脱出したくなった場合、どうすればいいのだろうか。例えばループを実行中に何らかのエラーを検出したので処理を中止したい場合などだ</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span> ( <span class="kw">true</span> )
+{
+    <span class="co">// 処理</span>
+
+    <span class="cf">if</span> ( is_error() )
+        <span class="co">// エラーのため脱出したくなった</span>
+
+    <span class="co">// 処理</span>
+}</code></pre></div>
+<p><code>break文</code>はループの途中から脱出するための文だ。</p>
+<pre><code>break ;</code></pre>
+<p><code>break文</code>は<code>for文</code>、<code>while文</code>、<code>do文</code>の中でしか使えない。</p>
+<p><code>break文</code>は<code>for文</code>、<code>while文</code>、<code>do文</code>の外側に脱出する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">true</span> )
+    {
+        <span class="co">// 処理</span>
+
+        <span class="cf">break</span> ;
+
+        <span class="co">// 処理</span>
+    }
+}</code></pre></div>
+<p>これは以下のようなコードと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">true</span> )
+    {
+        <span class="co">// 処理</span>
+
+        <span class="cf">goto</span> break_while ;
+
+        <span class="co">// 処理</span>
+    }
+break_while : ;
+}</code></pre></div>
+<p><code>break文</code>は最も内側の<code>繰り返し文</code>から脱出する</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">true</span> ) <span class="co">// 外側</span>
+    {
+        <span class="cf">while</span> ( <span class="kw">true</span> ) <span class="co">// 内側</span>
+        {
+            <span class="cf">break</span> ;
+        }
+        <span class="co">// ここに脱出</span>
+    }
+}</code></pre></div>
+<h2 id="continue文">continue文</h2>
+<p>ループの途中で、今のループを打ち切って次のループに進みたい場合はどうすればいいのだろう。例えば、ループの途中でエラーを検出したので、そのループについては処理を打ち切りたい場合だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">while</span> ( <span class="kw">true</span> )
+{
+    <span class="co">// 処理</span>
+
+    <span class="cf">if</span> ( is_error() )
+        <span class="co">// このループは打ち切りたい</span>
+
+    <span class="co">// 処理</span>
+}</code></pre></div>
+<p><code>continue文</code>はループを打ち切って次のループに行くための文だ。</p>
+<pre><code>continue ;</code></pre>
+<p><code>continue文</code>は<code>for文</code>、<code>while文</code>、<code>do</code>文の中でしか使えない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">true</span> )
+    {
+        <span class="co">// 処理</span>
+
+        <span class="cf">continue</span> ;
+
+        <span class="co">// 処理</span>
+    }
+}</code></pre></div>
+<p>これは以下のようなコードと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">true</span> )
+    {
+        <span class="co">// 処理</span>
+
+        <span class="cf">goto</span> continue_while ;
+
+        <span class="co">// 処理</span>
+
+continue_while : ;
+    }
+}</code></pre></div>
+<p><code>continue</code>文はループの最後に処理を移す。その結果、次のループを実行するかどうかの<code>条件</code>を評価することになる。</p>
+<p><code>continue文</code>は最も内側のループに対応する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">while</span> ( <span class="kw">true</span> ) <span class="co">// 外側</span>
+    {
+        <span class="cf">while</span> ( <span class="kw">true</span> ) <span class="co">// 内側</span>
+        {
+            <span class="cf">continue</span> ;
+            <span class="co">// continueはここに実行を移す</span>
+        }
+    }
+}</code></pre></div>
+<h1 id="vector">vector</h1>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
