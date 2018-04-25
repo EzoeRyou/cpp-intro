@@ -167,8 +167,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#do文">do文</a></li>
 <li><a href="#break文">break文</a></li>
 <li><a href="#continue文">continue文</a></li>
+<li><a href="#再帰関数">再帰関数</a></li>
 </ul></li>
-<li><a href="#vector">vector</a></li>
+<li><a href="#メモリを無限に確保する">メモリを無限に確保する</a><ul>
+<li><a href="#これまでのまとめ">これまでのまとめ</a></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -3353,7 +3356,118 @@ continue_while : ;
         }
     }
 }</code></pre></div>
-<h1 id="vector">vector</h1>
+<h2 id="再帰関数">再帰関数</h2>
+<p>最後に関数でループを実装する方法を示してこの章を終わりにしよう。</p>
+<p>関数は関数を呼び出すことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f() { }
+
+<span class="dt">void</span> g()
+{
+    f() ; <span class="co">// 関数fの呼び出し</span>
+}
+
+<span class="dt">int</span> main()
+{
+    g() ; <span class="co">// 関数gの呼び出し</span>
+}</code></pre></div>
+<p>ではもし、関数が自分自身を呼び出したらどうなるだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    hello() ;
+}
+
+<span class="dt">int</span> main()
+{
+    hello() ;
+}</code></pre></div>
+<ol style="list-style-type: decimal">
+<li>関数<code>main</code>は関数<code>hello</code>を呼び出す</li>
+<li>関数<code>hello</code>は&quot;hello&quot;と出力して関数<code>hello</code>を呼び出す</li>
+</ol>
+<p>関数<code>hello</code>は必ず関数<code>hello</code>を呼び出すので、この実行は無限ループする。</p>
+<p>関数が自分自身を呼び出すことを、<code>再帰(recursion)</code>という。</p>
+<p>なるほど、再帰によって無限ループを実現できることはわかった。では終了条件付きループは書けるだろうか。</p>
+<p>関数は<code>return文</code>によって呼び出し元に戻る。単に'return ;'と書けば再帰はしない。そして、<code>if文</code>によって実行は分岐できる。これを使えば再帰で終了条件付きループが実現できる。</p>
+<p>試しに、ユーザーが0を入力するまでループし続けるプログラムを書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// ユーザーからの入力を返す</span>
+<span class="dt">int</span> input ()
+{
+    <span class="dt">int</span> x { } ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="co">// 0の入力を終了条件としたループ</span>
+<span class="dt">void</span> loop_until_zero()
+{
+    <span class="cf">if</span> ( input() == <span class="dv">0</span> )
+        <span class="cf">return</span> ;
+    <span class="cf">else</span>
+        loop_until_zero() ;
+}
+
+<span class="dt">int</span> main()
+{
+    loop_until_zero() ;
+}</code></pre></div>
+<p>書けた。</p>
+<p>ではインデックスループはどうだろうか。1から10までの整数を出力してみよう。</p>
+<p>インデックスループを実現するには、書き換えられる変数が必要だ。関数は引数で値を渡すことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> g( <span class="dt">int</span> x ) { }
+<span class="dt">void</span> f( <span class="dt">int</span> x ) { g( x<span class="dv">+1</span> ) ; }
+
+<span class="dt">int</span> main() { f( <span class="dv">0</span> ) ; }</code></pre></div>
+<p>これをみると、関数<code>main</code>は関数<code>f</code>に引数0を渡し、関数<code>f</code>は関数<code>g</code>に引数1を渡している。これをもっと再帰的に考えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> until_ten( <span class="dt">int</span> x )
+{
+    <span class="cf">if</span> ( x &gt; <span class="dv">10</span> )
+        <span class="cf">return</span> ;
+    <span class="cf">else</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+        <span class="cf">return</span> until_ten( x + <span class="dv">1</span> ) ;
+    }
+}
+
+<span class="dt">int</span> main()
+{
+    until_ten(<span class="dv">1</span>) ;
+}</code></pre></div>
+<p>関数<code>main</code>は関数<code>until_ten</code>に引数1を渡す。</p>
+<p>関数<code>until_ten</code>は引数が10より大きければ何もせず処理を戻し、そうでなければ引数を出力して再起する。その時引数は+1される。</p>
+<p>これによりインデックスループが実現できる。</p>
+<p>関数は戻り値を返すことができる。再帰で戻り値を使うことにより面白い問題も解くことができる。</p>
+<p>例えば、1と0だけを使った10進数の整数を2進数に変換するプログラムを書いてみよう。</p>
+<pre><code>$ make run
+&gt; 0
+0
+&gt; 1
+1
+&gt; 10
+2
+&gt; 11
+3
+&gt; 1010
+10
+&gt; 1111
+15</code></pre>
+<p>まず10進数と2進数を確認しよう。数学的に言うと「10を底にする」とか「2を底にする」という言い方をする。</p>
+<p>具体的な例を出すと10進数では1,2,3,4,5,6,7,8,9,0の文字を使う。<code>1234</code>は以下のようになる。</p>
+<p><span class="math display">\[
+1234 = 1 \times 10^3 + 2 \times 10^2 + 3 \times 10^1 + 4 \times 10^0 = 1 \times 1000 + 2 \times 100 + 3 \times 10 + 4 \times 1
+\]</span></p>
+<p>10進数で<code>1010</code>は以下のようになる。</p>
+<p><span class="math display">\[
+1010 = 1 \times 10^3 + 0 \times 10^2 + 1 \times 10^1 + 0 \times 10^0 = 1 \times 1000 + 0 \times 100 + 1 \times 10 + 0 \times 1
+\]</span></p>
+<p>2進数では1,0の文字を使う。<code>1010</code>は以下のようになる。</p>
+<p><span class="math display">\[
+1010 = 1 \times 2^3 + 0 \times 2^2 + 1 \times 2^1 + 0 \times 2^0 = 1 \times 8 + 0 \times 4 + 1 \times 2 + 0 \times 1
+\]</span></p>
+<h1 id="メモリを無限に確保する">メモリを無限に確保する</h1>
+<h2 id="これまでのまとめ">これまでのまとめ</h2>
+<p>ここまで読み進めてきた読者は、逐次実行、条件分岐、ループに加えて、変数と関数を理解した。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
