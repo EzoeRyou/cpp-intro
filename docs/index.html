@@ -171,6 +171,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li><a href="#メモリを無限に確保する">メモリを無限に確保する</a><ul>
 <li><a href="#これまでのまとめ">これまでのまとめ</a></li>
+<li><a href="#vector">vector</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -246,7 +247,7 @@ $ cd cpp</code></pre>
 <p>好きなテキストエディターを使って上のサンプルコードをテキストファイルとして記述する。ファイル名は<code>hello.cpp</code>としておこう。</p>
 <pre><code>$ vim hello.cpp</code></pre>
 <p>C++のソースファイルの名前は何でもよいが、慣習で使われている拡張子がいくつかある。本書では<code>.cpp</code>を使う。</p>
-<p>無事にソースファイルが作成できたかどうか確認してみよう。</p>
+<p>無事にソースファイルが作成できたかどうか確認してみよう。現在のカレントディレクトリー下のファイルの一覧を表示するには<code>ls</code>、ファイルの内容を表示するには<code>cat</code>を使う。</p>
 <pre><code>$ ls
 hello.cpp
 $ cat hello.cpp
@@ -3465,9 +3466,633 @@ continue_while : ;
 <p><span class="math display">\[
 1010 = 1 \times 2^3 + 0 \times 2^2 + 1 \times 2^1 + 0 \times 2^0 = 1 \times 8 + 0 \times 4 + 1 \times 2 + 0 \times 1
 \]</span></p>
+<p>2進数の<code>1010</code>は10進数では<code>10</code>になる。</p>
+<p>では問題を解いていこう。</p>
+<p>問題を難しく考えるとかえって解けなくなる。ここではすでに10進数から2進数への変換は解決したものとして考えよう。関数<code>convert</code>によってその問題は解決した。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 2進数への変換</span>
+<span class="dt">int</span> convert( <span class="dt">int</span> n ) ;</code></pre></div>
+<p>まだ我々は関数<code>convert</code>の中身を書いていないが、すでに書き終わったと仮定しよう。するとプログラムの残りの部分は以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> convert( <span class="dt">int</span> n ) ;
+
+<span class="co">// 入力</span>
+<span class="dt">int</span> input()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;&gt; &quot;</span> ;
+    <span class="dt">int</span> x{} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="co">// 出力</span>
+<span class="dt">void</span> output( <span class="dt">int</span> binary )
+{
+    <span class="bu">std::</span>cout &lt;&lt; binary &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 入力、変換、出力のループ</span>
+    <span class="cf">while</span>( <span class="kw">true</span> )
+    {
+        <span class="kw">auto</span> decimal = input() ;
+        <span class="kw">auto</span> binary = convert( decimal ) ;
+        output( binary ) ;
+    } 
+}</code></pre></div>
+<p>後は関数<code>convert</code>を実装すればよいだけだ。</p>
+<p>関数<code>convert</code>に引数を渡した時の結果を考えてみよう。convert(1010)は10を返し、convert(1111)は15を返す。</p>
+<p>ではconvert(-1010)の結果はどうなるだろうか。これは-10になる。</p>
+<p>負数と正数の違いを考えるのは面倒だ。ここでは正数を引数として与えると10進数から2進数へ変換した答えを返してくる魔法のような関数<code>solve</code>をすでに書き終えたと仮定しよう。我々はまだ関数<code>solve</code>を書いていないが、その問題は未来の自分に押し付けよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 1,0のみを使った10進数から</span>
+<span class="co">// 2進数へ変換する関数</span>
+<span class="dt">int</span> solve( <span class="dt">int</span> n ) ;</code></pre></div>
+<p>すると、関数<code>convert</code>がやるのは負数と正数の処理だけでよい。</p>
+<ol style="list-style-type: decimal">
+<li>引数が正数の場合はそのまま関数<code>solve</code>に渡してreturn</li>
+<li>引数が負数の場合は絶対値を関数<code>solve</code>に渡して負数にしてreturn</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> convert( <span class="dt">int</span> n )
+{
+    <span class="co">// 引数が正数の場合</span>
+    <span class="cf">if</span> ( n &gt; <span class="dv">0</span> )
+        <span class="co">// そのまま関数solveに渡してreturn</span>
+        <span class="cf">return</span> solve( n ) ;
+    <span class="cf">else</span> <span class="co">// 引数が負数の場合</span>
+        <span class="co">// 絶対値を関数solveに渡して負数にしてreturn</span>
+        <span class="cf">return</span> - solve( -n ) ;
+}</code></pre></div>
+<p>nが負数の場合の絶対値は-nで得られる。その場合、関数<code>solve</code>の答えは正数なので負数にする。</p>
+<p>あとは関数<code>solve</code>を実装するだけだ。</p>
+<p>今回、引数の整数を10進数で表現した場合に2,3,4,5,6,7,8,9が使われている場合は考えないものとする。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// OK</span>
+solve(<span class="dv">10111101</span>) ;
+<span class="co">// ありえない</span>
+solve(<span class="dv">2</span>) ;</code></pre></div>
+<p>再帰で問題を解くには再帰的な考え方が必要だ。再帰的な考え方では、問題の一部のみを解き、残りは自分自身に丸投げする。</p>
+<p>まずとても簡単な1桁の変換を考えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">solve(<span class="dv">0</span>) ; <span class="co">// 0</span>
+solve(<span class="dv">1</span>) ; <span class="co">// 1</span></code></pre></div>
+<p>引数が0か1の場合、単にその値を返すだけだ。関数<code>solve</code>には正数しか渡されないので、負数は考えなくてよい。すると、以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> solve( <span class="dt">int</span> n )
+{
+    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )
+        <span class="cf">return</span> n ;
+    <span class="cf">else</span>
+        <span class="co">// その他の場合</span>
+}</code></pre></div>
+<p>その他の場合とは、桁数が多い場合だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">solve(<span class="dv">10</span>) ;  <span class="co">// 2</span>
+solve(<span class="dv">11</span>) ;  <span class="co">// 3</span>
+solve(<span class="dv">110</span>) ; <span class="co">// 4</span>
+solve(<span class="dv">111</span>) ; <span class="co">// 5</span></code></pre></div>
+<p>関数<code>solve</code>が解決するのは最下位桁だ。110の場合は0で、111の場合は1となる。最も右側の桁のみを扱う。数値から10進数で表記したときの最下位桁を取り出すには、10で割った余りが使える。覚えているだろうか。剰余演算子のoperator %を。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> solve( <span class="dt">int</span> n )
+{
+    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )
+        <span class="cf">return</span> n ;
+    <span class="cf">else</span> <span class="co">// 未完成</span>
+        <span class="cf">return</span> n%<span class="dv">10</span> ;
+}</code></pre></div>
+<p>結果は以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">solve(<span class="dv">10</span>) ;  <span class="co">// 0</span>
+solve(<span class="dv">11</span>) ;  <span class="co">// 1</span>
+solve(<span class="dv">110</span>) ; <span class="co">// 0</span>
+solve(<span class="dv">111</span>) ; <span class="co">// 1</span></code></pre></div>
+<p>これで関数<code>solve</code>は最下位桁に完全に対応した。しかしそれ以外の桁はどうすればいいのだろう。</p>
+<p>ここで再帰的な考え方が必要だ。関数<code>solve</code>はすでに最下位桁に完全に対応している。ならば次の桁を最下位桁とした数値で関数<code>solve</code>を再帰的に呼び出せばいいのではないか。</p>
+<p>以下はsolve(n)が再帰的に呼び出す関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">solve(<span class="dv">10</span>) ;  <span class="co">// solve(1)</span>
+solve(<span class="dv">11</span>) ;  <span class="co">// solve(1)</span>
+solve(<span class="dv">100</span>) ; <span class="co">// solve(10)→solve(1)</span>
+solve(<span class="dv">110</span>) ; <span class="co">// solve(11)→solve(1)</span>
+solve(<span class="dv">111</span>) ; <span class="co">// solve(11)→solve(1)</span></code></pre></div>
+<p>10進数表記された数値から最下位桁を取り除いた数値にするというのは、11を1に, 111を11にする処理だ。これは数値を10で割ればよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dv">10</span>  / <span class="dv">10</span> ; <span class="co">// 1</span>
+<span class="dv">11</span>  / <span class="dv">10</span> ; <span class="co">// 1</span>
+<span class="dv">100</span> / <span class="dv">10</span> ; <span class="co">// 10</span>
+<span class="dv">110</span> / <span class="dv">10</span> ; <span class="co">// 11</span>
+<span class="dv">111</span> / <span class="dv">10</span> ; <span class="co">// 11</span></code></pre></div>
+<p>10進数表記は桁が一つあがると10倍される。だから10で割れば最下位桁が消える。ところで、我々は計算しようとしているのは2進数だ。2進数では桁が一つあがると2倍される。なので、再帰的に関数<code>solve</code>を呼び出して得られた結果は2倍しなければならない。そして足し合わせる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> solve( <span class="dt">int</span> n )
+{
+    <span class="co">// 1桁の場合</span>
+    <span class="cf">if</span> ( n &lt;= <span class="dv">1</span> )
+        <span class="cf">return</span> n ; <span class="co">// 単に返す</span>
+    <span class="cf">else</span> <span class="co">// それ以外</span>
+        <span class="cf">return</span>
+            <span class="co">// 最下位桁の計算</span>
+            n%<span class="dv">2</span>
+            <span class="co">// 残りの桁を丸投げする</span>
+            <span class="co">// 次の桁なので2倍する</span>
+            + <span class="dv">2</span> * solve( n/<span class="dv">10</span> ) ;
+}</code></pre></div>
+<p>冗長なコメントを除いて短くすると以下の通り</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> solve( <span class="dt">int</span> n )
+{
+    <span class="cf">if</span> ( n &lt;= <span class="dv">1</span> )
+        <span class="cf">return</span> n ;
+    <span class="cf">else</span>
+        <span class="cf">return</span> n%<span class="dv">2</span> + <span class="dv">2</span> * solve( n/<span class="dv">10</span> ) ;
+}</code></pre></div>
+<p>再帰ではないループで関数<code>solve</code>を実装するとどうなるのだろうか。</p>
+<p>引数の数値が何桁あっても対応できるよう、ループで1桁づつ処理していくのはかわらない。</p>
+<p>もういちど2進数の計算を見てみよう。</p>
+<p><span class="math display">\[
+1010 = 1 \times 2^3 + 0 \times 2^2 + 1 \times 2^1 + 0 \times 2^0 = 1 \times 8 + 0 \times 4 + 1 \times 2 + 0 \times 1
+\]</span></p>
+<p>1桁目は0で、この値は<span class="math inline">\(0 \times 2^0\)</span>、2桁目は1で、この値は<span class="math inline">\(1 \times 2^1\)</span>になる。</p>
+<p>一般に、i桁目の値は<span class="math inline">\(i桁目の数字 \times 2^{i-1}\)</span>になる。</p>
+<p>すると解き方としては、各桁の値を計算した和を返せばよい</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> solve( <span class="dt">int</span> n )
+{
+    <span class="co">// 和</span>
+    <span class="dt">int</span> result = <span class="dv">0</span> ;
+    <span class="co">// i桁目の数字に乗ずる値</span>
+    <span class="dt">int</span> i = <span class="dv">1</span> ;
+
+    <span class="co">// 桁がなくなれば終了</span>
+    <span class="cf">while</span> ( n != <span class="dv">0</span> )
+    {
+        <span class="co">// 現在の桁を計算して足す</span>
+        result += n%<span class="dv">10</span> * i ;
+        <span class="co">// 次の桁に乗ずる値</span>
+        i *= <span class="dv">2</span> ;
+        <span class="co">// 桁を一つ減らす</span>
+        n /= <span class="dv">10</span> ;
+    }
+
+    <span class="cf">return</span> result ;
+}</code></pre></div>
+<p>再帰を使うコードは、再帰を理解できれば短く簡潔でわかりやすい。ただし、再帰を理解するためにはまず再帰を理解しなければならない。</p>
+<p>再帰は万能ではない。そもそも関数とは、別の関数から呼ばれるものだ。関数<code>main</code>だけは特別で、関数<code>main</code>を呼び出すことはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    main() ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>関数の実行が終了した場合、呼び出し元に処理が戻る。そのために関数は呼び出し元を覚えていなければならない。これには通常<code>スタック</code>とよばれるメモリーを消費する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f() { }            <span class="co">// gに戻る</span>
+vopd g() { f() ; }      <span class="co">// mainに戻る </span>
+<span class="dt">int</span> main() { g() ; }</code></pre></div>
+<p>関数の中の変数も通常<code>スタック</code>に確保される。これもメモリーを消費する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f() { }
+
+<span class="dt">void</span> g()
+{
+    <span class="dt">int</span> x {} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    f() ;   <span class="co">// 関数を呼び出す</span>
+    <span class="co">// 関数を呼び出した後に変数を使う</span>
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>このコードでは、関数<code>g</code>が変数<code>x</code>を用意し、関数<code>f</code>を呼び出し、処理が戻ったら変数<code>x</code>を使っている。このコードが動くためには、変数<code>x</code>は関数<code>f</code>が実行されている間もスタックメモリーを消費し続けなければならない。</p>
+<p>スタックメモリーは有限であるので、以下のような再帰による無限ループは、いつかスタックメモリーを消費し尽して実行が止まるはずだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> hello()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    hello() ;
+}
+
+<span class="dt">int</span> main() { hello() ; }</code></pre></div>
+<p>しかし、大半の読者の環境ではプログラムの実行が止まらないはずだ。これはコンパイラーの末尾再帰の最適化によるものだ。</p>
+<p>末尾再帰とは、関数のすべての条件分岐の末尾が再帰で終わっている再帰のことだ。</p>
+<p>例えば以下は階乗を計算する再帰で書かれたループだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> factorial( <span class="dt">int</span> n )
+{
+    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )
+        <span class="cf">return</span> <span class="dv">0</span> ;
+    <span class="cf">else</span> <span class="cf">if</span> ( n == <span class="dv">1</span> )
+        <span class="cf">return</span> <span class="dv">1</span> ;
+    <span class="cf">else</span>
+        <span class="cf">return</span> n * factorial(n<span class="dv">-1</span>) ;
+}</code></pre></div>
+<p>factorial(n)は<span class="math inline">\(1 \times 2 \times 3 \times ... \times n\)</span>を計算する。</p>
+<p>この関数は、引数<code>n</code>が1未満であれば引数が間違っているので0を返す。そうでない場合でnが1であれば1を返す。それ以外の場合、n * factorial(n-1)を返す。</p>
+<p>このコードは末尾再帰になっている。末尾再帰は非再帰のループに機械的に変換できる特徴を持っている。例えば以下のように、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> factorial( <span class="dt">int</span> n )
+{
+    <span class="dt">int</span> temp = n ;
+
+loop :
+    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )
+        <span class="cf">return</span> <span class="dv">0</span> ;
+    <span class="cf">else</span> <span class="cf">if</span> ( n == <span class="dv">1</span> )
+        <span class="cf">return</span> temp * <span class="dv">1</span> ;
+    <span class="cf">else</span>
+    {
+        n = n<span class="dv">-1</span> ;
+        temp *= n ;
+        <span class="cf">goto</span> loop ;
+    }
+}</code></pre></div>
+<p>関数のすべての条件分岐の末尾が再帰になっているため、機械的に関数呼び出しをgoto文で置き換えることができる。</p>
+<p>ただし、プログラミング言語C++の標準規格は、C++の実装に末尾再帰の最適化を義務付けてはいない。そのため、末尾再帰が最適化されるかどうかはC++コンパイラー次第だ。</p>
+<p>再帰は強力なループの実現方法で、再帰的な問題を解くのに最適だが、落とし穴もある。</p>
 <h1 id="メモリを無限に確保する">メモリを無限に確保する</h1>
 <h2 id="これまでのまとめ">これまでのまとめ</h2>
-<p>ここまで読み進めてきた読者は、逐次実行、条件分岐、ループに加えて、変数と関数を理解した。</p>
+<p>ここまで読み進めてきた読者は、逐次実行、条件分岐、ループに加えて、変数と関数を理解した。これだけの要素を習得したならば、本質的にはプログラミングはほぼできるようになったと言ってよい。ただし、まだできないことがある。動的なメモリ確保だ。</p>
+<p>標準入力から0が入力されるまで任意個の整数値を受け取り、小さい値から順に出力するプログラムを実装しよう。以下はそのようなプログラムの実行例だ。</p>
+<pre><code>$ make run
+100
+-100
+1
+6
+3
+999
+-5000
+0
+-5000
+-100
+1
+3
+6
+100
+999</code></pre>
+<p>0が入力されるまで、1番目に、2番目に小さい値はわからない。そのため、この問題の解決には、入力をすべて保持しておく必要がある。</p>
+<p>ここで必要なのは、値をいくらでも保持しておく方法と、値に順番があり、i番目の値を間接的に指定して読み書きできる方法だ。その方法としてC++には標準ライブラリ<code>std::vector</code>がある。</p>
+<h2 id="vector">vector</h2>
+<p><code>std::vector&lt;T&gt;</code>はT型の値をいくらでも保持できる。<code>T</code>には保持する値の型を指定する。例えばintとかdoubleとかstd::stringだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 整数型intの値を保持するvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; vi ;
+
+    <span class="co">// 浮動小数点数型doubleの値を保持するvector</span>
+    ~<span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt; vd ;
+
+    <span class="co">// 文字列型std::stringの値を保持するvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="bu">std::</span>string&gt; vs ;
+}</code></pre></div>
+<p><code>std::vector&lt;T&gt;</code>というのはそれ自体が型になっている。そしてTには型を指定する。ということは、vector型の値を保持するvectorも書けるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 整数型intを保持するvectorを保持するvector</span>
+    <span class="bu">std::</span>vector&lt; <span class="bu">std::</span>vector&lt; <span class="dt">int</span> &gt; &gt; vvi ;
+}</code></pre></div>
+<p>もちろん、上のvectorを保持するvectorも書ける。その場合、<code>std::vector&lt;std::vector&lt;std::vector&lt;int&gt;&gt;&gt;</code>になる。このvectorを保持するvectorも当然書けるが省略する。</p>
+<p><code>std::vector</code>型の変数にはメンバー関数<code>push_back</code>を使うことで値を保持できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v  ;
+
+    v.push_back(<span class="dv">1</span>) ;
+    v.push_back(<span class="dv">2</span>) ;
+    v.push_back(<span class="dv">3</span>) ;
+}</code></pre></div>
+<p><code>メンバー関数(member function)</code>というのは特別な関数で、詳細はまだ説明しない。ここで覚えておくべきこととしては、メンバー関数は一部の変数に使うことができること、メンバー関数<code>f</code>を変数<code>x</code>に使うには'x.f(...)'のように書くこと、を覚えておこう。</p>
+<p><code>std::vector</code>はメモリの続く限りいくらでも値を保持できる。試しに1000個の整数を保持させてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">0</span> ; i != <span class="dv">0</span> ; ++i )
+    {
+        v.push_back( i ) ;
+    }
+}</code></pre></div>
+<p>このプログラムは0から999までの1000個の整数を<code>std::vector</code>に保持させている。</p>
+<p><code>std::vector</code>では保持する値のことを要素という。要素は順番を持っている。メンバー関数<code>push_back</code>は最後の要素の次に要素を追加する。最初に要素はない。もしくは0個ある空の状態だと言ってもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="co">// vは空</span>
+
+    <span class="co">// 要素数1、中身は{1}</span>
+    v.push_back(<span class="dv">1</span>) ;
+    <span class="co">// 要素数2、中身は{1,2}</span>
+    v.push_back(<span class="dv">2</span>) ;
+    <span class="co">// 要素数3、中身は{1,2,3}</span>
+    v.push_back(<span class="dv">3</span>) ;
+}</code></pre></div>
+<p><code>std::vector</code>はメンバー関数<code>size()</code>で現在の要素数を取得できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="co">// 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.size() ;
+    v.push_back(<span class="dv">1</span>) ;
+    <span class="co">// 1</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.size() ;
+    v.push_back(<span class="dv">2</span>) ;
+    <span class="co">// 2</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.size() ;
+}</code></pre></div>
+<p>せっかく値を入れたのだから取り出したいものだ。<code>std::vector</code>ではメンバー関数<code>at(i)</code>を使うことで、i番目の要素を取り出すことができる。このiのことを添字、インデックスと呼ぶ。ここで注意してほしいのは、最初の要素は0番目で、次の要素は1番目だということだ。最後の要素は'size()-1'番目になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">0</span> ; i != <span class="dv">10</span> ; ++i )
+    {
+        v.push_back(i) ;
+    }
+
+    <span class="co">// vの中身は{0,1,2,3,4,5,6,7,8,9}</span>
+
+    <span class="co">// 0, 0番目の最初の要素</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">0</span>) ;
+    <span class="co">// 4, 5番目の要素</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">5</span>) ;
+    <span class="co">// 9, 10番目の最後の要素</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">9</span>) ;
+}</code></pre></div>
+<p>この例ではループを使っている。読者はすでにループについては理解しているはずだ。上のコードが理解できないのであれば、もう一度ループの章に戻って学び直すべきだ。</p>
+<p>もし<code>at(i)</code>に要素数を超えるiを渡してしまった場合どうなるのだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v { } ;
+    v.push_back(<span class="dv">0</span>) ;
+    <span class="co">// vには0番目の要素しかない</span>
+    <span class="co">// 1番目はあやまり</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">1</span>) ;
+}</code></pre></div>
+<p>実行して確かめてみよう。</p>
+<pre><code>$ ./program
+terminate called after throwing an instance of &#39;std::out_of_range&#39;
+  what():  vector::_M_range_check: __n (which is 1) &gt;= this-&gt;size() (which is 1)
+Aborted (core dumped)</code></pre>
+<p>なにやら恐ろしげなメッセージが表示されるではないか。しかし心配することはない。このメッセージはむしろ嬉しいメッセージだ。変数vに1番目の要素がないことを発見してくれたという実行時のエラーメッセージだ。すでに学んだように、エラーメッセージは恐れるものではない。エラーメッセージは嬉しいものだ。エラーメッセージが出たらありがとう。エラーメッセージがあるおかげでバグの存在がわかる。</p>
+<p>このメッセージの本当の意味はいずれ例外やデバッガーを解説する章で説明するとして、vectorの要素数を超える指定をしてはいけないことを肝に銘じておこう。もちろん、-1もダメだ。</p>
+<p>メンバー関数<code>at(i)</code>に与える引数<code>i</code>の型は整数型ではあるのだが<code>int</code>型ではない。<code>std::size_t</code>型という特殊な型になる。メンバー関数<code>size</code>も同様に<code>std::size_t</code>型を返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="co">// std::size_t型</span>
+    <span class="bu">std::</span>size_t size = v.size() ;
+
+    v.push_back(<span class="dv">0</span>) ;
+
+    <span class="co">// std::siz_t型</span>
+    <span class="bu">std::</span>size_t i = <span class="dv">0</span> ;
+    v.at( i ) ;
+}</code></pre></div>
+<p>なぜ<code>int</code>型ではダメなのか。その謎は整数の章で明らかになる。ここでは<code>std::size_t</code>型は負数が使えない整数型だということだけ覚えておこう。<code>std::size_t</code>型に-1はない。vectorの要素指定では負数は使えないので、負数が使えない変数を使うのは理にかなっている。</p>
+<p>さて、これまでに学んだ知識だけを使って、<code>std::vector</code>のすべての要素を順番通りに出力するコードが書けるはずだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">0</span> ; i != <span class="dv">10</span> ; ++i )
+    {
+        v.push_back(i) ;
+    }
+
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != v.size() ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+    }
+}</code></pre></div>
+<p>このコードが書けるということは、もう標準入力から0が入力されるまで任意個の値を受け取り、入力された順番で出力するプログラムも書けるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> input()
+{
+    <span class="dt">int</span> x{} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="cf">return</span> x ;
+}
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+    <span class="dt">int</span> x { } ;
+
+    <span class="co">// 入力</span>
+    <span class="cf">while</span> ( ( x = input() ) != <span class="dv">0</span> )
+    {
+        v.push_back( x ) ;
+    }
+
+    <span class="co">// 出力</span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != v.size() ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+    }
+}</code></pre></div>
+<p>入力された順番に出力できるということは、その逆順にも出力できるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">for</span> ( <span class="bu">std::</span>size_t i = v.size()<span class="dv">-1</span> ; i != <span class="dv">0</span> ; ++i )
+{
+    <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+}
+
+<span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">0</span>) ;</code></pre></div>
+<p>最後に'v.at(0)'を出力しているのは、ループが'i == 0'のときに終了してしまうからだ。つまり最後に出力すべきvector最初の要素である'v.at(0)'が出力されない。</p>
+<p><code>std::size_t</code>型は-1が使えないため、このようなコードになってしまう。<code>int</code>型を使えば負数は使えるのだが、<code>int</code>型と<code>std::size_t</code>型の比較は様々な理由で問題がある。その理由は整数の章で深く学ぶことになるだろう。</p>
+<p>ところで、問題は入力された整数を小さい順に出力することだった。この問題を考えるために、まずvectorの中に入っている要素から最も小さい整数の場所を探すプログラムを考えよう。</p>
+<p>問題を考えるに当たって、いちいち標準入力から入力を取るのも面倒なので、あらかじめvectorに要素をいれておく方法を学ぶ。実は、vectorの要素は以下のように書けば指定することができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 要素{1, 2, 3}</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span> } ;
+
+    <span class="co">// 1</span>
+    <span class="kw">auto</span> x = v.at(<span class="dv">0</span>) ;
+    <span class="co">// 2</span>
+    <span class="kw">auto</span> y = v.at(<span class="dv">1</span>) ;
+    <span class="co">// 3</span>
+    <span class="kw">auto</span> z = v.at(<span class="dv">2</span>) ;
+}</code></pre></div>
+<p>この例では、1, 2, 3の整数が書かれた順番であらかじめvectorの要素として入った状態になる。</p>
+<p>さて、以下のような要素のvectorから最も小さい整数を探すプログラムを考えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">8</span>, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">9</span>, <span class="dv">3</span> } ;</code></pre></div>
+<p>これを見ると、最も小さい整数は4番目(最初の要素は0番目なので4番目)にある2だ。ではどうやって探すのだろうか。</p>
+<p>解決方法としては先頭から末尾まで要素を一つづつ比較して、最も小さい要素を見つけ出す。まず0番目の8が最も小さいと仮定する。現在わかっている中で最も小さい要素のインデックスを記録するために変数minを作っておこう</p>
+<pre><code>min = 0
+8 3 7 4 2 9 3
+^</code></pre>
+<p>次に1番目の3とmin番目を比較する。1番目の方が小さいので変数minに1を代入する。</p>
+<pre><code>min = 1
+8 3 7 4 2 9 3
+  ^</code></pre>
+<p>2番目の7とmin番目を比較するとまだ1番目のほうが小さい。3番目の4と比較してもまだmin番目の方が小さい。</p>
+<p>4番目の2とmin番目を比較すると、4番目の方が小さい。変数minに4を代入しよう。</p>
+<pre><code>min = 4
+8 3 7 4 2 9 3
+        ^</code></pre>
+<p>5番目と6番目もmin番目より大きいので、これで変数minに代入された4番目の要素が最も小さいことがわかる。</p>
+<p>vectorの変数をv、要素数をsizeとする。変数minには現在わかっている中で最も小さい要素へのインデックスが代入される。</p>
+<ol style="list-style-type: decimal">
+<li>変数minに0を代入する。</li>
+<li>size回のループを実行する</li>
+<li>変数iに0からsize-1までの整数を代入する</li>
+<li>'v.at(i) &lt; v.at(min)'ならばmin = i</li>
+</ol>
+<p>さっそく書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// vecotrの変数をv</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">8</span>, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">9</span>, <span class="dv">3</span> } ;
+    <span class="co">// 要素数をsizeとする</span>
+    <span class="bu">std::</span>size_t size = v.size() ;
+
+    <span class="co">// 変数minに0を代入する</span>
+    <span class="bu">std::</span>size_t min = <span class="dv">0</span> ;
+
+    <span class="co">// size回のループを実行する</span>
+    <span class="co">// 変数iに0からsize-1までの整数を代入する</span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">1</span> ; i != size ; ++i )
+    {
+        <span class="co">// &#39;v.at(i) &lt; v.at(min)&#39;ならばmin = i</span>
+        <span class="cf">if</span> ( v.at(i) &lt; v.at(min) )
+            min = i ;
+    }
+
+    <span class="co">// 一番小さい値を出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.at(min) ;
+}</code></pre></div>
+<p>うまくいった。</p>
+<p>ところで、最終的に解きたい問題とは、vectorのすべての要素を小さい順に出力するということだ。すると、もっと小さい要素を出力した次に、2番目に小さい要素、3番目に小さい要素・・・と出力していく必要がある。</p>
+<p>2番目に小さい要素を見つけるためには、1番目に小さい要素を探さなければよい。そこで、発見した最も小さい要素と先頭の要素を交換してしまい、先頭は無視して最も小さい要素を探すことを繰り返すと実現できる。</p>
+<p>例えば以下のような要素があるとして、</p>
+<pre><code>8 3 7 4 2 9 3
+        ^</code></pre>
+<p>最も小さい要素である4番目の2と0番目の8を交換する。</p>
+<pre><code>2 3 7 4 8 9 3
+^       ^
++-------+</code></pre>
+<p>そして、0番目は無視して最も小さい要素を探す。</p>
+<pre><code>3 7 4 8 9 3
+^</code></pre>
+<p>この場合、最も小さいのは0番目と5番目の3だ。どちらも同じだが今回は0番目を選ぶ。もともと0番目にあるので0番目と0番目を交換した結果は変わらない。</p>
+<p>そして、新しい0番目は無視して最も小さい要素を探す。</p>
+<pre><code>7 4 8 9 3
+        ^</code></pre>
+<p>こんどは4番目の3だ。これも先頭と交換する</p>
+<pre><code>3 4 8 9 7
+^       ^
++-------+</code></pre>
+<p>これを繰り返していけば、小さい順に要素を探していくことができる。</p>
+<p>この処理を行うコードを考えるために、先ほどと似たようなコードを見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">8</span>, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">9</span>, <span class="dv">3</span> } ;
+    <span class="bu">std::</span>size_t size = v.size() ;
+
+    <span class="co">// この部分を繰り返す？ </span>
+    { <span class="co">// これ全体がひとつのブロック文</span>
+        <span class="bu">std::</span>size_t min = <span class="dv">0</span> ;
+
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">1</span> ; i != size ; ++i )
+        {
+            <span class="cf">if</span> ( v.at(i) &lt; v.at(min) )
+                min = i ;
+        }
+
+        <span class="co">// 出力</span>
+        <span class="bu">std::</span>cout &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+
+        <span class="co">// 先頭と交換</span>
+    }
+}</code></pre></div>
+<p>このコードはそのまま使えない。今回考えた方法では、先頭が一つづつずれていく。そのために、最も小さい要素を探すループを、更にループさせる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 現在の先頭</span>
+<span class="cf">for</span> ( <span class="bu">std::</span>size_t head = <span class="dv">0</span> ; head != size ; ++head )
+{
+    <span class="co">// 現在の先頭を仮の最小の要素とみなす</span>
+    <span class="bu">std::</span>size_t min = head ;    
+    <span class="co">// 現在の先頭の次の要素から探す</span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = head + <span class="dv">1</span> ; i != size ; ++i )
+    {
+        <span class="cf">if</span> ( v.at(i) &lt; v.at(min)
+            min = i ;
+    }
+
+    <span class="bu">std::</span>cout &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+
+    <span class="co">// 先頭と交換</span>
+}</code></pre></div>
+<p>次に先頭(0番目)と現在見つけた最小の要素(min番目)を交換する方法を考えよう。</p>
+<p>vectorのn番目の要素の値をxに変更するには、単に<code>v.at(n) = x</code>と書けばよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;
+
+    v.at(<span class="dv">0</span>) = <span class="dv">4</span> ;
+    <span class="co">// vは{4,2,3}</span>
+}</code></pre></div>
+<p>すると、vectorのi番目の要素にj番目の要素値を入れるには'v.at(i) = v.at(j)'と書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;
+    v.at(<span class="dv">0</span>) = v.at(<span class="dv">2</span>) ;
+    <span class="co">// vは{3,2,3}</span>
+}</code></pre></div>
+<p>変数と全く同じだ。</p>
+<p>しかし、変数aに変数bの値を代入すると、変数aの元の値は消えてしまう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = <span class="dv">2</span> ;
+
+    <span class="co">// aの元の値は上書きされる</span>
+    a = b ;
+    <span class="co">// a == 2</span>
+    b = a ;
+    <span class="co">// b == 2</span>
+}</code></pre></div>
+<p>変数a, bの値を交換するためには、変数への代入の前に、別の変数に値を一時退避しておく必要がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = <span class="dv">2</span> ;
+
+    <span class="co">// 退避</span>
+    <span class="kw">auto</span> temp = a ;
+
+    a = b ;
+    b = temp ;
+
+    <span class="co">// a == 2</span>
+    <span class="co">// b == 1</span>
+}</code></pre></div>
+<p>さて、これで問題を解く準備は全て整った。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">8</span>, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">9</span>, <span class="dv">3</span> } ;
+    <span class="bu">std::</span>size_t size = v.size() ;
+   
+    <span class="co">// 先頭をずらすループ </span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t head = <span class="dv">0</span> ; head != size ; ++head )
+    {
+        <span class="bu">std::</span>size_t min = head ;
+        <span class="co">// 現在の要素の範囲から最小値を見つけるループ</span>
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = head<span class="dv">+1</span> ; i != size ; ++i )
+        {
+            <span class="cf">if</span> ( v.at(i) &lt; v.at(min) )
+                min = i ;
+        }
+        <span class="co">// 出力</span>
+        <span class="bu">std::</span>cout &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+
+        <span class="co">// 最小値を先頭と交換</span>
+        <span class="kw">auto</span> temp = v.at(head) ;
+        v.at(head) = v.at(min) ;
+        v.at(min) = temp ;
+    }
+
+    <span class="co">// 実行した後</span>
+}</code></pre></div>
+<p>ところで、このプログラムの「実行した後」地点でのvectorの中身はどうなっているだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">8</span>,<span class="dv">3</span>,<span class="dv">7</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">9</span>,<span class="dv">3</span> } ;
+
+    <span class="co">// 上と同じコードなので省略</span>
+
+    <span class="co">// 実行した後</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span>, size = v.size() ; i != size ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+    }
+}</code></pre></div>
+<p>これを実行すると以下のようになる。</p>
+<pre><code>$ make run
+2 3 3 4 7 8 9
+2 3 3 4 7 8 9</code></pre>
+<p>なんとvectorの要素も小さい順に並んでいる。この状態のことを、ソートされているという。ループの中で最も小さい値を出力していく代わりに、まずソートして先頭から値を出力してもよいということだ。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
