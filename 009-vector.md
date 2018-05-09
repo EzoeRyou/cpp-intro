@@ -193,8 +193,8 @@ int main()
     v.push_back(0) ;
 
     // std::siz_t型
-    std::size_t i = 0 ;
-    v.at( i ) ;
+    std::size_t index = 0 ;
+    v.at( index ) ;
 }
 ~~~
 
@@ -208,14 +208,14 @@ int main()
 
     std::vector<int> v ;
 
-    for ( int i = 0 ; i != 10 ; ++i )
+    for ( int iota = 0 ; iota != 10 ; ++iota )
     {
-        v.push_back(i) ;
+        v.push_back(iota) ;
     }
 
-    for ( std::size_t i = 0 ; i != v.size() ; ++i )
+    for ( std::size_t index = 0 ; index != v.size() ; ++index )
     {
-        std::cout << v.at(i) << " "s ;
+        std::cout << v.at(index) << " "s ;
     }
 }
 ~~~
@@ -241,9 +241,9 @@ int main()
     }
 
     // 出力
-    for ( std::size_t i = 0 ; i != v.size() ; ++i )
+    for ( std::size_t index = 0 ; index != v.size() ; ++index )
     {
-        std::cout << v.at(i) << " "s ;
+        std::cout << v.at(index) << " "s ;
     }
 }
 ~~~
@@ -251,9 +251,9 @@ int main()
 入力された順番に出力できるということは、その逆順にも出力できるということだ。
 
 ~~~c++
-for ( std::size_t i = v.size()-1 ; i != 0 ; ++i )
+for ( std::size_t index = v.size()-1 ; index != 0 ; --index )
 {
-    std::cout << v.at(i) << " "s ;
+    std::cout << v.at(index) << " "s ;
 }
 
 std::cout << v.at(0) ;
@@ -326,8 +326,8 @@ vectorの変数をv、要素数をsizeとする。変数minには現在わかっ
 
 1. 変数minに0を代入する。
 2. size回のループを実行する
-3. 変数iに0からsize-1までの整数を代入する
-4. 'v.at(i) < v.at(min)'ならばmin = i
+3. 変数indexに0からsize-1までの整数を代入する
+4. 'v.at(index) < v.at(min)'ならばmin = index
 
 さっそく書いてみよう。
 
@@ -344,11 +344,11 @@ int main()
 
     // size回のループを実行する
     // 変数iに0からsize-1までの整数を代入する
-    for ( std::size_t i = 1 ; i != size ; ++i )
+    for ( std::size_t index = 1 ; index != size ; ++index )
     {
-        // 'v.at(i) < v.at(min)'ならばmin = i
-        if ( v.at(i) < v.at(min) )
-            min = i ;
+        // 'v.at(index) < v.at(min)'ならばmin = index
+        if ( v.at(index) < v.at(min) )
+            min = index ;
     }
 
     // 一番小さい値を出力
@@ -415,10 +415,10 @@ int main()
     { // これ全体がひとつのブロック文
         std::size_t min = 0 ;
 
-        for ( std::size_t i = 1 ; i != size ; ++i )
+        for ( std::size_t index = 1 ; index != size ; ++index )
         {
-            if ( v.at(i) < v.at(min) )
-                min = i ;
+            if ( v.at(index) < v.at(min) )
+                min = index ;
         }
 
         // 出力
@@ -435,13 +435,13 @@ int main()
 // 現在の先頭
 for ( std::size_t head = 0 ; head != size ; ++head )
 {
-    // 現在の先頭を仮の最小の要素とみなす
+    // 現在の先頭であるmin番目を仮の最小の要素とみなすのでhead
     std::size_t min = head ;    
-    // 現在の先頭の次の要素から探す
-    for ( std::size_t i = head + 1 ; i != size ; ++i )
+    // 現在の先頭の次の要素から探すのでhead + 1
+    for ( std::size_t index = head + 1 ; index != size ; ++index )
     {
-        if ( v.at(i) < v.at(min)
-            min = i ;
+        if ( v.at(index) < v.at(min)
+            min = index ;
     }
 
     std::cout << v.at(min) << " "s ;
@@ -525,10 +525,10 @@ int main()
     {
         std::size_t min = head ;
         // 現在の要素の範囲から最小値を見つけるループ
-        for ( std::size_t i = head+1 ; i != size ; ++i )
+        for ( std::size_t index = head+1 ; index != size ; ++index )
         {
-            if ( v.at(i) < v.at(min) )
-                min = i ;
+            if ( v.at(index) < v.at(min) )
+                min = index ;
         }
         // 出力
         std::cout << v.at(min) << " "s ;
@@ -555,9 +555,9 @@ int main()
     // 実行した後
     std::cout << "\n"s ;
     
-    for ( std::size_t i = 0, size = v.size() ; i != size ; ++i )
+    for ( std::size_t index = 0, size = v.size() ; index != size ; ++index )
     {
-        std::cout << v.at(i) << " "s ;
+        std::cout << v.at(index) << " "s ;
     }
 }
 ~~~
