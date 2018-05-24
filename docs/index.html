@@ -173,6 +173,37 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#これまでのまとめ">これまでのまとめ</a></li>
 <li><a href="#vector">vector</a></li>
 </ul></li>
+<li><a href="#デバッグprintfデバッグ">デバッグ：printfデバッグ</a><ul>
+<li><a href="#実践例">実践例</a></li>
+<li><a href="#stdcerr"><code>std::cerr</code></a></li>
+<li><a href="#まとめ">まとめ</a></li>
+</ul></li>
+<li><a href="#整数">整数</a><ul>
+<li><a href="#整数リテラル">整数リテラル</a><ul>
+<li><a href="#進数リテラル">10進数リテラル</a></li>
+<li><a href="#進数リテラル-1">2進数リテラル</a></li>
+<li><a href="#進数リテラル-2">8進数リテラル</a></li>
+<li><a href="#進数リテラル-3">16進数リテラル。</a></li>
+<li><a href="#数値区切り">数値区切り</a></li>
+</ul></li>
+<li><a href="#整数の仕組み">整数の仕組み</a><ul>
+<li><a href="#情報の単位">情報の単位</a></li>
+<li><a href="#バイトで表現された整数">1バイトで表現された整数</a><ul>
+<li><a href="#符号ビット">符号ビット</a></li>
+<li><a href="#の補数">1の補数</a></li>
+<li><a href="#の補数-1">2の補数</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#整数型">整数型</a><ul>
+<li><a href="#int型">int型</a></li>
+<li><a href="#long-int型">long int型</a></li>
+<li><a href="#long-long-int型">long long int型</a></li>
+<li><a href="#short-int型">short int型</a></li>
+<li><a href="#char型">char型</a></li>
+</ul></li>
+<li><a href="#整数型のサイズ">整数型のサイズ</a></li>
+<li><a href="#整数型の表現できる値の範囲">整数型の表現できる値の範囲</a></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -3826,8 +3857,8 @@ Aborted (core dumped)</code></pre>
     v.push_back(<span class="dv">0</span>) ;
 
     <span class="co">// std::siz_t型</span>
-    <span class="bu">std::</span>size_t i = <span class="dv">0</span> ;
-    v.at( i ) ;
+    <span class="bu">std::</span>size_t index = <span class="dv">0</span> ;
+    v.at( index ) ;
 }</code></pre></div>
 <p>なぜ<code>int</code>型ではダメなのか。その謎は整数の章で明らかになる。ここでは<code>std::size_t</code>型は負数が使えない整数型だということだけ覚えておこう。<code>std::size_t</code>型に-1はない。vectorの要素指定では負数は使えないので、負数が使えない変数を使うのは理にかなっている。</p>
 <p>さて、これまでに学んだ知識だけを使って、<code>std::vector</code>のすべての要素を順番通りに出力するコードが書けるはずだ。</p>
@@ -3836,14 +3867,14 @@ Aborted (core dumped)</code></pre>
 
     <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
 
-    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">0</span> ; i != <span class="dv">10</span> ; ++i )
+    <span class="cf">for</span> ( <span class="dt">int</span> iota = <span class="dv">0</span> ; iota != <span class="dv">10</span> ; ++iota )
     {
-        v.push_back(i) ;
+        v.push_back(iota) ;
     }
 
-    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != v.size() ; ++i )
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = <span class="dv">0</span> ; index != v.size() ; ++index )
     {
-        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+        <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
     }
 }</code></pre></div>
 <p>このコードが書けるということは、もう標準入力から0が入力されるまで任意個の値を受け取り、入力された順番で出力するプログラムも書けるということだ。</p>
@@ -3865,15 +3896,15 @@ Aborted (core dumped)</code></pre>
     }
 
     <span class="co">// 出力</span>
-    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != v.size() ; ++i )
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = <span class="dv">0</span> ; index != v.size() ; ++index )
     {
-        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+        <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
     }
 }</code></pre></div>
 <p>入力された順番に出力できるということは、その逆順にも出力できるということだ。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">for</span> ( <span class="bu">std::</span>size_t i = v.size()<span class="dv">-1</span> ; i != <span class="dv">0</span> ; ++i )
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">for</span> ( <span class="bu">std::</span>size_t index = v.size()<span class="dv">-1</span> ; index != <span class="dv">0</span> ; --index )
 {
-    <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+    <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
 }
 
 <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">0</span>) ;</code></pre></div>
@@ -3915,8 +3946,8 @@ Aborted (core dumped)</code></pre>
 <ol style="list-style-type: decimal">
 <li>変数minに0を代入する。</li>
 <li>size回のループを実行する</li>
-<li>変数iに0からsize-1までの整数を代入する</li>
-<li>'v.at(i) &lt; v.at(min)'ならばmin = i</li>
+<li>変数indexに0からsize-1までの整数を代入する</li>
+<li>'v.at(index) &lt; v.at(min)'ならばmin = index</li>
 </ol>
 <p>さっそく書いてみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -3931,11 +3962,11 @@ Aborted (core dumped)</code></pre>
 
     <span class="co">// size回のループを実行する</span>
     <span class="co">// 変数iに0からsize-1までの整数を代入する</span>
-    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">1</span> ; i != size ; ++i )
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = <span class="dv">1</span> ; index != size ; ++index )
     {
-        <span class="co">// &#39;v.at(i) &lt; v.at(min)&#39;ならばmin = i</span>
-        <span class="cf">if</span> ( v.at(i) &lt; v.at(min) )
-            min = i ;
+        <span class="co">// &#39;v.at(index) &lt; v.at(min)&#39;ならばmin = index</span>
+        <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+            min = index ;
     }
 
     <span class="co">// 一番小さい値を出力</span>
@@ -3973,10 +4004,10 @@ Aborted (core dumped)</code></pre>
     { <span class="co">// これ全体がひとつのブロック文</span>
         <span class="bu">std::</span>size_t min = <span class="dv">0</span> ;
 
-        <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">1</span> ; i != size ; ++i )
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = <span class="dv">1</span> ; index != size ; ++index )
         {
-            <span class="cf">if</span> ( v.at(i) &lt; v.at(min) )
-                min = i ;
+            <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+                min = index ;
         }
 
         <span class="co">// 出力</span>
@@ -3989,13 +4020,13 @@ Aborted (core dumped)</code></pre>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 現在の先頭</span>
 <span class="cf">for</span> ( <span class="bu">std::</span>size_t head = <span class="dv">0</span> ; head != size ; ++head )
 {
-    <span class="co">// 現在の先頭を仮の最小の要素とみなす</span>
+    <span class="co">// 現在の先頭であるmin番目を仮の最小の要素とみなすのでhead</span>
     <span class="bu">std::</span>size_t min = head ;    
-    <span class="co">// 現在の先頭の次の要素から探す</span>
-    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = head + <span class="dv">1</span> ; i != size ; ++i )
+    <span class="co">// 現在の先頭の次の要素から探すのでhead + 1</span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = head + <span class="dv">1</span> ; index != size ; ++index )
     {
-        <span class="cf">if</span> ( v.at(i) &lt; v.at(min)
-            min = i ;
+        <span class="cf">if</span> ( v.at(index) &lt; v.at(min)
+            min = index ;
     }
 
     <span class="bu">std::</span>cout &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
@@ -4057,10 +4088,10 @@ Aborted (core dumped)</code></pre>
     {
         <span class="bu">std::</span>size_t min = head ;
         <span class="co">// 現在の要素の範囲から最小値を見つけるループ</span>
-        <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = head<span class="dv">+1</span> ; i != size ; ++i )
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = head<span class="dv">+1</span> ; index != size ; ++index )
         {
-            <span class="cf">if</span> ( v.at(i) &lt; v.at(min) )
-                min = i ;
+            <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+                min = index ;
         }
         <span class="co">// 出力</span>
         <span class="bu">std::</span>cout &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
@@ -4083,9 +4114,9 @@ Aborted (core dumped)</code></pre>
     <span class="co">// 実行した後</span>
     <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
     
-    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span>, size = v.size() ; i != size ; ++i )
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = <span class="dv">0</span>, size = v.size() ; index != size ; ++index )
     {
-        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+        <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
     }
 }</code></pre></div>
 <p>これを実行すると以下のようになる。</p>
@@ -4093,6 +4124,596 @@ Aborted (core dumped)</code></pre>
 2 3 3 4 7 8 9
 2 3 3 4 7 8 9</code></pre>
 <p>なんとvectorの要素も小さい順に並んでいる。この状態のことを、ソートされているという。ループの中で最も小さい値を出力していく代わりに、まずソートして先頭から値を出力してもよいということだ。</p>
+<p>ソートには様々な方法があるが、今回使ったのは選択ソート(selection sort)というアルゴリズムだ。</p>
+<p>vectorを使う方法には、イテレーターというもっと便利な方法があるが、それはイテレーターの章で説明する。</p>
+<h1 id="デバッグprintfデバッグ">デバッグ：printfデバッグ</h1>
+<p>ループと多数の要素の集合を扱えるようになったので、読者はもう相当複雑な処理をするプログラムでも書けるようになった。処理が複雑になってくると増えるのがバグだ。</p>
+<p>この章では、伝統ある<code>printfデバッグ</code>を紹介する。</p>
+<p><code>printfデバッグ</code>とは、プログラムの実行中に知りたい情報を出力することだ。<code>printf</code>とはC言語の伝統ある出力用のライブラリに由来する名前だが、本書ではiostreamを使う。</p>
+<h2 id="実践例">実践例</h2>
+<p>例えば前章で実装したようにvectorの要素を選択ソートでソートしたいとする。</p>
+<p>選択ソートとは、要素の集合の中から0番目に来るべき要素の場所を探し、0番目の要素と交換し、1番目に来るべき要素の場所を探し、1番目の要素と交換し・・・を要素の数だけ繰り返すことによって要素全体をソートする方法だ。</p>
+<p>以下のように書いたとする。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">3</span>,<span class="dv">8</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">9</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">7</span> } ;
+    <span class="kw">auto</span> size = v.size() ;
+
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t head = <span class="dv">0</span> ; head != size ; ++head )
+    {
+        <span class="kw">auto</span> min = head ;
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t index = head<span class="dv">+1</span> ; index != size ; ++index )
+        {
+            <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+                min = index ;
+        }
+        
+        <span class="kw">auto</span> temp = v.at(head) ;
+        v.at(head) = v.at(min) ;
+        v.at(min) = v.at(head) ;
+    }
+
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != size ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+    }
+}</code></pre></div>
+<p>早速実行してみよう。</p>
+<pre><code>$ make run
+1 1 1 1 1 1 1 1 7</code></pre>
+<p>コンパイルはできるが、なぜかうまく動かない。コードのどこかが間違っているのはわかる。しかしどこが間違っているのかはわからない。さっそく<code>printfデバッグ</code>により問題のある箇所を特定してみよう。</p>
+<p><code>printfデバッグ</code>を行うには、まずコード中の間違っていそうな箇所にアタリをつける必要がある。</p>
+<p>問題がどこにあるかわからないが、ループのどこかで間違っていそうだ。一番外側のループにアタリをつけよう。ループが実行されるごとに変数vの中身を表示してみる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">for</span> ( <span class="bu">std::</span>size_t head = <span class="dv">0</span> ; head != size ; ++head )
+{
+    <span class="co">// printfデバッグ</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;debug: head = &quot;</span>s &lt;&lt; head &lt;&lt; <span class="st">&quot;, v = { &quot;</span>s;
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != v.size() ; ++i )
+        {
+            <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot; &quot;</span>s ;
+        }
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;}</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    <span class="co">// printfデバッグ</span></code></pre></div>
+<p>そして実行した結果が以下だ。</p>
+<pre><code>$ make run
+debug: v = { 3, 8, 2, 5, 6, 9, 4, 1, 7, }
+debug: v = { 1, 8, 2, 5, 6, 9, 4, 1, 7, }
+debug: v = { 1, 1, 2, 5, 6, 9, 4, 1, 7, }
+debug: v = { 1, 1, 1, 5, 6, 9, 4, 1, 7, }
+debug: v = { 1, 1, 1, 1, 6, 9, 4, 1, 7, }
+debug: v = { 1, 1, 1, 1, 1, 9, 4, 1, 7, }
+debug: v = { 1, 1, 1, 1, 1, 1, 4, 1, 7, }
+debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
+debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
+1 1 1 1 1 1 1 1 7 </code></pre>
+<p>何故か1が増えている。明らかにおかしい。しかしまだ問題の特定にまでは至らない。</p>
+<p>内側のループにも<code>printfデバッグ</code>を追加してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> min = head ;
+<span class="cf">for</span> ( <span class="bu">std::</span>size_t index = head<span class="dv">+1</span> ; index != size ; ++index )
+{
+    <span class="co">// printfデバッグ</span>
+        <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot;, &quot;</span>s ;
+    <span class="co">// printfデバッグ</span>
+
+    <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+        min = index ;
+}
+<span class="co">// printfデバッグ</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+<span class="co">// printfデバッグ</span></code></pre></div>
+<p>そして実行する。</p>
+<pre><code>debug: v = { 3, 8, 2, 5, 6, 9, 4, 1, 7, }
+8, 2, 5, 6, 9, 4, 1, 7, 
+debug: v = { 1, 8, 2, 5, 6, 9, 4, 1, 7, }
+2, 5, 6, 9, 4, 1, 7, 
+debug: v = { 1, 1, 2, 5, 6, 9, 4, 1, 7, }
+5, 6, 9, 4, 1, 7, 
+debug: v = { 1, 1, 1, 5, 6, 9, 4, 1, 7, }
+6, 9, 4, 1, 7, 
+debug: v = { 1, 1, 1, 1, 6, 9, 4, 1, 7, }
+9, 4, 1, 7, 
+debug: v = { 1, 1, 1, 1, 1, 9, 4, 1, 7, }
+4, 1, 7, 
+debug: v = { 1, 1, 1, 1, 1, 1, 4, 1, 7, }
+1, 7, 
+debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
+7, 
+debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
+
+1 1 1 1 1 1 1 1 7 </code></pre>
+<p>あまりいい情報は得られないようだ。問題はここではないらしい。</p>
+<p>ひょっとしたら大小比較が間違っているのかもしれない。確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">for</span> ( <span class="bu">std::</span>size_t index = head<span class="dv">+1</span> ; index != size ; ++index )
+{
+
+    <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot; &lt; &quot;</span>s &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        min = index ;
+    }
+    <span class="cf">else</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(index) &lt;&lt; <span class="st">&quot; &gt;= &quot;</span>s &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>実行結果は長いので一部だけ記載しておく。</p>
+<pre><code>debug: v = { 3, 8, 2, 5, 6, 9, 4, 1, 7, }
+8 &gt;= 3
+2 &lt; 3
+5 &gt;= 2
+6 &gt;= 2
+9 &gt;= 2
+4 &gt;= 2
+1 &lt; 2
+7 &gt;= 1
+
+debug: v = { 1, 8, 2, 5, 6, 9, 4, 1, 7, }
+2 &lt; 8
+5 &gt;= 2
+6 &gt;= 2
+9 &gt;= 2
+4 &gt;= 2
+1 &lt; 2
+7 &gt;= 1</code></pre>
+<p>大小比較も問題ないようだ。では最終的に見つけた最も小さい値は、本当に最も小さい値だろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 最小値を探すループ</span>
+<span class="cf">for</span> ( <span class="bu">std::</span>size_t index = head<span class="dv">+1</span> ; index != size ; ++index )
+{
+    <span class="co">// より小さい値があればそれを現在の最小値とする</span>
+    <span class="cf">if</span> ( v.at(index) &lt; v.at(min) )
+        min = index ;
+}
+
+<span class="co">// printfデバッグ</span>
+    <span class="bu">std::</span>cout &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+<span class="co">// printfデバッグ </span></code></pre></div>
+<pre><code>debug: v = { 3, 8, 2, 5, 6, 9, 4, 1, 7, }
+1
+debug: v = { 1, 8, 2, 5, 6, 9, 4, 1, 7, }
+1
+debug: v = { 1, 1, 2, 5, 6, 9, 4, 1, 7, }
+1
+debug: v = { 1, 1, 1, 5, 6, 9, 4, 1, 7, }
+1
+debug: v = { 1, 1, 1, 1, 6, 9, 4, 1, 7, }
+1
+debug: v = { 1, 1, 1, 1, 1, 9, 4, 1, 7, }
+1
+debug: v = { 1, 1, 1, 1, 1, 1, 4, 1, 7, }
+1
+debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
+1
+debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
+7
+1 1 1 1 1 1 1 1 7 </code></pre>
+<p>見つけた値は最も小さいようだ。しかし毎回1になる。1が残っているのだから当然だが、なぜ残っているのだろう。</p>
+<p>ひょっとしたら要素の交換が間違っているのかもしれない。<code>printfデバッグ</code>してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// printfデバッグ </span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;debug before: &quot;</span>s &lt;&lt;  v.at(head) &lt;&lt; <span class="st">&quot;,  &quot;</span> &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+<span class="co">// printfデバッグ</span>
+
+v.at(head) = v.at(min) ;
+v.at(min) = v.at(head) ;
+
+<span class="co">// printfデバッグ</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;debug after : &quot;</span>s &lt;&lt; v.at(head) &lt;&lt; <span class="st">&quot;, &quot;</span> &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+<span class="co">// printfデバッグ</span></code></pre></div>
+<p>&quot;debug before:&quot;は交換前、&quot;debug after:&quot;は交換後の2つの要素の値だ。</p>
+<p>以下は実行結果の一部だ。</p>
+<pre><code>debug: v = { 3, 8, 2, 5, 6, 9, 4, 1, 7, }
+debug before: 3,  1
+debug after : 1, 1
+debug: v = { 1, 8, 2, 5, 6, 9, 4, 1, 7, }
+debug before: 8,  1
+debug after : 1, 1
+debug: v = { 1, 1, 2, 5, 6, 9, 4, 1, 7, }
+debug before: 2,  1
+debug after : 1, 1
+debug: v = { 1, 1, 1, 5, 6, 9, 4, 1, 7, }</code></pre>
+<p>これをみると、要素の値の交換が正しく行われていないことがわかる。</p>
+<p>問題の場所がわかったので、早速コードを見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">v.at(head) = v.at(min) ;
+v.at(min) = v.at(head) ;</code></pre></div>
+<p>これは要するに以下のコードと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a = <span class="dv">0</span> ;
+<span class="dt">int</span> b = <span class="dv">1</span> ;
+
+a = b ; <span class="co">// a = 1</span>
+b = a ; <span class="co">// b = 1</span></code></pre></div>
+<p>変数a, bの値を交換したい場合、変数aに変数bを代入した後に、変数bに変数aを代入する処理は誤りだ。なぜならば、変数bの代入のときには、変数aの値は変数bの値になってしまっているからだ。</p>
+<p>前章で学んだように、こういう場合、別の変数に値を代入して退避させておく。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a = <span class="dv">0</span> ;
+<span class="dt">int</span> b = <span class="dv">1</span> ;
+
+<span class="dt">int</span> temp = a ;
+a = b ;
+b = temp ;</code></pre></div>
+<p>こうして<code>printfデバッグ</code>によって問題が解決した。</p>
+<h2 id="stdcerr"><code>std::cerr</code></h2>
+<p><code>printfデバッグ</code>として標準出力である<code>std::cout</code>に出力すると、プログラムの通常の標準出力と混ざって見づらくなる。例えば以下のプログラムを見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 1 * 2 * 3 * ... * nを計算するプログラム</span>
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> n{} ;
+    <span class="bu">std::</span>cin &gt;&gt; n ;
+    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )
+        <span class="cf">return</span> <span class="dv">-1</span> ;
+
+    <span class="dt">int</span> sum = <span class="dv">1</span> ;  
+    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">2</span> ; i &lt;= n ; ++i )
+    {
+        sum *= i ;
+
+        <span class="co">// printfデバッグ</span>
+            <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;debug: &quot;</span>s &lt;&lt; i &lt;&lt; <span class="st">&quot;, &quot;</span> &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="co">// printfデバッグ</span>
+    }
+
+    <span class="bu">std::</span>cout &lt;&lt; sum ;
+}</code></pre></div>
+<p>この場合、標準エラー出力を使うとプログラムの通常の出力と<code>printfデバッグ</code>用の出力を分けることができる。</p>
+<p>標準エラー出力を使うには、<code>std::cout</code>の代わりに<code>std::cerr</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 標準出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;standard output</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="co">// 標準エラー出力</span>
+    <span class="bu">std::</span>cerr &lt;&lt; <span class="st">&quot;standard error output</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>このプログラムを実行すると一見すべて同じように出力されているように見える。</p>
+<pre><code>$ make run
+standard output
+standard error output</code></pre>
+<p>違いはリダイレクトやパイプを使うとわかる。</p>
+<pre><code>$ ./program &gt; /dev/null
+standard error output
+$ ./program | grep error
+standard error output </code></pre>
+<p>標準出力には&quot;standard output&quot;しか出力されていない。通常のリダイレクトやパイプで扱われるのも標準出力だけだ。そのため、<code>/dev/null</code>にリダイレクトすると標準エラー出力しか見えないし、grepにパイプしても標準出力しか受け取らない。</p>
+<p>標準出力と標準エラー出力を別々にリダイレクトする方法もある。</p>
+<pre><code>$ ./program &gt; cout.txt 2&gt; cerr.txt</code></pre>
+<p>これを実行すると、ファイルcout.txtには&quot;standard output&quot;が、ファイルcerr.txtには&quot;standard error output&quot;が出力されている。</p>
+<p>これを使って先程のプログラムを書き直すと以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="co">// 1 * 2 * 3 * ... * nを計算するプログラム</span>
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> n{} ;
+    <span class="bu">std::</span>cin &gt;&gt; n ;
+    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )
+        <span class="cf">return</span> <span class="dv">-1</span> ;
+
+    <span class="dt">int</span> sum = <span class="dv">1</span> ;  
+    <span class="cf">for</span> ( <span class="dt">int</span> i = <span class="dv">2</span> ; i &lt;= n ; ++i )
+    {
+        sum *= i ;
+
+        <span class="co">// printfデバッグ</span>
+            <span class="co">// 標準エラー出力</span>
+            <span class="bu">std::</span>cerr &lt;&lt; <span class="st">&quot;debug: &quot;</span>s &lt;&lt; i &lt;&lt; <span class="st">&quot;, &quot;</span> &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+        <span class="co">// printfデバッグ</span>
+    }
+    <span class="co">// 標準出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; sum ;
+}</code></pre></div>
+<h2 id="まとめ">まとめ</h2>
+<p><code>printfデバッグ</code>はコード中のどこに問題があるかを絞り込むための方法だ。プログラムに問題が存在し、問題の発生の有無はプログラムの状態を調べることで判断できるが、コード中のどこに問題が存在するかわからない時、<code>printfデバッグ</code>で問題の箇所を絞り込むことができる。</p>
+<p><code>printfデバッグ</code>のやり方は以下の通り。</p>
+<ol style="list-style-type: decimal">
+<li>コード中の間違っていそうな箇所にアタリをつける</li>
+<li>プログラムの状態を出力する</li>
+<li>出力結果が期待通りかどうかを調べる</li>
+</ol>
+<p><code>printfデバッグ</code>は原始的だが効果的なデバッグ方法だ。後の章ではデバッガーというより高級でプログラマーらしいデバッグ方法も紹介するが、そのような高級なデバッグ方法が使えない環境でも、<code>printfデバッグ</code>ならば使えることは多い。</p>
+<h1 id="整数">整数</h1>
+<p>始めに書いておくがこの章はユーモア欠落症患者によって書かれており極めて退屈だ。しかし、整数の詳細はすべてのプログラマーが理解すべきものだ。心して読むとよい。</p>
+<h2 id="整数リテラル">整数リテラル</h2>
+<p>整数リテラルとは整数の値を直接ソースファイルに記述する機能だ。本書ではここまで何の説明もなくリテラルを使っていた。例えば以下のように。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">123</span> ;
+    <span class="dt">int</span> b = <span class="dv">0</span> ;
+    <span class="dt">int</span> c = <span class="dv">-123</span> ;
+}</code></pre></div>
+<p>ここでは、'123', '0'がリテラルだ。'-123'というのは演算子operator -に整数リテラル123を適用したものだ。リテラルは<code>123</code>だけだ。ただしこれは細かい詳細なので今はそれほど気にしなくてもよい。</p>
+<h3 id="進数リテラル">10進数リテラル</h3>
+<p>10進数リテラルは最も簡単で我々が日常的に使っている数の表記方法と同じものだ。接頭語は何も使わず数字には0,1,2,3,4,5,6,7,8,9が使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で123</span>
+<span class="dt">int</span> decimal = <span class="dv">123</span> ;</code></pre></div>
+<p>ただし、10進数リテラルの先頭を0にしてはならない。これは8進数リテラルになってしまう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で83</span>
+<span class="dt">int</span> octal = <span class="bn">0123</span> ;</code></pre></div>
+<h3 id="進数リテラル-1">2進数リテラル</h3>
+<p>2進数リテラルは接頭語'0b', '0B'から始まる。数字には0, 1を使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で5</span>
+<span class="dt">int</span> binary = <span class="bn">0b1010</span>
+
+<span class="co">// 0bと0Bは同じ</span>
+<span class="dt">int</span> a = <span class="bn">0B1010</span> ;</code></pre></div>
+<h3 id="進数リテラル-2">8進数リテラル</h3>
+<p>8進数リテラルは接頭語'0'から始まる。数字には0,1,2,3,4,5,6,7を使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で83</span>
+<span class="dt">int</span> octal = <span class="bn">0123</span> ;
+
+<span class="co">// 10進数で342391</span>
+<span class="dt">int</span> a = <span class="bn">01234567</span> ;</code></pre></div>
+<h3 id="進数リテラル-3">16進数リテラル。</h3>
+<p>16進数リテラルは接頭語'0x', '0X'から始まる。数字には0,1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,A,B,C,D,E,Fが使える。ローマ字の大文字と小文字は意味が同じだ。a,b,c,d,e,fがそれぞれ10,11,12,13,14,15を意味する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で291</span>
+<span class="dt">int</span> hexadecimal = <span class="bn">0x123</span> ;
+
+<span class="co">// 0xと0Xは同じ</span>
+<span class="dt">int</span> a = <span class="er">0X123</span> ;
+
+<span class="co">// 10進数で10</span>
+<span class="dt">int</span> b = <span class="bn">0xa</span> ;
+
+<span class="co">// 10進数で15</span>
+<span class="dt">int</span> c = <span class="bn">0xf</span> ;</code></pre></div>
+<h3 id="数値区切り">数値区切り</h3>
+<p>長い整数リテラルは読みにくい。例えば<code>10000000</code>と<code>100000000</code>はどちらが大きくて具体的にどのくらいの値なのかがわからない。C++には整数リテラルを読みやすいように区切ることのできる数値区切りという機能がある。整数リテラルはシングルクオート文字(')で区切ることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a =   <span class="dv">1000&#39;0000</span> ;
+    <span class="dt">int</span> b = <span class="dv">1&#39;0000&#39;0000</span> ;
+}</code></pre></div>
+<p>区切り幅は何文字でもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1&#39;22&#39;333&#39;4444&#39;55555</span> ;
+}</code></pre></div>
+<p>10進数整数リテラル以外でも使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> a = <span class="bn">0b10101010&#39;11110000&#39;00001111</span> ;
+    <span class="kw">auto</span> b = <span class="bn">07&#39;7&#39;5</span> ;
+    <span class="kw">auto</span> c = <span class="bn">0xde&#39;ad&#39;be&#39;ef</span> ;
+}</code></pre></div>
+<h2 id="整数の仕組み">整数の仕組み</h2>
+<h3 id="情報の単位">情報の単位</h3>
+<p>0から100までの整数を表現するには101種類の状態を表現できる必要がある。コンピューターはどうやって整数を表現しているのかをここで学ぶ。</p>
+<p>情報の最小単位はビット(bit)だ。ビットは2種類の状態を表現できる。たとえばbool型はtrue/falseという2種類の状態を表現できる。</p>
+<p>しかし、2種類の状態しか表現できない整数は使いづらい。0もしくは1しか表現できない整数とか、100もしく1000しか表現できない整数は使い物にならない。</p>
+<p>また、ビットという単位も扱いづらい。コンピューターは膨大な情報を扱うので、ビットをいくつかまとめたバイト(byte)を単位として情報を扱っている。1バイトが何ビットであるかは環境により異なる。本書では最も普及している1バイトは8ビットを前提にする。</p>
+<p>1ビットは2種類の状態を表現できるので、1バイトの中の8ビットは<span class="math inline">\(2^8 = 256\)</span>種類の状態を表現できる。2バイトならば16ビットとなり、<span class="math inline">\(2^8 = 65536\)</span>種類の状態を表現できる。</p>
+<h3 id="バイトで表現された整数">1バイトで表現された整数</h3>
+<p>整数の表現方法について理解するために、1バイトで表現された整数を考えよう。</p>
+<p>1バイトは8ビットであり256種類の状態を表現できる。整数を0から正の方向の数だけ表現したいとすると、0から255までの値を表現できることになる。</p>
+<p>その場合、1バイトの整数の中の8ビットはちょうど2進数8桁で表現できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 0</span>
+<span class="kw">auto</span> zero = <span class="bn">0b00000000</span> ;
+<span class="co">// 255</span>
+<span class="kw">auto</span> max  = <span class="bn">0b11111111</span> ;</code></pre></div>
+<p>一番左側の桁が最上位桁で、一番右側の桁が最下位桁だ。これを最上位ビット、最下位ビットともいう。</p>
+<p>正数だけを表現するならば話は簡単だ。1バイトの整数は0から255までの値を表現できる。これを符号なし整数(unsigned integer)という。</p>
+<p>では負数を表現するにはどうしたらいいだろう。正数と負数を両方扱える整数表現のことを、符号付き正数(signed integer)という。1バイトは256種類の状態しか表現できないので、もし-1を表現したい場合、-1から254までの値を扱えることになる。</p>
+<p>-1しか扱えないのでは実用的ではないので、負数と正数を同じ種類ぐらい表現したい。256の半分は128だが、1バイトで表現された整数は-128から128までを表現することはできない。0があるからだ。0を含めると、1バイトの整数は最大で-128から127までか、-127から128までを表現できる。どちらかに偏ってしまう。</p>
+<p>では実際に1バイトで負数も表現できる正数表現を考えてみよう。</p>
+<h4 id="符号ビット">符号ビット</h4>
+<p>誰でも思いつきそうな表現方法に、符号ビットがある。これは最上位ビットを符号の有無を管理するフラグとして用いることにより、下位7ビットの値の符号を指定する方法だ。</p>
+<p>符号ビット表現では-1と1は以下のように表現できる。</p>
+<pre><code>// 1
+0b0&#39;0000001
+// -1
+0b1&#39;0000001</code></pre>
+<p>最上位ビットが0であれば正数、1であれば負数だ。</p>
+<p>この一見わかりやすい表現方法には問題がある。まず表現できる値の範囲は-127から+127だ。さきほど、1バイトで正負になるべく均等に値を割り振る場合、-128から+127、もしくは-127から+128までを扱えると書いた。しかし符号ビット表現では-127から+127しか扱えない。残りの1はどこにいったのか。</p>
+<p>答えはゼロにある。符号ビット表現ではゼロに二通りの表現がある。+0と-0だ。</p>
+<pre><code>// +0
+0b0&#39;0000000
+// -0
+0b1&#39;0000000</code></pre>
+<p>+0も-0もゼロには違いない。しかし符号ビットが独立して存在しているために、ゼロが2種類ある。</p>
+<p>符号ビットは電子回路で実装するには複雑という問題もある。</p>
+<h4 id="の補数">1の補数</h4>
+<p>1の補数は負数を絶対値を2進数で表したときの各ビットを反転させた値で表現する。たとえば-1は1(0b00000001)の1の補数の0b11111110で表現される。</p>
+<pre><code>// -1
+0b11111110
+
+// -2
+0b11111101</code></pre>
+<p>-1と-2を足すと結果は-3だ。この計算を1の補数で行うとどうなるか。</p>
+<p>まず1の補数表現による-1と-2を足す。</p>
+<pre><code>   11111110
++) 11111101
+-----------
+ 1`11111011</code></pre>
+<p>この結果は9ビットになる。この整数は8ビットなので、9ビット目を表現することはできない。ただし1の補数表現の計算では、もし9ビット目が繰り上がった場合は、演算結果に1を足す取り決めがある。</p>
+<pre><code>   11111011
++)        1</code></pre>
+<p>11111100 <sub>~</sub></p>
+<p>1の補数による-3は3の各ビットを反転したものだ。3は0b00000011で、そのビットを反転させたものは0b11111100だ。上の計算結果は-3の1の補数表現になった。</p>
+<p>もう一つ例を見てみよう。5と-2を足すと3になる。</p>
+<pre><code>   00000101
++) 11111101
+-----------
+ 1`00000010</code></pre>
+<p>繰り上がりが発生したので1を足すと</p>
+<pre><code>   00000010
++)        1
+-----------
+   00000011</code></pre>
+<p>3になった。</p>
+<p>1の補数は引き算も足し算で表現できるので電子回路での実装が符号ビットよりもやや簡単になる。</p>
+<p>ただし、1の補数にも問題がある。0の表現だ。0というのは0b00000000だが1の補数では-xはxの各ビット反転ということを適用すると、-0は0b11111111になる。すると、符号ビット表現と同じく、+0と-0が存在することになる。したがって、1の補数8ビットで表現できる範囲は-127から+127になる。</p>
+<h4 id="の補数-1">2の補数</h4>
+<p>符号ビットと1の補数による負数表現にある問題は、2の補数表現で解決できる。</p>
+<p>2の補数表現による負数は1の補数表現の負数に、繰り上がり時に足すべき1を加えた値になる。</p>
+<p>-1は1の補数表現では、1(0b00000001)の各ビットを反転させた値になる(0b11111110)。2の補数表現では、1の補数表現に1を加えた値になるので、0b11111111になる。</p>
+<p>同様に、-2は0b11111110に、-3は0b11111101になる。</p>
+<p>00000011 11111100</p>
+<p>2の補数表現の-1と-2を足すと以下のようになる。</p>
+<pre><code>   11111111
++) 11111110
+-----------
+ 1&#39;11111101</code></pre>
+<p>9ビット目の繰り上がりを無視すると、計算結果は0b11111101になる。これは2の補数表現による-3と同じだ。</p>
+<p>5と-2の計算も見てみよう。</p>
+<pre><code>   00000101
++) 11111110
+-----------
+ 1&#39;00000011</code></pre>
+<p>結果は3(0b00000011)だ。</p>
+<p>2の補数表現は引き算も足し算で実装できる上に、ゼロの表現方法は一つで、+0と-0が存在しない。8ビットの2の補数表現された整数の範囲は-128から+127になる。とても便利な負数の表現方法なので殆どのコンピューターで採用されている。</p>
+<h2 id="整数型">整数型</h2>
+<p>C++には様々な整数型が存在する。C++はCから引き継いだ歴史的な経緯により、整数型の文法がわかりにくくなっている。</p>
+<p>基本的には、符号付き整数型と符号なし整数型にわかれている。</p>
+<p>符号付き整数型としては、<code>signed char</code>, <code>short int</code>, <code>int</code>, <code>long int</code>, <code>long long int</code>が存在する。符号付き整数型は負数を表現できる。</p>
+<p>符号なし整数型としては、<code>unsigned char</code>, <code>unsigned short int</code>, <code>unsigned int</code>, <code>unsigned long int</code>, <code>unsigned long long int</code>が存在する。符号なし整数型はふ数を表現できない。</p>
+<h3 id="int型">int型</h3>
+<p><code>int型</code>は最も基本となる整数型だ。C++で数値を扱う場合、多くはint型になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> x = <span class="dv">123</span> ;</code></pre></div>
+<p>整数リテラルの型は通常はint型になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+<span class="kw">auto</span> x = <span class="dv">123</span> ;</code></pre></div>
+<p><code>unsigned int型</code>は符号のないint型だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">unsigned</span> <span class="dt">int</span> x = <span class="dv">123</span> ;</code></pre></div>
+<p>整数リテラルの末尾にu/Uと書いた場合、unsigned int型になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+<span class="kw">auto</span> x = <span class="dv">123</span> ;
+<span class="co">// unsigned int</span>
+<span class="kw">auto</span> y = <span class="dv">123u</span> ;</code></pre></div>
+<p>特殊なルールとして、単に<code>signed</code>と書いた場合、それは<code>int</code>になる。<code>unsigned</code>と書いた場合は、<code>unsigned int</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+<span class="dt">signed</span> a = <span class="dv">1</span> ;
+<span class="co">// unsigned int</span>
+<span class="dt">unsigned</span> b = <span class="dv">1</span> ;</code></pre></div>
+<p><code>signed int</code>と書いた場合、<code>int型</code>になる。<code>signed int</code>は<code>int</code>の冗長な書き方だ。</p>
+<h3 id="long-int型">long int型</h3>
+<p><code>long int型</code>は<code>int型</code>以上の範囲の整数を扱える型だ。具体的な整数型の値の範囲は実装依存だが、<code>long int型</code>は<code>int型</code>の表現できる整数の範囲はすべて表現でき、かつ<code>int型</code>以上の範囲の整数型を表現できるかもしれない型だ。</p>
+<p><code>unsigned long int型</code>は符号なしの<code>long int</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">long</span> <span class="dt">int</span> a = <span class="dv">123</span> ;
+<span class="dt">unsigned</span> lont <span class="dt">int</span> b = <span class="dv">123</span> ;</code></pre></div>
+<p>特殊なルールとして、単に<code>long</code>と書いた場合、それは<code>long int</code>になる。<code>unsigned long</code>と書いた場合、<code>unsigned long int</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// long int</span>
+<span class="dt">long</span> a = <span class="dv">1</span> ;
+<span class="co">// unsigned long int</span>
+<span class="dt">unsigned</span> <span class="dt">long</span> <span class="dt">int</span> b = <span class="dv">1</span> ;</code></pre></div>
+<p>通常、intを省略して単に<code>long</code>と書くことが多い。</p>
+<p>整数リテラルの値が<code>int型</code>で表現できない場合、<code>long型</code>になる。例えば、<code>int型</code>で100億を表現できないが、<code>long型</code>では表現できる実装の場合、以下の変数aは<code>long型</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 100億</span>
+<span class="kw">auto</span> a = <span class="dv">100&#39;0000&#39;0000</span> ;</code></pre></div>
+<p>整数リテラルの値が<code>long</code>では表現できないが<code>unsigned long</code>では表現できる場合、<code>unsigned long型</code>になる。</p>
+<p>整数リテラルの末尾にl/Lと書いた場合、値にかかわらず<code>long型</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+<span class="kw">auto</span> a = <span class="dv">123</span> ;
+<span class="co">// long</span>
+<span class="kw">auto</span> b = <span class="dv">123l</span> ;
+<span class="co">// long</span>
+<span class="kw">auto</span> c = <span class="dv">123L</span> ;</code></pre></div>
+<p>符号なし整数型を意味するu/Uと組み合わせることもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// unsigned long</span>
+<span class="kw">auto</span> a = <span class="dv">123ul</span> ;
+<span class="kw">auto</span> b = <span class="dv">123lu</span> ;</code></pre></div>
+<p>順番と大文字小文字の組み合わせは自由だ。</p>
+<h3 id="long-long-int型">long long int型</h3>
+<p><code>long long int型</code>は<code>long int型</code>以上の範囲の整数を扱える型だ。<code>long</code>と同じく<code>long long</code>は<code>long long int</code>と同じで、<code>unsigned long long int</code>もある。</p>
+<pre><code>// long long int
+long long a = 1 ;
+// unsigned long long int
+unsinged long long b = 1 ;</code></pre>
+<p>整数リテラルの値が<code>long型</code>でも表現できないときは、<code>long long</code>が使われる。<code>long long</code>でも表現できない場合は<code>unsigned long long</code>が使われる。</p>
+<p>整数リテラルの末尾にll/LLと書くと<code>long long int型</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// long long int</span>
+<span class="kw">auto</span> a = <span class="dv">123ll</span> ;
+<span class="co">// long long int</span>
+<span class="kw">auto</span> b = <span class="dv">123LL</span> ;
+<span class="co">// unsigned long long int</span>
+<span class="kw">auto</span> c = <span class="dv">123ull</span></code></pre></div>
+<h3 id="short-int型">short int型</h3>
+<p><code>short int型</code>は<code>int型</code>より小さい範囲の値を扱う整数型だ。<code>long</code>, <code>long long</code>と同様に、<code>unsigned short int</code>型もある。単に<code>short</code>と書くと、<code>short int</code>と同じ意味になる。</p>
+<p>整数リテラルでは末尾にs/Sと書くと<code>short int型</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// short int</span>
+<span class="kw">auto</span> a = <span class="er">123s</span> ;
+<span class="co">// short int</span>
+<span class="kw">auto</span> b = <span class="er">123S</span> ;
+<span class="co">// unsigned short int ;</span>
+<span class="kw">auto</span> c = <span class="er">123us</span> ;</code></pre></div>
+<h3 id="char型">char型</h3>
+<p><code>char型</code>はやや特殊で、<code>char</code>, <code>signed char</code>, <code>unsigned char</code>の三種類の型がある。<code>signed char</code>と<code>char</code>は別物だ。<code>char型</code>は整数型であり、後で説明するように文字型でもある。<code>char型</code>の符号の有無は実装ごとに異なる。</p>
+<h2 id="整数型のサイズ">整数型のサイズ</h2>
+<p>整数型を含む変数のサイズは、<code>sizeof演算子</code>で確認することができる。sizeof(T)はTに型名や変数名を入れることで、サイズを取得することができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">sizeof</span>(<span class="dt">int</span>) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="dt">int</span> x{} ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">sizeof</span>(x) ;
+}</code></pre></div>
+<p><code>sizeof演算子</code>は<code>std::size_t型</code>を返す。vectorの章でも出てきたこの型は実装依存の符号なし型であると定義されている。単位はバイトだ。</p>
+<p>以下が各種整数型のサイズを出力するプログラムだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> print = []( <span class="bu">std::</span>size_t s )
+    { <span class="bu">std::</span>cout &lt;&lt; s &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    print( <span class="kw">sizeof</span>(<span class="dt">char</span>) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">short</span>) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">int</span>) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">long</span>) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">long</span> <span class="dt">long</span> ) ) ;
+}</code></pre></div>
+<p>このプログラムを筆者の環境で実行した結果が以下になる。</p>
+<pre><code>1
+2
+4
+8
+8</code></pre>
+<p>どうやら筆者の環境では、charが1バイト、shortが2バイト、intが4バイト、longとlong longが8バイトのようだ。この結果は環境ごとに異なるので読者も自分でsizeof演算子を様々な型に適用して試してほしい。</p>
+<h2 id="整数型の表現できる値の範囲">整数型の表現できる値の範囲</h2>
+<p>整数型の表現できる値の最小値と最大値は<code>std::numeric_limits&lt;T&gt;</code>で取得できる。最小値は::min()を、最大値は::max()で得られる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">int</span>&gt;::min() &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">int</span>&gt;::max() ;
+}</code></pre></div>
+<p>実行結果</p>
+<pre><code>-2147483648
+2147483647</code></pre>
+<p>どうやら筆者の環境ではint型は−21億4748万3648から21億4748万3647までの範囲の値を表現できるようだ。</p>
+<p><code>unsigned int</code>はどうだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">unsigned</span> <span class="dt">int</span>&gt;::min() &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">unsigned</span> <span class="dt">int</span>&gt;::max() ;
+}</code></pre></div>
+<p>実行結果</p>
+<pre><code>0
+4294967295</code></pre>
+<p>どうやら筆者の環境ではunsigned int型は0から42億9496万7295までの範囲の値を表現できるようだ。sizeof(int)が4バイトであり、1バイトが8ビットの筆者の環境では自然な値だ。符号なしの4バイト整数型は0から<span class="math inline">\(2^{32}-1\)</span>までの範囲の値を表現できる。符号付き4バイト整数型は<span class="math inline">\(-2^{31}\)</span>から<span class="math inline">\(2^{31}-1\)</span>までの範囲の値を表現できる。</p>
+<p>整数の最小値を-1したり、最大値を+1した場合、何が起こるのだろうか。</p>
+<p>符号なし整数型の場合は簡単だ。最小値-1は最大値になる。最大値+1は最小値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">unsigned</span> <span class="dt">int</span> min = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">unsigned</span> <span class="dt">int</span>&gt;::min() ;
+    <span class="dt">unsigned</span> <span class="dt">int</span> max = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">unsigned</span> <span class="dt">int</span>&gt;::max() ;
+
+    <span class="dt">unsigned</span> <span class="dt">int</span> min_minus_one = min - <span class="dv">1u</span> ;
+    <span class="dt">unsigned</span> <span class="dt">int</span> max_plus_one = max + <span class="dv">1u</span> ;
+
+    <span class="bu">std::</span>cout &lt;&lt; min &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; max &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; min_minus_one &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; max_plus_one ;
+}</code></pre></div>
+<p>8ビットの符号なし整数型があるとして、最小値は0b00000000(0)になるが、この値を-1すると0b11111111(255)となり、これは最大値になる。逆に、最大値である0b11111111(255)に+1すると0b00000000(0)となり、これは最小値になる。</p>
+<p>これを数学的に厳密に書くと、「符号なし整数は算術モジュロ<span class="math inline">\(2^n\)</span>の法に従う。ただしnは整数を表現する値のビット数である」となる。</p>
+<p>符号付き整数型の場合、挙動は定められていない。ただし、一般に普及している2の補数表現の場合は、以下のような挙動になることが多い。</p>
+<p>符号付き整数型の最小値を-1すると最大値になり、最大値を+1すると最小値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+     <span class="dt">int</span> min = <span class="bu">std::</span>numeric_limits&lt; <span class="dt">int</span>&gt;::min() ;
+     <span class="dt">int</span> max = <span class="bu">std::</span>numeric_limits&lt; <span class="dt">int</span>&gt;::max() ;
+
+     <span class="dt">int</span> min_minus_one = min - <span class="dv">1</span> ;
+     <span class="dt">int</span> max_plus_one = max + <span class="dv">1</span> ;
+
+    <span class="bu">std::</span>cout &lt;&lt; min &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; max &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; min_minus_one &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; max_plus_one ;
+}</code></pre></div>
+<p>これはなぜか。2の補数表現の8ビットの符号付き整数の最小値は0b10000000(-128)だが、これを-1すると0b01111111(127)となり、これは最大値となる。逆に最大値0b01111111(127)を+1すると0b10000000(-128)となり、これは最小値となる。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
