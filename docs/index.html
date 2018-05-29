@@ -203,6 +203,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li><a href="#整数型のサイズ">整数型のサイズ</a></li>
 <li><a href="#整数型の表現できる値の範囲">整数型の表現できる値の範囲</a></li>
+<li><a href="#整数型の変換">整数型の変換</a></li>
+</ul></li>
+<li><a href="#浮動小数点数">浮動小数点数</a><ul>
+<li><a href="#浮動小数点数リテラル">浮動小数点数リテラル</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -4714,6 +4718,109 @@ unsinged long long b = 1 ;</code></pre>
         &lt;&lt; min_minus_one &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; max_plus_one ;
 }</code></pre></div>
 <p>これはなぜか。2の補数表現の8ビットの符号付き整数の最小値は0b10000000(-128)だが、これを-1すると0b01111111(127)となり、これは最大値となる。逆に最大値0b01111111(127)を+1すると0b10000000(-128)となり、これは最小値となる。</p>
+<h2 id="整数型の変換">整数型の変換</h2>
+<p>整数型にはここで紹介しただけでも、様々な型がある。同じ型同士を使ったほうがよい。</p>
+<p>以下は型が一致している例だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">123</span> ;
+    <span class="dt">long</span> b = <span class="dv">123l</span> ;
+    <span class="dt">long</span> <span class="dt">long</span> c = <span class="dv">123ll</span> ;
+
+    <span class="dt">unsigned</span> <span class="dt">int</span> d = <span class="dv">123u</span> ; 
+}</code></pre></div>
+<p>以下は型が一致していない例だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// intからshort</span>
+    <span class="dt">short</span> a = <span class="dv">123</span> ;
+    <span class="co">// longからint</span>
+    <span class="dt">int</span> b = <span class="dv">123l</span> ;
+
+    <span class="co">// intからunsigned int</span>
+    <span class="dt">unsigned</span> <span class="dt">int</span> c = <span class="dv">123</span> ;
+    <span class="co">// unsigned intからint</span>
+    <span class="dt">int</span> d = <span class="dv">123u</span> ;
+}</code></pre></div>
+<p>代入や演算で整数型が一致しない場合、整数型の変換が行われる。</p>
+<p>整数型の変換で注意すべきこととしては、変換元の値を変換先の型で表現できない場合の挙動だ。</p>
+<p>たとえばshort型とint型の表現できる最大値を調べるプログラムを書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;short: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">short</span>&gt;::max() &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;int: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">int</span>&gt;::max() ;
+}</code></pre></div>
+<p>これを実行すると筆者の環境では以下のようになる。</p>
+<pre><code>short: 32767
+int: 2147483647</code></pre>
+<p>どうやら筆者の環境ではshort型は約3万、int型は約21億ぐらいの値を表現できるようだ。</p>
+<p>では約3万までしか表現できないshort型に4万を代入しようとするとどうなるのか。これは一つ前の整数型の表現できる値の範囲で説明したものと同じことがおこる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">short</span> x = <span class="dv">40000</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}</code></pre></div>
+<p>このプログラムを実行した結果は実装ごとに異なる。例えば筆者の環境では以下のようになる。</p>
+<pre><code>-25536</code></pre>
+<p>整数型の変換は暗黙的に行われるが、明示的に行うこともできる。明示的な変換には<code>static_cast&lt;T&gt;(e)</code>を使う。<code>static_cast</code>は値eを型Tの値に変換する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">123</span> ;
+    <span class="dt">short</span> y = <span class="kw">static_cast</span>&lt;T&gt;(x) ;
+}</code></pre></div>
+<h1 id="浮動小数点数">浮動小数点数</h1>
+<p>浮動小数点数の型には<code>float</code>, <code>double</code>, <code>long double</code>がある。<code>float</code>が最も精度が低く、<code>double</code>はfloatと同等以上の精度を持ち、<code>long double</code>はdoubleと同等以上の精度を持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">float</span> f = <span class="fl">1.0</span> ;
+<span class="dt">double</span> d = <span class="fl">1.0</span> ;
+<span class="dt">long</span> <span class="dt">double</span> ld = <span class="fl">1.0</span> ;</code></pre></div>
+<p>以下は浮動小数点数型の変数のサイズを調べるコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> print = [](<span class="bu">std::</span>size_t s )
+    { <span class="bu">std::</span>cout &lt;&lt; s &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    print( <span class="kw">sizeof</span>(<span class="dt">float</span>) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">double</span>) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">long</span> <span class="dt">double</span>) ) ;
+}</code></pre></div>
+<p>筆者の環境では以下のように出力される。</p>
+<pre><code>4
+8
+16</code></pre>
+<p>浮動小数点数は一見整数と同じように扱える上、小数点以下の値も扱える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">double</span> a = <span class="fl">1.23</span> ;
+<span class="dt">double</span> b = <span class="fl">0.00001</span> ;</code></pre></div>
+<p>浮動小数点数が表現できる最大値は実装依存だが、通常はかなり大きな値を表現できる。</p>
+<p>しかし、浮動小数点数は値を正確に表現しているわけではない。例えば以下のコードを実行してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// １万</span>
+    <span class="dt">float</span> a = <span class="fl">10000.0</span> ;
+    <span class="co">// １万分の1</span>
+    <span class="dt">float</span> b = <span class="fl">0.0001</span> ;
+
+    <span class="co">// １万足す１万分の1</span>
+    <span class="dt">float</span> c = a + b ;
+
+    <span class="bu">std::</span>cout &lt;&lt; a &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; c ;
+}</code></pre></div>
+<p>変数aの値は１万、変数bの値は１万分の1だ。変数cの値はa+bで10000.0001となるはずだが結果はどうだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dv">10000</span>
+<span class="fl">0.0001</span>
+<span class="dv">10000</span></code></pre></div>
+<p>変数cの値は10000.0001ではない。</p>
+<h2 id="浮動小数点数リテラル">浮動小数点数リテラル</h2>
+<p>浮動小数点数リテラルの最も簡単な書き方は10進数で整数部を書き、小数点'.'を書き、続けて小数部を書く。末尾がf/Fならfloat型、末尾がなければdouble型、末尾がl/Lならlong double型だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// float</span>
+<span class="kw">auto</span> a = <span class="fl">123.456f</span> ;
+<span class="kw">auto</span> b = <span class="fl">123.456F</span> ;
+
+<span class="co">// double</span>
+<span class="kw">auto</span> c = <span class="fl">123.456</span> ;
+
+<span class="co">// long double</span>
+<span class="kw">auto</span> d = <span class="fl">123.456l</span> ;
+<span class="kw">auto</span> e = <span class="fl">123.456L</span> ;</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
