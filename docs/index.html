@@ -183,7 +183,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#進数リテラル">10進数リテラル</a></li>
 <li><a href="#進数リテラル-1">2進数リテラル</a></li>
 <li><a href="#進数リテラル-2">8進数リテラル</a></li>
-<li><a href="#進数リテラル-3">16進数リテラル。</a></li>
+<li><a href="#進数リテラル-3">16進数リテラル</a></li>
 <li><a href="#数値区切り">数値区切り</a></li>
 </ul></li>
 <li><a href="#整数の仕組み">整数の仕組み</a><ul>
@@ -207,6 +207,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li><a href="#浮動小数点数">浮動小数点数</a><ul>
 <li><a href="#浮動小数点数リテラル">浮動小数点数リテラル</a></li>
+<li><a href="#進浮動小数点数リテラル">10進浮動小数点数リテラル</a><ul>
+<li><a href="#指数部と仮数部表記">指数部と仮数部表記</a></li>
+<li><a href="#進数による仮数部と指数部の表記">16進数による仮数部と指数部の表記</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -4442,7 +4446,7 @@ standard error output </code></pre>
 
 <span class="co">// 10進数で342391</span>
 <span class="dt">int</span> a = <span class="bn">01234567</span> ;</code></pre></div>
-<h3 id="進数リテラル-3">16進数リテラル。</h3>
+<h3 id="進数リテラル-3">16進数リテラル</h3>
 <p>16進数リテラルは接頭語'0x', '0X'から始まる。数字には0,1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,A,B,C,D,E,Fが使える。ローマ字の大文字と小文字は意味が同じだ。a,b,c,d,e,fがそれぞれ10,11,12,13,14,15を意味する。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で291</span>
 <span class="dt">int</span> hexadecimal = <span class="bn">0x123</span> ;
@@ -4810,6 +4814,7 @@ int: 2147483647</code></pre>
 <span class="dv">10000</span></code></pre></div>
 <p>変数cの値は10000.0001ではない。</p>
 <h2 id="浮動小数点数リテラル">浮動小数点数リテラル</h2>
+<h2 id="進浮動小数点数リテラル">10進浮動小数点数リテラル</h2>
 <p>浮動小数点数リテラルの最も簡単な書き方は10進数で整数部を書き、小数点'.'を書き、続けて小数部を書く。末尾がf/Fならfloat型、末尾がなければdouble型、末尾がl/Lならlong double型だ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// float</span>
 <span class="kw">auto</span> a = <span class="fl">123.456f</span> ;
@@ -4821,6 +4826,45 @@ int: 2147483647</code></pre>
 <span class="co">// long double</span>
 <span class="kw">auto</span> d = <span class="fl">123.456l</span> ;
 <span class="kw">auto</span> e = <span class="fl">123.456L</span> ;</code></pre></div>
+<h3 id="指数部と仮数部表記">指数部と仮数部表記</h3>
+<p><code>123.456</code>という値について考えてみよう。この値は以下のように表現することができる。</p>
+<p><span class="math display">\[1.23456 \times 10^{2}\]</span></p>
+<p>あるいは以下のように表現することもできる。</p>
+<p><span class="math display">\[123456 \times 10^{-3}\]</span></p>
+<p>あるいは以下のようにも表現できる。</p>
+<p><span class="math display">\[123.456 \times 10^{0}\]</span></p>
+<p>一般に、値は以下のように表現できるということだ。</p>
+<p><span class="math display">\[a \times 10^{b}\]</span></p>
+<p>浮動小数点数リテラルのもう一つの文法として、この<code>a</code>と<code>b</code>を指定するものがある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 値はすべて123.456</span>
+<span class="kw">auto</span> a = <span class="fl">1.23456e2</span> ;
+<span class="kw">auto</span> b = <span class="fl">123456e-3</span> ;
+<span class="kw">auto</span> c = <span class="fl">123.456e0</span> ;
+<span class="kw">auto</span> d = <span class="fl">123.456E0</span></code></pre></div>
+<p>この文法は、<code>a</code>と<code>b</code>をe/Eで挟むことによって浮動小数点数の値を指定する。</p>
+<p>この<code>a</code>を仮数部(fractional part)、bを指数部(exponent part)と言う。</p>
+<p>そして、指数部は底が10になる。</p>
+<p>浮動小数点数は、値を正確に表現しているのではなく、仮数部と指数部の組み合わせで表現している。浮動小数点数が浮動と呼ばれる理由は、指数部の存在によって少数点数が浮いているかのように動くからだ。</p>
+<p>例えば、仮数部と指数部がともに符号付き1バイトの整数で表現された2バイトの浮動小数点数があるとする。指数部、仮数部ともに、-128から127までの範囲の整数を表現できる。この浮動小数点数は10000(1万)も100000000(1億)も1000000000000(1兆)も表現できる。それぞれ、<code>1e4</code>, <code>1e8</code>, '1e12'だ。</p>
+<p>しかし、この浮動小数点数では1000100010000(1兆1億1万)を表現できない。なぜならば、この値を正確に表現するには、<code>100010001e4</code>を表現できる必要があるが、仮数部は100010001を表現できないからだ。</p>
+<p>浮動小数点数は値を必ずしも正確に表現できない。その代わり、とても大きな値や、とても小さな値を表現できる。</p>
+<p>浮動小数点数の型を表す末尾のf/F/l/Lは同じように使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// float</span>
+<span class="kw">auto</span> a = <span class="fl">1.0e0f</span> ;
+<span class="co">// double</span>
+<span class="kw">auto</span> b = <span class="fl">1.0e0</span> ;
+<span class="co">// long double</span>
+<span class="kw">auto</span> c = <span class="fl">1.0e0l</span> ;</code></pre></div>
+<h3 id="進数による仮数部と指数部の表記">16進数による仮数部と指数部の表記</h3>
+<p>浮動小数点数の仮数部と指数部によるリテラルは、16進数で記述することもできる。</p>
+<p>文法は、0xからはじめ、16進数の仮数部を書き、e/Eの代わりにp/Pを使い、指数部を10進数で指定する。このときの指数部の底は2になる。</p>
+<p>値は</p>
+<p><span class="math display">\[仮数部 \times 2^{指数部}\]</span></p>
+<p>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 5496</span>
+<span class="dt">double</span> a = <span class="bn">0xabc</span><span class="fl">.0</span>p0 ;
+<span class="co">// 7134</span>
+<span class="dt">double</span> b = <span class="bn">0xde</span>.fp5 ;</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
