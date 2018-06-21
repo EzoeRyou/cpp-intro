@@ -208,9 +208,42 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#浮動小数点数">浮動小数点数</a><ul>
 <li><a href="#浮動小数点数リテラル">浮動小数点数リテラル</a></li>
 <li><a href="#進浮動小数点数リテラル">10進浮動小数点数リテラル</a><ul>
-<li><a href="#指数部と仮数部表記">指数部と仮数部表記</a></li>
-<li><a href="#進数による仮数部と指数部の表記">16進数による仮数部と指数部の表記</a></li>
+<li><a href="#進数の仮数と指数による表記">10進数の仮数と指数による表記</a></li>
+<li><a href="#進数の仮数と指数による表記-1">16進数の仮数と指数による表記</a></li>
 </ul></li>
+<li><a href="#浮動小数点数の表現と特性">浮動小数点数の表現と特性</a><ul>
+<li><a href="#と-0.0">+0.0と-0.0</a></li>
+<li><a href="#と-無限大">+∞と-∞(無限大)</a></li>
+<li><a href="#nannot-a-number">NaN(Not a Number)</a></li>
+<li><a href="#有効桁数">有効桁数</a></li>
+</ul></li>
+<li><a href="#浮動小数点数同士の変換">浮動小数点数同士の変換</a></li>
+<li><a href="#浮動小数点数と整数の変換">浮動小数点数と整数の変換</a></li>
+</ul></li>
+<li><a href="#名前">名前</a><ul>
+<li><a href="#キーワード">キーワード</a></li>
+<li><a href="#名前に使える文字">名前に使える文字</a></li>
+<li><a href="#宣言と定義">宣言と定義</a></li>
+<li><a href="#名前空間">名前空間</a><ul>
+<li><a href="#グローバル名前空間">グローバル名前空間</a></li>
+<li><a href="#名前空間のネスト">名前空間のネスト</a></li>
+<li><a href="#名前空間名の別名を宣言する名前空間エイリアス">名前空間名の別名を宣言する名前空間エイリアス</a></li>
+<li><a href="#名前空間名の指定を省略するusingディレクティブ">名前空間名の指定を省略するusingディレクティブ</a></li>
+<li><a href="#名前空間を指定しなくてもよいinline名前空間">名前空間を指定しなくてもよいinline名前空間</a></li>
+</ul></li>
+<li><a href="#型名">型名</a><ul>
+<li><a href="#型名の別名を宣言するエイリアス宣言">型名の別名を宣言するエイリアス宣言</a></li>
+</ul></li>
+<li><a href="#スコープ">スコープ</a></li>
+</ul></li>
+<li><a href="#イテレーターの基礎">イテレーターの基礎</a><ul>
+<li><a href="#イテレーターの取得方法">イテレーターの取得方法</a></li>
+<li><a href="#イテレーターの参照する要素に対する読み書き">イテレーターの参照する要素に対する読み書き。</a></li>
+<li><a href="#イテレーターの参照する要素を変更">イテレーターの参照する要素を変更</a></li>
+<li><a href="#イテレーターの比較">イテレーターの比較</a></li>
+<li><a href="#最後の次の要素へのイテレーター">最後の次の要素へのイテレーター</a></li>
+<li><a href="#なんでもイテレーター">なんでもイテレーター</a></li>
+<li><a href="#イテレーターと添字の範囲">イテレーターと添字の範囲</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -4826,7 +4859,7 @@ int: 2147483647</code></pre>
 <span class="co">// long double</span>
 <span class="kw">auto</span> d = <span class="fl">123.456l</span> ;
 <span class="kw">auto</span> e = <span class="fl">123.456L</span> ;</code></pre></div>
-<h3 id="指数部と仮数部表記">指数部と仮数部表記</h3>
+<h3 id="進数の仮数と指数による表記">10進数の仮数と指数による表記</h3>
 <p><code>123.456</code>という値について考えてみよう。この値は以下のように表現することができる。</p>
 <p><span class="math display">\[1.23456 \times 10^{2}\]</span></p>
 <p>あるいは以下のように表現することもできる。</p>
@@ -4842,11 +4875,11 @@ int: 2147483647</code></pre>
 <span class="kw">auto</span> c = <span class="fl">123.456e0</span> ;
 <span class="kw">auto</span> d = <span class="fl">123.456E0</span></code></pre></div>
 <p>この文法は、<code>a</code>と<code>b</code>をe/Eで挟むことによって浮動小数点数の値を指定する。</p>
-<p>この<code>a</code>を仮数部(fractional part)、bを指数部(exponent part)と言う。</p>
-<p>そして、指数部は底が10になる。</p>
-<p>浮動小数点数は、値を正確に表現しているのではなく、仮数部と指数部の組み合わせで表現している。浮動小数点数が浮動と呼ばれる理由は、指数部の存在によって少数点数が浮いているかのように動くからだ。</p>
-<p>例えば、仮数部と指数部がともに符号付き1バイトの整数で表現された2バイトの浮動小数点数があるとする。指数部、仮数部ともに、-128から127までの範囲の整数を表現できる。この浮動小数点数は10000(1万)も100000000(1億)も1000000000000(1兆)も表現できる。それぞれ、<code>1e4</code>, <code>1e8</code>, '1e12'だ。</p>
-<p>しかし、この浮動小数点数では1000100010000(1兆1億1万)を表現できない。なぜならば、この値を正確に表現するには、<code>100010001e4</code>を表現できる必要があるが、仮数部は100010001を表現できないからだ。</p>
+<p>この<code>a</code>を仮数部(fractional part)、bを指数部(exponent part)と言う。仮数のことは他にも、coefficient, significand, mantissaなどと呼ばれたりもする。</p>
+<p>そして、指数は底が10になる。</p>
+<p>浮動小数点数は、値を正確に表現しているのではなく、仮数と指数の組み合わせで表現している。浮動小数点数が浮動と呼ばれる理由は、指数の存在によって少数点数が浮いているかのように動くからだ。</p>
+<p>例えば、仮数と指数がともに符号付き1バイトの整数で表現された2バイトの浮動小数点数があるとする。指数、仮数ともに、-128から127までの範囲の整数を表現できる。この浮動小数点数は10000(1万)も100000000(1億)も1000000000000(1兆)も表現できる。それぞれ、<code>1e4</code>, <code>1e8</code>, '1e12'だ。</p>
+<p>しかし、この浮動小数点数では1000100010000(1兆1億1万)を表現できない。なぜならば、この値を正確に表現するには、<code>100010001e4</code>を表現できる必要があるが、仮数は100010001を表現できないからだ。</p>
 <p>浮動小数点数は値を必ずしも正確に表現できない。その代わり、とても大きな値や、とても小さな値を表現できる。</p>
 <p>浮動小数点数の型を表す末尾のf/F/l/Lは同じように使える。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// float</span>
@@ -4855,16 +4888,940 @@ int: 2147483647</code></pre>
 <span class="kw">auto</span> b = <span class="fl">1.0e0</span> ;
 <span class="co">// long double</span>
 <span class="kw">auto</span> c = <span class="fl">1.0e0l</span> ;</code></pre></div>
-<h3 id="進数による仮数部と指数部の表記">16進数による仮数部と指数部の表記</h3>
+<h3 id="進数の仮数と指数による表記-1">16進数の仮数と指数による表記</h3>
 <p>浮動小数点数の仮数部と指数部によるリテラルは、16進数で記述することもできる。</p>
 <p>文法は、0xからはじめ、16進数の仮数部を書き、e/Eの代わりにp/Pを使い、指数部を10進数で指定する。このときの指数部の底は2になる。</p>
 <p>値は</p>
-<p><span class="math display">\[仮数部 \times 2^{指数部}\]</span></p>
+<p><span class="math display">\[仮数 \times 2^{指数}\]</span></p>
 <p>になる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 5496</span>
 <span class="dt">double</span> a = <span class="bn">0xabc</span><span class="fl">.0</span>p0 ;
 <span class="co">// 7134</span>
 <span class="dt">double</span> b = <span class="bn">0xde</span>.fp5 ;</code></pre></div>
+<h2 id="浮動小数点数の表現と特性">浮動小数点数の表現と特性</h2>
+<p>浮動小数点数は指数と仮数で表現される。浮動小数点数の表現は様々だが、多くのアーキテクチャーでは国際標準規格のISO/IEC/IEEE 60559:2011が使われている。これは米国電気電子学会の規格IEEE 754-2008と同じ内容になっている。その大本はIntelが立案した規格、IEEE 754-1985だ。一般にはIEEE 754(アイトリプルイー 754)という名称で知られている。</p>
+<p>IEEE 754では、浮動小数点数は符号ビット、仮数部、指数部からなる。本書ではIEEE 754のを前提として、浮動小数点数で気をつけるべき特性を説明する。</p>
+<h3 id="と-0.0">+0.0と-0.0</h3>
+<p>i IEEE 754では符号ビットがあるので、ゼロには2種類ある。正のゼロと負のゼロだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="fl">0.0</span> &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; <span class="fl">-0.0</span> ;
+}</code></pre></div>
+<p>+0.0と-0.0の違いを浮動小数点数で表現することはできるが、値を比較すると同じものだとみなされる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// a, bは異なるビットパターンを持つ</span>
+    <span class="dt">double</span> a = <span class="fl">+0.0</span> ;
+    <span class="dt">double</span> b = <span class="fl">-0.0</span> ;
+
+    <span class="co">// true</span>
+    <span class="dt">bool</span> c = a == b ;
+}</code></pre></div>
+<h3 id="と-無限大">+∞と-∞(無限大)</h3>
+<p>IEEE 754の浮動小数点数は正の無限と負の無限を表現できる。</p>
+<p>浮動小数点数の値としての無限は、計算の結果として現れるほか、<code>numeric_limits&lt;T&gt;::infinity()</code>を使って取得できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> a = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::infinity() ;
+    <span class="dt">double</span> b = -<span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::infinity() ;
+
+    <span class="bu">std::</span>cout &lt;&lt; a &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; b ;
+}</code></pre></div>
+<h3 id="nannot-a-number">NaN(Not a Number)</h3>
+<p>NaN(Not a Number)は計算結果が未定義の場合を表現する浮動小数点数の特別な値だ。</p>
+<p>計算結果が未定義な場合とは、例えばゼロで除算する場合だ。</p>
+<p>値としてのNaNは<code>numeric_limits&lt;T&gt;::quiet_NaN()</code>で取得できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> NaN = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::quiet_NaN() ;
+    <span class="bu">std::</span>cout &lt;&lt; NaN ;
+}</code></pre></div>
+<p>NaNとの比較結果はすべてfalseとなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> NaN = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::quiet_NaN() ;
+
+    <span class="co">// すべてfalse</span>
+    <span class="dt">bool</span> a = NaN == <span class="fl">0.0</span> ;
+    <span class="dt">bool</span> b = NaN != <span class="fl">0.0</span> ;
+    <span class="dt">bool</span> c = NaN == NaN ;
+    <span class="dt">bool</span> d = NaN != NaN ;
+    <span class="dt">bool</span> e = Nan &lt; <span class="fl">0.0</span> ;
+}</code></pre></div>
+<p>整数であれば、'a == b'がfalesであるならば、'a != b'なのだと仮定してもよいが、こと浮動小数点数の場合、NaNの存在があるために必ずしもそうとは限らない。上の例でわかるように、NaNとの比較はすべてfalseになる。</p>
+<h3 id="有効桁数">有効桁数</h3>
+<p>浮動小数点数は正確な値のすべての桁数を表現できない。表現できるのは仮数部が何桁を正確に表現できるかに依存している。この有効桁数は、<code>numeric_limits&lt;T&gt;::digits10</code>で取得できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="st">&quot;float: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">float</span>&gt;::digits10 &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;double: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::digits10 &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;long double: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">long</span> <span class="dt">double</span>&gt;::digits10 &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>浮動小数点数型Tの<code>numeric_limits&lt;T&gt;</code>にはもう一つ、max_digits10がある。これは浮動小数点数を10進数表記にして、その10進数表記を浮動小数点数に戻したときに、浮動小数点数としての値を精度が落ちることなく再現できる桁数のことだ。</p>
+<p>もうひとつ興味深い値としては、<code>numeric_limits&lt;T&gt;::epsilon()</code>がある。これは浮動小数点数の1と比較可能な最小の値との差だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout
+        &lt;&lt; <span class="st">&quot;float: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">float</span>&gt;::digits10 &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;double: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::digits10 &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
+        &lt;&lt; <span class="st">&quot;long double: &quot;</span>s &lt;&lt; <span class="bu">std::</span>numeric_limits&lt;<span class="dt">long</span> <span class="dt">double</span>&gt;::digits10 &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<h2 id="浮動小数点数同士の変換">浮動小数点数同士の変換</h2>
+<p>浮動小数点数型は相互に変換できる。変換先の浮動小数点数型が変換元の値を完全に表現できるならばその値に、できないのであれば近い値に変換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> a = <span class="fl">1.23456789</span> ;
+
+    <span class="co">// 変換</span>
+    <span class="dt">float</span> b = a ;
+    <span class="co">// 変換</span>
+    <span class="dt">long</span> <span class="dt">double</span> c = a ;
+}</code></pre></div>
+<p>異なる浮動小数点数同士を演算すると、<code>float&lt;double&lt;long doube</code>の順で大きい浮動小数点数型に合わせて変換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// float</span>
+    <span class="kw">auto</span> a = <span class="fl">1.0f</span> + <span class="fl">1.0f</span> ;
+    <span class="co">// double</span>
+    <span class="kw">auto</span> b = <span class="fl">1.0f</span> + <span class="fl">1.0</span> ;
+    <span class="co">// long double</span>
+    <span class="kw">auto</span> c = <span class="fl">1.0f</span> + <span class="fl">1.0l</span> ;
+}</code></pre></div>
+<h2 id="浮動小数点数と整数の変換">浮動小数点数と整数の変換</h2>
+<p>浮動小数点数型を整数型に変換すると、小数部が切り捨てられる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">double</span> a = <span class="fl">1.9999</span> ;
+    <span class="co">// 1</span>
+    <span class="dt">int</span> x = a ;
+}</code></pre></div>
+<p>変換元の浮動小数点数から小数部を切り捨てた値が変換先の整数型で表現できなかった場合は、何が起こるかわからない。</p>
+<p>整数型を浮動小数点数型に変換すると、変換元の整数の値が変換先の浮動小数点数型で正確に表現できる場合はその値に、そうでない場合は表現できる最も近い値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="co">// 1.0</span>
+    <span class="dt">double</span> b = a ;
+}</code></pre></div>
+<p>浮動小数点数と整数を演算した場合、浮動小数点数型になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// double</span>
+    <span class="kw">auto</span> a = <span class="fl">1.0</span> + <span class="dv">1</span> ;
+    <span class="kw">auto</span> b = <span class="dv">1</span> + <span class="fl">1.0</span> ;
+
+    <span class="co">// float</span>
+    <span class="kw">auto</span> c = <span class="fl">1.0f</span> + <span class="dv">1</span> ;
+}</code></pre></div>
+<h1 id="名前">名前</h1>
+<p>プログラミング言語C++には様々な名前が出てくる。変数、関数、型など、さまざまなものに名前がついている。この章では名前について学ぶ。</p>
+<h2 id="キーワード">キーワード</h2>
+<p>一部の名前はキーワードとして予約され、特別な意味を持つ。キーワードは名前として使うことができない。</p>
+<p>キーワードの一覧は以下の通り。</p>
+<pre><code>alignas         alignof     asm         auto        bool            break
+case            catch       char        char16_t    char32_t        class
+concept         const       constexpr   const_cast  continue        decltype
+default         delete      do          double      dynamic_cast    else
+enum            explicit    export      extern      false           float
+for             friend      goto        if          inline          int
+long            mutable     namespace   new         noexcept        nullptr
+operator        private     protected   public      register        reinterpret_cast
+requires        return      short       signed      sizeof          static
+static_assert   static_cast struct      switch      template        this
+thread_local    throw       true        try         typedef         typeid
+typename        union       unsigned    using       virtual         void
+volatile        wchar_t     while</code></pre>
+<h2 id="名前に使える文字">名前に使える文字</h2>
+<p>名前というのは根本的には識別子と呼ばれる文字列でなりたっている。</p>
+<p>C++では識別子にラテンアルファベット小文字、大文字、アラビア数字、アンダースコア、を使うことができる。以下がその文字の一覧だ。</p>
+<pre><code>a b c d e f g h i j k l m
+n o p q r s t u v w x y z
+A B C D E F G H I J K L M
+N O P Q R S T U V W X Y Z
+0 1 2 3 4 5 6 7 8 9
+_</code></pre>
+<p>小文字と大文字は区別される。名前<code>a</code>と名前<code>A</code>は別の名前だ。</p>
+<p>ただし、名前はアラビア数字で始まってはならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> <span class="er">123abc</span> = <span class="dv">0</span> ; <span class="co">// エラー</span></code></pre></div>
+<p>名前にダブルアンダースコア(<code>__</code>)が含まれているものは予約されているので使ってはならない。ダブルアンダースコアとはアンダースコア文字が2つ連続したものをいう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 使ってはならない</span>
+<span class="co">// すべてダブルアンダースコアを含む</span>
+<span class="dt">int</span> __ = <span class="dv">0</span> ;
+<span class="dt">int</span> a__ = <span class="dv">0</span> ;
+<span class="dt">int</span> __a = <span class="dv">0</span> ;</code></pre></div>
+<p>アンダースコアに大文字から始まる名前も予約されているので使ってはならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 使ってはならない</span>
+<span class="co">// アンダースコアに大文字から始まる</span>
+<span class="dt">int</span> _A = <span class="dv">0</span> ;</code></pre></div>
+<p>アンダースコアに小文字から始まる名前もグローバル名前空間で予約されているので使ってはならない。グローバル名前空間についてはこの後説明する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 使ってはならない</span>
+<span class="co">// アンダースコアに小文字から始まる</span>
+<span class="dt">int</span> _a = <span class="dv">0</span> ;</code></pre></div>
+<p>予約されているというのは、C++コンパイラーがその名前をC++の実装のために使うかもしれないということだ。例えばC++コンパイラーは<code>_A</code>という名前を特別な意味を持つものとして使うかもしれないし、その名前の変数や関数をプログラムに追加するかもしれない。</p>
+<h2 id="宣言と定義">宣言と定義</h2>
+<p>C++では、名前は使う前に宣言しなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ; <span class="co">// 宣言</span>
+    x = <span class="dv">1</span> ; <span class="co">// 使用</span>
+}</code></pre></div>
+<p>宣言する前に使うことはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// エラー、名前xは宣言されていない。</span>
+    x = <span class="dv">1</span> ; 
+
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>C++では多くの名前は宣言と定義に分かれている。宣言と定義の分離は関数が一番わかりやすい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 関数の宣言</span>
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ;
+
+<span class="co">// 関数の定義</span>
+inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</span>
+<span class="co">// 定義部分</span>
+<span class="co">// 関数の本体</span>
+{
+    <span class="cf">return</span> x + <span class="dv">1</span> ;
+}</code></pre></div>
+<p>関数の定義は宣言をかねる。</p>
+<p>宣言は何度でも書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ; <span class="co">// 初出</span>
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ; <span class="co">// OK</span>
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ; <span class="co">// OK</span></code></pre></div>
+<p>定義はプログラム中に一度しか書くことができない</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 定義</span>
+<span class="dt">int</span> odr() { }
+
+<span class="co">// エラー、定義の重複</span>
+<span class="dt">int</span> odr() { }</code></pre></div>
+<p>名前を使うのに事前に必要なのは宣言だ。定義は名前を使った後に書いてもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 宣言</span>
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ;
+
+<span class="dt">int</span> main()
+{
+    plus_one( <span class="dv">1</span> ) ;
+}
+
+<span class="co">// 定義</span>
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ;
+{
+    <span class="cf">return</span> x + <span class="dv">1</span> ;
+}</code></pre></div>
+<p>ほとんどの変数は宣言と定義が同時に行われる。変数でも宣言と定義を分割して行う方法もあるのだが、解説は分割コンパイルの章で行う。</p>
+<h2 id="名前空間">名前空間</h2>
+<p>本書をここまで読んだ読者は、一部の型名の記述がすこし変なことに気がついているだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="bu">std::</span>string a ;
+<span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; b ;</code></pre></div>
+<p>コロンやアングルブラケットは名前に使える文字ではない。信じられない読者は試してみるとよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// エラー</span>
+<span class="dt">int</span> :: = <span class="dv">0</span> ;
+<span class="dt">int</span> &lt;<span class="dt">int</span>&gt; = <span class="dv">0</span> ;</code></pre></div>
+<p>莫大なエラーが表示されるだろうが、すでに学んだようにとてもいいことだ。コンパイラーが間違いを見つけてくれたのだから。わからないことがあったらどんどんコンパイルエラーを出すとよい。</p>
+<p>実は<code>std</code>というのは名前空間(namespace)の名前だ。ダブルコロン(<code>::</code>)は名前空間を指定する文法だ。</p>
+<p>名前空間の文法は以下の通り</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> ns {
+<span class="co">// コード</span>
+}</code></pre></div>
+<p>名前空間の中の名前を参照するには<code>::</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">ns::name ;</code></pre></div>
+<p>名前空間の中には変数も書ける。この変数は関数の内部に限定されたローカル変数とは違い、どの関数からでも参照できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> ns {
+    <span class="dt">int</span> name{} ;
+}
+
+<span class="dt">int</span> f()
+{
+    <span class="cf">return</span> ns::name ;
+}
+
+<span class="dt">int</span> main()
+{
+    ns::name = <span class="dv">1</span> ;
+}</code></pre></div>
+<p>名前空間の中で宣言された名前は、名前空間を指定しなければ使えなくなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> ns {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="dt">int</span> main()
+{
+    ns::f() ;
+
+    f() ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>異なる名前空間名の下の名前は別の名前になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> a {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+
+<span class="kw">namespace</span> b {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }
+}
+
+<span class="dt">int</span> main()
+{
+    a::f() ; <span class="co">// 0</span>
+    b::f() ; <span class="co">// 1</span>
+}</code></pre></div>
+<p>これだけを見ると、名前空間というのはわざわざ名前空間名を指定しなければ使えない面倒な機能に見えるだろう。名前空間の価値は複数人で同じプログラムのソースファイルを編集するときに出てくる。</p>
+<p>例えば、アリスとボブがプログラムを共同で開発しているとする。あるプログラムのソースファイル<code>f</code>という名前の関数を書いたとする。ここで、同じプログラムを共同開発している他人も<code>func</code>という名前の関数を書いたらどうなるか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// アリスの書いた関数f</span>
+<span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+
+<span class="co">// ボブの書いた関数f</span>
+<span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }</code></pre></div>
+<p>すでに宣言と定義で学んだように、このコードはエラーになる。なぜならば、同じ名前に対して定義が2つあるからだ。</p>
+<p>名前空間なしでこの問題を解決するためはに、アリスとボブが事前の申し合わせて、名前が衝突しないように調整する必要がある。</p>
+<p>しかし名前空間があるC++では、そのような面倒な調整は必要がない。アリスとボブが別の名前空間を使えばいいのだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// アリスの名前空間</span>
+<span class="kw">namespace</span> alice {
+    <span class="co">// アリスの書いた関数f</span>
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="co">// ボブの名前空間</span>
+<span class="kw">namespace</span> bob {
+    <span class="co">// ボブの書いた関数f</span>
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }
+}</code></pre></div>
+<p><code>alice::f</code>と<code>bob::f</code>は別の名前なので定義の衝突は起こらない。</p>
+<h3 id="グローバル名前空間">グローバル名前空間</h3>
+<p>名前空間に包まれていないソースファイルのトップレベルの場所は、実はグローバル名前空間(global name space)という名前のない名前空間で包まれているという扱いになっている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// グローバル名前空間</span>
+<span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+
+<span class="kw">namespace</span> ns {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }
+}
+
+<span class="dt">int</span> main()
+{
+    f() ; <span class="co">// 0</span>
+    ns::f() ; <span class="co">// 1</span>
+}</code></pre></div>
+<p>グローバル名前空間は名前の指定のない単なる<code>::</code>で指定することもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> x { } ;
+
+<span class="dt">int</span> main()
+{
+    x ; <span class="co">// ::xと同じ</span>
+    ::x ;
+}</code></pre></div>
+<p>すでに名前空間の中では変数を宣言できることは学んだ。グローバル名前空間は名前空間なので同じように変数を宣言できる。</p>
+<p>main関数はグローバル名前空間に存在しなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// グローバル名前空間</span>
+<span class="dt">int</span> main() { }</code></pre></div>
+<h3 id="名前空間のネスト">名前空間のネスト</h3>
+<p>名前空間の中に名前空間を書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> A { <span class="kw">namespace</span> B { <span class="kw">namespace</span> C {
+    <span class="dt">int</span> name {} ;
+} } }
+
+<span class="dt">int</span> main()
+{
+    A::B::C::name = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>名前空間のネストは省略して書くこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> A::B::C {
+    <span class="dt">int</span> name { } ;
+}
+
+<span class="dt">int</span> main()
+{
+    A::B::C::name = <span class="dv">0</span> ;
+}</code></pre></div>
+<h3 id="名前空間名の別名を宣言する名前空間エイリアス">名前空間名の別名を宣言する名前空間エイリアス</h3>
+<p>名前空間名には別名をつけることができる。これを名前空間エイリアスと呼ぶ。</p>
+<p>たとえば名前空間名が重複することを恐れるあまり、とても長い名前空間名を付けたライブラリがあるとする。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> very_long_name {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="dt">int</span> main()
+{
+    very_long_name::f() ;
+}</code></pre></div>
+<p>この関数fを使うために毎回<code>very_long_name::f</code>と書くのは面倒だ。こういうときには名前空間エイリアスを使うとよい。名前空間エイリアスは名前空間名の別名を宣言できる。</p>
+<pre><code>namespace 別名 = 名前空間名 ;</code></pre>
+<p>使い方。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> very_long_name {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 名前空間エイリアス</span>
+    <span class="kw">namespace</span> vln = very_long_name ;
+    <span class="co">// vlnはvery_long_nameのエイリアス</span>
+    vln::f() ;
+}</code></pre></div>
+<p>名前空間エイリアスは元の名前空間名と同じように使える。意味も同じだ。</p>
+<p>名前空間エイリアスはネストされた名前空間にも使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> A::B::C {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">namespace</span> D = A::B::C ;
+    <span class="co">// DはA::B::Cのエイリアス</span>
+    D::f() ;
+}</code></pre></div>
+<p>名前空間エイリアスを関数の中で宣言すると、その関数の中でだけ有効になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> A { <span class="dt">int</span> x { } ; }
+
+<span class="dt">int</span> f()
+{
+    <span class="co">// Bの宣言</span>
+    <span class="kw">namespace</span> B = A ;
+    <span class="co">// OK、Bは宣言されている</span>
+    <span class="cf">return</span> B::x ;
+}
+
+<span class="dt">int</span> g()
+{
+    <span class="co">// エラー、Bは宣言されていない</span>
+    <span class="cf">return</span> B::x ;
+}</code></pre></div>
+<p>名前空間エイリアスを名前空間の中で宣言すると、宣言以降の名前空間内で有効になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> ns {
+    <span class="kw">namespace</span> A { <span class="dt">int</span> x { } ; }
+    <span class="kw">namespace</span> B = A ;
+
+    <span class="co">// OK</span>
+    <span class="dt">int</span> f(){ <span class="cf">return</span> B::x ; }
+    <span class="co">// OK</span>
+    <span class="dt">int</span> g(){ <span class="cf">return</span> B::x ; }
+
+} <span class="co">// end namespace ns</span>
+
+<span class="co">// エラー、Bは宣言されていない</span>
+<span class="dt">int</span> h(){ <span class="cf">return</span> B::x ; }</code></pre></div>
+<p>グローバル名前空間は名前空間なので、名前空間エイリアスを宣言できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> long_name_is_loooong { } ;
+<span class="kw">namespace</span> cat = long_name_is_loooong ;</code></pre></div>
+<h3 id="名前空間名の指定を省略するusingディレクティブ">名前空間名の指定を省略するusingディレクティブ</h3>
+<p>名前空間は名前の衝突を防ぐ機能だが、名前空間名をわざわざ指定するのは面倒だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// std名前空間のstring</span>
+    <span class="bu">std::</span>string s ;
+    <span class="co">// std名前空間のvector&lt;int&gt;</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="co">// std名前空間のcout</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">123</span> ;
+}</code></pre></div>
+<p>もし自分のソースファイルが<code>string</code>, <code>vector&lt;int&gt;</code>, <code>cout</code>、その他std名前空間で使われる名前を一切使っていない場合、名前の衝突は発生しないことになる。その場合でも名前空間名を指定しなければならないのは面倒だ。</p>
+<p>C++では指定した名前空間を省略できる機能が存在する。usingディレクティブだ。</p>
+<pre><code>using namespace 名前空間名 ;</code></pre>
+<p>これを使えば、先程のコードは以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> <span class="kw">namespace</span> std ;
+    <span class="co">// std名前空間のstring</span>
+    string s ;
+    <span class="co">// std名前空間のvector&lt;int&gt;</span>
+    vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="co">// std名前空間のcout</span>
+    cout &lt;&lt; <span class="dv">123</span> ;
+}</code></pre></div>
+<p>では名前が衝突した場合はどうなるのか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> abc {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">using</span> <span class="kw">namespace</span> std ;
+
+    <span class="co">// エラー、名前が曖昧</span>
+    f() ;
+}</code></pre></div>
+<p>名前<code>f</code>に対してどの名前を使用するのか曖昧になってエラーになる。このエラーを回避するためには、名前空間を直接指定する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> abc {
+    <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">using</span> <span class="kw">namespace</span> std ;
+
+    <span class="co">// OK、名前空間abcのf</span>
+    abc::f() ;
+
+    <span class="co">// OK、グローバル名前空間のf</span>
+    ::f() ;
+}</code></pre></div>
+<p>usingディレクティブは関数の中だけではなく、名前空間の中にも書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> A {
+    <span class="dt">int</span> f(){ <span class="cf">return</span> <span class="dv">0</span> ; }
+}
+
+<span class="kw">namespace</span> B {
+    <span class="kw">using</span> <span class="kw">namespace</span> A ;
+    <span class="dt">int</span> g()
+    {
+        <span class="co">// OK、A::f</span>
+        f() ;
+    }
+}</code></pre></div>
+<p>名前空間のなかにusingディレクティブを書くと、その名前空間の中では指定した名前空間を省略できる。</p>
+<p>グローバル名前空間は名前空間なのでusingディレクティブが書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="kw">namespace</span> std ;</code></pre></div>
+<p>ただし、グローバル名前空間の中にusingディレクティブを書くと、それ以降全ての箇所で指定した名前空間の省略ができてしまうので注意が必要だ。</p>
+<h3 id="名前空間を指定しなくてもよいinline名前空間">名前空間を指定しなくてもよいinline名前空間</h3>
+<p><code>inline名前空間</code>は<code>inline namespace</code>で定義する。</p>
+<pre><code>inline namespace name { }</code></pre>
+<p>inline名前空間内の名前は名前空間名を指定して使うこともできるし、名前空間を指定せずとも使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">inline</span> <span class="kw">namespace</span> A {
+    <span class="dt">int</span> a { } ;
+}
+
+<span class="kw">namespace</span> B {
+    <span class="dt">int</span> b { } ;
+}
+
+<span class="dt">int</span> main()
+{
+    a = <span class="dv">0</span> ;     <span class="co">// A::a</span>
+    A::a = <span class="dv">0</span> ;  <span class="co">// A::a</span>
+
+    b = <span class="dv">0</span> ;     <span class="co">// エラー、名前bは宣言されていない</span>
+    B::b = <span class="dv">0</span> ;  <span class="co">// B::b</span>
+}</code></pre></div>
+<p>読者がinline名前空間を使うことはほとんど無いだろうが、ライブラリのソースファイルを読むときには出てくるだろう。</p>
+<h2 id="型名">型名</h2>
+<p>型名とは型を表す名前だ。</p>
+<p>型名はintやdoubleのように言語組み込みのキーワードを使うこともあれば、独自に作った型名を使うこともある。この独自に作った型名を専門用語ではユーザー定義された型(user-defined type)という。ユーザー定義された型を作る方法は様々だ。具体的に説明するのは本書のだいぶ後の方になるだろう。例としては、<code>std::string</code>や<code>std::vector&lt;T&gt;</code>がある。標準ライブラリによってユーザー定義された型だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 組み込みの型名</span>
+<span class="dt">int</span> i = <span class="dv">0</span> ;
+<span class="dt">double</span> d = <span class="fl">0.0</span> ;
+
+<span class="co">// ユーザー定義された型名</span>
+<span class="bu">std::</span>string s ;
+<span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;</code></pre></div>
+<h3 id="型名の別名を宣言するエイリアス宣言">型名の別名を宣言するエイリアス宣言</h3>
+<p>長い名前空間名を書くのが煩わしいように、長い型名を書くのも煩わしい。名前空間名の別名を宣言できるように、型名も別名を宣言できる。</p>
+<p>型名の別名を宣言するにはエイリアス宣言を使う。</p>
+<pre><code>using 別名 = 型名 ;</code></pre>
+<p>使い方。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// エイリアス宣言</span>
+    <span class="kw">using</span> Number = <span class="dt">int</span> ;
+
+    <span class="co">// Numberはintの別名</span>
+    Number x = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>型名の別名は型名と同じように使える。意味も同じだ。</p>
+<p>歴史的な経緯により、エイリアス宣言による型名の別名のことを、typedef名(typedef name)という。これはtypedef名を宣言する文法が、かつてはtypedefキーワードを使ったものだったからだ。typedefキーワードを使ったtypedef名の宣言方法は、昔のコードによく出てくるので現代でも覚えておく必要はある。</p>
+<pre><code>typedef 型名 typedef名 ;</code></pre>
+<p>使い方。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// typedef名による型名の宣言</span>
+    <span class="kw">typedef</span> <span class="dt">int</span> Number ;
+
+    Number x = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>これは変数の宣言と同じ文法だ。変数の宣言が以下のような文法で、</p>
+<pre><code>型名 変数名 ;</code></pre>
+<p>これにtypedefキーワードを使えばtypedef名の宣言になる。</p>
+<p>しかしtypedefキーワードによるtypdef名の宣言は罠が多い。例えば熟練のC++プログラマーでも、以下のコードが合法だということに驚くだろう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> <span class="kw">typedef</span> Number ;
+    Number x = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>しかし本書ではまだ教えていない複雑な型名について、このようなコードを書こうとするとコンパイルエラーになることに熟練のC++プログラマーは気がつくはずだ。その理由はとても難しい。</p>
+<p>エイリアス宣言にはこのような罠はない。</p>
+<h2 id="スコープ">スコープ</h2>
+<p>スコープ(scope)というのはやや説明が難しい概念だ。名前空間や関数はスコープを持っている。とてもおざっぱに説明するとカーリブラケット<code>{}</code>で囲まれた範囲がスコープだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> ns
+{ <span class="co">// 名前空間スコープの始まり</span>
+} <span class="co">// 関数スコープの終わり</span>
+
+<span class="dt">void</span> f()
+{ <span class="co">// 関数スコープの始まり</span>
+
+} <span class="co">// 関数スコープの終わり</span></code></pre></div>
+<p>これとは別にブロック文のスコープもある。ブロックとは関数の中で複数の文をたばねて一つの文として扱う機能だ。覚えているだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{ <span class="co">// 関数スコープ</span>
+
+    { <span class="co">// 外側のブロックスコープ</span>
+        { <span class="co">// 内側のブロックスコープ</span>
+        }
+    }
+}</code></pre></div>
+<p>スコープは<code>{</code>に始まり<code>}</code>に終わる。</p>
+<p>なぜスコープという概念について説明したかと言うと、宣言された名前が有効な範囲は、宣言された最も内側のスコープの範囲だからだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> ns
+{<span class="co">// aの所属するスコープ</span>
+    <span class="dt">int</span> a {} ;
+
+    <span class="dt">void</span> f()
+    { <span class="co">// bの所属するスコープ</span>
+        <span class="dt">int</span> b {} ;
+
+        { <span class="co">// cの所属するスコープ</span>
+            <span class="dt">int</span> c {} ;
+        }<span class="co">// cの範囲終わり</span>
+
+        
+    }<span class="co">// bの範囲終わり</span>
+
+} <span class="co">// aの範囲終わり</span></code></pre></div>
+<p>名前が有効な範囲は、宣言された最も内側のスコープだ。</p>
+<p>外側のスコープで宣言された名前は内側のスコープで使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="dt">int</span> a {} ;
+    {<span class="co">// 新たなスコープ</span>
+        a = <span class="dv">0</span> ;
+    }
+}</code></pre></div>
+<p>その逆はできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    { <span class="dt">int</span> a {} ; }
+    <span class="co">// エラー</span>
+    a = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>名前空間も同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// グローバル名前空間スコープ</span>
+
+<span class="kw">namespace</span> ns {
+    <span class="dt">int</span> a {} ;
+    <span class="dt">void</span> f()
+    {
+        a = <span class="dv">0</span> ; <span class="co">// OK</span>
+    }
+} <span class="co">// 名前空間nsのスコープの終了</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// エラー</span>
+    a = <span class="dv">0</span> ;
+    <span class="co">// OK </span>
+    ns::a ;
+}</code></pre></div>
+<p>名前空間スコープと関数スコープには違う点もあるが、名前の有効な範囲としては同じスコープだ。</p>
+<p>外側のスコープで宣言された名前と同じ名前を内側で宣言すると、内側の名前が外側の名前を隠す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// グローバル名前空間のf</span>
+<span class="kw">auto</span> f =  []()
+{ <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> ; } ;
+
+<span class="dt">int</span> main()
+{
+    f() ; <span class="co">// 1</span>
+
+    <span class="co">// 関数mainのf</span>
+    <span class="kw">auto</span> f = []()
+    { <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> ; } ;
+
+    f() ; <span class="co">// 2</span>
+
+    {
+        f() ; <span class="co">// 2</span>
+
+        <span class="co">// ブロックのf</span>
+        <span class="kw">auto</span> f = []()
+        { <span class="bu">std::</span>cout &lt;&lt; <span class="dv">3</span> ; } ;
+        f() ; <span class="co">// 3</span>
+    }
+
+    f() ; <span class="co">// 2</span>
+}</code></pre></div>
+<p>宣言されている場所に注意が必要だ。名前fは3つある。最初の関数呼び出しの時点ではグローバル名前空間のfが呼ばれる。まだ名前fは関数mainの中で宣言されていないからだ。そして関数mainのスコープの中で名前fが宣言される。このときグローバル名前空間のfは隠される。そのため、次の関数fの呼び出しでは関数mainのfが呼ばれる。次にブロックの中に入る。ここで関数fが呼ばれるが、まだこのfは関数mainのfだ。その後にブロックの中で名前fが宣言される。すると次の関数fの呼び出しはブロックのfだ。ブロックから抜けた後の関数fの呼び出しは関数mainのfだ。</p>
+<p>この章では名前について解説した。名前は難しい。難しいが、プログラミングにおいては名前を向き合わなければならない。</p>
+<h1 id="イテレーターの基礎">イテレーターの基礎</h1>
+<p>vectorの章ではvectorの要素にアクセスする方法としてメンバー関数<code>at(i)</code>を学んだ。<code>at(i)</code>はi番目の要素にアクセスできる。ただし最初の要素は0番目だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="dt">int</span> x = v.at(<span class="dv">2</span>) ; <span class="co">// 3</span>
+    v.at(<span class="dv">2</span>) = <span class="dv">0</span> ;
+    <span class="co">// vは{1,2,0,4,5}</span>
+}</code></pre></div>
+<p>この章ではvectorの要素にアクセスする方法としてイテレーター(iterator)を学ぶ。</p>
+<h2 id="イテレーターの取得方法">イテレーターの取得方法</h2>
+<p>イテレーターは<code>std::begin(v)</code>で取得する。vはvectorの変数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+}</code></pre></div>
+<h2 id="イテレーターの参照する要素に対する読み書き">イテレーターの参照する要素に対する読み書き。</h2>
+<p>イテレーターはvectorの先頭の要素を指し示している。イテレーターの指し示す要素を参照するには<code>*</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+
+    <span class="dt">int</span> x = *i ; <span class="co">// 1</span>
+
+    *i = <span class="dv">0</span> ;
+    <span class="co">// vは{0,2,3,4,5} </span>
+}</code></pre></div>
+<p><code>*i</code>を読み込むと指し示す要素の値を読むことができ、<code>*i</code>に代入をすると指し示す要素の値を変えることができる。</p>
+<h2 id="イテレーターの参照する要素を変更">イテレーターの参照する要素を変更</h2>
+<p>現在指している要素の次の要素を指すように変更するには<code>++</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+
+    *i ; <span class="co">// 1</span>
+    ++i ;
+    *i ; <span class="co">// 2</span>
+    ++i ;
+    *i ; <span class="co">// 3</span>
+}</code></pre></div>
+<p>減災さしている要素の前の要素を指すように変更するには<code>--</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+
+    *i ; <span class="co">// 1</span>
+    ++i ;
+    *i ; <span class="co">// 2</span>
+    --i ;
+    *i ; <span class="co">// 1</span>
+}</code></pre></div>
+<p>すると、vectorの全要素を先頭からイテレーターでアクセスするには、要素数だけ<code>++i</code>すればよいことになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="kw">auto</span> iter = <span class="bu">std::</span>begin(v) ;
+
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != <span class="bu">std::</span>size(v) ; ++i, ++iter )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *iter &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>これは動く。ただしもっとマシな方法がある。イテレーターの比較だ。</p>
+<h2 id="イテレーターの比較">イテレーターの比較</h2>
+<p>イテレーターは比較できる。同じ順番の要素を指すイテレーターは等しく、そうではないイテレーターは等しくない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> x = <span class="bu">std::</span>begin(v) ;
+    <span class="kw">auto</span> y = x ;
+
+    <span class="co">// x, yは0番目の要素を指す</span>
+
+    <span class="dt">bool</span> b1 = (x == y) ; <span class="co">// true</span>
+    <span class="dt">bool</span> b2 = (x != y) ; <span class="co">// false</span>
+
+    ++x ; <span class="co">// xは1番目の要素を指す。</span>
+
+    <span class="dt">bool</span> b1 = (x == y) ; <span class="co">// false</span>
+    <span class="dt">bool</span> b2 = (x != y) ; <span class="co">// true</span>
+}</code></pre></div>
+<h2 id="最後の次の要素へのイテレーター">最後の次の要素へのイテレーター</h2>
+<p><code>std::begin(v)</code>はvectorの変数vの最初の要素を指し示すイテレーターを取得する。</p>
+<p><code>std::end(v)</code>はvectorの変数vの最後の次の要素を指し示すイテレーターを取得する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = { <span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span> };
+
+    <span class="co">// 最後の次の要素を指し示すイテレーター</span>
+    <span class="kw">auto</span> i = <span class="bu">std::</span>end(v) ;
+}</code></pre></div>
+<p>最後の次の要素とは何か。ある<code>vector&lt;int&gt;</code>の変数の中身が<code>{1,2,3,4,5}</code>のとき、最初の0番目の要素の値は1だ。最後の4番目の要素の値は5だ。最後の次の要素とは、値が5の最後の要素の次の要素だ。そのような要素は実際には存在しないが、<code>std::end</code>は概念として最後の次の要素を返す。</p>
+<p>最後の次の要素を指し示すイテレーターに対して、<code>*</code>で要素にアクセスを試みるとエラーになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>end(v) ;
+
+    *i ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>最後の次の要素を<code>++</code>しようとするとエラーになる。<code>--</code>することはできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="kw">auto</span> i = <span class="bu">std::</span>end(v) ;
+
+    --i ; <span class="co">// 最後の要素を指す</span>
+    *i ; <span class="co">// 5</span>
+    ++i ; 最後の次の要素を指す
+    *i ; <span class="co">// エラー</span>
+
+}</code></pre></div>
+<p>実際には存在しない最後の次の要素を指し示すイテレーターは何の役に立つのか。答えはイテレーターの比較だ。</p>
+<p>実際には存在しない最後の次の要素を指すイテレーターに'*'を使って要素にアクセスするのはエラーだが、イテレーター同士の比較はできる。すでに説明したように、イテレーターの比較は同じ要素を指す場合はtrue、違う要素を指す場合はfalseになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;
+
+    <span class="co">// xは最初の要素を指す</span>
+    <span class="kw">auto</span> x = <span class="bu">std::</span>begin(v) ;
+    <span class="co">// yは最後の次の要素を指す</span>
+    <span class="kw">auto</span> y = <span class="bu">std::</span>end(v) ;
+
+
+    x == y ; <span class="co">// false</span>
+    ++x ; <span class="co">// xは最初の次の要素を指す</span>
+    x == y ; <span class="co">// false</span>
+    ++x ; <span class="co">// xは最後の要素を指す</span>
+    x == y ; <span class="co">// false</span>
+    ++x ; <span class="co">// xは最後の次の要素を指す</span>
+    x == y ; <span class="co">// true</span>
+}</code></pre></div>
+<p><code>std::end</code>で取得する最後の次の要素を指すイテレーターと比較することで、イテレーターが最後の次の要素を指し示す状態に到達したことを判定できる。</p>
+<p>ということは、<code>vector</code>の要素を先頭から最後まで順番に出力するプログラムは、以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = <span class="bu">std::</span>begin(v), last = <span class="bu">std::</span>end(v) ;
+          iter != last ; ++iter )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *iter &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<h2 id="なんでもイテレーター">なんでもイテレーター</h2>
+<p>イテレーターというのは要素にアクセスする回りくどくて面倒な方法に見える。イテレーターという面倒なものを使わずに、<code>vector::at(i)</code>でi番目の要素にアクセスするほうが楽ではないか。そう考える読者もいるだろう。イテレーターの利点はその汎用性にある。イテレーターの作法に従うことで、様々な処理が同じコードで書けるようになるのだ。</p>
+<p>たとえば、vectorの要素を先頭から順番に出力する処理を振り返ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != <span class="bu">std::</span>size(v) ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>このコードは<code>vector</code>にしか使えないコードだ。イテレーターで書き直してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = <span class="bu">std::</span>begin(v), last = <span class="bu">std::</span>end(v) ;
+          iter != last ; ++iter )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *iter &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>そして、この要素を先頭から出力する処理を関数にしてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> output_all = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *iter &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    output_all( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v) ) ;
+}</code></pre></div>
+<p>この<code>関数output_all</code>は<code>vector</code>以外のイテレーターにも対応している。C++には様々なイテレーターがある。例えば標準入力から値を受け取るイテレーターがある。早速使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>istream_iterator&lt;<span class="dt">int</span>&gt; first( <span class="bu">std::</span>cin ), last ;
+
+    output_all( first, last ) ;
+}</code></pre></div>
+<p>このプログラムは標準入力から<code>int</code>型の値を受け取り、それをそのまま標準出力する。</p>
+<p>C++には他にも、カレントディレクトリーにあるファイルの一覧を取得するイテレーターがある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>filesystem<span class="bu">::</span>directory_iterator first(<span class="st">&quot;./&quot;</span>), last ;
+
+    output_all( first, last ) ;
+}</code></pre></div>
+<p><code>関数output_all</code>のコードは何も変えていないのに、様々なイテレーターに対応できる。イテレーターというお作法に乗っ取ることで、様々な処理が可能になるのだ。</p>
+<p>これは出力にも言えることだ。<code>関数output_all</code>は<code>std::cout</code>に出力していた。これをイテレーターに対する書き込みに変えてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> output_all = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> output_iter )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter, ++output_iter )
+    {
+        *output_iter = *iter ;
+    }
+} ;</code></pre></div>
+<p>書き換えた<code>関数output_iter</code>は新しく<code>output_iter</code>という引数を取る。これはイテレーターだ。<code>std::cout</code>に出力する代わりに、このイテレーターに書き込むように変更している。</p>
+<p>こうすることによって、出力にも様々なイテレーターが使える。</p>
+<p>標準出力に出力するイテレーターがある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    
+    output_all( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+                <span class="bu">std::</span>ostream_iterator&lt;<span class="dt">int</span>&gt;(<span class="bu">std::</span>cout) ) ;
+}</code></pre></div>
+<p>vectorも出力先にできる。つまりvectorのコピーだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; source = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; destination(<span class="dv">5</span>) ;
+
+    output_all( <span class="bu">std::</span>begin(source), <span class="bu">std::</span>end(source), <span class="bu">std::</span>begin( destination ) ) ;
+}</code></pre></div>
+<p><code>desitination(5)</code>というのは、<code>vector</code>にあらかじめ5個の要素を入れておくという意味だ。あらかじめ入っている要素の値はintの場合ゼロになる。</p>
+<p>この他にもイテレーターは様々ある。自分でイテレーターを作ることもできる。そして、<code>関数output_all</code>はイテレーターにさえ対応していれば様々な処理にコードを一行たりとも変えずに使えるのだ。</p>
+<h2 id="イテレーターと添字の範囲">イテレーターと添字の範囲</h2>
+<p>イテレーターは順序のある値の集合を表現するために、最初の要素への参照と、最後の次の要素への参照のペアを用いる。</p>
+<p>たとえば、{1,2,3,4,5}という順序の値の集合があった場合、イテレーターは最初の要素である1と最後の一つ次の要素である5の次の架空の要素を指し示す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+    <span class="kw">auto</span> j = <span class="bu">std::</span>end(v) ;
+}</code></pre></div>
+<p>このようにして範囲を表現することを、<code>半閉鎖(half-closed)</code>とか、<code>[i,j)</code>などと表現する。</p>
+<p>この状態から{2,3,4,5}のような値の集合を表現したい場合、イテレーターiをインクリメントすればよい。</p>
+<pre><code>++i ;</code></pre>
+<p>これで<code>[i,j)</code>は{2,3,4,5}になった。</p>
+<p>このような範囲の表現方法に疑問を感じる読者もいるだろう。なぜ最後の次の要素という本来存在しない架空の要素をあたかも参照しているかのようなイテレーターが必要なのか。最後の要素を参照するのではだめなのか。</p>
+<p>そのような範囲の表現方法は、<code>閉鎖(closed)</code>とか<code>[i,j]</code>などと表現する。</p>
+<p>実はこの方法はvectorの要素の順番を指定する方法と同じなのだ。</p>
+<p>{1,2,3,4,5}と5個の順序ある要素からなるvectorでは、最初の要素は0番目で、最後の要素は4番目だ。1番目から5番目ではない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    v.at(<span class="dv">0</span>) ; <span class="co">// 最初の要素: 1</span>
+    v.at(<span class="dv">4</span>) ; <span class="co">// 最後の要素: 5</span>
+}</code></pre></div>
+<p>ではなぜなのか。なぜvectorではn個の要素の順番を0番目からn-1番目として表現するのか。</p>
+<p>実はC++に限らず、現在使われているすべてのプログラミングはインデックスを0から始めている。かつてはインデックスを1からはじめる言語も存在したが、そのような言語は今は使われていない。</p>
+<p>この疑問はエドガー・ダイクストラがWhy numbering should start at zero(EWD831)で解説している。</p>
+<p>2, 3, ..., 12の範囲の自然数を表現するのに、慣習的に以下の4つの表記がある。</p>
+<p><span class="math display">\[
+a) 2 \le i \lt 13
+\]</span></p>
+<p><span class="math display">\[
+b) 1 \lt i \le 12
+\]</span></p>
+<p><span class="math display">\[
+c) 2 \le i \le 12
+\]</span></p>
+<p><span class="math display">\[
+d) 2 \lt i \lt 13
+\]</span></p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
