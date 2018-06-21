@@ -5822,6 +5822,96 @@ c) 2 \le i \le 12
 <p><span class="math display">\[
 d) 2 \lt i \lt 13
 \]</span></p>
+<p>C++のイテレーターはa)を元にしている。</p>
+<p>この4つのうち、a)とb)は上限から下限を引くと、範囲にある自然数の個数である11になる。</p>
+<p>この性質はとても便利なのでC++でも、イテレーター同士の引き算ができるようになっている。イテレーターi, j(<span class="math inline">\(i \le j\)</span>)で<code>j - i</code>をした結果はイテレーターの範囲の要素の個数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+    <span class="kw">auto</span> j = <span class="bu">std::</span>end(v) ;
+
+    <span class="co">// 11</span>
+    <span class="co">// イテレーターの範囲の要素の個数</span>
+    <span class="bu">std::</span>cout &lt;&lt; j - i &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    ++i ; <span class="co">// 先頭の次の要素を指す</span>
+    <span class="co">// 10</span>
+    <span class="bu">std::</span>cout &lt;&lt; j - i ; 
+}</code></pre></div>
+<p>a)とb)はどちらがいいのだろうか。b)を元にイテレーターを設計すると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// b)案を採用する場合</span>
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 最初の一つ前の架空の要素を指す</span>
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+    <span class="co">// 最後の要素を指す</span>
+    <span class="kw">auto</span> j = <span class="bu">std::</span>end(v) ;
+
+    <span class="co">// 最初の要素を指すようにする。</span>
+    ++i ;
+
+    <span class="co">// iが最後の要素を指すとループを抜ける</span>
+    <span class="cf">for</span> ( ; i != j ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *i ;
+    }
+    <span class="co">// 最後の要素を処理する</span>
+    <span class="bu">std::</span>cout &lt;&lt; *i ;
+    
+
+}</code></pre></div>
+<p>a)の方がよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// a)案を採用する場合</span>
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 最初の要素を指す</span>
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+    <span class="co">// 最後の次の要素を指す</span>
+    <span class="kw">auto</span> j = <span class="bu">std::</span>end(v) ;
+
+    <span class="co">// iが最後の次の要素を指すとループを抜ける</span>
+    <span class="cf">for</span> ( ; i != j ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *i ;
+    }
+
+    <span class="co">// すべての要素について処理を終えている</span>
+}</code></pre></div>
+<p>b)案では末尾から先頭まで後ろ向きに要素を一巡する操作はやりやすいが、実際には先頭から末尾まで一巡する操作の方が多い。</p>
+<p>C++では要素の順番を数値で指し示す時、最初の要素は0番目であり、次の要素は1番目であり、N個目の要素はN-1番目になっている。この数値で指し示すことを<code>添字</code>とか<code>インデックス</code>というがなぜ最初の要素を1番目にしないのか。</p>
+<p>C++では様々なところでa)を採用している。これを添字に適用すると、最初の要素が1番目から始まる場合、N個の要素を参照する添字の範囲は<span class="math inline">\(1 \le i \lt N+1\)</span>になる。そのような場合、以下のようなコードになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 最初の要素が1番目の場合</span>
+<span class="dt">int</span> main()
+{
+    <span class="co">// 5個の要素を持つvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// iの値の範囲は1から5まで</span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">1</span> ; i &lt; <span class="dv">6</span> ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) ;
+    }    
+}</code></pre></div>
+<p>要素数は5個なのに6が出てくる。最初の要素が0番目の場合、N個の要素を参照する添字の範囲は<span class="math inline">\(0 \le i \lt N\)</span>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 最初の要素が0番目の場合</span>
+<span class="dt">int</span> main()
+{
+    <span class="co">// 5個の要素を持つvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// iの値の範囲は0から5まで</span>
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i &lt; <span class="dv">5</span> ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; v.at(i) ;
+    }    
+}</code></pre></div>
+<p>一貫性のために最初の要素は0番目となっている。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
