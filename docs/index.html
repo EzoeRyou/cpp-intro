@@ -245,6 +245,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#なんでもイテレーター">なんでもイテレーター</a></li>
 <li><a href="#イテレーターと添字の範囲">イテレーターと添字の範囲</a></li>
 </ul></li>
+<li><a href="#ポップカルチャーリファレンス">ポップカルチャーリファレンス</a></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -5591,7 +5592,7 @@ inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</
     ++i ;
     *i ; <span class="co">// 3</span>
 }</code></pre></div>
-<p>減災さしている要素の前の要素を指すように変更するには<code>--</code>を使う。</p>
+<p>現在指している要素の前の要素を指すように変更するには<code>--</code>を使う。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
@@ -5604,7 +5605,7 @@ inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</
     --i ;
     *i ; <span class="co">// 1</span>
 }</code></pre></div>
-<p>すると、vectorの全要素を先頭からイテレーターでアクセスするには、要素数だけ<code>++i</code>すればよいことになる。</p>
+<p>vectorの全要素を先頭からイテレーターでアクセスするには、要素数だけ<code>++i</code>すればよいことになる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
@@ -5912,6 +5913,23 @@ d) 2 \lt i \lt 13
     }    
 }</code></pre></div>
 <p>一貫性のために最初の要素は0番目となっている。</p>
+<p>また、空の集合にも対応できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 空</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="co">// 空なので何も出力されない</span>
+    <span class="cf">for</span> (   <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v), j = <span class="bu">std::</span>end(v) ;
+            i != j ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; i ;
+    }
+}</code></pre></div>
+<p>変数vは空なので<code>i != j</code>はfalseとなり、for文の中の文は一度も実行されない。</p>
+<h1 id="ポップカルチャーリファレンス">ポップカルチャーリファレンス</h1>
+<pre><code>ポップカルチャーリファレンスというのは流行の要素をさり気なく作品中に取り入れることで、流行作品を知っている読者の笑いを誘う手法である
+-- キャプテン・オブビウス ポップカルチャーリファレンスについて</code></pre>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
