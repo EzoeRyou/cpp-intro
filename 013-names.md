@@ -446,7 +446,7 @@ int h(){ return B::x ; }
 グローバル名前空間は名前空間なので、名前空間エイリアスを宣言できる。
 
 ~~~cpp
-namespace long_name_is_loooong { } ;
+namespace long_name_is_loooong { }
 namespace cat = long_name_is_loooong ;
 ~~~
 
