@@ -1535,7 +1535,7 @@ int solve( int n ) ;
 1. 引数が正数の場合はそのまま関数`solve`に渡してreturn
 2. 引数が負数の場合は絶対値を関数`solve`に渡して負数にしてreturn
 
-~~~cpp
+~~~c++
 int convert( int n )
 {
     // 引数が正数の場合
