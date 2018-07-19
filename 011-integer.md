@@ -332,7 +332,7 @@ unsigned b = 1 ;
 
 ~~~cpp
 long int a = 123 ;
-unsigned lont int b = 123 ;
+unsigned long int b = 123 ;
 ~~~
 
 特殊なルールとして、単に`long`と書いた場合、それは`long int`になる。`unsigned long`と書いた場合、`unsigned long int`になる。
