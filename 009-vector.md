@@ -40,7 +40,7 @@ int main()
     std::vector<int> vi ;
 
     // 浮動小数点数型doubleの値を保持するvector
-    ~std::vector<double> vd ;
+    std::vector<double> vd ;
 
     // 文字列型std::stringの値を保持するvector
     std::vector<std::string> vs ;

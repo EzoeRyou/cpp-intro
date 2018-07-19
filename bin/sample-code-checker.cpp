@@ -100,7 +100,7 @@ std::string create_temp_source_file( std::string sample_code )
 
 bool compile_check_gcc( std::string const & file_name )
 {
-    std::string command = std::string("g++ -fsyntax-only -D _ISOC11_SOURCE -std=c++1z --pedantic-errors -Wall -pthread -include /tmp/sample-code-checker/all.h ") + file_name ;
+    std::string command = std::string("g++ -fsyntax-only -D _ISOC11_SOURCE -std=c++17 --pedantic-errors -Wall -pthread -include /tmp/sample-code-checker/all.h ") + file_name ;
 
     int result = system( command.c_str() ) ;
 
@@ -110,7 +110,7 @@ bool compile_check_gcc( std::string const & file_name )
 
 bool compile_check_clang( std::string const & file_name )
 {
-    std::string command = std::string("clang++ -fsyntax-only -D _ISOC11_SOURCE -std=c++1z -stdlib=libc++ --pedantic-errors -Wall -pthread -include-pch /tmp/sample-code-checker/all.h.pch ") + file_name ;
+    std::string command = std::string("clang++ -fsyntax-only -D _ISOC11_SOURCE -std=c++17 -stdlib=libc++ --pedantic-errors -Wall -pthread -include-pch /tmp/sample-code-checker/all.h.pch ") + file_name ;
 
     int result = system( command.c_str() ) ;
 
@@ -123,9 +123,9 @@ bool compile_check_clang( std::string const & file_name )
 bool compile_check( std::string const & file_name )
 {
     return
-        compile_check_gcc( file_name )
-            &&
-        compile_check_clang( file_name ) ;
+        compile_check_gcc( file_name ) ;
+        //    &&
+        //compile_check_clang( file_name ) ;
 }
 
 // check if a given sample code is a well-formed C++ code fragment
@@ -188,9 +188,9 @@ bool prepare_compile()
         precompiled_header.write( all_std_headers.c_str(), all_std_headers.size() ) ;
     }
 
-    int r1 = std::system("g++ -D _ISOC11_SOURCE -std=c++1z --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all.h.gch /tmp/sample-code-checker/all.h") ;
+    int r1 = std::system("g++ -D _ISOC11_SOURCE -std=c++17 --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all.h.gch /tmp/sample-code-checker/all.h") ;
     
-    int r2 = std::system("clang++ -D _ISOC11_SOURCE -std=c++14 --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all.h.pch /tmp/sample-code-checker/all.h") ;
+    int r2 = std::system("clang++ -D _ISOC11_SOURCE -std=c++17 --pedantic-errors -Wall -pthread -x c++-header -o /tmp/sample-code-checker/all.h.pch /tmp/sample-code-checker/all.h") ;
 
     return r1 == 0 && r2 == 0 ;
 }

@@ -124,8 +124,8 @@ int main()
 
     ++x ; // xは1番目の要素を指す。
 
-    bool b1 = (x == y) ; // false
-    bool b2 = (x != y) ; // true
+    bool b3 = (x == y) ; // false
+    bool b4 = (x != y) ; // true
 }
 ~~~
 
@@ -169,11 +169,10 @@ int main()
     std::vector<int> v = {1,2,3,4,5} ;
     auto i = std::end(v) ;
 
-    --i ; // 最後の要素を指す
-    *i ; // 5
-    ++i ; 最後の次の要素を指す
-    *i ; // エラー
-
+    --i ;   // 最後の要素を指す
+    *i ;    // 5
+    ++i ;   // 最後の次の要素を指す
+    *i ;    // エラー
 }
 ~~~
 
@@ -541,7 +540,7 @@ int main()
     for (   auto i = std::begin(v), j = std::end(v) ;
             i != j ; ++i )
     {
-        std::cout << i ;
+        std::cout << *i ;
     }
 }
 ~~~

@@ -23,7 +23,7 @@ int main()
     double mass = 73.0 ;
 
     // BMIの計算
-    dublle bmi = mass / (height*height) ;
+    double bmi = mass / (height*height) ;
 
     // BMIの出力
     std::cout << "BMI=" << bmi << "\n"s ;
@@ -90,7 +90,7 @@ int main()
     double mass = 80.0 ;
 
     // BMIの計算
-    dublle bmi = mass / (height*height) ;
+    double bmi = mass / (height*height) ;
 
     // BMIの出力
     std::cout << "BMI=" << bmi << "\n"s ;

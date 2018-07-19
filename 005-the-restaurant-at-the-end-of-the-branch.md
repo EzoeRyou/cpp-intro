@@ -611,7 +611,7 @@ int main()
 {
     std::cout << std::boolalpha ;
     auto print = [](auto b)
-    { std::cout << b << "\n"s } ;
+    { std::cout << b << "\n"s ; } ;
 
     print( true  == true  ) ; // true
     print( true  == false ) ; // false

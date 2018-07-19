@@ -19,7 +19,7 @@ retest : test-tool
 test-tool : bin/sample-code-checker
 
 bin/sample-code-checker : bin/sample-code-checker.cpp
-	g++ -D _ISOC11_SOURCE -std=c++14 --pedantic-errors -Wall -pthread -O2 -o bin/sample-code-checker  bin/sample-code-checker.cpp
+	g++ -D _ISOC11_SOURCE -std=c++17 --pedantic-errors -Wall -pthread -O2 -o bin/sample-code-checker  bin/sample-code-checker.cpp
 
 book : docs/index.html
 

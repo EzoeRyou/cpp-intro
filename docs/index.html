@@ -245,7 +245,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#なんでもイテレーター">なんでもイテレーター</a></li>
 <li><a href="#イテレーターと添字の範囲">イテレーターと添字の範囲</a></li>
 </ul></li>
-<li><a href="#ポップカルチャーリファレンス">ポップカルチャーリファレンス</a></li>
+<li><a href="#lvalueリファレンスとconst">lvalueリファレンスとconst</a><ul>
+<li><a href="#lvalueリファレンス">lvalueリファレンス</a></li>
+<li><a href="#const">const</a></li>
+</ul></li>
+<li><a href="#アルゴリズム">アルゴリズム</a><ul>
+<li><a href="#for_each">for_each</a></li>
+<li><a href="#all_ofany_ofnone_of">all_of/any_of/none_of</a></li>
+<li><a href="#findfind_if">find/find_if</a></li>
+<li><a href="#countcount_if">count/count_if</a></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -5927,9 +5936,674 @@ d) 2 \lt i \lt 13
     }
 }</code></pre></div>
 <p>変数vは空なので<code>i != j</code>はfalseとなり、for文の中の文は一度も実行されない。</p>
-<h1 id="ポップカルチャーリファレンス">ポップカルチャーリファレンス</h1>
+<h1 id="lvalueリファレンスとconst">lvalueリファレンスとconst</h1>
 <pre><code>ポップカルチャーリファレンスというのは流行の要素をさり気なく作品中に取り入れることで、流行作品を知っている読者の笑いを誘う手法である
 -- キャプテン・オブビウス ポップカルチャーリファレンスについて</code></pre>
+<h2 id="lvalueリファレンス">lvalueリファレンス</h2>
+<p>変数に変数を代入すると、代入元の値が代入先にコピーされる。代入先の値を変更しても、コピーされた値が変わるだけで、代入元には一切影響がない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = <span class="dv">2</span> ;
+
+    b = a ;
+    <span class="co">// b == 1</span>
+
+    b = <span class="dv">3</span> ;
+    <span class="co">// a == 1</span>
+    <span class="co">// b == 3</span>
+}</code></pre></div>
+<p>これは関数も同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> assign_3( <span class="dt">int</span> x )
+{
+    x = <span class="dv">3</span> ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    assign_3( a ) ;
+
+    <span class="co">// a == 1</span>
+}   </code></pre></div>
+<p>しかし、時には変数の値を直接書き換えたい場合がある。この時lvalueリファレンス(reference)が使える。lvalueリファレンスは変数に<code>&amp;</code>を付けて宣言する</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> &amp; ref = a ;
+
+    ref = <span class="dv">3</span> ;
+
+    <span class="co">// a ==  3  </span>
+    <span class="co">// refはaなので同じく3</span>
+}</code></pre></div>
+<p>この例で、変数refは変数aへの参照(リファレンス)なので、変数aと同じように使える。</p>
+<p>lvalueリファレンスは必ず初期化しなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// エラー</span>
+    <span class="dt">int</span> &amp; ref ;
+}</code></pre></div>
+<p>lvalueリファレンスは関数でも使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="dt">int</span> &amp; x )
+{
+    x = <span class="dv">3</span> ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    f( a ) ;
+
+    <span class="co">// a == 3</span>
+}</code></pre></div>
+<p>選択ソートで2つの変数の値を交換する必要があったことを覚えているだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 0番目と2番目の要素を交換したい</span>
+    <span class="kw">auto</span> temp = v.at(<span class="dv">0</span>) ;
+    v.at(<span class="dv">0</span>) = v.at(<span class="dv">2</span>) ;
+    v.at(<span class="dv">2</span>) = temp ;
+}</code></pre></div>
+<p>いちいち交換のために別の変数<code>temp</code>を作って3回代入を書くのは面倒だ。これを関数にしてしまいたい。</p>
+<pre><code>// 値を交換
+swap( v.at(0), v.at(2) ) ;</code></pre>
+<p>このような関数<code>swap</code>は普通に書くことはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// この実装は正しくない</span>
+<span class="kw">auto</span> swap = []( <span class="kw">auto</span> a, <span class="kw">auto</span> b )
+{
+    <span class="kw">auto</span> temp = a ;
+    a = b ;
+    b = temp ;
+} ;</code></pre></div>
+<p>この実装では、変数は単にコピーされるだけなので、関数の呼び出し元には何の影響もない。</p>
+<p>これをlvalueリファレンスに変えると、関数の呼び出し元の変数の値を交換する関数<code>swap</code>が作れる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// lvalueリファレンス</span>
+<span class="kw">auto</span> swap = []( <span class="kw">auto</span> &amp; a, <span class="kw">auto</span> &amp; b )
+{
+    <span class="kw">auto</span> temp = a ;
+    a = b ;
+    b = temp ;
+} ;</code></pre></div>
+<p>C++の標準ライブラリには<code>std::swap</code>があるので、読者はわざわざこのような関数を自作する必要はない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = <span class="dv">2</span> ;
+
+    <span class="bu">std::</span>swap( a, b ) ;
+
+    <span class="co">// a == 2</span>
+    <span class="co">// b == 1</span>
+}</code></pre></div>
+<p>ところで、この章では一貫してlvalueリファレンスと書いているのに気がついただろうか。lvalueとは何なのか、lvalueではないリファレンスはあるのか。その疑問は後の章で解決する。</p>
+<h2 id="const">const</h2>
+<p>値を変更したくない変数は、constをつけることで変更を禁止できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    x = <span class="dv">1</span> ; <span class="co">// OK、変更できる</span>
+
+    <span class="at">const</span> <span class="dt">int</span> y = <span class="dv">0</span> ;
+    y = <span class="dv">0</span> ; <span class="co">// エラー、変更できない。</span>
+}</code></pre></div>
+<p>constはちょっと文法が変わっていて混乱する。例えば、<code>const int</code>でも<code>int const</code>でも意味が同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 意味は同じ</span>
+    <span class="at">const</span> <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="dt">int</span> <span class="at">const</span> y = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>constはlvalueリファレンスと組み合わせることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+
+    <span class="dt">int</span> &amp; ref = x ;
+    <span class="co">// OK</span>
+    ++ref ;
+
+    <span class="at">const</span> <span class="dt">int</span> &amp; const_ref = x ;
+
+    <span class="co">// エラー</span>
+    ++const_ref ;
+}</code></pre></div>
+<p>constは本当に文法が変わっていて混乱する。<code>const int &amp;</code>と<code>int const &amp;</code>は同じ意味だが、<code>int &amp; const</code>はエラーになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">0</span> ;
+
+    <span class="co">// OK、意味は同じ</span>
+    <span class="at">const</span> <span class="dt">int</span> &amp; b = a ;
+    <span class="dt">int</span> <span class="at">const</span> &amp; c = a ;
+
+    <span class="co">// エラー</span>
+    <span class="dt">int</span> &amp; <span class="at">const</span> d = a ;
+}</code></pre></div>
+<p>これはとても複雑なルールで決まっているので、こういうものだと諦めて覚えるしかない。</p>
+<p>constがついていない型のオブジェクトをconstなlvalueリファレンスで参照することができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// constのついていない型のオブジェクト</span>
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+
+    <span class="co">// OK</span>
+    <span class="dt">int</span> &amp; ref = x ;
+    <span class="co">// OK、constはつけてもよい</span>
+    <span class="at">const</span> <span class="dt">int</span> &amp; cref = x ;
+}</code></pre></div>
+<p>constのついている型のオブジェクトをconstのついていないlvalueリファレンスで参照することはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// constのついている型のオブジェクト</span>
+    <span class="at">const</span> <span class="dt">int</span> x = <span class="dv">0</span> ;
+
+    <span class="co">// エラー、constがない。</span>
+    <span class="dt">int</span> &amp; ref = x ;
+
+    <span class="co">// OK、constがついている</span>
+    <span class="at">const</span> <span class="dt">int</span> &amp; cref = x ;
+}</code></pre></div>
+<p>constのついているlvalueリファレンスは何の役に立つのかというと、関数の引数を摂るときに役に立つ。</p>
+<p>例えば以下のコードは非効率的だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v )
+{
+    <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">1234</span>) ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 10000個の要素を持つvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v(<span class="dv">10000</span>) ;
+
+    f( v ) ;
+}</code></pre></div>
+<p>なぜかというと、関数の引数に渡すときに、変数<code>v</code>はコピーされるからだ。</p>
+<p>リファレンスを使うと不要なコピーをしなくて済む。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; &amp; v )
+{
+    <span class="bu">std::</span>cout &lt;&lt; v.at(<span class="dv">1234</span>) ;
+}</code></pre></div>
+<p>しかし、リファレンスで受け取ると、うっかり変数を変更してしまった場合、その変更が関数の呼び出し元に反映されてしまう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 値を変更するかもしれない</span>
+<span class="dt">void</span> f( <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; &amp; v ) ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 要素数10000のvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v(<span class="dv">10000</span>) ;
+
+    f(v) ;
+
+    <span class="co">// 値は変更されているかもしれない</span>
+}</code></pre></div>
+<p>このとき、constなlvalueリファレンスを使うと、引数に取った値を変更しないことを保証できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; <span class="at">const</span> &amp; v ) ;</code></pre></div>
+<h1 id="アルゴリズム">アルゴリズム</h1>
+<p>アルゴリズムは難しい。アルゴリズム自体の難しさに加え、アルゴリズムを正しくコードで表記するのも難しい。そこでC++ではアルゴリズム自体をライブラリにしている。ライブラリとしてのアルゴリズムを使うことで、読者はアルゴリズムを自前で実装することなく、すでに正しく実装されたアルゴリズムを使うことができる。</p>
+<h2 id="for_each">for_each</h2>
+<p>例えば<code>vector</code>の要素を先頭から順番に標準出力するコードを考えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="cf">for</span> (
+        <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v),
+             j = <span class="bu">std::</span>end(v) ;
+        i != j ;
+        ++i  )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; *i ;
+    }
+}</code></pre></div>
+<p>このコードを書くのは難しい。このコードを書くには、イテレーターで要素の範囲を取り、ループを実行するごとにイテレーターを適切にインクリメントし、イテレーターが範囲内であるかどうかの判定をしなければならない。</p>
+<p>アルゴリズムを理解するだけでも難しいのに、正しくコード書くのは更に難しい。例えば以下はコンパイルが通る完全に合法なC++だが間違っている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="cf">for</span> (
+        <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v),
+             j = <span class="bu">std::</span>end(v) ;
+        i == j ;
+        ++i  )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; i ;
+    }
+}</code></pre></div>
+<p>間違っている箇所がわかるだろうか。</p>
+<p>まず比較の条件が間違っている。<code>i != j</code>となるべきところが<code>i == j</code>となっている。出力する部分も間違っている。イテレーター<code>i</code>が指し示す値を得るには<code>*i</code>としなければならないところ、単に<code>i</code>としている。</p>
+<p>毎回このようなイテレーターのループをするfor文を書くのは間違いの下だ。ここで重要なのは、要素のそれぞれに対して<code>std::cout &lt;&lt; *i ;</code>を実行するということだ。要素を先頭から末尾まで順番に処理するというのはライブラリにやってもらいたい。</p>
+<p>そこでこの処理を関数に切り出してみよう。イテレーター<code>[first,last)</code>を渡すと、イテレーターを先頭から末尾まで順番に処理してくれる関数は以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> print_all = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="co">// ループ</span>
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        <span class="co">// 重要な処理</span>
+        <span class="bu">std::</span>cout &lt;&lt; *iter ;
+    }
+} ; 
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    print_all( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v) ) ;
+}</code></pre></div>
+<p>関数<code>printf_all</code>は便利だが、重要な処理がハードコードされている。例えば要素の集合のうち100以下の値だけ出力したいとか、値を2倍して出力したいとか、値を出力するたびに改行を出力したいという場合、それぞれに関数を書く必要がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 値が100以下なら出力</span>
+<span class="kw">auto</span> print_if_le_100 = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    { <span class="co">// 特別な処理</span>
+        <span class="cf">if</span> ( *iter &lt;= <span class="dv">100</span> )
+            <span class="bu">std::</span>cout &lt;&lt; *iter ;
+    }
+} ; 
+
+
+<span class="co">// 値を2倍して出力</span>
+<span class="kw">auto</span> print_twice = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    { <span class="co">// 特別な処理</span>
+        <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> * (*iter) ;
+    }
+} ; 
+
+
+<span class="co">// 値を出力するたびに改行を出力</span>
+<span class="kw">auto</span> print_with_newline = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    { <span class="co">// 特別な処理</span>
+        <span class="bu">std::</span>cout &lt;&lt; *iter &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+} ; </code></pre></div>
+<p>これを見ると、for文によるイテレーターのループは全く同じコードだとわかる。</p>
+<p>全く同じfor文を手で書くのは間違いの元だ。同じコードはできれば書きたくない。ここで必要なのは、共通な処理は一度書くだけで済ませ、特別な処理だけを記述すればすむような方法だ。</p>
+<p>この問題を解決するには、問題を分割することだ。問題を「for文によるループ」と「特別な処理」に分けることだ。</p>
+<p>ところで、関数は変数に代入できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 変数に代入された関数</span>
+    <span class="kw">auto</span> print = []( <span class="kw">auto</span> x ) { <span class="bu">std::</span>cout &lt;&lt; x ; } ;
+
+    <span class="co">// 変数に代入された関数の呼び出し</span>
+    print(<span class="dv">123</span>) ;
+}</code></pre></div>
+<p>変数に代入できるということは、関数の引数として関数に渡せるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 関数を引数にとり呼び出す関数</span>
+    <span class="kw">auto</span> call_func = []( <span class="kw">auto</span> func )
+    {
+        func(<span class="dv">123</span>) ;
+    } ;
+
+    <span class="co">// 引数を出力する関数</span>
+    <span class="kw">auto</span> print = []( <span class="kw">auto</span> x ) { <span class="bu">std::</span>cout &lt;&lt; x ; } ;
+
+    call_func( print ) ;
+
+    <span class="co">// 引数を2倍して出力する関数</span>
+    <span class="kw">auto</span> print_twice = []( <span class="kw">auto</span> x ) { <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span>*x ; } ;
+
+    call_func( print_twice ) ;
+}</code></pre></div>
+<p>すると、要素ごとの特別な処理をする関数を引数で受け取り、要素ごとに関数を適用する関数を書くとどうなるのか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> for_each = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> f )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        f( *iter ) ;
+    }
+}</code></pre></div>
+<p>この関数はイテレーターをループで回す部分だけを実装していて、要素ごとの処理は引数に取った関数に任せている。早速使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 引数を出力する関数</span>
+    <span class="kw">auto</span> print_value = []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; value ; } ;
+
+    for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), print_value ) ;
+
+    <span class="co">// 引数を2倍して出力する関数</span>
+    <span class="kw">auto</span> print_twice = []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> * value ; } ;
+
+    for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), print_twice ) ;
+
+    <span class="co">// 引数を出力した後に改行を出力する関数</span>
+    <span class="kw">auto</span> print_with_newline = []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; value &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+
+    for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), print_with_newline ) ;
+}</code></pre></div>
+<p>関数は変数に代入しなくても使えるので、上のコードは以下のようにも書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 引数を出力する</span>
+    for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; value ; } ) ;
+
+    <span class="co">// 引数を2倍して出力する</span>
+    for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; <span class="dv">2</span> * value ; } ) ;
+
+    <span class="co">// 引数を出力した後に改行を出力する関数</span>
+    for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; value &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ) ;
+}</code></pre></div>
+<p>わざわざfor文を書かずに、問題の本質的な処理だけを書くことができるようになった。</p>
+<p>このイテレーターを先頭から末尾までループで回し、要素ごとに関数を呼び出すという処理はとても便利なので、標準ライブラリには<code>std::for_each( first, last, f)</code>がある。使い方は同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="bu">std::</span>for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; value ; } ) ;
+}</code></pre></div>
+<p>C++17の時点ではまだ使えないが、将来のC++では、イテレーターを渡さずに、vectorを直接渡すことができるようになる予定だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// C++20予定</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="bu">std::</span>for_each( v, []( <span class="kw">auto</span> value ) { <span class="bu">std::</span>cout &lt;&lt; value ; } ) ;
+}</code></pre></div>
+<p>ところでもう一度<code>for_each</code>の実装を見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> for_each = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> f )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        f( *iter ) ;
+    }
+}</code></pre></div>
+<p><code>f(*iter)</code>がとても興味深い。もし関数fがリファレンスを引数に取っていたらどうなるだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 引数をリファレンスでとって2倍にする関数</span>
+    <span class="kw">auto</span> twice = [](<span class="kw">auto</span> &amp; value){ value = <span class="dv">2</span> * value ; } ;
+
+    <span class="bu">std::</span>for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), twice ) ;
+
+    <span class="co">// 引数を出力する関数</span>
+    <span class="kw">auto</span> print = [](<span class="kw">auto</span> &amp; value){ <span class="bu">std::</span>cout &lt;&lt; value &lt;&lt; <span class="st">&quot;, &quot;</span>s ; } ;
+
+    <span class="co">// 2, 4, 6, 8, 10, </span>
+    <span class="bu">std::</span>for_each( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), print ) ;
+}</code></pre></div>
+<p>元のvectorを書き換えることもできる。</p>
+<h2 id="all_ofany_ofnone_of">all_of/any_of/none_of</h2>
+<p>他のアルゴリズムも実装していくことで学んでいこう。</p>
+<p><code>all_of(first, last, pred)</code>は、<code>[first,last)</code>の間のイテレーター<code>iter</code>のそれぞれに対して、<code>pred(*iter)</code>がすべて<code>true</code>を返すならば<code>true</code>、そうではないならば<code>false</code>を返すアルゴリズムだ。</p>
+<p>この<code>all_of</code>は要素が全て条件を満たすかどうかを調べるのに使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 要素が全て偶数かどうか調べる関数</span>
+<span class="kw">auto</span> is_all_of_odd( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">return</span> <span class="bu">std::</span>all_of( first, last,
+        []( <span class="kw">auto</span> value ) { <span class="cf">return</span> value % <span class="dv">2</span> == <span class="dv">0</span> ; } ) ;
+}
+
+<span class="co">// 要素が全て100以下かどうか調べる関数</span>
+<span class="kw">auto</span> is_all_of_le_100( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">return</span> <span class="bu">std::</span>all_of( first, last,
+        []( <span class="kw">auto</span> value ) { <span class="cf">return</span> value &lt;= <span class="dv">100</span>; } ) ;
+}</code></pre></div>
+<p>ところで、もし要素がゼロ個の、つまり空のイテレーターを渡した場合どうなるのだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 空のvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v ;
+
+    <span class="dt">bool</span> b = <span class="bu">std::</span>all_of( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        <span class="co">// 特に意味のない関数</span>
+        [](<span class="kw">auto</span> value){ <span class="cf">return</span> <span class="kw">false</span> ; } ) ;
+}</code></pre></div>
+<p>この場合、<code>all_of</code>はtrueを返す。</p>
+<p>実装は以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> all_of = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        <span class="cf">if</span> ( pref( *iter ) == <span class="kw">false</span> )
+            <span class="cf">return</span> <span class="kw">false</span> ;
+    }
+
+    <span class="cf">return</span> <span class="kw">true</span> ;
+} ;</code></pre></div>
+<p><code>[first,last)</code>が空かどうかを確認する必要はない。というのも、空であればループは一度も実行されないからだ。</p>
+<p><code>any_of(first, last, pred)</code>は<code>[first,last)</code>の間のイテレーター<code>iter</code>それぞれに対して、<code>pred(*iter)'がひとつでも</code>true<code>ならば</code>true<code>を返す。空の場合、すべて</code>false<code>の場合は</code>false`を返す。</p>
+<p><code>any_of</code>は要素に一つでも条件を満たすものがあるかどうかを調べるのに使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 要素に一つでも3が含まれているか？</span>
+    <span class="co">// true</span>
+    <span class="dt">bool</span> has_3 = <span class="bu">std::</span>any_of( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        []( <span class="kw">auto</span> x ) { <span class="cf">return</span> x == <span class="dv">3</span> ;}  ) ;
+
+    <span class="co">// 要素に一つでも10が含まれているか？</span>
+    <span class="co">// false</span>
+    <span class="dt">bool</span> has_10 = <span class="bu">std::</span>any_of( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        []( <span class="kw">auto</span> x ) { <span class="cf">return</span> x == <span class="dv">10</span> ;}  ) ;
+}</code></pre></div>
+<p>これも実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> any_of = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        <span class="cf">if</span> ( pred( *iter ) )
+            <span class="cf">return</span> <span class="kw">true</span> ;
+    }
+    <span class="cf">return</span> <span class="kw">false</span> ;
+} ;</code></pre></div>
+<p><code>none_of(first, last, pred)</code>は<code>[first,last)</code>の間のイテレーター<code>iter</code>それぞれに対して、<code>pred(*iter)</code>がすべて<code>false</code>ならば<code>true</code>を返す。空の場合の<code>true</code>を返す。それ以外は<code>false</code>を返す。</p>
+<p><code>none_of</code>はすべての要素が条件を満たさない判定に使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 値は100か？</span>
+    <span class="kw">auto</span> is_100 = [](<span class="kw">auto</span> x){ <span class="cf">return</span> x == <span class="dv">100</span> ; } ;
+
+    <span class="dt">bool</span> b = <span class="bu">std::</span>none_of( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_100 ) ;
+}</code></pre></div>
+<p>これも実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> none_of( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; first != last ; ++iter )
+    {
+        <span class="cf">if</span> ( pred(*iter) )
+            <span class="cf">return</span> <span class="kw">false</span> ;
+    }
+    <span class="cf">return</span> <span class="kw">true</span> ;
+}</code></pre></div>
+<h2 id="findfind_if">find/find_if</h2>
+<p><code>find( first, last, value )</code>はイテレーター<code>[first,last)</code>からvalueに等しい値を見つけて、そのイテレーターを返すアルゴリズムだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 3を指すイテレーター</span>
+    <span class="kw">auto</span> pos = <span class="bu">std::</span>find( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">3</span> ) ;
+
+    <span class="bu">std::</span>cout &lt;&lt; *pos ;
+}</code></pre></div>
+<p>要素が見つからない場合はlastが返る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> pos = <span class="bu">std::</span>find( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">0</span> ) ;
+
+    <span class="cf">if</span> ( pos != <span class="bu">std::</span>end(v) )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Found.&quot;</span>s ; 
+    }
+    <span class="cf">else</span>
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Not found.&quot;</span>s ;
+    }
+}</code></pre></div>
+<p>イテレーターがlastかどうかは実際にlastと比較すればよい。</p>
+<p>アルゴリズムを理解するには、自分で実装してみるとよい。さっそくfindを実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> find = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> <span class="at">const</span> &amp; value )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        <span class="co">// 値を発見したらそのイテレーターを返す</span>
+        <span class="cf">if</span> ( *iter == value )
+            <span class="cf">return</span> iter ;
+    }
+    <span class="co">// 値が見つからなければ最後のイテレーターを返す</span>
+    <span class="cf">return</span> last ;
+}</code></pre></div>
+<p><code>value</code>が<code>auto const &amp; value</code>になっているのは、リファレンスによってコピーを回避するためと、変更が必要ないためだ。しかし、intやdoubleのような単純な型については、わざわざconstなlvalueリファレンスを使う必要はない。</p>
+<p><code>find_if(first, last, pred)</code>はイテレーター<code>[first,last)</code>から、要素を関数<code>pred</code>に渡したときにtrueを返す要素へのイテレーターを探すアルゴリズムだ。</p>
+<p>関数<code>pred</code>についてはもう少し解説が必要だ。<code>pred</code>とは<code>predicate</code>の略で、以下のような形をしている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> pred = []( <span class="kw">auto</span> <span class="at">const</span> &amp; value ) -&gt; <span class="dt">bool</span> ;</code></pre></div>
+<p>関数predは値を一つ引数にとり、bool型を返す関数だ。</p>
+<p>早速使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">9</span>,<span class="dv">11</span>,<span class="dv">13</span>,<span class="dv">14</span>,<span class="dv">15</span>,<span class="dv">16</span>} ;
+
+    <span class="co">// 偶数ならばtrueを返す</span>
+    <span class="kw">auto</span> is_even = []( <span class="kw">auto</span> value )
+    {
+        <span class="cf">return</span> value % <span class="dv">2</span> == <span class="dv">0</span> ;
+    } ;
+    <span class="co">// 奇数ならばtrueを返す</span>
+    <span class="kw">auto</span> is_odd = []( <span class="kw">auto</span> value )
+    {
+        <span class="cf">return</span> value % <span class="dv">2</span> == <span class="dv">1</span> ;
+    } ;
+
+    <span class="co">// 最初の偶数の要素</span>
+    <span class="kw">auto</span> even = <span class="bu">std::</span>find_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_even ) ;
+    <span class="co">// 最初の奇数の要素</span>
+    <span class="kw">auto</span> odd = <span class="bu">std::</span>find_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_odd ) ;
+}</code></pre></div>
+<p>実装はどうなるだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> find_if = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        <span class="co">// predがtrueを返した最初のイテレーターを返す</span>
+        <span class="cf">if</span> ( pred( *iter ) )
+            <span class="cf">return</span> iter ;
+    }
+
+    <span class="cf">return</span> last ;
+}</code></pre></div>
+<p>値との比較が関数になっただけだ。</p>
+<p>つまりある値と比較する関数を渡したならば、find_ifはfindと同じ動きをするということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 引数が3の場合にtrueを返す関数</span>
+    <span class="kw">auto</span> is_3 = []( <span class="kw">auto</span> value ) { <span class="cf">return</span> x == <span class="dv">3</span> ; } ;
+
+    <span class="co">// 最初に関数がtrueを返す要素へのイテレーターを探すfind_if</span>
+    <span class="kw">auto</span> i = <span class="bu">std::</span>find_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_3 ) ;
+
+    <span class="co">// 最初に3と等しい要素へのイテレーターを返すfind</span>
+    <span class="kw">auto</span> j = <span class="bu">std::</span>find( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">3</span> ) ;
+
+    <span class="co">// 同じイテレーター</span>
+    <span class="dt">bool</span> b = (i == j) ;
+}</code></pre></div>
+<p>実は、関数は特別な<code>[=]</code>を使うことで、関数の外側の値をコピーして使うことができる</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> value = <span class="dv">123</span> ;
+
+    <span class="kw">auto</span> f = [=]{ <span class="cf">return</span> value ; } ;
+
+    f() ; <span class="co">// 123</span>
+}</code></pre></div>
+<p>特別な<code>[&amp;]</code>を使うことで、関数の外側の値をリファレンスで使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> value = <span class="dv">123</span> ;
+
+    <span class="kw">auto</span> f = [&amp;]{ ++value ; } ; 
+
+    f() ;
+    <span class="bu">std::</span>cout &lt;&lt; value ; <span class="co">// 124</span>
+}</code></pre></div>
+<p>ということは、<code>find</code>は<code>find_if</code>で実装することもできるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> find = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> value )
+{
+    <span class="cf">return</span> <span class="bu">std::</span>find_if( first, last,
+        [&amp;]( <span class="kw">auto</span> elem ) { <span class="cf">return</span> value == elem ; } ) ;
+}</code></pre></div>
+<h2 id="countcount_if">count/count_if</h2>
+<p><code>count(first, last, value)</code>は<code>[first,last)</code>の範囲のイテレーター<code>i</code>から<code>*i == value</code>になるイテレーター<code>i</code>の数を数える。</p>
+<p><code>count</code>は指定した値と同じ要素の数を数える関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">3</span>} ;
+
+    <span class="co">// 3</span>
+    <span class="kw">auto</span> a = <span class="bu">std::</span>count( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">1</span> ) ;
+    <span class="co">// 1</span>
+    <span class="kw">auto</span> b = <span class="bu">std::</span>count( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">2</span> ) ;
+    <span class="co">// 2</span>
+    <span class="kw">auto</span> b = <span class="bu">std::</span>count( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">3</span> ) ;
+}</code></pre></div>
+<p>実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> count( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> value )
+{
+    <span class="kw">auto</span> counter = <span class="dv">0u</span> ;
+    <span class="cf">for</span> ( <span class="kw">auto</span> i = first ; iter != last ; ++iter )
+    {
+        <span class="cf">if</span> ( *i == value )
+            ++counter ;  
+    }
+    <span class="cf">return</span> counter ;
+}</code></pre></div>
+<p><code>count_if(first, last, pred)</code>は<code>[first, last)</code>の範囲のイテレーター<code>i</code>から<code>pred(*i) != false</code>になるイテレーター<code>i</code>の数を返す。</p>
+<p><code>count_if</code>は要素を数える対象にするかどうかを判定する関数を渡せる<code>count</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">3</span>} ;
+
+    <span class="co">// 奇数の数: 5</span>
+    <span class="kw">auto</span> a = <span class="bu">std::</span>count_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        [](<span class="kw">auto</span> x){ <span class="cf">return</span> x%<span class="dv">2</span> == <span class="dv">1</span> ; } ) ;
+
+    <span class="co">// 偶数の数: 1</span>
+    <span class="kw">auto</span> b = <span class="bu">std::</span>count_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        [](<span class="kw">auto</span> x){ <span class="cf">return</span> x%<span class="dv">2</span> == <span class="dv">0</span> ; } ) ;
+
+    <span class="co">// 2以上の数: 3</span>
+    <span class="kw">auto</span> a = <span class="bu">std::</span>count_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        [](<span class="kw">auto</span> x){ <span class="cf">return</span> x &gt;= <span class="dv">2</span> ; } ) ;
+}</code></pre></div>
+<p>実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> count( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+{
+    <span class="kw">auto</span> counter = <span class="dv">0u</span> ;
+    <span class="cf">for</span> ( <span class="kw">auto</span> i = first ; iter != last ; ++iter )
+    {
+        <span class="cf">if</span> ( pred(*i) != <span class="kw">false</span> )
+            ++counter ;  
+    }
+    <span class="cf">return</span> counter ;
+}</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>

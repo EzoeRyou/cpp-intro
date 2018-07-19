@@ -39,7 +39,7 @@ int octal = 0123 ;
 
 ~~~cpp
 // 10進数で5
-int binary = 0b1010
+int binary = 0b1010 ;
 
 // 0bと0Bは同じ
 int a = 0B1010 ;
@@ -398,23 +398,14 @@ auto a = 123ll ;
 // long long int
 auto b = 123LL ;
 // unsigned long long int
-auto c = 123ull
+auto c = 123ull ;
 ~~~
 
 ### short int型
 
 `short int型`は`int型`より小さい範囲の値を扱う整数型だ。`long`, `long long`と同様に、`unsigned short int`型もある。単に`short`と書くと、`short int`と同じ意味になる。
 
-整数リテラルでは末尾にs/Sと書くと`short int型`になる。
-
-~~~cpp
-// short int
-auto a = 123s ;
-// short int
-auto b = 123S ;
-// unsigned short int ;
-auto c = 123us ;
-~~~
+整数リテラルで`short int`型を表現する方法はない。z2
 
 ### char型
 
@@ -631,7 +622,7 @@ int main()
 int main()
 {
     int x = 123 ;
-    short y = static_cast<T>(x) ;
+    short y = static_cast<short>(x) ;
 }
 ~~~
 
