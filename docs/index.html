@@ -254,6 +254,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#all_ofany_ofnone_of">all_of/any_of/none_of</a></li>
 <li><a href="#findfind_if">find/find_if</a></li>
 <li><a href="#countcount_if">count/count_if</a></li>
+<li><a href="#equal">equal</a></li>
+<li><a href="#search">search</a></li>
+<li><a href="#copy">copy</a></li>
+<li><a href="#transform">transform</a></li>
+<li><a href="#replace">replace</a></li>
+<li><a href="#fill">fill</a></li>
+<li><a href="#generate">generate</a></li>
+<li><a href="#remove">remove</a></li>
+<li><a href="#section"></a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -964,7 +973,7 @@ ccc</code></pre>
     x = x + <span class="dv">5</span> ;
 
     <span class="co">// 15</span>
-    <span class="bu">std::</span>cout &lt;&lt; c ;
+    <span class="bu">std::</span>cout &lt;&lt; x ;
 }</code></pre></div>
 <p><code>operator =</code>は「代入」という意味で、「等号」という意味ではないからだ。<code>x=x+5</code>は、「<code>x</code>と<code>x+5</code>は等しい」という独創的な数学上の定義ではなく、「変数xに代入前の変数xの値に5を加えた数を代入する」という意味だ。</p>
 <p>変数の今の値に対して演算した結果を変数に代入するという処理はとても良く使うので、C++には<code>x = x + a</code>と同じ意味で使える演算子、<code>operator +=</code>もある。</p>
@@ -1121,7 +1130,7 @@ x <span class="op">=</span> <span class="dv">2</span> <span class="op">;</span><
     <span class="bu">std::</span>cout
         &lt;&lt; plus( <span class="dv">1</span>, <span class="dv">2</span> ) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
         &lt;&lt; plus( <span class="fl">1.5</span>, <span class="fl">0.5</span> ) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
-        &lt;&lt; plus( <span class="st">&quot;123&quot;</span>, <span class="st">&quot;456&quot;</span>) ;
+        &lt;&lt; plus( <span class="st">&quot;123&quot;</span>s, <span class="st">&quot;456&quot;</span>s) ;
 }</code></pre></div>
 <p>関数はreturn文を実行すると処理を関数の呼び出し元に返す。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -1875,7 +1884,7 @@ false</code></pre>
 {
     <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;
     <span class="kw">auto</span> print = [](<span class="kw">auto</span> b)
-    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s } ;
+    { <span class="bu">std::</span>cout &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
 
     print( <span class="kw">true</span>  == <span class="kw">true</span>  ) ; <span class="co">// true</span>
     print( <span class="kw">true</span>  == <span class="kw">false</span> ) ; <span class="co">// false</span>
@@ -2269,7 +2278,7 @@ BMI = \frac{体重_{kg}}{身長^2_{m}}
     <span class="dt">double</span> mass = <span class="fl">73.0</span> ;
 
     <span class="co">// BMIの計算</span>
-    dublle bmi = mass / (height*height) ;
+    <span class="dt">double</span> bmi = mass / (height*height) ;
 
     <span class="co">// BMIの出力</span>
     <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
@@ -2343,7 +2352,7 @@ BMI = \frac{体重_{kg}}{身長^2_{m}}
     <span class="dt">double</span> mass = <span class="fl">80.0</span> ;
 
     <span class="co">// BMIの計算</span>
-    dublle bmi = mass / (height*height) ;
+    <span class="dt">double</span> bmi = mass / (height*height) ;
 
     <span class="co">// BMIの出力</span>
     <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
@@ -3140,7 +3149,7 @@ loop :
 <p>タブ文字はMakefileを書くのにも使った文字で、C++の文字列中に直接書くこともできるが、エスケープ文字<code>\t</code>を使ってもよい。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
-    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">4</span>\t8\t12\n5\t10\t15<span class="st">&quot;s ;</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;4</span><span class="sc">\t</span><span class="st">8</span><span class="sc">\t</span><span class="st">12</span><span class="sc">\n</span><span class="st">5</span><span class="sc">\t</span><span class="st">10</span><span class="sc">\t</span><span class="st">15&quot;</span>s ;
 }</code></pre></div>
 <p>エスケープ文字<code>\n</code>が改行文字に置き換わるように、エスケープ文字<code>\t</code>はタブ文字に置き換わる。</p>
 <p>九九の表はどうやって出力すればよいだろうか。計算自体はC++では&quot;a*b&quot;でできる。上の表がどのように計算されているかを考えてみよう。</p>
@@ -3293,7 +3302,7 @@ i &lt;= <span class="dv">100</span> ;
 {
     <span class="cf">for</span> (   <span class="dt">int</span> a = <span class="dv">1</span>, b = <span class="dv">1</span> ;
             a &lt;= <span class="dv">9</span> ;
-            +++a, ++b,
+            ++a, ++b,
             <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
         )
             <span class="bu">std::</span>cout &lt;&lt; a*b &lt;&lt; <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>s ;
@@ -3302,7 +3311,7 @@ i &lt;= <span class="dv">100</span> ;
 <p><code>for文</code>では使わない部分を省略することができる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
-    <span class="dt">bool</span> b = <span class="kw">true</span>
+    <span class="dt">bool</span> b = <span class="kw">true</span> ;
     <span class="co">// for文による変数宣言は使わない</span>
     <span class="cf">for</span> ( ; b ; b = <span class="kw">false</span> )
         <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span>s ;
@@ -3713,7 +3722,7 @@ solve(<span class="dv">111</span>) ; <span class="co">// solve(11)→solve(1)</s
 }</code></pre></div>
 <p>関数の実行が終了した場合、呼び出し元に処理が戻る。そのために関数は呼び出し元を覚えていなければならない。これには通常<code>スタック</code>とよばれるメモリーを消費する。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f() { }            <span class="co">// gに戻る</span>
-vopd g() { f() ; }      <span class="co">// mainに戻る </span>
+<span class="dt">void</span> g() { f() ; }      <span class="co">// mainに戻る </span>
 <span class="dt">int</span> main() { g() ; }</code></pre></div>
 <p>関数の中の変数も通常<code>スタック</code>に確保される。これもメモリーを消費する。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f() { }
@@ -3799,7 +3808,7 @@ loop :
     <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; vi ;
 
     <span class="co">// 浮動小数点数型doubleの値を保持するvector</span>
-    ~<span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt; vd ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt; vd ;
 
     <span class="co">// 文字列型std::stringの値を保持するvector</span>
     <span class="bu">std::</span>vector&lt;<span class="bu">std::</span>string&gt; vs ;
@@ -4478,7 +4487,7 @@ standard error output </code></pre>
 <h3 id="進数リテラル-1">2進数リテラル</h3>
 <p>2進数リテラルは接頭語'0b', '0B'から始まる。数字には0, 1を使うことができる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 10進数で5</span>
-<span class="dt">int</span> binary = <span class="bn">0b1010</span>
+<span class="dt">int</span> binary = <span class="bn">0b1010</span> ;
 
 <span class="co">// 0bと0Bは同じ</span>
 <span class="dt">int</span> a = <span class="bn">0B1010</span> ;</code></pre></div>
@@ -4635,7 +4644,7 @@ standard error output </code></pre>
 <p><code>long int型</code>は<code>int型</code>以上の範囲の整数を扱える型だ。具体的な整数型の値の範囲は実装依存だが、<code>long int型</code>は<code>int型</code>の表現できる整数の範囲はすべて表現でき、かつ<code>int型</code>以上の範囲の整数型を表現できるかもしれない型だ。</p>
 <p><code>unsigned long int型</code>は符号なしの<code>long int</code>だ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">long</span> <span class="dt">int</span> a = <span class="dv">123</span> ;
-<span class="dt">unsigned</span> lont <span class="dt">int</span> b = <span class="dv">123</span> ;</code></pre></div>
+<span class="dt">unsigned</span> <span class="dt">long</span> <span class="dt">int</span> b = <span class="dv">123</span> ;</code></pre></div>
 <p>特殊なルールとして、単に<code>long</code>と書いた場合、それは<code>long int</code>になる。<code>unsigned long</code>と書いた場合、<code>unsigned long int</code>になる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// long int</span>
 <span class="dt">long</span> a = <span class="dv">1</span> ;
@@ -4671,16 +4680,10 @@ unsinged long long b = 1 ;</code></pre>
 <span class="co">// long long int</span>
 <span class="kw">auto</span> b = <span class="dv">123LL</span> ;
 <span class="co">// unsigned long long int</span>
-<span class="kw">auto</span> c = <span class="dv">123ull</span></code></pre></div>
+<span class="kw">auto</span> c = <span class="dv">123ull</span> ;</code></pre></div>
 <h3 id="short-int型">short int型</h3>
 <p><code>short int型</code>は<code>int型</code>より小さい範囲の値を扱う整数型だ。<code>long</code>, <code>long long</code>と同様に、<code>unsigned short int</code>型もある。単に<code>short</code>と書くと、<code>short int</code>と同じ意味になる。</p>
-<p>整数リテラルでは末尾にs/Sと書くと<code>short int型</code>になる。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// short int</span>
-<span class="kw">auto</span> a = <span class="er">123s</span> ;
-<span class="co">// short int</span>
-<span class="kw">auto</span> b = <span class="er">123S</span> ;
-<span class="co">// unsigned short int ;</span>
-<span class="kw">auto</span> c = <span class="er">123us</span> ;</code></pre></div>
+<p>整数リテラルで<code>short int</code>型を表現する方法はない。z2</p>
 <h3 id="char型">char型</h3>
 <p><code>char型</code>はやや特殊で、<code>char</code>, <code>signed char</code>, <code>unsigned char</code>の三種類の型がある。<code>signed char</code>と<code>char</code>は別物だ。<code>char型</code>は整数型であり、後で説明するように文字型でもある。<code>char型</code>の符号の有無は実装ごとに異なる。</p>
 <h2 id="整数型のサイズ">整数型のサイズ</h2>
@@ -4813,7 +4816,7 @@ int: 2147483647</code></pre>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="dt">int</span> x = <span class="dv">123</span> ;
-    <span class="dt">short</span> y = <span class="kw">static_cast</span>&lt;T&gt;(x) ;
+    <span class="dt">short</span> y = <span class="kw">static_cast</span>&lt;<span class="dt">short</span>&gt;(x) ;
 }</code></pre></div>
 <h1 id="浮動小数点数">浮動小数点数</h1>
 <p>浮動小数点数の型には<code>float</code>, <code>double</code>, <code>long double</code>がある。<code>float</code>が最も精度が低く、<code>double</code>はfloatと同等以上の精度を持ち、<code>long double</code>はdoubleと同等以上の精度を持つ。</p>
@@ -4852,10 +4855,10 @@ int: 2147483647</code></pre>
     <span class="bu">std::</span>cout &lt;&lt; a &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s &lt;&lt; c ;
 }</code></pre></div>
 <p>変数aの値は１万、変数bの値は１万分の1だ。変数cの値はa+bで10000.0001となるはずだが結果はどうだろう。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dv">10000</span>
-<span class="fl">0.0001</span>
-<span class="dv">10000</span></code></pre></div>
-<p>変数cの値は10000.0001ではない。</p>
+<pre><code>10000
+0.0001
+10000</code></pre>
+<p>変数cの値は10000.0001ではない。この謎は浮動小数点数を学べば明らかになる。</p>
 <h2 id="浮動小数点数リテラル">浮動小数点数リテラル</h2>
 <h2 id="進浮動小数点数リテラル">10進浮動小数点数リテラル</h2>
 <p>浮動小数点数リテラルの最も簡単な書き方は10進数で整数部を書き、小数点'.'を書き、続けて小数部を書く。末尾がf/Fならfloat型、末尾がなければdouble型、末尾がl/Lならlong double型だ。</p>
@@ -4883,7 +4886,7 @@ int: 2147483647</code></pre>
 <span class="kw">auto</span> a = <span class="fl">1.23456e2</span> ;
 <span class="kw">auto</span> b = <span class="fl">123456e-3</span> ;
 <span class="kw">auto</span> c = <span class="fl">123.456e0</span> ;
-<span class="kw">auto</span> d = <span class="fl">123.456E0</span></code></pre></div>
+<span class="kw">auto</span> d = <span class="fl">123.456E0</span> ;</code></pre></div>
 <p>この文法は、<code>a</code>と<code>b</code>をe/Eで挟むことによって浮動小数点数の値を指定する。</p>
 <p>この<code>a</code>を仮数部(fractional part)、bを指数部(exponent part)と言う。仮数のことは他にも、coefficient, significand, mantissaなどと呼ばれたりもする。</p>
 <p>そして、指数は底が10になる。</p>
@@ -4956,7 +4959,7 @@ int: 2147483647</code></pre>
     <span class="dt">bool</span> b = NaN != <span class="fl">0.0</span> ;
     <span class="dt">bool</span> c = NaN == NaN ;
     <span class="dt">bool</span> d = NaN != NaN ;
-    <span class="dt">bool</span> e = Nan &lt; <span class="fl">0.0</span> ;
+    <span class="dt">bool</span> e = NaN &lt; <span class="fl">0.0</span> ;
 }</code></pre></div>
 <p>整数であれば、'a == b'がfalesであるならば、'a != b'なのだと仮定してもよいが、こと浮動小数点数の場合、NaNの存在があるために必ずしもそうとは限らない。上の例でわかるように、NaNとの比較はすべてfalseになる。</p>
 <h3 id="有効桁数">有効桁数</h3>
@@ -5089,7 +5092,7 @@ _</code></pre>
 <span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ;
 
 <span class="co">// 関数の定義</span>
-inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</span>
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</span>
 <span class="co">// 定義部分</span>
 <span class="co">// 関数の本体</span>
 {
@@ -5116,7 +5119,7 @@ inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</
 }
 
 <span class="co">// 定義</span>
-<span class="dt">int</span> plus_one( <span class="dt">int</span> x ) ;
+<span class="dt">int</span> plus_one( <span class="dt">int</span> x )
 {
     <span class="cf">return</span> x + <span class="dv">1</span> ;
 }</code></pre></div>
@@ -5312,7 +5315,7 @@ inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</
 <span class="co">// エラー、Bは宣言されていない</span>
 <span class="dt">int</span> h(){ <span class="cf">return</span> B::x ; }</code></pre></div>
 <p>グローバル名前空間は名前空間なので、名前空間エイリアスを宣言できる。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> long_name_is_loooong { } ;
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> long_name_is_loooong { }
 <span class="kw">namespace</span> cat = long_name_is_loooong ;</code></pre></div>
 <h3 id="名前空間名の指定を省略するusingディレクティブ">名前空間名の指定を省略するusingディレクティブ</h3>
 <p>名前空間は名前の衝突を防ぐ機能だが、名前空間名をわざわざ指定するのは面倒だ。</p>
@@ -5642,8 +5645,8 @@ inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</
 
     ++x ; <span class="co">// xは1番目の要素を指す。</span>
 
-    <span class="dt">bool</span> b1 = (x == y) ; <span class="co">// false</span>
-    <span class="dt">bool</span> b2 = (x != y) ; <span class="co">// true</span>
+    <span class="dt">bool</span> b3 = (x == y) ; <span class="co">// false</span>
+    <span class="dt">bool</span> b4 = (x != y) ; <span class="co">// true</span>
 }</code></pre></div>
 <h2 id="最後の次の要素へのイテレーター">最後の次の要素へのイテレーター</h2>
 <p><code>std::begin(v)</code>はvectorの変数vの最初の要素を指し示すイテレーターを取得する。</p>
@@ -5671,11 +5674,10 @@ inf plus_one( <span class="dt">int</span> x ) <span class="co">// 宣言部分</
     <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
     <span class="kw">auto</span> i = <span class="bu">std::</span>end(v) ;
 
-    --i ; <span class="co">// 最後の要素を指す</span>
-    *i ; <span class="co">// 5</span>
-    ++i ; 最後の次の要素を指す
-    *i ; <span class="co">// エラー</span>
-
+    --i ;   <span class="co">// 最後の要素を指す</span>
+    *i ;    <span class="co">// 5</span>
+    ++i ;   <span class="co">// 最後の次の要素を指す</span>
+    *i ;    <span class="co">// エラー</span>
 }</code></pre></div>
 <p>実際には存在しない最後の次の要素を指し示すイテレーターは何の役に立つのか。答えはイテレーターの比較だ。</p>
 <p>実際には存在しない最後の次の要素を指すイテレーターに'*'を使って要素にアクセスするのはエラーだが、イテレーター同士の比較はできる。すでに説明したように、イテレーターの比較は同じ要素を指す場合はtrue、違う要素を指す場合はfalseになる。</p>
@@ -5932,7 +5934,7 @@ d) 2 \lt i \lt 13
     <span class="cf">for</span> (   <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v), j = <span class="bu">std::</span>end(v) ;
             i != j ; ++i )
     {
-        <span class="bu">std::</span>cout &lt;&lt; i ;
+        <span class="bu">std::</span>cout &lt;&lt; *i ;
     }
 }</code></pre></div>
 <p>変数vは空なので<code>i != j</code>はfalseとなり、for文の中の文は一度も実行されない。</p>
@@ -6170,7 +6172,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
         i == j ;
         ++i  )
     {
-        <span class="bu">std::</span>cout &lt;&lt; i ;
+        <span class="bu">std::</span>cout &lt;&lt; *i ;
     }
 }</code></pre></div>
 <p>間違っている箇所がわかるだろうか。</p>
@@ -6261,7 +6263,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     {
         f( *iter ) ;
     }
-}</code></pre></div>
+} ;</code></pre></div>
 <p>この関数はイテレーターをループで回す部分だけを実装していて、要素ごとの処理は引数に取った関数に任せている。早速使ってみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -6324,7 +6326,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     {
         f( *iter ) ;
     }
-}</code></pre></div>
+} ;</code></pre></div>
 <p><code>f(*iter)</code>がとても興味深い。もし関数fがリファレンスを引数に取っていたらどうなるだろうか。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -6347,18 +6349,18 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
 <p><code>all_of(first, last, pred)</code>は、<code>[first,last)</code>の間のイテレーター<code>iter</code>のそれぞれに対して、<code>pred(*iter)</code>がすべて<code>true</code>を返すならば<code>true</code>、そうではないならば<code>false</code>を返すアルゴリズムだ。</p>
 <p>この<code>all_of</code>は要素が全て条件を満たすかどうかを調べるのに使える。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 要素が全て偶数かどうか調べる関数</span>
-<span class="kw">auto</span> is_all_of_odd( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+<span class="kw">auto</span> is_all_of_odd = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
 {
     <span class="cf">return</span> <span class="bu">std::</span>all_of( first, last,
         []( <span class="kw">auto</span> value ) { <span class="cf">return</span> value % <span class="dv">2</span> == <span class="dv">0</span> ; } ) ;
-}
+} ;
 
 <span class="co">// 要素が全て100以下かどうか調べる関数</span>
-<span class="kw">auto</span> is_all_of_le_100( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+<span class="kw">auto</span> is_all_of_le_100 = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
 {
     <span class="cf">return</span> <span class="bu">std::</span>all_of( first, last,
         []( <span class="kw">auto</span> value ) { <span class="cf">return</span> value &lt;= <span class="dv">100</span>; } ) ;
-}</code></pre></div>
+} ;</code></pre></div>
 <p>ところで、もし要素がゼロ個の、つまり空のイテレーターを渡した場合どうなるのだろうか。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -6420,7 +6422,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     <span class="dt">bool</span> b = <span class="bu">std::</span>none_of( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_100 ) ;
 }</code></pre></div>
 <p>これも実装してみよう。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> none_of( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> none_of = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
 {
     <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; first != last ; ++iter )
     {
@@ -6428,7 +6430,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
             <span class="cf">return</span> <span class="kw">false</span> ;
     }
     <span class="cf">return</span> <span class="kw">true</span> ;
-}</code></pre></div>
+} ;</code></pre></div>
 <h2 id="findfind_if">find/find_if</h2>
 <p><code>find( first, last, value )</code>はイテレーター<code>[first,last)</code>からvalueに等しい値を見つけて、そのイテレーターを返すアルゴリズムだ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -6468,11 +6470,14 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     }
     <span class="co">// 値が見つからなければ最後のイテレーターを返す</span>
     <span class="cf">return</span> last ;
-}</code></pre></div>
+} ;</code></pre></div>
 <p><code>value</code>が<code>auto const &amp; value</code>になっているのは、リファレンスによってコピーを回避するためと、変更が必要ないためだ。しかし、intやdoubleのような単純な型については、わざわざconstなlvalueリファレンスを使う必要はない。</p>
 <p><code>find_if(first, last, pred)</code>はイテレーター<code>[first,last)</code>から、要素を関数<code>pred</code>に渡したときにtrueを返す要素へのイテレーターを探すアルゴリズムだ。</p>
 <p>関数<code>pred</code>についてはもう少し解説が必要だ。<code>pred</code>とは<code>predicate</code>の略で、以下のような形をしている。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> pred = []( <span class="kw">auto</span> <span class="at">const</span> &amp; value ) -&gt; <span class="dt">bool</span> ;</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> pred = []( <span class="kw">auto</span> <span class="at">const</span> &amp; value ) -&gt; <span class="dt">bool</span>
+{
+    <span class="cf">return</span> <span class="kw">true</span> ;
+} ;</code></pre></div>
 <p>関数predは値を一つ引数にとり、bool型を返す関数だ。</p>
 <p>早速使ってみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -6506,7 +6511,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     }
 
     <span class="cf">return</span> last ;
-}</code></pre></div>
+} ;</code></pre></div>
 <p>値との比較が関数になっただけだ。</p>
 <p>つまりある値と比較する関数を渡したならば、find_ifはfindと同じ動きをするということだ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -6514,7 +6519,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
 
     <span class="co">// 引数が3の場合にtrueを返す関数</span>
-    <span class="kw">auto</span> is_3 = []( <span class="kw">auto</span> value ) { <span class="cf">return</span> x == <span class="dv">3</span> ; } ;
+    <span class="kw">auto</span> is_3 = []( <span class="kw">auto</span> x ) { <span class="cf">return</span> x == <span class="dv">3</span> ; } ;
 
     <span class="co">// 最初に関数がtrueを返す要素へのイテレーターを探すfind_if</span>
     <span class="kw">auto</span> i = <span class="bu">std::</span>find_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_3 ) ;
@@ -6549,7 +6554,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
 {
     <span class="cf">return</span> <span class="bu">std::</span>find_if( first, last,
         [&amp;]( <span class="kw">auto</span> elem ) { <span class="cf">return</span> value == elem ; } ) ;
-}</code></pre></div>
+} ;</code></pre></div>
 <h2 id="countcount_if">count/count_if</h2>
 <p><code>count(first, last, value)</code>は<code>[first,last)</code>の範囲のイテレーター<code>i</code>から<code>*i == value</code>になるイテレーター<code>i</code>の数を数える。</p>
 <p><code>count</code>は指定した値と同じ要素の数を数える関数だ。</p>
@@ -6562,19 +6567,19 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     <span class="co">// 1</span>
     <span class="kw">auto</span> b = <span class="bu">std::</span>count( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">2</span> ) ;
     <span class="co">// 2</span>
-    <span class="kw">auto</span> b = <span class="bu">std::</span>count( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">3</span> ) ;
+    <span class="kw">auto</span> c = <span class="bu">std::</span>count( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">3</span> ) ;
 }</code></pre></div>
 <p>実装してみよう。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> count( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> value )
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> count = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> value )
 {
     <span class="kw">auto</span> counter = <span class="dv">0u</span> ;
-    <span class="cf">for</span> ( <span class="kw">auto</span> i = first ; iter != last ; ++iter )
+    <span class="cf">for</span> ( <span class="kw">auto</span> i = first ; i != last ; ++i )
     {
         <span class="cf">if</span> ( *i == value )
             ++counter ;  
     }
     <span class="cf">return</span> counter ;
-}</code></pre></div>
+} ;</code></pre></div>
 <p><code>count_if(first, last, pred)</code>は<code>[first, last)</code>の範囲のイテレーター<code>i</code>から<code>pred(*i) != false</code>になるイテレーター<code>i</code>の数を返す。</p>
 <p><code>count_if</code>は要素を数える対象にするかどうかを判定する関数を渡せる<code>count</code>だ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -6590,20 +6595,402 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
         [](<span class="kw">auto</span> x){ <span class="cf">return</span> x%<span class="dv">2</span> == <span class="dv">0</span> ; } ) ;
 
     <span class="co">// 2以上の数: 3</span>
-    <span class="kw">auto</span> a = <span class="bu">std::</span>count_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+    <span class="kw">auto</span> c = <span class="bu">std::</span>count_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
         [](<span class="kw">auto</span> x){ <span class="cf">return</span> x &gt;= <span class="dv">2</span> ; } ) ;
 }</code></pre></div>
 <p>実装してみよう。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> count( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> count = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> pred )
 {
     <span class="kw">auto</span> counter = <span class="dv">0u</span> ;
-    <span class="cf">for</span> ( <span class="kw">auto</span> i = first ; iter != last ; ++iter )
+    <span class="cf">for</span> ( <span class="kw">auto</span> i = first ; i != last ; ++i )
     {
         <span class="cf">if</span> ( pred(*i) != <span class="kw">false</span> )
             ++counter ;  
     }
     <span class="cf">return</span> counter ;
+} ;</code></pre></div>
+<h2 id="equal">equal</h2>
+<p>これまでのアルゴリズムは一つのイテレーターの範囲だけを扱ってきた。アルゴリズムの中には複数の範囲を取るものもある。</p>
+<p><code>equal(first1, last1, first2, last2)</code>は<code>[first1,last1)</code>と<code>[first2, last2)</code>が等しい場合にtrueを返す。「等しい」というのは、要素の数が同じで、各要素がそれぞれ等しい場合を指す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="co">// aと等しい</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; b = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="co">// aと等しくない</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; c = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>} ;
+    <span class="co">// aと等しくない</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; d = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>} ;
+
+    <span class="co">// true</span>
+    <span class="dt">bool</span> ab = <span class="bu">std::</span>equal(
+        <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a),
+        <span class="bu">std::</span>begin(b), <span class="bu">std::</span>end(b) ) ;
+
+    <span class="co">// false</span>
+    <span class="dt">bool</span> ac = <span class="bu">std::</span>equal(
+        <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a),
+        <span class="bu">std::</span>begin(c), <span class="bu">std::</span>end(c) ) ;
+
+    <span class="co">// false</span>
+    <span class="dt">bool</span> ad = <span class="bu">std::</span>equal(
+        <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a),
+        <span class="bu">std::</span>begin(d), <span class="bu">std::</span>end(d) ) ;
 }</code></pre></div>
+<p>実装は、まず要素数を比較し、等しくなければ<code>false</code>を返す。次に各要素を一つづつ比較し、途中で等しくない要素が見つかれば<code>false</code>を、最後まで各要素が等しければ<code>true</code>を返す。</p>
+<p>イテレーターの範囲<code>[first,last)</code>の要素数は<code>last-first</code>で取得できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 最初の要素</span>
+    <span class="kw">auto</span> first = <span class="bu">std::</span>begin(v) ;
+    <span class="co">// 最後の一つ次の要素</span>
+    <span class="kw">auto</span> last = <span class="bu">std::</span>end(v) ;
+
+    <span class="co">// 要素数: 5</span>
+    <span class="kw">auto</span> size = last - first ;
+
+    <span class="co">// 最初の次の要素</span>
+    <span class="kw">auto</span> next = first + <span class="dv">1</span> ;
+
+    <span class="co">// 4</span>
+    <span class="kw">auto</span> size_from_next = last - next ;
+}</code></pre></div>
+<p><code>last-first</code>という表記はわかりにくいので、C++には<code>distance(first, last)</code>というライブラリが用意されている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> distance = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last )
+{
+    <span class="cf">return</span> last - first ;
+} ;</code></pre></div>
+<p>これを使えばわかりやすく書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 最初の要素</span>
+    <span class="kw">auto</span> first = <span class="bu">std::</span>begin(v) ;
+    <span class="co">// 最後の一つ次の要素</span>
+    <span class="kw">auto</span> last = <span class="bu">std::</span>end(v) ;
+
+    <span class="co">// 要素数: 5</span>
+    <span class="kw">auto</span> size = <span class="bu">std::</span>distance( first, last ) ;
+
+    <span class="co">// 4</span>
+    <span class="kw">auto</span> size_from_next = <span class="bu">std::</span>distance( first + <span class="dv">1</span>, last ) ;
+}</code></pre></div>
+<p>後は実装するだけだ(この実装は最も効率のいい実装ではない。理由についてはイテレーターの章を参照)</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> equal = []( <span class="kw">auto</span> first1, <span class="kw">auto</span> last1, <span class="kw">auto</span> first2, <span class="kw">auto</span> last2)
+{
+    <span class="co">// 要素数が等しいことを確認</span>
+    <span class="kw">auto</span> size1 = <span class="bu">std::</span>distance( first1, last1 ) ;
+    <span class="kw">auto</span> size2 = <span class="bu">std::</span>distance( first2, last2 ) ;
+
+    <span class="cf">if</span> ( size1 != size2 )
+        <span class="co">// 要素数が等しくなかった</span>
+        <span class="cf">return</span> <span class="kw">false</span> ;
+
+    <span class="co">// 各要素が等しいことを確認</span>
+    <span class="cf">for</span> (   <span class="kw">auto</span> i = first1, j = first2 ;
+            i != last1 ; ++i, ++j )
+    {
+        <span class="cf">if</span> ( *i != *j )
+            <span class="co">// 等しくない要素があった</span>
+            <span class="cf">return</span> <span class="kw">false</span> ;
+    }
+    <span class="co">// 各要素がすべて等しかった</span>
+    <span class="cf">return</span> <span class="kw">true</span> ;
+} ;</code></pre></div>
+<p>for文の終了条件では<code>i != last1</code>だけを見ていて、<code>j != last2</code>は見ていないが、これは問題がない。なぜならば、このfor文が実行されるのは、要素数が等しい場合だけだからだ。</p>
+<p>関数<code>pred</code>を取る<code>equal(first1, last1, first2, last2, pred)</code>もある。この<code>pred</code>は<code>pread(a, b)</code>で、<code>a</code>と<code>b</code>が等しい場合に<code>true</code>、そうでない場合に<code>false</code>を返す関数だ。つまり<code>a == b</code>のoperator ==の代わりに使う関数を指定する。</p>
+<p><code>equal</code>に関数を渡すことにより、例えば小数点以下の値を誤差として切り捨てるような処理が書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt; v = {<span class="fl">1.3</span>, <span class="fl">2.2</span>, <span class="fl">3.0</span>, <span class="fl">4.9</span>, <span class="fl">5.7</span>} ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt; w = {<span class="fl">1.9</span>, <span class="fl">2.4</span>, <span class="fl">3.8</span>, <span class="fl">4.5</span>, <span class="fl">5.0</span>} ;
+
+    <span class="co">// 小数点以下は誤差として切り捨てる比較</span>
+    <span class="kw">auto</span> comp = []( <span class="kw">auto</span> a, <span class="kw">auto</span> b )
+    {
+        <span class="cf">return</span> <span class="bu">std::</span>floor(a) == <span class="bu">std::</span>floor(b) ;
+    } ;
+
+    <span class="dt">bool</span> b = <span class="bu">std::</span>equal(
+        <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v),
+        <span class="bu">std::</span>begin(w), <span class="bu">std::</span>end(w),
+        comp ) ;
+}</code></pre></div>
+<p><code>std::floor(x)</code>は浮動小数点数<code>x</code>の少数点数以下を切り捨てた結果を返す関数だ。<code>floor(0.999)</code>は<code>0.0</code>に、<code>floor(1.999)</code>は<code>1.0</code>になる。</p>
+<p>本書をここまで読んできた読者であれば実装は自力でできるだろう。</p>
+<h2 id="search">search</h2>
+<p><code>search( first1, last1, first2, last2)</code>はイテレーター<code>[first2, last2)</code>の範囲で示された連続した要素の並びがイテレーター<code>[first1, last1)</code>の範囲に存在すれば<code>true</code>、そうでない場合は<code>false</code>を返す。</p>
+<p>こう書くと難しいが、例を見るとわかりやすい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v1 = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>} ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v2 = {<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>} ;
+
+    <span class="co">// true</span>
+    <span class="dt">bool</span> a = <span class="bu">std::</span>search( <span class="bu">std::</span>begin(v1), <span class="bu">std::</span>end(v1), <span class="bu">std::</span>begin(v2), <span class="bu">std::</span>end(v2) ) ;
+
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v3 = {<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">5</span>} ;
+    <span class="co">// false </span>
+    <span class="dt">bool</span> a = <span class="bu">std::</span>search( <span class="bu">std::</span>begin(v1), <span class="bu">std::</span>end(v1), <span class="bu">std::</span>begin(v3), <span class="bu">std::</span>end(v3) ) ;
+}</code></pre></div>
+<p>この例では、v1の中にv2と同じ並びの<code>{4,5,6}</code>が存在するので<code>true</code>、v3と同じ並びの<code>{1,3,5}</code>は存在しないので<code>false</code>になる。</p>
+<p><code>search</code>の実装例は今の読者にはまだ理解できない。<code>equal</code>や<code>search</code>を効率的に実装するにはイテレーターの詳細な理解が必要だ。</p>
+<h2 id="copy">copy</h2>
+<p>これまでのアルゴリズムは<code>for_each</code>を除き要素の変更をしてこなかった。<code>copy</code>は要素の変更をするアルゴリズムだ。</p>
+<p>イテレーター<code>i</code>は<code>*i</code>で参照する要素の値として使うことができるほか、<code>*i=x</code>で要素に値<code>x</code>を代入できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>} ;
+
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
+
+    <span class="co">// 参照する要素を値として使う</span>
+    <span class="bu">std::</span>cout &lt;&lt; *i ;
+    <span class="co">// 参照する要素に値を代入する。</span>
+    *i = <span class="dv">2</span> ;
+}</code></pre></div>
+<p><code>copy(first, last, result)</code>はイテレーター<code>[first, last)</code>の範囲の値を、先頭から順番にイテレーター<code>result</code>に書き込んでいくアルゴリズムだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; source = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="co">// 要素数5のvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; destination(<span class="dv">5</span>) ;
+
+    <span class="bu">std::</span>copy( <span class="bu">std::</span>begin(source), <span class="bu">std::</span>end(source), <span class="bu">std::</span>begin(destination) ) ;
+
+    <span class="co">// destinationの中身は{1,2,3,4,5}</span>
+}</code></pre></div>
+<p>これは実質的に以下のような操作をしたのと等しい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; source = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; destination(<span class="dv">5</span>) ; 
+}</code></pre></div>
+<p>イテレーター<code>result</code>は先頭のイテレーターのみで末尾のイテレーターは渡さない。イテレーター'result'はイテレーター<code>[first, last)</code>の範囲の要素数をコピーできるだけの要素数の範囲を参照していなければならない。</p>
+<p>例えば以下の例はエラーになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; source = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="co">// 要素数3のvector</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; destination(<span class="dv">3</span>) ;
+
+    <span class="co">// エラー</span>
+    <span class="bu">std::</span>copy( <span class="bu">std::</span>begin(source), <span class="bu">std::</span>end(source), <span class="bu">std::</span>begin(destination) ) ;
+}</code></pre></div>
+<p>要素数が3しかないvectorに5個の要素をコピーしようとしている。</p>
+<p><code>copy</code>の戻り値は<code>[first,last)</code>の要素数だけ進めたイテレーター<code>result</code>になる。これはつまり、<code>result + (last - first)</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; source = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; destination(<span class="dv">5</span>) ;
+    
+    <span class="kw">auto</span> first = <span class="bu">std::</span>begin(source) ;
+    <span class="kw">auto</span> last = <span class="bu">std::</span>end(source) ;
+    <span class="kw">auto</span> result = <span class="bu">std::</span>begin(destination) ;
+    
+    <span class="kw">auto</span> returned = <span class="bu">std::</span>copy( first, last, result ) ;
+
+    <span class="co">// true</span>
+    <span class="dt">bool</span> b = (returned == (result + (last - first)) ;
+}</code></pre></div>
+<p>ここで、<code>last-first</code>は<code>source</code>の要素数の5なので、<code>result + 5</code>は<code>copy</code>の戻り値のイテレーターと等しい。</p>
+<p><code>copy</code>には<code>[first,last)</code>の範囲が<code>result</code>から続く範囲とオーバーラップしてはいけないという制約がある。</p>
+<p>オーバーラップというのは、同じ要素を参照しているという意味だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;
+
+    <span class="co">// [first,last)とresultがオーバーラップしている</span>
+    <span class="bu">std::</span>copy( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="bu">std::</span>begin(v) ) ;
+}</code></pre></div>
+<p>オーバーラップした場合、<code>copy</code>の動作は保証されない。</p>
+<p>実装例。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> copy = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> result )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter, ++result )
+    { *result = *iter ; }
+
+    <span class="cf">return</span> result ;
+}</code></pre></div>
+<h2 id="transform">transform</h2>
+<p><code>transform(first, last, result, op)</code>は<code>copy</code>に似ているが、<code>result</code>へのコピーが<code>*result = *iter ;</code>ではなく、<code>*result = op(*iter) ;</code>になる。opは関数だ。</p>
+<p>以下が実装例だ。<code>copy</code>とほぼ同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> transform = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> result, <span class="kw">auto</span> op )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter, ++result )
+    { *result = op(*iter) ; }
+
+    <span class="cf">return</span> result ;
+}</code></pre></div>
+<p>使い方は<code>copy</code>と似ているが、値をコピーをする際に関数を適用することができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; b(<span class="dv">5</span>) ;
+    <span class="bu">std::</span>transform( <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a), <span class="bu">std::</span>begin(b),
+        [](<span class="kw">auto</span> x){ <span class="cf">return</span> <span class="dv">2</span>*x ; } ) ;
+    <span class="co">// bは{2,4,6,8,10}</span>
+
+
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; c(<span class="dv">5</span>) ;
+    <span class="bu">std::</span>transform( <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a), <span class="bu">std::</span>begin(c),
+        [](<span class="kw">auto</span> x){ <span class="cf">return</span> x % <span class="dv">3</span> ; } ) ;
+    <span class="co">// cは{1,2,0,1,2}</span>
+
+    
+    <span class="bu">std::</span>vector&lt;<span class="dt">bool</span>&gt; d(<span class="dv">5</span>) ;
+    <span class="bu">std::</span>transform( <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a), <span class="bu">std::</span>begin(d),
+        [](<span class="kw">auto</span> x){ <span class="cf">return</span> x &lt; <span class="dv">3</span> ; } ) ;
+    <span class="co">// dは{true,true,false,false,false}</span>
+}</code></pre></div>
+<p><code>result</code>に代入されるのは関数<code>op</code>の戻り値だ。関数<code>op</code>は値を一つの引数受け取り値を返す関数だ。</p>
+<h2 id="replace">replace</h2>
+<p><code>replace(first, last, old_value, new_value)</code>はイテレーター<code>[first,last)</code>の範囲のイテレーターが指す要素の値が<code>old_value</code>に等しいものを<code>new_value</code>に置換する関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="bu">std::</span>replace( <span class="bu">std::</span>begin(a), <span class="bu">std::</span>end(a), <span class="dv">3</span>, <span class="dv">0</span> ) ;
+    <span class="co">// aは{1,2,0,0,4,5,0,4,5}</span>
+}</code></pre></div>
+<p>実装も簡単。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> replace = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> old_value, <span class="kw">auto</span> new_value )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; first != last ; ++iter )
+    {
+        <span class="cf">if</span> ( *iter == old_value )
+            *iter = new_value ;
+    }
+} ;</code></pre></div>
+<h2 id="fill">fill</h2>
+<p><code>fill(first, last, value)</code>はイテレーター<code>[first,last)</code>の範囲をのイテレーターが参照する要素に<code>value</code>を代入する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="bu">std::</span>fill( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">0</span> ) ;
+    <span class="co">// vは{0,0,0,0,0}</span>
+}</code></pre></div>
+<p><code>fill_n(first, n, value)</code>はイテレーター<code>[first, first+n)</code>の範囲のイテレーターが参照する要素に<code>value</code>を代入する関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="bu">std::</span>fill_n( <span class="bu">std::</span>begin(v), <span class="dv">5</span>, <span class="dv">0</span> ) ;
+    <span class="co">// vは{0,0,0,0,0}</span>
+}</code></pre></div>
+<p>実装例。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> fill_n = []( <span class="kw">auto</span> first, <span class="kw">auto</span> n, <span class="kw">auto</span> value )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> i = <span class="dv">0</span> ; i != n ; ++i, ++first )
+    {
+        *first = value ;
+    }
+}</code></pre></div>
+<h2 id="generate">generate</h2>
+<p><code>generate</code>は<code>fill</code>に似ているが、値として<code>value</code>をとるのではなく、関数<code>gen</code>を取る。</p>
+<p><code>generate(first, last, gen)</code>はイテレーター<code>[first, last)</code>の範囲のイテレーターが参照する要素に<code>gen()</code>を代入する。</p>
+<p><sub>~</sub>cpp int main() { std::vector<int> v = {1,2,3,4,5} ; auto gen_zero = <a href=""></a>{ return 0 ; } ; std::generate( std::begin(v), std::end(v), gen_zero ) ; // vは{0,0,0,0,0} }</p>
+<p><code>generate_n(first, n, gen)</code>は<code>fill_n</code>の<code>generete</code>版だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="kw">auto</span> gen_zero = []{ <span class="cf">return</span> <span class="dv">0</span> ; } ;
+    <span class="bu">std::</span>generate_n( <span class="bu">std::</span>begin(v), <span class="dv">5</span>, gen_zero ) ;
+    <span class="co">// vは{0,0,0,0,0}</span>
+}</code></pre></div>
+<p>実装例は単純だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> generate = []( first, last, gen )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )
+    {
+        *iter = gen() ;
+    }
+} ;
+
+<span class="kw">auto</span> generate_n = []( first, n, gen )
+{
+    <span class="cf">for</span> ( <span class="kw">auto</span> i = <span class="dv">0u</span> ; i != n ; ++i, ++iter )
+    {
+        *iter = gen() ;
+    }
+} ;</code></pre></div>
+<h2 id="remove">remove</h2>
+<p><code>remove(first, last, value)</code>はイテレーター<code>[first,last)</code>の範囲の参照する要素から、値<code>value</code>に等しいものを取り除く。そして新しい終端イテレーターを返す。</p>
+<p>アルゴリズム<code>remove</code>が値を取り除くというとやや語弊がある。例えば以下のような数列があり、</p>
+<pre><code>1, 2, 3</code></pre>
+<p>この中から値<code>2</code>を<code>remove</code>のように取り除く場合、以下のようになる。</p>
+<pre><code>1, 3, ?</code></pre>
+<p><code>remove</code>は取り除くべき値の入った要素を、後続の値で上書きする。この場合、1番目の<code>2</code>を2番目の<code>3</code>で上書きする。2番目は不定な状態になる。これは、<code>remove</code>アルゴリズムは2番目がどのような値になるかを保証しないという意味だ。</p>
+<p>以下のような数列で値<code>2</code>をremoveしたとき</p>
+<pre><code>1,2,2,3,2,2,4</code></pre>
+<p>以下のようになる。</p>
+<pre><code>1,3,4,?,?,?,?</code></pre>
+<p><code>remove</code>の戻り値は、新しいイテレーターの終端を返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> last2 = remove( first, last, value ) ;</code></pre></div>
+<p>この例では、<code>remove</code>は<code>[first,last)</code>から値<code>value</code>に等しい要素を取り除いたイテレーターの範囲を戻り地として返す。その戻り値が<code>last2</code>だ。<code>[first,last2)</code>が値を取り除いた後の新しいイテレーターの範囲だ。</p>
+<p><code>remove</code>を呼び出しても元のvectorの要素数が変わることはない。<code>remove</code>はvectorの要素の値を変更するだけだ。</p>
+<p>以上を踏まえて、以下が<code>remove</code>を使う例だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;
+
+    <span class="kw">auto</span> last = <span class="bu">std::</span>remove( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">2</span> ) ;
+
+    <span class="co">// &quot;12&quot;</span>
+    <span class="bu">std::</span>for_each( <span class="bu">std::</span>begin(v), last,
+        [](<span class="kw">auto</span> x) { <span class="bu">std::</span>cout &lt;&lt; x ; } ) ;
+
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; w = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">4</span>} ;
+
+    <span class="kw">auto</span> last2 = <span class="bu">std::</span>remove( <span class="bu">std::</span>begin(w), <span class="bu">std::</span>end(w), <span class="dv">2</span> ) ;
+
+    <span class="co">// &quot;134&quot;</span>
+    <span class="bu">std::</span>for_each( <span class="bu">std::</span>begin(w), last2,
+        [](<span class="kw">auto</span> x) { <span class="bu">std::</span>cout &lt;&lt; x ; } ) ;
+   
+}</code></pre></div>
+<p><code>remove_if(first, last, pred)</code>は、<code>[first,last]</code>の範囲の要素を指すイテレーター<code>i</code>のうち、関数<code>pred</code>に渡した結果<code>pred(*i)</code>が<code>true</code>になる要素を取り除くアルゴリズムだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 偶数の場合true、奇数の場合falseを返す関数</span>
+    <span class="kw">auto</span> is_even = []( <span class="kw">auto</span> x ) { <span class="cf">return</span> x%<span class="dv">2</span> == <span class="dv">0</span> ; } ;
+
+    <span class="bu">std::</span>vector v = { <span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span> } ;
+    <span class="co">// 偶数を取り除く</span>
+    <span class="kw">auto</span> last = <span class="bu">std::</span>remove_if( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), is_even ) ;
+
+    <span class="co">// [ std::begin(v), last)は{1,3,5,7,9}</span>
+}</code></pre></div>
+<p><code>remove</code>は現在知っている知識だけではまだ完全に実装できない。以下は不完全な実装の例だ。<code>remove</code>を完全に理解するためには<code>ムーブセマンティクス</code>の理解が必要だ。</p>
+<pre><code>auto remove_if = []( auto first, auto last, auto pred )
+{
+    // removeする最初の要素
+    auto removing = std::find_if( first, last, pred ) ;
+    // removeする要素がなかった
+    if ( removing == last )
+        return last ;
+
+    // removeする要素の次の要素
+    auto remaining = removing ;
+    ++remaining ;
+
+    // removeする要素に上書きする
+    for (  ; remaining != last ; ++remaining )
+    {
+        // 上書き元も取り除くのであればスキップ
+        if ( pred( *remaining ) == false )
+        {
+            *removing = *remaining ;
+            ++removing ;
+        }
+ 
+    }
+    // 新しい終端イテレーター
+    return removing ;
+} ;</code></pre>
+<h2 id="section"></h2>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
@@ -7063,7 +7450,7 @@ ill-formed line <span class="co">// 102行目</span></code></pre></div>
     <span class="bu">std::</span>cout &lt;&lt; <span class="ot">__LINE__</span> ;
 }</code></pre></div>
 <p>以下の文法の<code>#line</code>ディレクティブは、次の行の行番号を数値にした上で、ソースファイル名をソースファイル名にする。</p>
-<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#line 数値 &quot;ソースファイル名&quot; 改行文字</span></code></pre></div>
+<pre class="v++"><code>#line 数値 &quot;ソースファイル名&quot; 改行文字</code></pre>
 <p>例、</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#line 42 &quot;answer.cpp&quot;</span></code></pre></div>
 <p>以下の文法の<code>#line</code>ディレクティブは、プリプロセッサートークン列をプリプロセスし、上の2つの文法のいずれかに合致させる。</p>
