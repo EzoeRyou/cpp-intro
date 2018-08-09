@@ -262,7 +262,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#fill">fill</a></li>
 <li><a href="#generate">generate</a></li>
 <li><a href="#remove">remove</a></li>
-<li><a href="#section"></a></li>
+</ul></li>
+<li><a href="#ラムダ式">ラムダ式</a><ul>
+<li><a href="#基本">基本</a></li>
+<li><a href="#キャプチャー">キャプチャー</a><ul>
+<li><a href="#コピーキャプチャー">コピーキャプチャー</a></li>
+<li><a href="#リファレンスキャプチャー">リファレンスキャプチャー</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#クラスの基本">クラスの基本</a><ul>
+<li><a href="#変数をまとめる">変数をまとめる</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -6990,7 +6999,272 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
     // 新しい終端イテレーター
     return removing ;
 } ;</code></pre>
-<h2 id="section"></h2>
+<h1 id="ラムダ式">ラムダ式</h1>
+<p>実は以下の形の関数は、「関数」ではない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> function = [](<span class="kw">auto</span> value ) { <span class="cf">return</span> value } ;</code></pre></div>
+<p>これは<code>ラムダ式</code>と呼ばれるC++の機能で、関数のように振る舞うオブジェクトを作るための式だ。</p>
+<h2 id="基本">基本</h2>
+<p><code>ラムダ式</code>の基本の文法は以下の通り</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">{}(){} ;</code></pre></div>
+<p>これを細かく分解すると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[]  <span class="co">// ラムダ導入子</span>
+()  <span class="co">// 引数リスト</span>
+{}  <span class="co">// 複合文</span>
+;   <span class="co">// 文末</span></code></pre></div>
+<p><code>ラムダ導入子</code>はさておく。</p>
+<p><code>引数リスト</code>は通常の関数と同じように型名と名前を書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="dt">int</span> x, <span class="dt">double</span> d ) { }
+
+[]( <span class="dt">int</span> x, <span class="dt">double</span> d ) { } ;</code></pre></div>
+<p><code>ラムダ式</code>では、<code>引数リスト</code>に<code>auto</code>キーワードが使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[]( <span class="kw">auto</span> x ) { } ;</code></pre></div>
+<p>このように書くとどんな型でも受け取れるようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> f = []( <span class="kw">auto</span> x )
+    { <span class="bu">std::</span>cout &lt;&lt; x ; } ;
+
+    f(<span class="dv">0</span>) ; <span class="co">// int</span>
+    f(<span class="fl">1.0</span>) ; <span class="co">// double</span>
+    f(<span class="st">&quot;hello&quot;</span>s) ; <span class="co">// std::string</span>
+}</code></pre></div>
+<p><code>複合文</code>は<code>{}</code>だ。この<code>{}</code>の中に通常の関数と同じように複数の文を書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[]()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span>s ;
+    <span class="dt">int</span> x = <span class="dv">1</span> + <span class="dv">1</span> ;
+} ;</code></pre></div>
+<p>最後の<code>文末</code>は<code>文</code>の最後につけるセミコロンだ。これは&quot;1+1 ;&quot;とするのと変わらない。&quot;1+1&quot;や&quot;<a href=""></a>&quot;は<code>式</code>で、<code>文</code>は<code>式</code>を使うことができる。<code>式</code>だけが入った<code>文</code>を専門用語では<code>式文</code>と呼ぶが特に覚える必要はない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dv">1</span> + <span class="dv">1</span> ; <span class="co">// OK、式文</span>
+[](){} ; <span class="co">// OK、式文</span></code></pre></div>
+<p><code>ラムダ式</code>は<code>式</code>なので<code>式文</code>の中に書くことができる。</p>
+<p><code>ラムダ式</code>は<code>式</code>なので、そのまま<code>関数呼び出し</code>することもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="bu">std::</span>string x 
+{
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}
+
+<span class="dt">int</span> main()
+{
+    f( <span class="st">&quot;hello&quot;</span>s ) ;
+    [](<span class="kw">auto</span> x ){ <span class="bu">std::</span>cout &lt;&lt; x ; }( <span class="st">&quot;hello&quot;</span>s ) ;
+}</code></pre></div>
+<p>これはわかりやすくインデントすると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">f               <span class="co">// 関数</span>
+( <span class="st">&quot;hello&quot;</span>s ) ;  <span class="co">// 関数呼び出し</span>
+
+<span class="co">// ラムダ式</span>
+[](<span class="kw">auto</span> x ){ <span class="bu">std::</span>cout &lt;&lt; x ; }
+( <span class="st">&quot;hello&quot;</span>s ) ;  <span class="co">// 関数呼び出し</span></code></pre></div>
+<p>ラムダ式が引数を一つも取らない場合、<code>引数リスト</code>は省略できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 引数を取らないラムダ式</span>
+[](){} ;
+<span class="co">// 引数リストは省略できる</span>
+[]{} ;</code></pre></div>
+<p>ラムダ式の戻り値の型はreturn文から推定される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+[]{ <span class="cf">return</span> <span class="dv">0</span> ; } ;
+<span class="co">// double</span>
+[]{ <span class="cf">return</span> <span class="fl">0.0</span> ; } ;
+<span class="co">// std::string</span>
+[]{ <span class="cf">return</span> <span class="st">&quot;hello&quot;</span>s ; } ;</code></pre></div>
+<p>return文で複数の型を返した場合は推定ができないのでエラーになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[]( <span class="dt">bool</span> b )
+{
+    <span class="cf">if</span> ( b )
+        <span class="cf">return</span> <span class="dv">0</span> ;
+    <span class="cf">else</span>
+        <span class="cf">return</span> <span class="fl">0.0</span> ;
+} ;</code></pre></div>
+<p>戻り値の型を指定したい場合は<code>引数リスト</code>の後に<code>-&gt;</code>を書き、型名を書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">[]( <span class="dt">bool</span> b ) -&gt; <span class="dt">int</span>
+{
+    <span class="cf">if</span> ( b )
+        <span class="cf">return</span> <span class="dv">0</span> ;
+    <span class="cf">else</span>
+        <span class="co">// doubleからintへの変換</span>
+        <span class="cf">return</span> <span class="fl">0.0</span> ;
+} ;</code></pre></div>
+<p>戻り値の型の推定は通常の関数も同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+<span class="kw">auto</span> f() { <span class="cf">return</span> <span class="dv">0</span> ; }
+
+<span class="co">// 戻り値の型の明示的な指定</span>
+<span class="kw">auto</span> f() -&gt; <span class="dt">int</span> { <span class="cf">return</span> <span class="dv">0</span> ; }</code></pre></div>
+<h2 id="キャプチャー">キャプチャー</h2>
+<p><code>ラムダ式</code>は書かれている関数のローカル変数を使うことができる。これを<code>キャプチャー</code>という。<code>キャプチャー</code>は通常の関数にはできない<code>ラムダ式</code>の機能だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="co">// ローカル関数</span>
+    <span class="kw">auto</span> message = <span class="st">&quot;hello&quot;</span>s ;
+
+    [=](){ <span class="bu">std::</span>cout &lt;&lt; message ; } ;
+}</code></pre></div>
+<p><code>キャプチャー</code>には<code>コピーキャプチャー</code>と<code>リファレンスキャプチャー</code>がある。</p>
+<h3 id="コピーキャプチャー">コピーキャプチャー</h3>
+<p><code>コピーキャプチャー</code>は変数をコピーによってキャプチャーする。</p>
+<p><code>コピーキャプチャー</code>をするには、<code>ラムダ式</code>を<code>[=]</code>と書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="co">// コピーキャプチャー</span>
+    [=]{ <span class="cf">return</span> x ; } ;
+}</code></pre></div>
+<p><code>コピーキャプチャー</code>した変数はラムダ式の中で変更できない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="co">// エラー</span>
+    [=]{ x = <span class="dv">0</span> ; } ;
+}</code></pre></div>
+<p>変更できるようにする方法もあるのだが、通常は使われない。</p>
+<h3 id="リファレンスキャプチャー">リファレンスキャプチャー</h3>
+<p><code>リファレンスキャプチャー</code>は変数をリファレンスによってキャプチャーする。</p>
+<p><code>リファレンス</code>を覚えているだろうか。リファレンスは初期化時の元の変数を参照する変数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="co">// 通常の変数</span>
+    <span class="dt">int</span> y = x ;
+
+    <span class="co">// 変数を変更</span>
+    y = <span class="dv">1</span> ;
+    <span class="co">// xの値は変わらない</span>
+
+    <span class="co">// リファレンス</span>
+    <span class="dt">int</span> &amp; ref = x ;
+
+    <span class="co">// リファレンスを変更</span>
+    ref = <span class="dv">1</span> ;
+    <span class="co">// xの値が変わる</span>
+}</code></pre></div>
+<p><code>リファレンスキャプチャー</code>を使うには、<code>ラムダ式</code>を<code>[&amp;]</code>と書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    [&amp;] { <span class="cf">return</span> x ; } ;
+}</code></pre></div>
+<p><code>リファレンスキャプチャー</code>した変数を<code>ラムダ式</code>の中で変更すると、元の変数が変更される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="kw">auto</span> f = [&amp;]{ ++x ; } ;
+
+    f() ; <span class="co">// x == 1</span>
+    f() ; <span class="co">// x == 2</span>
+    f() ; <span class="co">// x == 3</span>
+}</code></pre></div>
+<p>ラムダ式についてはまだ色々な機能があるが、本書での解説はここまでとする。</p>
+<h1 id="クラスの基本">クラスの基本</h1>
+<p>C++はもともとC言語に<code>クラス</code>の機能を追加することを目的とした言語だった。</p>
+<p><code>クラス</code>とは何か。クラスには様々な機能があるが、最も基本的な機能としては以下の2つがある。</p>
+<ul>
+<li>変数をまとめる</li>
+<li>まとめた変数に適用できる関数を提供する</li>
+</ul>
+<p>この章は<code>クラス</code>の数ある機能のうち、この2つの機能だけを説明する。</p>
+<h2 id="変数をまとめる">変数をまとめる</h2>
+<p>2次元座標上の点<code>(x,y)</code>を表現するプログラムを書くとする。</p>
+<p>とりあえずint型で表現してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 表現</span>
+    <span class="dt">int</span> point_x = <span class="dv">0</span>;
+    <span class="dt">int</span> point_y = <span class="dv">0</span>;
+}</code></pre></div>
+<p>これはわかりやすい。ところでものは相談だが、点は複数表現したい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x1 = <span class="dv">0</span> ;
+    <span class="dt">int</span> y1 = <span class="dv">0</span> ;
+
+    <span class="dt">int</span> x2 = <span class="dv">0</span> ;
+    <span class="dt">int</span> y2 = <span class="dv">0</span> ;
+
+    <span class="dt">int</span> x3 = <span class="dv">0</span> ;
+    <span class="dt">int</span> y3 = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>これはわかりにくい。ところで点はユーザーがいくつでも入力できるものとしよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; xs ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; ys ;
+
+    <span class="co">// xs.at(i)とys.at(i)は同じ点のための変数</span>
+
+    <span class="dt">int</span> x {} ;
+    <span class="dt">int</span> y {} ;
+    <span class="cf">while</span> ( <span class="bu">std::</span>cin &gt;&gt; x &gt;&gt; y )
+    {
+        xs.push_back(x) ;
+        ys.push_back(y) ;
+    }
+}</code></pre></div>
+<p>これはとてもわかりにくい。</p>
+<p>ここで<code>クラス</code>の出番だ。<code>クラス</code>を使うと点を表現するコードは以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> point
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="dt">int</span> y = <span class="dv">0</span> ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    point p ;
+
+    <span class="bu">std::</span>cout &lt;&lt; p.x &lt;&lt; p.y ;
+}</code></pre></div>
+<p>点を複数表現するのもわかりやすい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">point p1 ;
+point p2 ;
+point p3 ;</code></pre></div>
+<p>ユーザーが好きなだけ点を入力できるプログラムもわかりやすく書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> point
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    <span class="dt">int</span> y = <span class="dv">0</span> ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;point&gt; ps ;
+
+    <span class="dt">int</span> x { } ;
+    <span class="dt">int</span> y { } ;
+
+    <span class="cf">while</span>( <span class="bu">std::</span>cin &gt;&gt; x &gt;&gt; y )
+    {
+        ps.push_back( point{ x, y } ) ;
+    }    
+}</code></pre></div>
+<p>これが<code>クラス</code>の変数をまとめる機能だ。</p>
+<p><code>クラス</code>を定義するには、キーワード<code>struct</code>に続いて<code>クラス名</code>を書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> class_name 
+{
+
+} ;</code></pre></div>
+<p>変数は<code>{}</code>の中に書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> a ;
+    <span class="dt">double</span> b ;
+    <span class="bu">std::</span>string c ;
+} ;</code></pre></div>
+<p>このクラスの中に書かれた変数のことを、<code>データメンバー</code>という。正確には変数ではない。</p>
+<p>定義した<code>クラス</code>は変数のように宣言して使うことができる。<code>クラス</code>の<code>データメンバー</code>を使うには、クラス名に引き続いてドット文字を書きデータメンバー名を書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 名前と年齢を表現するクラスPerson</span>
+<span class="kw">struct</span> Person
+{
+    <span class="bu">std::</span>string name ;
+    <span class="dt">int</span> age ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    Person john ;
+    john.name = <span class="st">&quot;john&quot;</span> ;
+    john.age = <span class="dv">20</span> ;
+}</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
