@@ -212,11 +212,11 @@ int main()
 ~~~cpp
 int main()
 {
-    int a = 1 ;
-    int b = 2 ;
+    int num = 1 ;
+    int denom = 2 ;
 
     // 出力
-    std::cout << static_cast<double>(a) / static_cast<double>(b) ;
+    std::cout << static_cast<double>(num) / static_cast<double>(denom) ;
 }
 ~~~
 
@@ -226,8 +226,8 @@ int main()
 ~~~cpp
 struct fractional
 {
-    int a ;
-    int b ;
+    int num ;
+    int denom ;
 } ;
 
 int main()
@@ -235,7 +235,7 @@ int main()
     fractional x{1, 2} ;
 
     // 出力
-    std::cout << static_cast<double>(x.a) / static_cast<double>(x.b) ;
+    std::cout << static_cast<double>(x.num) / static_cast<double>(x.denom) ;
 }
 ~~~
 
@@ -245,7 +245,7 @@ int main()
 ~~~c++
 double value( fractional & x )
 {
-    return static_cast<double>(x.a) / static_cast<double>(x.b) ;
+    return static_cast<double>(x.num) / static_cast<double>(x.denom) ;
 }
 
 int main()
@@ -274,12 +274,12 @@ struct S
 ~~~cpp
 struct fractional
 {
-    int a ;
-    int b ;
+    int num ;
+    int denom ;
 
     double value()
     {
-        return static_cast<double>(a) / static_cast<double>(b) ;
+        return static_cast<double>(num) / static_cast<double>(denom) ;
     }
 } ;
 ~~~
@@ -359,18 +359,18 @@ struct X
 ~~~cpp
 struct fractional
 {
-    int a ;
-    int b ;
+    int num ;
+    int denom ;
 
-    void set( int num )
+    void set( int num_ )
     {
-        a = num ;
-        b = 1 ;
+        num = num_ ;
+        denom = 1 ;
     }
-    void set( int num, int denom )
+    void set( int num_, int denom_ )
     {
-        a = num ;
-        b = denom ;
+        num = num_ ;
+        denom = denom_ ;
     }
 } ;
 
@@ -380,13 +380,98 @@ int main()
 
 
     x.set(5) ;
-    // x.a == 5
-    // x.b == 1
+    // x.num == 5
+    // x.denom == 1
 
     x.set( 2, 3 ) ;
-    // x.a == 2
-    // x.b == 3
+    // x.num == 2
+    // x.denom == 3
 }
 ~~~
 
 メンバー関数`set(num)`を呼び出すと、値が$\frac{num}{1}$になる。メンバー関数`set(num, denom)`を呼び出すと、値が$\frac{num}{denom}$になる。
+
+ところで上のコードを見ると、`データメンバー`と引数の名前の衝突を避けるために、アンダースコアを使っている。
+
+`データメンバー`と引数の名前が衝突するとどうなるのか。確かめてみよう。
+
+~~~cpp
+struct S
+{
+    int x ;
+    void f( int x_ )
+    {
+        x = x_ ;
+    }
+} ;
+
+int main()
+{
+    S s{0} ;
+    s.f(1) ;
+
+    std::cout << s.x ;
+}
+~~~
+
+結果は`0`だ。メンバー関数`f`の中の名前`x`は引数名のxだからだ。
+
+すでに名前は`スコープ`に属するということは説明した。実はクラスも`スコープ`を持つ。上のコードは以下のようなスコープを持つ。
+
+~~~cpp
+// グローバル名前空間スコープ
+int x ;
+
+struct S
+{
+    // クラススコープ
+    int x ;
+
+    void f( int x )
+    {
+        // 関数のブロックスコープ
+        x = x ;
+    }
+} ;
+~~~
+
+内側の`スコープ`は外側の`スコープ`の名前を隠す。そのため、クラススコープのxはグローバル名前空間スコープxを隠す。関数のブロックスコープのxはクラススコープのxを隠す。
+
+名前がどのスコープに属するかを明示的に指定することによって、隠された名前を使うことができる。
+
+~~~cpp
+int x ;
+
+struct S
+{
+    int x ;
+
+    void f( int x )
+    {
+        // 関数のブロックスコープのx
+        x = 0 ;
+        // クラススコープのx
+        S::x = 0 ;
+        // グローバル名前空間のスコープ
+        ::x = 0 ;
+    }
+} ;
+~~~
+
+名前空間スコープを明示するために`namespace_name::name`を使うように、クラススコープを明示するために`class_name::name`を使うことができる。
+
+これを使えば、分数クラスは以下のように書ける。
+
+~~~cpp
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    void set( int num, int denom )
+    {
+        fractional::num = num ;
+        fractional::denom = denom ;
+    }
+}
+~~~
