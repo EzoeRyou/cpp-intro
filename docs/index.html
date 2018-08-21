@@ -273,6 +273,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#クラスの基本">クラスの基本</a><ul>
 <li><a href="#変数をまとめる">変数をまとめる</a></li>
 </ul></li>
+<li><a href="#まとめた変数に関数を提供する">まとめた変数に関数を提供する</a></li>
+<li><a href="#より自然に振る舞うクラス">より自然に振る舞うクラス</a><ul>
+<li><a href="#より自然な初期化">より自然な初期化</a></li>
+</ul></li>
+<li><a href="#自然な演算子">自然な演算子</a><ul>
+<li><a href="#演算子のオーバーロード">演算子のオーバーロード</a><ul>
+<li><a href="#二項演算子">二項演算子</a></li>
+<li><a href="#単項演算子">単項演算子</a></li>
+<li><a href="#インクリメントデクリメント">インクリメント/デクリメント</a></li>
+<li><a href="#メンバー関数での演算子のオーバーロード">メンバー関数での演算子のオーバーロード</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#stdarray">std::array</a></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -7160,7 +7173,7 @@ swap( v.at(0), v.at(2) ) ;</code></pre>
 <p><code>クラス</code>とは何か。クラスには様々な機能があるが、最も基本的な機能としては以下の2つがある。</p>
 <ul>
 <li>変数をまとめる</li>
-<li>まとめた変数に適用できる関数を提供する</li>
+<li>まとめた変数に関数を提供する</li>
 </ul>
 <p>この章は<code>クラス</code>の数ある機能のうち、この2つの機能だけを説明する。</p>
 <h2 id="変数をまとめる">変数をまとめる</h2>
@@ -7246,12 +7259,12 @@ point p3 ;</code></pre></div>
 <p>変数は<code>{}</code>の中に書く。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
 {
-    <span class="dt">int</span> a ;
-    <span class="dt">double</span> b ;
-    <span class="bu">std::</span>string c ;
+    <span class="dt">int</span> a = <span class="dv">0</span> ;
+    <span class="dt">double</span> b = <span class="fl">0.0</span> ;
+    <span class="bu">std::</span>string c = <span class="st">&quot;hello&quot;</span>s ;
 } ;</code></pre></div>
 <p>このクラスの中に書かれた変数のことを、<code>データメンバー</code>という。正確には変数ではない。</p>
-<p>定義した<code>クラス</code>は変数のように宣言して使うことができる。<code>クラス</code>の<code>データメンバー</code>を使うには、クラス名に引き続いてドット文字を書きデータメンバー名を書く。</p>
+<p>定義した<code>クラス</code>は変数として宣言して使うことができる。<code>クラス</code>の<code>データメンバー</code>を使うには、クラス名に引き続いてドット文字を書きデータメンバー名を書く。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 名前と年齢を表現するクラスPerson</span>
 <span class="kw">struct</span> Person
 {
@@ -7265,6 +7278,964 @@ point p3 ;</code></pre></div>
     john.name = <span class="st">&quot;john&quot;</span> ;
     john.age = <span class="dv">20</span> ;
 }</code></pre></div>
+<p><code>クラス</code>の<code>データメンバー</code>の定義は変数ではないし、ストレージが割り当てられているわけではない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="co">// これは変数ではない。</span>
+    <span class="dt">int</span> data ;
+} ;</code></pre></div>
+<p>クラスの変数を定義したときに、その変数のオブジェクトに紐付いたストレージが使われる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> data ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s1 ; <span class="co">// 変数</span>
+    <span class="co">// オブジェクトs1に紐付いたストレージ</span>
+    s1.data = <span class="dv">0</span> ;
+
+    S s2 ;
+    <span class="co">// 別のストレージ</span>
+    s2.data = <span class="dv">1</span> ; 
+}</code></pre></div>
+<p>クラスの変数を定義するときにデータメンバーを初期化できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> x ;
+    <span class="dt">int</span> y ;
+    <span class="dt">int</span> z ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s { <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span> } ;
+    <span class="co">// s.x == 1</span>
+    <span class="co">// s.y == 2</span>
+    <span class="co">// s.z == 3</span>
+}</code></pre></div>
+<p>クラスの初期化で<code>{1,2,3}</code>と書くと、クラスの最初のデータメンバーが1で、次のデータメンバーが2で、その次のデータメンバーが3で、それぞれ初期化される。</p>
+<h1 id="まとめた変数に関数を提供する">まとめた変数に関数を提供する</h1>
+<p>分数を表現するプログラムを書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> num = <span class="dv">1</span> ;
+    <span class="dt">int</span> denom = <span class="dv">2</span> ;
+
+    <span class="co">// 出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(num) / <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(denom) ;
+}</code></pre></div>
+<p>分子<code>a</code>と分母<code>b</code>はクラスにまとめることができそうだ。そうすれば複数の分数を扱うのも楽になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    fractional x{<span class="dv">1</span>, <span class="dv">2</span>} ;
+
+    <span class="co">// 出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(x.num) / <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(x.denom) ;
+}</code></pre></div>
+<p>ところで、この出力を毎回書くのが面倒だ。こういう処理は関数にまとめたい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">double</span> value( fractional &amp; x )
+{
+    <span class="cf">return</span> <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(x.num) / <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(x.denom) ;
+}
+
+<span class="dt">int</span> main()
+{
+    fractional x{ <span class="dv">1</span>, <span class="dv">2</span> } ;
+    <span class="bu">std::</span>cout &lt;&lt; value( x ) ;
+}</code></pre></div>
+<p>この関数<code>value</code>はクラス<code>fractional</code>専用だ。であれば、この関数をクラス事態に関連付けたい。そこでC++には<code>メンバー関数</code>という機能がある。</p>
+<p><code>メンバー関数</code>はクラスの中で定義する関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> member_function( <span class="dt">int</span> x )
+    {
+        <span class="cf">return</span> x ;
+    }
+} ;</code></pre></div>
+<p><code>メンバー関数</code>はクラスの<code>データメンバー</code>を使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    <span class="dt">double</span> value()
+    {
+        <span class="cf">return</span> <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(num) / <span class="kw">static_cast</span>&lt;<span class="dt">double</span>&gt;(denom) ;
+    }
+} ;</code></pre></div>
+<p>メンバー関数を呼び出すには、クラスのオブジェクトに続いてドット文字を書き、メンバー関数名を書く。後は通常の関数のように書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    fractional x{ <span class="dv">1</span>, <span class="dv">2</span> } ;
+    <span class="bu">std::</span>cout &lt;&lt; x.value() ;
+}</code></pre></div>
+<p><code>メンバー関数</code>から使える<code>データメンバー</code>は、メンバー関数が呼ばれたクラスのオブジェクトのデータメンバーだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> x ;
+    <span class="dt">void</span> print()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; x ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s1(<span class="dv">1</span>) ;
+    s1.print() ; <span class="co">// 1</span>
+
+    S s2(<span class="dv">2</span>) ;
+    s2.print() ; <span class="co">// 2</span>
+}</code></pre></div>
+<p>この<code>print</code>を非メンバー関数として書くと以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> print( S &amp; s )
+{
+    <span class="bu">std::</span>cout &lt;&lt; s.x ;
+}</code></pre></div>
+<p>メンバー関数は隠し引数としてクラスのオブジェクトを受け取っている関数だ。メンバー関数の呼び出しには、対応するクラスのオブジェクトが必要になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> f() { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    f() ; <span class="co">// エラー</span>
+    S s ;
+    s.f() ; <span class="co">// OK</span>
+}</code></pre></div>
+<p><code>メンバー関数</code>はデータメンバーを変更することもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> X
+{
+    <span class="dt">int</span> data ;
+    <span class="dt">void</span> f()
+    {
+        data = <span class="dv">3</span> ;
+    }
+} ;</code></pre></div>
+<p>先程の分数クラスに値を設定するための<code>メンバー関数</code>を追加してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    <span class="dt">void</span> set( <span class="dt">int</span> <span class="va">num_</span> )
+    {
+        num = <span class="va">num_</span> ;
+        denom = <span class="dv">1</span> ;
+    }
+    <span class="dt">void</span> set( <span class="dt">int</span> <span class="va">num_</span>, <span class="dt">int</span> <span class="va">denom_</span> )
+    {
+        num = <span class="va">num_</span> ;
+        denom = <span class="va">denom_</span> ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    fractional x ;
+
+
+    x.set(<span class="dv">5</span>) ;
+    <span class="co">// x.num == 5</span>
+    <span class="co">// x.denom == 1</span>
+
+    x.set( <span class="dv">2</span>, <span class="dv">3</span> ) ;
+    <span class="co">// x.num == 2</span>
+    <span class="co">// x.denom == 3</span>
+}</code></pre></div>
+<p>メンバー関数<code>set(num)</code>を呼び出すと、値が<span class="math inline">\(\frac{num}{1}\)</span>になる。メンバー関数<code>set(num, denom)</code>を呼び出すと、値が<span class="math inline">\(\frac{num}{denom}\)</span>になる。</p>
+<p>ところで上のコードを見ると、<code>データメンバー</code>と引数の名前の衝突を避けるために、アンダースコアを使っている。</p>
+<p><code>データメンバー</code>と引数の名前が衝突するとどうなるのか。確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> x ;
+    <span class="dt">void</span> f( <span class="dt">int</span> <span class="va">x_</span> )
+    {
+        x = <span class="va">x_</span> ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s{<span class="dv">0</span>} ;
+    s.f(<span class="dv">1</span>) ;
+
+    <span class="bu">std::</span>cout &lt;&lt; s.x ;
+}</code></pre></div>
+<p>結果は<code>0</code>だ。メンバー関数<code>f</code>の中の名前<code>x</code>は引数名のxだからだ。</p>
+<p>すでに名前は<code>スコープ</code>に属するということは説明した。実はクラスも<code>スコープ</code>を持つ。上のコードは以下のようなスコープを持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// グローバル名前空間スコープ</span>
+<span class="dt">int</span> x ;
+
+<span class="kw">struct</span> S
+{
+    <span class="co">// クラススコープ</span>
+    <span class="dt">int</span> x ;
+
+    <span class="dt">void</span> f( <span class="dt">int</span> x )
+    {
+        <span class="co">// 関数のブロックスコープ</span>
+        x = x ;
+    }
+} ;</code></pre></div>
+<p>内側の<code>スコープ</code>は外側の<code>スコープ</code>の名前を隠す。そのため、クラススコープのxはグローバル名前空間スコープxを隠す。関数のブロックスコープのxはクラススコープのxを隠す。</p>
+<p>名前がどのスコープに属するかを明示的に指定することによって、隠された名前を使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> x ;
+
+<span class="kw">struct</span> S
+{
+    <span class="dt">int</span> x ;
+
+    <span class="dt">void</span> f( <span class="dt">int</span> x )
+    {
+        <span class="co">// 関数のブロックスコープのx</span>
+        x = <span class="dv">0</span> ;
+        <span class="co">// クラススコープのx</span>
+        S::x = <span class="dv">0</span> ;
+        <span class="co">// グローバル名前空間のスコープ</span>
+        ::x = <span class="dv">0</span> ;
+    }
+} ;</code></pre></div>
+<p>名前空間スコープを明示するために<code>namespace_name::name</code>を使うように、クラススコープを明示するために<code>class_name::name</code>を使うことができる。</p>
+<p>これを使えば、分数クラスは以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    <span class="dt">void</span> set( <span class="dt">int</span> num, <span class="dt">int</span> denom )
+    {
+        fractional::num = num ;
+        fractional::denom = denom ;
+    }
+}</code></pre></div>
+<h1 id="より自然に振る舞うクラス">より自然に振る舞うクラス</h1>
+<p>整数型の<code>int</code>について考えてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = a + a ;
+    <span class="dt">int</span> c = a + b ;
+}</code></pre></div>
+<p>同様のことを、前章の分数クラスで書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+} ;
+
+fractional add( fractional &amp; l, fractional &amp; r )
+{
+    <span class="co">// 分母が同じなら</span>
+    <span class="cf">if</span> ( l.denom == r.denom )
+        <span class="co">// 単に分子を足す</span>
+        <span class="cf">return</span> fractional{ l.num + r.num, l.denom } ;
+
+    <span class="co">// 分母を合わせて分子を足す</span>
+    <span class="cf">return</span> fractional{ l.num * r.denom + r.num * l.denom, l.denom * r.denom } ;
+}
+
+<span class="dt">int</span> main()
+{
+    fractional a{<span class="dv">1</span>,<span class="dv">1</span>} ;
+    fractional b = add(a, a) ;
+    fractional c = add(a, b) ;
+}</code></pre></div>
+<p>これは読みにくい。できれば以下のように書きたいところだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    fractional a = <span class="dv">1</span> ;
+    fractional b = a + a ;
+    fractional c = a + b ;
+}</code></pre></div>
+<p>C++ではクラスをこのように自然に振る舞わせることができる。</p>
+<h2 id="より自然な初期化">より自然な初期化</h2>
+<p>int型は初期化にあたって値を設定できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a = <span class="dv">0</span> ;
+<span class="dt">int</span> b(<span class="dv">0</span>) ;
+<span class="dt">int</span> c{<span class="dv">0</span>} ;</code></pre></div>
+<p><code>クラス</code>でこのような初期化をするには、<code>コンストラクター</code>を書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    <span class="co">// コンストラクター</span>
+    fractional( <span class="dt">int</span> num )
+        : num(num), denom(<span class="dv">1</span>)
+    { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    fractional a = <span class="dv">1</span> ;
+    fractional b = <span class="dv">2</span> ;
+}</code></pre></div>
+<p><code>コンストラクター</code>は<code>クラス</code>の<code>特殊なメンバー関数</code>として定義する。<code>メンバー関数</code>としての<code>コンストラクター</code>は、名前がクラス名で、戻り値の型は記述しない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> clas<span class="va">s_name</span>
+{
+    <span class="co">// コンストラクター</span>
+    class_name() { }
+} ;</code></pre></div>
+<p><code>コンストラクター</code>は<code>データメンバー</code>の初期化に特別な文法を持っている。関数の本体の前にコロンを書き、データメンバー名をそれぞれカンマで区切って初期化する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> clas<span class="va">s_name</span>
+{
+    <span class="dt">int</span> data_member ;
+
+    class_name( <span class="dt">int</span> value )
+        : data_member(value)
+    { }
+    
+} ;</code></pre></div>
+<p>このとき、引数名とデータメンバー名が同じでもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> clas<span class="va">s_name</span>
+{
+    <span class="dt">int</span> x ;
+    class_name( <span class="dt">int</span> x )
+        : x(x) { }
+} ;</code></pre></div>
+<p><code>x(x)</code>の最初の<code>x</code>は<code>class_name::x</code>として、次の<code>x</code>は引数名の<code>x</code>として認識される。そのためこのコードは期待通りに動く。</p>
+<p><code>コンストラクター</code>の特別なメンバー初期化を使わずに、<code>コンストラクター</code>の関数の本体で<code>データメンバー</code>を変更してもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> clas<span class="va">s_name</span>
+{
+    <span class="dt">int</span> x ;
+    class_name( <span class="dt">int</span> x )
+    {
+        class_name::x = x ;
+    }
+} ;</code></pre></div>
+<p>この場合、<code>x</code>は関数の本体が実行される前に一度初期化され、その後、値を代入されるという挙動の違いがある。</p>
+<p>コンストラクターはクラスが初期化されるときに実行される。例えば以下のプログラムを実行すると、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    S a(<span class="dv">1</span>) ;
+    S b(<span class="dv">2</span>) ;
+    S c(<span class="dv">3</span>) ;
+}</code></pre></div>
+<p>以下のように出力される。</p>
+<pre><code>123</code></pre>
+<p><code>コンストラクター</code>のついでに<code>デストラクター</code>も学んでおこう。<code>コンストラクター</code>はクラスのオブジェクトが初期化されるときに実行されるが、<code>デストラクター</code>はクラスのオブジェクトが破棄されるときに実行される。</p>
+<p><code>デストラクター</code>の宣言は<code>コンストラクター</code>と似ている。違う点は、クラス名の前にチルダ文字を書くところだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="co">// デストラクター</span>
+    ~S()
+    {
+        <span class="co">// オブジェクトの破棄時に実行される</span>
+    }
+} ;</code></pre></div>
+<p>関数のローカル変数は、ブロックスコープを抜ける際に破棄される。破棄は構築の逆順に行われる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a ;
+    {
+        <span class="dt">int</span> b ;
+    <span class="co">// bが破棄される</span>
+    }
+    <span class="dt">int</span> c ;
+<span class="co">// cが破棄される</span>
+<span class="co">// aが破棄される</span>
+}</code></pre></div>
+<p>さっそく初期化時と終了時に標準出力をするクラスで確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> n ;
+    S( <span class="dt">int</span> n )
+        : n(n)
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;constructed: &quot;</span>s &lt;&lt; n &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+
+    ~S()
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;destructed: &quot;</span>s &lt;&lt; n &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+} ;</code></pre></div>
+<p>このクラスを以下のように使うと、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    S a(<span class="dv">1</span>) ;
+    { S b(<span class="dv">2</span>) ; }
+    S c(<span class="dv">3</span>) ;
+}</code></pre></div>
+<p>以下のように出力される</p>
+<pre><code>constructed: 1
+constructed: 2
+destructed: 2
+constructed: 3
+destructed: 3
+destructed: 1</code></pre>
+<p>この出力は以下のような意味だ。</p>
+<ol style="list-style-type: decimal">
+<li>aが構築される</li>
+<li>bが構築される</li>
+<li>bが破棄される</li>
+<li>cが構築される</li>
+<li>cが破棄される</li>
+<li>aが破棄される</li>
+</ol>
+<p>bはブロックスコープの終わりに達したのでaの構築の後、cの構築の前に破棄される。破棄は構築の逆順で行われるので、aよりも先にcが破棄される。</p>
+<p><code>コンストラクター</code>と<code>デストラクター</code>は戻り値を返さないので、<code>return文</code>には値を書かない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> clas<span class="va">s_name</span>
+{
+    class_name()
+    {
+        <span class="cf">return</span> ;
+    }
+} ;</code></pre></div>
+<p><code>コンストラクター</code>は複数の引数を取ることもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    fractional( <span class="dt">int</span> num )
+        : num(num), denom(<span class="dv">1</span>)
+    { }
+
+    fractional( <span class="dt">int</span> num, <span class="dt">int</span> denom )
+        : num(num), denom(denom)
+    { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// fractional(int)が呼ばれる</span>
+    fractional a = <span class="dv">1</span> ;
+
+    <span class="co">// fractional(int,int)が呼ばれる</span>
+    fractional b(<span class="dv">1</span>, <span class="dv">2</span>) ;
+    fractional c{<span class="dv">1</span>, <span class="dv">2</span>} ;
+}</code></pre></div>
+<p>複数の引数をとるコンストラクターを呼び出すには&quot;=&quot;は使えない。&quot;()&quot;か&quot;{}&quot;を使う必要がある。</p>
+<p>上のコードを見ると、コンストラクターは引数の数以外にやっていることはほとんど同じだ。こういう場合、コンストラクターを一つにする方法がある。</p>
+<p>実はコンストラクターに限らず、関数は<code>デフォルト実引数</code>を取ることができる。書き方は仮引数に&quot;=&quot;で値を書く</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f( <span class="dt">int</span> x = <span class="dv">0</span> )
+{ }
+
+<span class="dt">int</span> main()
+{
+    f() ;  <span class="co">// f(0)</span>
+    f(<span class="dv">1</span>) ; <span class="co">// f(1)</span>
+}</code></pre></div>
+<p><code>デフォルト実引数</code>を指定した関数の仮引数に実引数を渡さない場合、<code>デフォルト実引数</code>で指定した値が渡される。</p>
+<p>ところで、<code>仮引数</code>、<code>実引数</code>という聞きなれない言葉が出てきた。これは関数の引数を区別するための言葉だ。<code>仮引数</code>は関数の宣言の引数。実引数は関数呼び出しのときに引数に渡す値のことを意味する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// xは仮引数</span>
+<span class="dt">void</span> f( <span class="dt">int</span> x ) { }
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 123は仮引数xに対する実引数</span>
+    f( <span class="dv">123</span> ) ;
+}</code></pre></div>
+<p><code>デフォルト実引数</code>は関数の実引数の一部を省略できる。</p>
+<p>ただし、<code>デフォルト実引数</code>を使った以後の仮引数には、すべて<code>デフォルト実引数</code>がなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// OK</span>
+<span class="dt">void</span> f( <span class="dt">int</span> x, <span class="dt">int</span> y = <span class="dv">0</span>, <span class="dt">int</span> z = <span class="dv">0</span> ) { }
+<span class="co">// エラー</span>
+<span class="co">// zにデフォルト実引数がない</span>
+<span class="dt">void</span> g( <span class="dt">int</span> x, <span class="dt">int</span> y = <span class="dv">0</span>, <span class="dt">int</span> z ) { }</code></pre></div>
+<p><code>デフォルト実引数</code>で途中の引数だけ省略することはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">void</span> f( <span class="dt">int</span> x = <span class="dv">0</span>, <span class="dt">int</span> y = <span class="dv">0</span>, <span class="dt">int</span> z = <span class="dv">0</span>) { }
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// エラー</span>
+    f( <span class="dv">1</span>, , <span class="dv">2</span> ) ;
+}</code></pre></div>
+<p><code>デフォルト実引数</code>を使うと、コンストラクターを一つにできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    fractional( <span class="dt">int</span> num, <span class="dt">int</span> denom = <span class="dv">1</span> )
+        : num(num), denom(denom)
+    { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    fractional a = <span class="dv">1</span> ;
+    fractional b(<span class="dv">1</span>,<span class="dv">2</span>) ;
+    fractional c{<span class="dv">1</span>,<span class="dv">2</span>} ;
+}</code></pre></div>
+<p>コンストラクターの数を減らす方法はもう一つある。<code>デリゲートコンストラクター</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+    fractional( <span class="dt">int</span> num, <span class="dt">int</span> denom )
+        : num(num), denom(denom)
+    { }
+
+    <span class="co">// デリゲートコンストラクター</span>
+    fractional( <span class="dt">int</span> num )
+        : fractional( num, <span class="dv">1</span> )
+    { } 
+}</code></pre></div>
+<p><code>デリゲートコンストラクター</code>は初期化処理を別のコンストラクターにデリゲート(丸投げ)する。丸投げ先のコンストラクターの初期化処理が終わり次第、デリゲートコンストラクターの関数の本体が実行される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    S()
+        : S(<span class="dv">1</span>)
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;delegating constructor</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+
+    S( <span class="dt">int</span> n )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;constructor</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+    }
+}
+
+<span class="dt">int</span> main()
+{
+    S s ;
+}</code></pre></div>
+<p>このプログラムを実行すると、以下のように出力される。</p>
+<pre><code>constructor
+delegating constructor</code></pre>
+<p>まず&quot;S()&quot;が呼ばれるが、処理を&quot;S(int)&quot;にデリゲートする。&quot;S(int)&quot;の処理が終わり次第&quot;S()&quot;の関数の本体が実行される。そのためこのような出力になる。</p>
+<p>コンストラクターを減らすのはよいが、減らしすぎても不便だ。以下の例を見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> A { } ;
+<span class="kw">struct</span> B { B(<span class="dt">int</span>) { } } ;
+
+<span class="dt">int</span> main()
+{
+    A a ; <span class="co">// OK</span>
+    B b ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>クラス<code>A</code>の変数は問題ないのに、クラス<code>B</code>の変数はエラーになる。これはクラス<code>B</code>には引数を取らないコンストラクターがないためだ。</p>
+<p>クラス<code>B</code>に引数を必要としないコンストラクターを書くと、具体的に引数を渡さなくても初期化ができるようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> B
+{
+    B() { }
+    B( <span class="dt">int</span> x ) { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    B b ; <span class="co">// OK</span>
+}</code></pre></div>
+<p>もしくは、デフォルト引数を使ってもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> B
+{
+    B( <span class="dt">int</span> x = <span class="dv">0</span> ) { }
+} ;</code></pre></div>
+<p>もちろん、ユーザーが値を指定しなければならないようなクラスは値を指定するべきだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 人間クラス</span>
+<span class="co">// 必ず名前が必要</span>
+<span class="kw">struct</span> person
+{
+    <span class="bu">std::</span>string name
+    person( <span class="bu">std::</span>string name )
+        : name(name) { }
+} ;</code></pre></div>
+<h1 id="自然な演算子">自然な演算子</h1>
+<p>int型は<code>+-*/</code>といった演算子を使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = <span class="dv">1</span> ;
+    a + b ;
+    a - b ;
+    a * b ;
+    a / b ;
+}</code></pre></div>
+<p>クラスも演算子を使った自然な記述ができる。クラスを演算子に対応させることを、<code>演算子のオーバーロード</code>という。</p>
+<p>分数クラスの足し算を考えよう。</p>
+<ul>
+<li>分母が同じならば分子を足す</li>
+<li>分母が異なるならば互いの分母を掛けて、分母を揃えて足す。</li>
+</ul>
+<p>コードにすると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> fractional
+{
+    <span class="dt">int</span> num ;
+    <span class="dt">int</span> denom ;
+
+<span class="co">// コンストラクターなど</span>
+} ;
+
+fractional add( fractional &amp; l, fractional &amp; r )
+{
+    <span class="co">// 分母が同じなら</span>
+    <span class="cf">if</span> ( l.denom == r.denom )
+        <span class="co">// 単に分子を足す</span>
+        <span class="cf">return</span> fractional{ l.num + r.num, l.denom } ;
+
+    <span class="co">// 分母を合わせて分子を足す</span>
+    <span class="cf">return</span> fractional{ l.num * r.denom + r.num * l.denom, l.denom * r.denom } ;
+}</code></pre></div>
+<p>しかし、この関数<code>add</code>を使ったコードは以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    fractional a{<span class="dv">1</span>,<span class="dv">2</span>} ;
+    fractional b{<span class="dv">1</span>,<span class="dv">3</span>} ;
+
+    <span class="kw">auto</span> c = add(a, b) ;
+}</code></pre></div>
+<p>これはわかりにくい。できれば、以下のように書きたい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> c = a + b ;</code></pre></div>
+<p>C++では演算子は関数として扱うことができる。演算子の名前は<code>opeartor op</code>で、例えば<code>+演算子</code>の名前は<code>operator +</code>になる。</p>
+<p>関数<code>operator +</code>は引数を2つ取り、戻り値を返す関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">fractional <span class="kw">operator</span> +( fractional &amp; l, fractional &amp; r )
+{
+    <span class="co">// 分母が同じなら</span>
+    <span class="cf">if</span> ( l.denom == r.denom )
+        <span class="co">// 単に分子を足す</span>
+        <span class="cf">return</span> fractional{ l.num + r.num, l.denom } ;
+    <span class="cf">else</span>
+        <span class="co">// 分母を合わせて分子を足す</span>
+        <span class="cf">return</span> fractional{ l.num * r.denom + r.num * l.denom, l.denom * r.denom } ;
+}</code></pre></div>
+<p>このように<code>operator +</code>を書くと、以下のようなコードが書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> c = a + b ;</code></pre></div>
+<p>同様に、引き算は<code>operator -</code>、掛け算は<code>operator *</code>、割り算は<code>operator /</code>だ。</p>
+<p>以下に関数の宣言を示すので実際に分数の計算を実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">fractional opearotor -( fractional &amp; l, fractional &amp; r ) ;
+fractional opearotor *( fractional &amp; l, fractional &amp; r ) ;
+fractional opearotor /( fractional &amp; l, fractional &amp; r ) ;</code></pre></div>
+<p>引き算は足し算とほぼ同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">fractional opearotor -( fractional &amp; l, fractional &amp; r )
+{
+    <span class="co">// 分母が同じ</span>
+    <span class="cf">if</span> ( l.denom == r.denom )
+        <span class="cf">return</span> fractional{ l.num - r.num, l.denom } ;
+    <span class="cf">else</span>
+        <span class="cf">return</span> fractional{ l.num * r.denom - r.num * l.denom, l.denom * r.denom } ;
+}</code></pre></div>
+<p>掛け算と割り算は楽だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">fractional opearotor *( fractional &amp; l, fractional &amp; r )
+{
+    <span class="cf">return</span> fractional{ l.num * r.num, l.denom * r.denom } ;
+}
+
+fractional opearotor /( fractional &amp; l, fractional &amp; r )
+{
+    <span class="cf">return</span> fractional{ l.num * r.denom, l.denom * r.num } ;
+}</code></pre></div>
+<h2 id="演算子のオーバーロード">演算子のオーバーロード</h2>
+<h3 id="二項演算子">二項演算子</h3>
+<p>C++には様々な演算子があるが、多くが<code>二項演算子</code>と呼ばれる演算子だ。<code>二項演算子</code>は2つの引数を取り、値を返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">a + b ;
+a - b ;
+a * b ;
+a / b ;</code></pre></div>
+<p>このような演算子は<code>operator +</code>のように、キーワード<code>operator</code>に続いて演算子の文字を書くことで、関数名とする。あとは通常の関数と変わらない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { } ;
+
+S add( S a, S b ) ;
+S <span class="kw">operator</span> + ( S a, S b ) ;</code></pre></div>
+<p>戻り値の型は何でもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { } ;
+
+<span class="dt">int</span> <span class="kw">operator</span> +( S, S ) { <span class="cf">return</span> <span class="dv">0</span> ; }
+<span class="dt">void</span> <span class="kw">operator</span> -( S, S ) { }
+
+<span class="dt">int</span> main()
+{
+    S s ;
+    <span class="dt">int</span> x = s + s ;
+    s - s ; <span class="co">// 戻り値はない</span>
+}</code></pre></div>
+<p>演算子としてではなく、関数と同じように呼び出すこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="kw">struct</span> S { } ;
+
+<span class="co">// S f( S, S )のようなもの</span>
+S <span class="kw">operator</span> + ( S, S ) { }
+
+<span class="dt">int</span> main()
+{
+    S s ;
+    <span class="co">// f(s,s)のようなもの</span>
+    <span class="kw">operator</span> +(s,s) ;
+}</code></pre></div>
+<p><code>演算子のオーバーロード</code>では、少なくとも1つのユーザー定義された型がなければならない。つまり以下のような演算子のオーバーロードはできないということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> <span class="kw">operator</span> +( <span class="dt">int</span>, <span class="dt">int</span> ) ;
+<span class="dt">int</span> <span class="kw">operator</span> +( <span class="dt">int</span>, <span class="dt">double</span> ) ;</code></pre></div>
+<p>二項演算子には<code>オペランド</code>と呼ばれる式を取る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">a + b ;</code></pre></div>
+<p>この場合、二項演算子<code>operator +</code>にはa, bという2つのオペランドがある。</p>
+<p>二項演算子をオーバーロードする場合、最初の引数が最初のオペランド、次の引数が次のオペランドに対応する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> X { } ;
+<span class="kw">struct</span> Y { } ;
+
+<span class="dt">void</span> <span class="kw">operator</span> +( X, Y ) { }
+
+<span class="dt">int</span> main()
+{
+    X x ;
+    Y y ;
+    
+    <span class="co">// OK</span>
+    x + y ;
+
+    <span class="co">// エラー</span>
+    <span class="co">// operator +(Y,X)は存在しない</span>
+    y + x ;
+}</code></pre></div>
+<p>そのため、上の例で&quot;x+y&quot;と&quot;y+x&quot;を両方使いたい場合は、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> <span class="kw">operator</span> +(Y,X) { }</code></pre></div>
+<p>も必要だ。</p>
+<p>現実のコードでは、二項演算子のオーバーロードは以下のように書くことが多い。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { } ;
+
+<span class="co">// 引数名は様々</span>
+S <span class="kw">operator</span> +( S <span class="at">const</span> &amp; left, S <span class="at">const</span> &amp; right )
+{
+
+}</code></pre></div>
+<p><code>const &amp;</code>という特別な書き方をする。<code>&amp;</code>についてはすでに学んだように、リファレンスだ。リファレンスを使うことによって値をコピーせずに効率的に使うことができる。</p>
+<p><code>const</code>というのは値を変更しない変数を宣言する機能だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    x = <span class="dv">1</span> ; <span class="co">// OK</span>
+
+    <span class="dt">int</span> <span class="at">const</span> y = <span class="dv">0</span> ;
+    y = <span class="dv">0</span> ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>constをつけると値を変更できなくなる。</p>
+<p>一般に<code>operator +</code>のような演算子は、オペランドに渡した変数を書き換えない処理をすることが期待されている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a = <span class="dv">1</span> ;
+    <span class="dt">int</span> b = <span class="dv">1</span> ;
+
+    <span class="co">// a, bは書き換わらない</span>
+    <span class="dt">int</span> c = a + b ;
+}</code></pre></div>
+<p>もちろん、<code>operator +</code>をオーバーロードして引数をリファレンスで取り、値を書き換えるような処理を書くこともできる。ただ、通常はそのような処理をすることはない。</p>
+<p>しかし、処理の効率のためにリファレンスは使いたい。</p>
+<p>そのようなときに、constかつリファレンスを使うと、効率的で値の変更ができないコードが書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> IntLike{ <span class="dt">int</span> data ;} ;
+
+IntLike <span class="kw">operator</span> + ( IntLike <span class="at">const</span> &amp; l, IntLike <span class="at">const</span> &amp; r )
+{
+    <span class="cf">return</span> IntLike{ l.data + r.data }
+}</code></pre></div>
+<p>constリファレンスの変数をうっかり書き換えてしまった場合、コンパイラーが検出してくれるので、バグを未然に発見することができる。</p>
+<h3 id="単項演算子">単項演算子</h3>
+<p><code>単項演算子</code>はオペランドを一つしか取らない演算子のことだ。</p>
+<p><code>単項演算子</code>についてはまだ説明していないものも多い。例えば、<code>operator +</code>や<code>operator -</code>がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">1</span> ;
+    +x ; <span class="co">//  1: operator +</span>
+    -x ; <span class="co">// -1: operator -</span>
+}</code></pre></div>
+<p><code>単項演算子</code>は引数を一つしか取らない関数として書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> IntLike{ <span class="dt">int</span> data ;} ;
+
+IntLike <span class="kw">operator</span> +( IntLike <span class="at">const</span> &amp; obj )
+{
+    <span class="cf">return</span> obj ;
+}
+
+IntLIke <span class="kw">operator</span> -( IntLike <span class="at">const</span> &amp; obj )
+{
+    <span class="cf">return</span> IntLike{ -obj.data } ;
+}</code></pre></div>
+<h3 id="インクリメントデクリメント">インクリメント/デクリメント</h3>
+<p><code>インクリメント演算子</code>と<code>デクリメント演算子</code>はやや変わっている。この演算子には、オペランドの前に書く前置演算子(++i)と、後に書く後置演算子(i++)がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> i = <span class="dv">0</span> ;
+    ++i ;
+    i++ ;
+
+    --i ;
+    i-- ;
+}</code></pre></div>
+<p>前置演算子を評価すると、演算子を評価した後の値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> i = <span class="dv">0</span> ;
+++i ;   <span class="co">// 1</span>
+i ;     <span class="co">// 1</span></code></pre></div>
+<p>一方、後置演算子を評価すると、演算子を評価する前の値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> i = <span class="dv">0</span> ;
+i++ ;   <span class="co">// 0</span>
+i ;     <span class="co">// 1</span></code></pre></div>
+<p>さらに前置演算子を評価した結果はリファレンスになるので代入やさらなる演算子の適用ができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> i = <span class="dv">0</span> ;
+++i = <span class="dv">0</span> ;   <span class="co">// iは0</span>
+++++i ;     <span class="co">// iは2</span>
+
+i++ = <span class="dv">0</span> ;   <span class="co">// エラー</span>
+i++++ ;     <span class="co">// エラー</span></code></pre></div>
+<p>インクリメントとデクリメントの前置演算子は、単項演算子と同じ方法で書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> IntLike { <span class="dt">int</span> data ; } ;
+
+IntLike &amp; <span class="kw">operator</span> ++( IntLike &amp; obj )
+{
+    ++obj.data ;
+    <span class="cf">return</span> obj ;
+}
+IntLike &amp; <span class="kw">operator</span> --( IntLike &amp; obj )
+{
+    --obj.data ;
+    <span class="cf">return</span> obj ;
+}</code></pre></div>
+<p>引数を変更するのでconstではないリファレンスを使う。戻り値は引数をそのままリファレンスで返す。</p>
+<p>もちろん、この実装はインクリメントとデクリメントの挙動を自然に再現したい場合の実装だ。以下のような挙動を実装することも可能だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { } ;
+
+<span class="dt">void</span> <span class="kw">operator</span> ++( S <span class="at">const</span> &amp; s )
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;increment!</span><span class="sc">\n</span><span class="st">&quot;</span> ;
+}
+
+<span class="dt">int</span> main()
+{
+
+    S s ;
+    ++s ;
+}</code></pre></div>
+<p>演算子のオーバーロードは演算子の文法で関数を呼べるという機能で、その呼び出した結果の関数が何をしようとも自由だからだ。</p>
+<p>後置演算子は少し変わっている。いかが後置演算子の実装だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> IntLike { <span class="dt">int</span> data ; } ;
+
+IntLike <span class="kw">operator</span> ++( IntLike &amp; obj, <span class="dt">int</span> )
+{
+    <span class="kw">auto</span> temp = obj ;
+    ++obj.data ;
+    <span class="cf">return</span> temp ;
+}
+IntLike <span class="kw">operator</span> --( IntLike &amp; obj, <span class="dt">int</span> )
+{
+    <span class="kw">auto</span> temp = obj ;
+    --obj.data ;
+    <span class="cf">return</span> temp ;
+}</code></pre></div>
+<p>後置演算子は2つめの引数としてint型を取る。この引数はダミーで前置演算子と後置演算子を区別する以外の意味はない。意味はないので引数名は省略している。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { } ;
+
+<span class="co">// 前置演算子</span>
+<span class="dt">void</span> <span class="kw">operator</span> ++( S ) ;
+<span class="co">// 後置演算子</span>
+<span class="dt">void</span> <span class="kw">operator</span> ++( S, <span class="dt">int</span> ) ;</code></pre></div>
+<p>後置演算子はオペランドである引数を変更するが、戻り値は変更する前の値だ。なので変更前の値をまずコピーしておき、そのコピーを返す。</p>
+<h3 id="メンバー関数での演算子のオーバーロード">メンバー関数での演算子のオーバーロード</h3>
+<p>実は演算子のオーバーロードはメンバー関数で書くことも可能だ。</p>
+<p>例えば、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">S s ;
+s + s ;</code></pre></div>
+<p>を可能にするクラスSに対する<code>operator +</code>は、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { } 
+S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S <span class="at">const</span> &amp; ) ;</code></pre></div>
+<p>でも実装できるが、メンバー関数としても実装できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    S <span class="kw">operator</span> +( S <span class="at">const</span> &amp; right )
+    {
+        <span class="cf">return</span> S{} ;
+    }
+} ;</code></pre></div>
+<p>演算子のオーバーロードをメンバー関数で書く場合、最初のオペランドがメンバー関数の属するクラスのオブジェクト、2つめのオペランドが一つ目の引数になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> IntLike
+{
+    <span class="dt">int</span> data ;
+
+    IntLike <span class="kw">operator</span> +( IntLike <span class="at">const</span> &amp; right )
+    {
+        <span class="cf">return</span> IntLike { data + right.data } ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    IntLike a(<span class="dv">1</span>) ;
+    IntLike b(<span class="dv">2</span>) ;
+
+    IntLike c = a + b ;
+}</code></pre></div>
+<p>この場合、メンバー関数は変数aに対して呼ばれ、変数bが<code>right</code>となる。</p>
+<p>普通のメンバー関数のように呼ぶこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">IntLike c = a.<span class="kw">operator</span> +( b ) ;</code></pre></div>
+<p>一見戸惑うかも知れないが、これは普通のメンバー関数呼び出しと何ら変わらない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> plus( S <span class="at">const</span> &amp; other ) { }
+    <span class="dt">void</span> <span class="kw">operator</span> +( S <span class="at">const</span> &amp; other ) { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    S a ;
+    S b ;
+
+    <span class="co">// これはメンバー関数呼び出し</span>
+    a.plus(b) ;
+    <span class="co">// これもメンバー関数呼び出し</span>
+    a.<span class="kw">operator</span> +(b) ;
+    <span class="co">// 同じくメンバー関数呼び出し</span>
+    a + b ;
+}</code></pre></div>
+<p>演算子のオーバーロードはフリー関数とメンバー関数のどちらで実装すればいいのだろうか。答えはどちらでもよい。ただし、ごく一部の演算子はメンバー関数でしか実装できない。</p>
+<p>こうして、この章の冒頭にある演算子を使った自然な四則演算の記述が、自作のクラスでも可能になる。</p>
+<h1 id="stdarray">std::array</h1>
+<p><code>std::vector&lt;T&gt;</code>を覚えているだろうか。T型の値をいくつでも保持できるクラスだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// int型の値を10個保持するクラス</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v(<span class="dv">10</span>) ;
+
+    <span class="co">// 0番目の値を1に</span>
+    v.at(<span class="dv">0</span>) = <span class="dv">1</span> ;
+}</code></pre></div>
+<p>この章では、<code>vector</code>と似ているクラス、<code>std::array&lt;T, N&gt;</code>を学ぶ。<code>array</code>はT型の値をN個保持するクラスだ。</p>
+<p>その使い方は一見<code>vector</code>と似ている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// int型の値を10個保持するクラス</span>
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">10</span>&gt; a ;
+
+    <span class="co">// 0番目の値を1に</span>
+    a.at(<span class="dv">0</span>) = <span class="dv">1</span> ;
+}</code></pre></div>
+<p><code>vector</code>と違う点は、コンパイル時に要素数が固定されるということだ。</p>
+<p><code>vector</code>は実行時に要素数を決めることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>size_t N{} ;
+    <span class="bu">std::</span>cin &gt;&gt; N ;
+
+    <span class="co">// 要素数N</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v(N) ; 
+}</code></pre></div>
+<p>一方、<code>array</code>はコンパイル時に要素数を決める。標準入力から得た値は実行時のものなので、使うことはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>size_T N{} ;
+    <span class="bu">std::</span>cin &gt;&gt; N ;
+
+    <span class="co">// エラー</span>
+    <span class="bu">std::</span>array&lt; <span class="dt">int</span>, N &gt; a ;
+}</code></pre></div>
+<p><code>vector</code>は実行時に要素数を変更することができる。メンバー関数<code>push_back</code>は要素数を1増やす。メンバー関数<code>resize(sz)</code>は要素数を<code>sz</code>にする。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 要素数5</span>
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; v(<span class="dv">5</span>) ;
+    <span class="co">// 要素数6</span>
+    v.push_back(<span class="dv">1</span>) ;
+    <span class="co">// 要素数2</span>
+    v.resize(<span class="dv">2</span>) ;
+}</code></pre></div>
+<p><code>array</code>は<code>push_back</code>も<code>resize</code>も提供していない。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
