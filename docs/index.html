@@ -286,6 +286,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 </ul></li>
 <li><a href="#stdarray">std::array</a></li>
+<li><a href="#arrayの実装-配列">arrayの実装: 配列</a></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -3891,7 +3892,7 @@ loop :
     <span class="co">// 2</span>
     <span class="bu">std::</span>cout &lt;&lt; v.size() ;
 }</code></pre></div>
-<p>せっかく値を入れたのだから取り出したいものだ。<code>std::vector</code>ではメンバー関数<code>at(i)</code>を使うことで、i番目の要素を取り出すことができる。このiのことを添字、インデックスと呼ぶ。ここで注意してほしいのは、最初の要素は0番目で、次の要素は1番目だということだ。最後の要素は'size()-1'番目になる。</p>
+<p>せっかく値を入れたのだから取り出したいものだ。<code>std::vector</code>ではメンバー関数<code>at(i)</code>を使うことで、i番目の要素を取り出すことができる。このiのことを添字、インデックスと呼ぶ。ここで注意してほしいのは、最初の要素は0番目で、次の要素は1番目だということだ。最後の要素は<code>size()-1</code>番目になる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
 
@@ -8195,6 +8196,9 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
 
     <span class="co">// 0番目の値を1に</span>
     v.at(<span class="dv">0</span>) = <span class="dv">1</span> ;
+
+    <span class="co">// イテレーターを取る</span>
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(v) ;
 }</code></pre></div>
 <p>この章では、<code>vector</code>と似ているクラス、<code>std::array&lt;T, N&gt;</code>を学ぶ。<code>array</code>はT型の値をN個保持するクラスだ。</p>
 <p>その使い方は一見<code>vector</code>と似ている。</p>
@@ -8205,6 +8209,9 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
 
     <span class="co">// 0番目の値を1に</span>
     a.at(<span class="dv">0</span>) = <span class="dv">1</span> ;
+
+    <span class="co">// イテレーターを取る</span>
+    <span class="kw">auto</span> i = <span class="bu">std::</span>begin(a) ;
 }</code></pre></div>
 <p><code>vector</code>と違う点は、コンパイル時に要素数が固定されるということだ。</p>
 <p><code>vector</code>は実行時に要素数を決めることができる。</p>
@@ -8236,6 +8243,169 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
     v.resize(<span class="dv">2</span>) ;
 }</code></pre></div>
 <p><code>array</code>は<code>push_back</code>も<code>resize</code>も提供していない。</p>
+<p><code>vector</code>も<code>array</code>もメンバー関数<code>at(i)</code>でi番目の要素にアクセスできる。実は、i番目にアクセスする方法は他にもある。<code>[i]</code>を使う方法だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">10</span>&gt; a ;
+
+    <span class="co">// どちらも0番目の要素に1を代入</span>
+    a.at(<span class="dv">0</span>) = <span class="dv">1</span> ;
+    a[<span class="dv">0</span>] = <span class="dv">1</span> ;
+
+    <span class="co">// どちらも0番目の要素を標準出力</span>
+    <span class="bu">std::</span>cout &lt;&lt; a.at(<span class="dv">0</span>) ;
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">0</span>] ;
+}</code></pre></div>
+<p><code>at(i)</code>と<code>[i]</code>の違いは、要素の範囲外にアクセスしたときの挙動だ。<code>at(i)</code>はエラー処理が行われる。<code>[i]</code>は何が起こるかわからない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 10個の要素を持つ</span>
+    <span class="co">// 0番目から9番目までが妥当な範囲</span>
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">10</span>&gt; a ;
+
+    <span class="co">// エラー処理が行われる</span>
+    <span class="co">// プログラムは終了する</span>
+    a.at(<span class="dv">10</span>) = <span class="dv">0</span> ;
+    <span class="co">// 何が起こるかわからない</span>
+    a[<span class="dv">10</span>] = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>この理由は、<code>[i]</code>は要素数が妥当な範囲かどうかを確認する処理を行っていないためだ。その分余計な処理が発生しないが、間違えたときに何が起こるかわからないという危険性がある。通常は<code>at(i)</code>を使うべきだ。</p>
+<p>実はこの<code>[i]</code>は<code>operator []</code>というれっきとした演算子だ。演算子のオーバーロードもできる。例えば以下は任意個の要素を持ち、常にゼロを返すarrayのように振る舞う意味のないクラスだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 常にゼロを返すクラス</span>
+<span class="co">// 何を書き込んでもゼロを返す</span>
+<span class="kw">struct</span> null_array
+{
+    <span class="dt">int</span> dummy ;
+    <span class="co">// 引数は無視</span>
+    <span class="dt">int</span> &amp; <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t )
+    {
+        dummy = <span class="dv">0</span> ;
+        <span class="cf">return</span> dummy ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    null_array a ;
+
+    <span class="co">// 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">0</span>] ;
+    <span class="co">// 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">999</span>] ;
+
+    a[<span class="dv">100</span>] = <span class="dv">0</span> ;
+    <span class="co">// 0</span>
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">100</span>] ;
+}</code></pre></div>
+<p>なぜ<code>vector</code>という実行時に要素数を設定でき実行時に要素数を変更できる便利なクラスがありながら、<code>array</code>のようなコンパイル時に要素数が決め打ちで要素数の変更もできないようなクラスもあるのだろうか。その理由は<code>array</code>と<code>vector</code>はパフォーマンスの特性が異なるからだ。<code>vector</code>はストレージ(メモリー)の動的確保をしている。ストレージの動的確保は実行時の要素数を変更できるのだが、そのために予測不可能な非決定的なパフォーマンス特性を持つ。<code>array</code>はストレージの動的確保を行わない。この結果実行時に要素数を変更することはできないが、予測可能で決定的なパフォーマンス特性を持つ。</p>
+<p>その他の<code>array</code>の使い方は、<code>vector</code>とほぼ同じだ。</p>
+<h1 id="arrayの実装-配列">arrayの実装: 配列</h1>
+<p><code>std::array</code>を実装してみよう。すでにクラスを作る方法については学んだ。</p>
+<p><code>std::array&lt;T,N&gt;</code>はT型の要素をN個保持するクラスだ。この<code>&lt;T,N&gt;</code>についてはまだ学んでいないので、今回はint型を3個確保する。今までに学んだ要素だけで実装してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> array_int_3
+{
+    <span class="dt">int</span> m0 ;
+    <span class="dt">int</span> m1 ;
+    <span class="dt">int</span> m2 ;
+} ;</code></pre></div>
+<p>そして<code>operator []</code>を実装しよう。引数が0ならm0を、1ならm1を、2ならm2を返す。それ以外の値の場合、プログラムを強制的に終了させる標準ライブラリ、<code>std::abort</code>を呼び出す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> array_int_3
+{
+    <span class="dt">int</span> m0 ; <span class="dt">int</span> m1 ; <span class="dt">int</span> m2 ;
+
+    <span class="dt">int</span> &amp; opeartor []( <span class="bu">std::</span>size_t i )
+    {
+        <span class="cf">switch</span>(i)
+        {
+            <span class="cf">case</span> <span class="dv">0</span> :
+                <span class="cf">return</span> m0 ;
+            <span class="cf">case</span> <span class="dv">1</span> :
+                <span class="cf">return</span> m1 ;
+            <span class="cf">case</span> <span class="dv">2</span> :
+                <span class="cf">return</span> m2 ;
+            <span class="cf">default</span> :
+                <span class="co">// 間違った引数</span>
+                <span class="co">// 強制終了</span>
+                <span class="bu">std::</span>abort() ;
+        }
+    }
+} ;</code></pre></div>
+<p>これは動く。では要素数を10個に増やした<code>array_int_10</code>はどうなるだろうか。要素数100個はどう書くのだろうか。この方法で実装するとソースコードが膨大になり、ソースコードを出力するソースコードを書かなければならなくなる。</p>
+<p><code>std::array</code>を実装するには、<code>配列(array)</code>を使う。</p>
+<p>int型の要素数10の配列aは以下のように書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a[<span class="dv">10</span>] ;</code></pre></div>
+<p>double型の要素数5の配列bは以下のように書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">duble b[<span class="dv">5</span>] ;</code></pre></div>
+<p><code>配列</code>の要素数は<code>std::array&lt;T,N&gt;</code>のNと同じようにコンパイル時定数でなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>size_t size ;
+    <span class="bu">std::</span>cin &gt;&gt; size ;
+    <span class="co">// エラー</span>
+    <span class="dt">int</span> a[size] ;
+}</code></pre></div>
+<p>配列は<code>={1,2,3}</code>のように初期化できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a[<span class="dv">5</span>] = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+<span class="dt">double</span> b[<span class="dv">3</span>] = {<span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">3.0</span> } ;</code></pre></div>
+<p>配列の要素にアクセスするには<code>operator []</code>を使う</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">5</span>] = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// 4</span>
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">3</span>] ;
+
+    a[<span class="dv">2</span>] = <span class="dv">0</span> ;
+    <span class="co">// {1,2,0,4,5}</span>
+}</code></pre></div>
+<p>配列にはメンバー関数はない。<code>at(i)</code>や<code>size()</code>のような便利なメンバー関数はない。</p>
+<p>配列のサイズは<code>sizeof</code>で取得できる。配列のサイズは配列の要素の型のサイズかけることの要素数のサイズになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> print = [](<span class="kw">auto</span> s){ <span class="bu">std::</span>cout &lt;&lt; s &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+    <span class="dt">int</span> a[<span class="dv">5</span>] ;
+    print( <span class="kw">sizeof</span>(a) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">int</span>) * <span class="dv">5</span> ) ;
+
+    <span class="dt">double</span> b [<span class="dv">5</span>] ;
+    print( <span class="kw">sizeof</span>(b) ) ;
+    print( <span class="kw">sizeof</span>(<span class="dt">double</span>) * <span class="dv">5</span> ) ;
+}</code></pre></div>
+<p><code>sizeof</code>は型やオブジェクトのバイト数を取得するのに対し、<code>vector</code>や<code>array</code>のメンバー関数<code>size()</code>は要素数を取得する。この違いに注意すること。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()]
+{
+    <span class="kw">auto</span> print = [](<span class="kw">auto</span> s){ <span class="bu">std::</span>cout &lt;&lt; s &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ; } ;
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a ;
+
+    <span class="co">// aのバイト数</span>
+    print( <span class="kw">sizeof</span>(a) ) ;
+    <span class="co">// 要素数: 5</span>
+    print( a.size() ) ;
+     
+}</code></pre></div>
+<p><code>配列</code>はとても低級な機能だ。その実装はある型を連続してストレージ上に並べたものになっている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a[<span class="dv">5</span>] ;</code></pre></div>
+<p>のような配列があり、int型が4バイトの環境では、20バイトのストレージが確保され、その先頭の4バイトが最初の0番目の要素に、その次の4バイトが1番目の要素になる。最後の4番目の要素は最後の4バイトになる。</p>
+<pre><code>配列のストレージ上のイメージ図
+
+□一つが1バイトのストレージ
+     1番目のint
+    |--|
+□□□□□□□□□□□□□□□□□□□□
+|--|            |--|
+ 0番目のint       4番目のint</code></pre>
+<p>配列にはメンバー関数がない上、コピーもできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">5</span>] = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="co">// エラー、コピーできない</span>
+    <span class="dt">int</span> b[<span class="dv">5</span>] = a ;
+
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; c = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="co">// OK、コピーできる</span>
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; d = c ;
+}</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
