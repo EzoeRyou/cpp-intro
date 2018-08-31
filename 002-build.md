@@ -663,7 +663,7 @@ hi :
 	echo hi
 
 hello :
-    echo hello
+	echo hello
 ~~~
 
 これを実行すると以下のようになる。
@@ -694,7 +694,7 @@ GNU makeはこの問題に対処するため、`.PHONY`ターゲットという�
 
 ~~~makefile
 hello :
-    echo hello
+	echo hello
 
 .PHONY : hello
 ~~~
