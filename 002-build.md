@@ -472,7 +472,7 @@ Makefile program source source01 source02 source03
 すでに`make`を実行した後で、もう一度`make`を実行するとどうなるだろうか。
 
 ~~~
-$make
+$ make
 make: 'program' is up to date.
 ~~~
 
@@ -672,7 +672,7 @@ hello :
 $ make
 echo hi
 hi
-$make hi
+$ make hi
 echo hi
 hi
 $ make hello
