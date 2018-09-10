@@ -286,7 +286,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 </ul></li>
 <li><a href="#stdarray">std::array</a></li>
-<li><a href="#arrayの実装-配列">arrayの実装: 配列</a></li>
+<li><a href="#プログラマーの三大美徳">プログラマーの三大美徳</a></li>
+<li><a href="#配列">配列</a><ul>
+<li><a href="#ナイーブなarray実装">ナイーブなarray実装</a></li>
+<li><a href="#配列-1">配列</a></li>
+</ul></li>
+<li><a href="#テンプレート">テンプレート</a><ul>
+<li><a href="#問題点">問題点</a></li>
+<li><a href="#関数の引数">関数の引数</a></li>
+<li><a href="#関数のテンプレート引数">関数のテンプレート引数</a></li>
+<li><a href="#テンプレート-1">テンプレート</a></li>
+<li><a href="#クラステンプレート">クラステンプレート</a></li>
+</ul></li>
+<li><a href="#arrayをさらに実装">arrayをさらに実装</a><ul>
+<li><a href="#ネストされた型名">ネストされた型名</a></li>
+<li><a href="#要素数の取得-size">要素数の取得: size()</a></li>
+<li><a href="#メンバー関数のconst修飾">メンバー関数のconst修飾</a></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -321,7 +337,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>C++とは何か。C++の原作者にして最初の実装者であるBjarne Stroustrupは、以下のように簡潔にまとめている。</p>
 <blockquote>
 <p>C++は、Simulaのプログラム構造化のための機構と、Cのシステムプログラミング用の効率性と柔軟性を提供するために設計された。C++は半年ほどで現場で使えることを見込んでいた。結果として成功した。</p>
-<p>Bjarne Stroustrup, A Hisotory of C++: 1979-1991, HOPL2</p>
+<p>Bjarne Stroustrup, A History of C++: 1979-1991, HOPL2</p>
 </blockquote>
 <p>プログラミング言語史に詳しくない読者は、Simulaというプログラミング言語について知らないことだろう。Simulaというのは、初めてオブジェクト指向プログラミングを取り入れたプログラミング言語だ。当時と言えばまだ高級なプログラミング言語はほとんどなく、if else, whileなどのIBMの提唱した構造化プログラミングを可能にする文法を提供しているプログラミング言語すら、多くは研究段階であった。いわんやオブジェクト指向など、当時はまだアカデミックにおいて可能性の一つとして研究されている程度の地に足のついていない夢の機能であった。そのような粗野な時代において、Simulaは先進的なオブジェクト指向プログラミングを実現していた。</p>
 <p>問題は、Simulaの設計と実装では実行速度が遅く、大規模なプログラムを開発するには適さなかった。</p>
@@ -494,7 +510,7 @@ hello</code></pre>
 <h3 id="コンパイル済みヘッダーprecompiled-header">コンパイル済みヘッダー(precompiled header)</h3>
 <p>C++はソースファイルをコンパイルする必要がある言語だ。コンパイルには時間がかかる。コンパイルにどれだけ時間がかかっているかを計測するには、以下のようにするとよい。</p>
 <pre><code>$ time g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp</code></pre>
-<p>どうだろうか。読者の環境にもよるが、近くできるぐらいの時間がかかっているのではないだろうか。プログラミングの習得にはコードを書いてから実行までの時間が短い方がよい。そこで本格的にC++を学ぶ前に、コンパイル時間を短縮する方法を学ぶ。</p>
+<p>どうだろうか。読者の環境にもよるが、知覚できるぐらいの時間がかかっているのではないだろうか。プログラミングの習得にはコードを書いてから実行までの時間が短い方がよい。そこで本格的にC++を学ぶ前に、コンパイル時間を短縮する方法を学ぶ。</p>
 <p>プログラムで変更しないファイルを事前にコンパイルしておくと、変更した部分だけコンパイルすれば良いので、コンパイル時間の短縮になる。GCCでは、ヘッダーファイルを事前にコンパイルする特別な機能がある。標準ライブラリのヘッダーファイルは変更しないので、事前にコンパイルしておけばコンパイル時間の短縮になる。</p>
 <p>事前にコンパイルしたヘッダーファイルのことをコンパイル済みヘッダー(precompiled header)という。</p>
 <p>すでに作成した<code>all.h</code>はコンパイル済みヘッダーとするのに適切なヘッダーファイルだ。</p>
@@ -601,7 +617,7 @@ cat source &gt; program
 $ ls
 Makefile program source source01 source02 source03</code></pre>
 <p>すでに<code>make</code>を実行した後で、もう一度<code>make</code>を実行するとどうなるだろうか。</p>
-<pre><code>$make
+<pre><code>$ make
 make: &#39;program&#39; is up to date.</code></pre>
 <p>このメッセージの意味は「programは最新だ」という意味だ。<code>make</code>はファイルのタイムスタンプを調べ、もしファイル<code>program</code>より<code>source</code>のタイムスタンプの方が若い場合、つまり<code>program</code>が変更されたよりも後に<code>source</code>が変更された場合、<code>ルール</code>を実行する。</p>
 <p>ためしにファイル<code>source02</code>のタイムスタンプを更新してみよう。</p>
@@ -706,7 +722,7 @@ echo A B C</code></pre>
 <pre><code>$ make
 echo hi
 hi
-$make hi
+$ make hi
 echo hi
 hi
 $ make hello
@@ -780,12 +796,22 @@ make: &#39;hello&#39; is up to date.</code></pre>
 <span class="ot">.PHONY</span> <span class="ot">:</span><span class="dt"> run clean</span></code></pre></div>
 <p><code>make</code>でコンパイル。<code>make run</code>で実行。<code>make clean</code>でコンパイル結果の削除。</p>
 <p>Makefile全体は以下のようになる。</p>
-<p><sub>~</sub>makefile gcc_options = -std=c++17 -Wall --pedantic-error</p>
-<p>program : main.cpp all.h all.h.gch g++ $(gcc_options) -include all.h $&lt; -o $@</p>
-<p>all.h.gch : all.h g++ $(gcc_options) -x c++-header -o $@ $&lt;</p>
-<p>run : program ./program</p>
-<p>clean : rm -f ./program rm -f ./all.h.gch</p>
-<p>.PHONY : run clean ~~</p>
+<div class="sourceCode"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span class="dt">gcc_options </span><span class="ch">=</span><span class="st"> -std=c++17 -Wall --pedantic-error</span>
+
+<span class="dv">program :</span><span class="dt"> main.cpp all.h all.h.gch</span>
+    g++ <span class="ch">$(</span><span class="dt">gcc_options</span><span class="ch">)</span> -include all.h <span class="ch">$&lt;</span> -o <span class="ch">$@</span>
+
+<span class="dv">all.h.gch :</span><span class="dt"> all.h</span>
+    g++ <span class="ch">$(</span><span class="dt">gcc_options</span><span class="ch">)</span> -x c++-header -o <span class="ch">$@</span> <span class="ch">$&lt;</span>
+
+<span class="dv">run :</span><span class="dt"> program</span>
+    ./program
+
+<span class="dv">clean :</span>
+    rm -f ./program
+    rm -f ./all.h.gch
+
+<span class="ot">.PHONY</span> <span class="ot">:</span><span class="dt"> run clean</span></code></pre></div>
 <h1 id="cヒッチハイクガイド">C++ヒッチハイクガイド</h1>
 <p>プログラミング言語の個々の機能の解説を理解するためには、まず言語の全体像を掴まなければならない。この章ではC++の様々なコードを一通り観光していく。ここではコードの詳細な解説はしない。</p>
 <h2 id="最小のコード">最小のコード</h2>
@@ -797,7 +823,7 @@ make: &#39;hello&#39; is up to date.</code></pre>
 main    // 関数名
 ()      // 関数の引数
 {       // 関数の始まり
-    // 実行される処理
+        // 実行される処理
 }       // 関数の終わり</code></pre>
 <p><code>//</code>から行末まではコメントだ。コメントには好きなことを書くことができる。</p>
 <p>このコードと一つ前のコードは、コメントの有無を別にすれば何の違いもない。このコードで使っている、<code>int</code>とか<code>main</code>とか記号文字の一つ一つをトークン(token)と呼ぶ。C++ではトークンの間に空白文字や改行文字をいくら使ってもよい。</p>
@@ -1184,7 +1210,7 @@ f is called.</code></pre>
 main    <span class="co">// 関数名</span>
 ()      <span class="co">// 関数の引数</span>
 {}      <span class="co">// 関数の本体</span></code></pre></div>
-<p>ためしに、int型の引数を2つ取り足して返す関数`plus'を書いてみよう。</p>
+<p>ためしに、int型の引数を2つ取り足して返す関数<code>plus</code>を書いてみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> plus( <span class="dt">int</span> x, <span class="dt">int</span> y )
 {
     <span class="cf">return</span> x + y ;
@@ -1459,7 +1485,7 @@ See &lt;ドキュメントへのファイルパス&gt; for instructions.</code><
 <h1 id="条件分岐の果てのレストラン">条件分岐の果てのレストラン</h1>
 <p>さてC++の勉強に戻ろう。この章では条件分岐について学ぶ。</p>
 <h2 id="複合文">複合文</h2>
-<p>条件分岐とループについて学ぶ前に、まず'複合文(compound statement)'や`ブロック(block)'と呼ばれている、複数の文をひとまとめにする文について学ばなければならない。</p>
+<p>条件分岐とループについて学ぶ前に、まず<code>複合文(compound statement)</code>や<code>ブロック(block)</code>と呼ばれている、複数の文をひとまとめにする文について学ばなければならない。</p>
 <p>C++では<code>文(statement)</code>が実行される。<code>文</code>については詳しく説明すると長くなるが、';'で区切られたものが<code>文</code>だ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -1553,7 +1579,7 @@ See &lt;ドキュメントへのファイルパス&gt; for instructions.</code><
         &lt;&lt; <span class="st">&quot;b=8073 * 132 / 5=&quot;</span> &lt;&lt; b &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s
         &lt;&lt; <span class="st">&quot;a+b=&quot;</span> &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 }</code></pre></div>
-<p>なるほど、答えがわかった。ところで変数<code>a</code>と変数`b'はどちらが大きいのだろうか。大きい変数だけ出力したい。この場合は条件分岐を使う。</p>
+<p>なるほど、答えがわかった。ところで変数<code>a</code>と変数<code>b</code>はどちらが大きいのだろうか。大きい変数だけ出力したい。この場合は条件分岐を使う。</p>
 <p>C++では条件分岐に<code>if文</code>を使う。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
@@ -2057,7 +2083,7 @@ false</code></pre>
 }</code></pre></div>
 <h3 id="短絡評価">短絡評価</h3>
 <p>論理積と論理和は短絡評価と呼ばれる特殊な評価が行われる。これは、左から右に最小限の評価をするという意味だ。</p>
-<p>論理積では、&quot;a &amp;&amp; b&quot;とある場合、<code>a</code>と<code>b</code>が共に<code>true</code>である場合のみ、結果は<code>true</code>になる。もし、<code>a</code>が<code>false</code>であった場合、'b'の結果如何にかかわらず結果は<code>false</code>となるので、<code>b</code>は評価されない。</p>
+<p>論理積では、&quot;a &amp;&amp; b&quot;とある場合、<code>a</code>と<code>b</code>が共に<code>true</code>である場合のみ、結果は<code>true</code>になる。もし、<code>a</code>が<code>false</code>であった場合、<code>b</code>の結果如何にかかわらず結果は<code>false</code>となるので、<code>b</code>は評価されない。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="kw">auto</span> a = []()
@@ -2078,7 +2104,7 @@ false</code></pre>
 <pre><code>a
 false</code></pre>
 <p>関数呼び出し&quot;a()&quot;の結果は<code>false</code>なので、&quot;b()&quot;は評価されない。評価されないということは関数呼び出しが行われず、当然標準出力も行われない。</p>
-<p>同様に、論理和では、&quot;a || b&quot;とある場合、<code>a</code>と'b'のどちらか片方でも<code>true</code>であれば、結果は<code>true</code>となる。もし、<code>a</code>が<code>true</code>であった場合、<code>b</code>の結果如何にかかわらず結果は<code>true</code>となるので、<code>b</code>は評価されない。</p>
+<p>同様に、論理和では、&quot;a || b&quot;とある場合、<code>a</code>と<code>b</code>のどちらか片方でも<code>true</code>であれば、結果は<code>true</code>となる。もし、<code>a</code>が<code>true</code>であった場合、<code>b</code>の結果如何にかかわらず結果は<code>true</code>となるので、<code>b</code>は評価されない。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="kw">auto</span> a = []()
@@ -7279,7 +7305,7 @@ point p3 ;</code></pre></div>
     john.name = <span class="st">&quot;john&quot;</span> ;
     john.age = <span class="dv">20</span> ;
 }</code></pre></div>
-<p><code>クラス</code>の<code>データメンバー</code>の定義は変数ではないし、ストレージが割り当てられているわけではない。</p>
+<p><code>クラス</code>の<code>データメンバー</code>の定義は変数ではない。オブジェクトではない。つまり、それ自体にストレージが割り当てられてはいない。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
 {
     <span class="co">// これは変数ではない。</span>
@@ -7300,6 +7326,9 @@ point p3 ;</code></pre></div>
     S s2 ;
     <span class="co">// 別のストレージ</span>
     s2.data = <span class="dv">1</span> ; 
+
+    <span class="co">// false</span>
+    <span class="dt">bool</span> b = s1.data == s2.data ;
 }</code></pre></div>
 <p>クラスの変数を定義するときにデータメンバーを初期化できる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
@@ -7317,6 +7346,15 @@ point p3 ;</code></pre></div>
     <span class="co">// s.z == 3</span>
 }</code></pre></div>
 <p>クラスの初期化で<code>{1,2,3}</code>と書くと、クラスの最初のデータメンバーが1で、次のデータメンバーが2で、その次のデータメンバーが3で、それぞれ初期化される。</p>
+<p>クラスをコピーすると、データメンバーがそれぞれコピーされる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { <span class="dt">int</span> a ; <span class="dt">double</span> b ; <span class="bu">std::</span>string c ; } ;
+
+<span class="dt">int</span> main()
+{
+    S a{<span class="dv">123</span>, <span class="fl">1.23</span>, <span class="st">&quot;123&quot;</span>} ;
+    <span class="co">// データメンバーがそれぞれコピーされる</span>
+    S b = a ;
+}</code></pre></div>
 <h1 id="まとめた変数に関数を提供する">まとめた変数に関数を提供する</h1>
 <p>分数を表現するプログラムを書いてみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -8299,7 +8337,27 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
 }</code></pre></div>
 <p>なぜ<code>vector</code>という実行時に要素数を設定でき実行時に要素数を変更できる便利なクラスがありながら、<code>array</code>のようなコンパイル時に要素数が決め打ちで要素数の変更もできないようなクラスもあるのだろうか。その理由は<code>array</code>と<code>vector</code>はパフォーマンスの特性が異なるからだ。<code>vector</code>はストレージ(メモリー)の動的確保をしている。ストレージの動的確保は実行時の要素数を変更できるのだが、そのために予測不可能な非決定的なパフォーマンス特性を持つ。<code>array</code>はストレージの動的確保を行わない。この結果実行時に要素数を変更することはできないが、予測可能で決定的なパフォーマンス特性を持つ。</p>
 <p>その他の<code>array</code>の使い方は、<code>vector</code>とほぼ同じだ。</p>
-<h1 id="arrayの実装-配列">arrayの実装: 配列</h1>
+<p>さて、これから'array'を実装していこう。実装を通じて読者はC++のクラスとその他の機能を学んでいくことになる。</p>
+<h1 id="プログラマーの三大美徳">プログラマーの三大美徳</h1>
+<p>プログラミング言語Perlの作者、Larry Wallは著書「プログラミング言語Perl」の初版で以下のように宣言した。</p>
+<blockquote>
+<p>読者はプログラマーの三大美徳である、怠惰、短気、傲慢を会得すべきである。</p>
+</blockquote>
+<p>第二版の巻末の用語集では、以下のような定義が与えらた。</p>
+<dl>
+<dt>怠惰</dt>
+<dd><p>プログラマーは労力を削減するための労力を惜しまないこと。怠惰のために書いたプログラムは他人にも便利であり、そしてドキュメントを書くことにより自ら他人の質問に答えずにすむようにすること。これがプログラマーの第一の美徳である。これが本書の書かれた理由である。</p>
+</dd>
+<dt>短気</dt>
+<dd><p>コンピューターが怠惰であるときにプログラマーが感ずる怒り。短気によって書かれたプログラムは、単に労力を削減するばかりではなく、事前に解決しておく。少なくとも、すでに解決済みのように振る舞う。これがプログラマーの第二の美徳である。</p>
+</dd>
+<dt>傲慢</dt>
+<dd><p>ゼウスも罰したもう過剰なまでの奢り。他人がそしりを入れられぬほどのプログラムを書く推進剤。これがプログラマーの第三の美徳である。</p>
+</dd>
+</dl>
+<p>これから学ぶ<code>array</code>を実装するためのC++の機能を学ぶときに、このプログラマーの三大美徳のことを頭にいれておこう。</p>
+<h1 id="配列">配列</h1>
+<h2 id="ナイーブなarray実装">ナイーブなarray実装</h2>
 <p><code>std::array</code>を実装してみよう。すでにクラスを作る方法については学んだ。</p>
 <p><code>std::array&lt;T,N&gt;</code>はT型の要素をN個保持するクラスだ。この<code>&lt;T,N&gt;</code>についてはまだ学んでいないので、今回はint型を3個確保する。今までに学んだ要素だけで実装してみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> array_int_3
@@ -8330,7 +8388,8 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
         }
     }
 } ;</code></pre></div>
-<p>これは動く。では要素数を10個に増やした<code>array_int_10</code>はどうなるだろうか。要素数100個はどう書くのだろうか。この方法で実装するとソースコードが膨大になり、ソースコードを出力するソースコードを書かなければならなくなる。</p>
+<p>これは動く。では要素数を10個に増やした<code>array_int_10</code>はどうなるだろうか。要素数100個はどう書くのだろうか。この方法で実装するとソースコードが膨大になり、ソースコードを出力するソースコードを書かなければならなくなる。これは怠惰で短気なプログラマーには耐えられない作業だ。</p>
+<h2 id="配列-1">配列</h2>
 <p><code>std::array</code>を実装するには、<code>配列(array)</code>を使う。</p>
 <p>int型の要素数10の配列aは以下のように書く。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> a[<span class="dv">10</span>] ;</code></pre></div>
@@ -8395,7 +8454,7 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
 □□□□□□□□□□□□□□□□□□□□
 |--|            |--|
  0番目のint       4番目のint</code></pre>
-<p>配列にはメンバー関数がない上、コピーもできない。</p>
+<p>配列にはメンバー関数がない上、コピーもできない。<code>std::array</code>はコピーできる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="dt">int</span> a[<span class="dv">5</span>] = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
@@ -8405,6 +8464,534 @@ S <span class="kw">operator</span> + ( S <span class="at">const</span> &amp;, S 
     <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; c = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
     <span class="co">// OK、コピーできる</span>
     <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; d = c ;
+}</code></pre></div>
+<p><code>配列</code>は低級で使いにくいので、<code>std::array</code>という配列をラップした高級なライブラリが標準で用意されている。</p>
+<p>さて、配列の使い方は覚えたので、さっそく<code>std::array_int_10</code>を実装してみよう。</p>
+<p>まずクラスのデータメンバーとして配列を宣言する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> array_int_10
+{
+    <span class="dt">int</span> storage[<span class="dv">10</span>] ;
+} ;</code></pre></div>
+<p>配列はコピーできないが、クラスのデータメンバーとして宣言した配列は、クラスのコピーの際に、その対応する順番の要素がそれぞれコピーされる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> array_int_3 { <span class="dt">int</span> storage [<span class="dv">3</span>] ; } ;
+
+<span class="dt">int</span> main()
+{
+    array_int_10 a = { <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span> } ;
+
+    array_int_10 b = a ;
+    <span class="co">// b.storage[0] == a.storage[0] </span>
+    <span class="co">// b.storage[1] == a.storage[1] </span>
+    <span class="co">// b.storage[2] == a.storage[2] </span>
+}</code></pre></div>
+<p>これはあたかも以下のように書いたかのように動く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> array_int_3
+{
+    <span class="dt">int</span> storage[<span class="dv">3</span>] ;
+
+    array_int_3( array_int_3 <span class="at">const</span> &amp; other )
+    {
+        <span class="bu">std::</span>copy(
+            <span class="bu">std::</span>begin(other.storage), <span class="bu">std::</span>end(otherstorage),
+            <span class="bu">std::</span>begin(storage)
+        ) ;
+
+        
+    }
+}</code></pre></div>
+<p><code>operator []</code>も実装しよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> array_int_10
+{
+    <span class="dt">int</span> storage[<span class="dv">10</span>] ;
+
+    <span class="dt">int</span> &amp; <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t i )
+    {
+        <span class="cf">return</span> storage[i] ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    array_int_10 a = {<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>} ;
+    a[<span class="dv">3</span>] = <span class="dv">0</span> ;
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">6</span>] ;
+}</code></pre></div>
+<p><code>std::array</code>にはまだ様々なメンバーがある。一つづつ順番に学んでいこう。</p>
+<h1 id="テンプレート">テンプレート</h1>
+<h2 id="問題点">問題点</h2>
+<p>前回、我々は'std::array'のようなものを実装した。C++を何も知らなかった我々がとうとうクールなキッズは皆やっているというクラスを書くことができた。素晴らしい成果だ。</p>
+<p>しかし、我々の書いた'array_int_10'は'std::array'とは異なる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 標準ライブラリ</span>
+<span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">10</span>&gt; a ;
+<span class="co">// 我々のクラス</span>
+array_int_10 a ;</code></pre></div>
+<p>もし要素数を20個にしたければ<code>array_int_20</code>を新たに書かなければならない。すると<code>array_int_1</code>とか<code>array_int_10000</code>のようなクラスを無数に書かなければならないのだろうか。要素の型をdoubleにしたければ<code>array_double_10</code>が必要だ。</p>
+<p>しかし、そのようなクラスはほとんど同じような退屈な記述の羅列になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">array_int_1
+{
+    <span class="dt">int</span> storage[<span class="dv">1</span>] ;
+    <span class="dt">int</span> &amp; <span class="kw">operator</span> []( <span class="bu">std::</span>size_t i )
+    { <span class="cf">return</span> storage[i] ; }
+} ;
+
+<span class="co">// array_int_2, array_int3, ...</span>
+
+array_int_10000
+{
+    <span class="dt">int</span> storage[<span class="dv">10000</span>] ;
+    <span class="dt">int</span> &amp; <span class="kw">operator</span> []( <span class="bu">std::</span>size_t i )
+    { <span class="cf">return</span> storage[i] ; }
+} ;
+
+array_double_1
+{
+    <span class="dt">double</span> storage[<span class="dv">1</span>] ;
+    <span class="dt">double</span> &amp; <span class="kw">operator</span> []( <span class="bu">std::</span>size_t i )
+    { <span class="cf">return</span> storage[i] ; }
+}
+
+<span class="co">// array_double_2, array_dobule_3, ...</span></code></pre></div>
+<p>これは怠惰で短気なプログラマーには耐えられない作業だ。C++にはこのような退屈なコードを書かなくてもすむ機能がある。しかしその前に、引数について考えてみよう。</p>
+<h2 id="関数の引数">関数の引数</h2>
+<p>1を2倍する関数を考えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> one_twice()
+{
+    <span class="cf">return</span> <span class="dv">1</span> * <span class="dv">2</span> ;
+}</code></pre></div>
+<p>上出来だ。では2を2倍する関数を考えよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> two_twice()
+{
+    <span class="cf">return</span> <span class="dv">2</span> * <span class="dv">2</span> ;
+}</code></pre></div>
+<p>すばらしい。では3を2倍する関数、4を2倍する関数...と考えていこう。</p>
+<p>ここまで読んでthree_twiceやfour_twiceを思い浮かべた読者にはプログラマーに備わるべき美徳が欠けている。怠惰で短気で傲慢なプログラマーはそんなコードを書かない。引数を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> twice( <span class="dt">int</span> n )
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}</code></pre></div>
+<p>具体的な値を2倍する関数を値の数だけ書くのは面倒だ。具体的な値は定めず、引数で外部から受け取る。そして引数を2倍して返す。引数は汎用的なコードを任意の値に対して対応させるための機能だ。</p>
+<h2 id="関数のテンプレート引数">関数のテンプレート引数</h2>
+<p>twiceを様々な型に対応させるにはどうすればいいだろう。例えばint型とdouble型に対応させてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> twice( <span class="dt">int</span> n ) 
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}
+
+<span class="dt">double</span> twice( <span class="dt">double</span> n )
+{
+    <span class="cf">return</span> n * <span class="fl">2.0</span> ;
+}</code></pre></div>
+<p>整数型にはintの他にも、short, long, long longといった型がある。浮動小数点数型にはfloatとlong doubleもある。ということは以下のような関数も必要だ。</p>
+<p>~~cpp short twice( short n ) { return n * 2 ; }</p>
+<p>long twice( long n ) { return n * 2 ; }</p>
+<p>long long twice( long long n ) { return n * 2 ; }</p>
+<p>float twice( float n ) { return n * 2 ; }</p>
+<p>long double twice( long double n ) { return n * 2 ; } <sub>~</sub></p>
+<p>ところで、整数型には符号付きと符号なしの2種類があるということは覚えているだろうか？</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> twice( <span class="dt">int</span> n )
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}
+
+<span class="dt">unsigned</span> <span class="dt">int</span> twice( <span class="dt">unsigned</span> <span class="dt">int</span> n )
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}
+
+<span class="co">// short, long, long longに対しても同様</span></code></pre></div>
+<p>C++ではユーザーが整数型のように振る舞うクラスを作ることができる。整数型を複数使って巨大な整数を表現できるクラスも作ることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 多倍長整数クラス</span>
+<span class="co">// unsigned long longが256個分の整数の実装</span>
+<span class="kw">struct</span> bigint
+{
+    <span class="dt">unsigned</span> <span class="dt">long</span> <span class="dt">long</span> storage[<span class="dv">256</span>] ;
+} ;
+
+bigint <span class="kw">operator</span> * ( bigint <span class="at">const</span> &amp; right, <span class="dt">int</span> )
+{
+    <span class="cf">return</span> <span class="co">// 実装</span>
+}</code></pre></div>
+<p>このクラスに対応するには当然、以下のように書かなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">bigint twice( bigint n )
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}</code></pre></div>
+<p>そろそろ怠惰と短気を美徳とするプログラマー読者は耐えられなくなってきただろう。これまでのコードは、単にある型Tに対して、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">T twice( T n )
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}</code></pre></div>
+<p>と書いているだけだ。型Tがコピーと<code>operator *(T, int)</code>に対応していればいい。型Tの具体的な型について知る必要はない。</p>
+<p>関数が具体的な値を知らなくても引数によって汎用的なコードをかけるように、具体的な型を知らなくても汎用的なコードを書けるようになりたい。その怠惰と短気に答えるのが<code>テンプレート</code>だ。</p>
+<h2 id="テンプレート-1">テンプレート</h2>
+<p>通常の関数が値を引数に取ることができるように、テンプレートは型を引数に取ることができる。</p>
+<p>テンプレートは以下のように宣言する</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+    宣言 </code></pre></div>
+<p>テンプレートを関数に使う<code>関数テンプレート</code>は以下のように書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+T twice( T n )
+{
+    <span class="cf">return</span> n * <span class="dv">2</span> ;
+}
+
+<span class="dt">int</span> main()
+{
+    twice( <span class="dv">123</span> ) ;  <span class="co">// int</span>
+    twice( <span class="fl">1.23</span> ) ; <span class="co">// double </span>
+}</code></pre></div>
+<p><code>template &lt; typename T &gt;</code>は型<code>T</code>を<code>テンプレート引数</code>に取る。テンプレートを使った宣言の中では、<code>T</code>が型として扱える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+T f( T n )
+{
+    T x = n ;
+}</code></pre></div>
+<p><code>関数</code>が<code>引数</code>をとるように、<code>テンプレート</code>は<code>テンプレート引数</code>を取る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// テンプレートはテンプレート引数template_parameterを取る</span>
+<span class="kw">template</span> &lt; <span class="kw">typename</span> template_parameter &gt;
+<span class="co">// 関数は引数function_parameterを取る</span>
+<span class="co">// 引数の型はtemplate_parameter</span>
+<span class="dt">void</span> f( template_parameter function_parameter )
+{
+}</code></pre></div>
+<p><code>テンプレート</code>が「使われる」ときに、<code>テンプレート引数</code>に対する具体的な型が決定する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="dt">void</span> f( T <span class="at">const</span> &amp; x )
+{
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// Tはint</span>
+    f( <span class="dv">0</span> ) ;
+    <span class="co">// Tはdouble</span>
+    f( <span class="fl">0.0</span> ) ;
+    <span class="co">// Tはstd::string</span>
+    f( <span class="st">&quot;hello&quot;</span>s ) ;
+}</code></pre></div>
+<p><code>テンプレート</code>を使うときに自動で<code>テンプレート引数</code>を推定してくれるが、<code>&lt;T&gt;</code>を使うことで明示的に<code>テンプレート引数</code>をT型に指定することもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="dt">void</span> f( T <span class="at">const</span> &amp; x )
+{
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// Tはint</span>
+    f&lt;<span class="dt">int</span>&gt;(<span class="dv">0</span>) ;
+
+    <span class="co">// Tはdouble</span>
+    <span class="co">// int型0からdouble型0.0への変換が行われる</span>
+    f&lt;<span class="dt">double</span>&gt;( <span class="dv">0</span> ) ;
+}</code></pre></div>
+<p><code>テンプレート引数</code>は型ではなく整数型の値を渡すこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="dt">int</span> N &gt;
+<span class="dt">void</span> f()
+{
+    <span class="bu">std::</span>cout &lt;&lt; N ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// Nは0</span>
+    f&lt;<span class="dv">0</span>&gt;() ;
+    <span class="co">// Nは123</span>
+    f&lt;<span class="dv">123</span>&gt;() ;
+}</code></pre></div>
+<p>ただし、<code>テンプレート引数</code>はコンパイル時にすべてが決定される。なので<code>テンプレート引数</code>に渡せる値はコンパイル時に決定できるものでなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="dt">int</span> N &gt;
+<span class="dt">void</span> f() { }
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// OK</span>
+    f&lt;<span class="dv">1+1</span>&gt;() ;
+
+    <span class="dt">int</span> x{} ;
+    <span class="bu">std::</span>cin &gt;&gt; x ;
+    <span class="co">// エラー</span>
+    f&lt;x&gt;() ;
+}</code></pre></div>
+<p><code>テンプレート引数</code>がコンパイル時に決定されるということは、配列のサイズのようなコンパイル時に決定されなければならない場面でも使えるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="bu">std::</span>size_t N &gt;
+<span class="dt">void</span> f()
+{
+    <span class="dt">int</span> buffer[N] ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 配列bufferのサイズは10</span>
+    f&lt;<span class="dv">10</span>&gt;() ;
+    <span class="co">// サイズは12</span>
+    f&lt;<span class="dv">12</span>&gt;() ;
+}</code></pre></div>
+<p>テンプレートを使ったコードは、与えられた<code>テンプレート引数</code>に対して妥当でなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> vec &gt;
+<span class="dt">void</span> f( vec &amp; v )
+{
+    v.push_back(<span class="dv">0</span>) ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; a ;
+    <span class="co">// OK</span>
+    f( a ) ;
+    <span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt; b ;
+    <span class="co">// OK</span>
+    <span class="co">// intからdoubleへの変換</span>
+    f( b ) ; 
+
+    <span class="bu">std::</span>vector&lt;<span class="bu">std::</span>string&gt; c ;
+    <span class="co">// エラー</span>
+    <span class="co">// intからstd::stringに変換はできない</span>
+    f( c ) ;
+
+    <span class="co">// エラー</span>
+    <span class="co">// int型はメンバー関数push_backを持っていない</span>
+    f( <span class="dv">0</span> ) ;
+}</code></pre></div>
+<h2 id="クラステンプレート">クラステンプレート</h2>
+<p><code>テンプレート</code>は<code>クラス</code>にも使える。<code>関数テンプレート</code>は<code>関数</code>の前に<code>テンプレート</code>を書くように、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt; <span class="co">// テンプレート</span>
+<span class="dt">void</span> f( ) ; <span class="co">// 関数</span></code></pre></div>
+<p><code>クラステンプレート</code>は<code>クラス</code>の前に<code>テンプレート</code>を書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt; <span class="co">// テンプレート</span>
+<span class="kw">class</span> S { } ; <span class="co">// クラス</span></code></pre></div>
+<p>関数の中でテンプレート引数名を型や値として使えるように。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, T N &gt;
+T value()
+{
+    <span class="cf">return</span> N :
+}
+
+<span class="dt">int</span> main()
+{
+    value&lt;<span class="dt">int</span>, <span class="dv">1</span>&gt;() ;
+    value&lt;<span class="dt">short</span>, <span class="dv">1</span>&gt;() ;
+}</code></pre></div>
+<p>クラスの中でもテンプレート引数名を型や値として使える。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    T storage[N] ;
+
+    T &amp; <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t i )
+    {
+        <span class="cf">return</span> storage[i] ;
+    }
+} ;</code></pre></div>
+<p>なんと、もう'std::array'が完成してしまった。</p>
+<h1 id="arrayをさらに実装">arrayをさらに実装</h1>
+<p>'std::array'をもっと実装していこう。前回、以下のような簡単な'array'を実装した。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size__t N &gt;
+<span class="kw">struct</span> array
+{
+    T storage[N] ;
+
+    T &amp; <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t i )
+    {
+        <span class="cf">return</span> storage[i] ;
+    }
+} ;</code></pre></div>
+<p>実は<code>std::array</code>はこのように書かれていない。この章では、'array'の実装を'std::array'に近づけていく。</p>
+<h2 id="ネストされた型名">ネストされた型名</h2>
+<p>エイリアス宣言を覚えているだろうか。型名に別名をつける機能だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> number = <span class="dt">int</span> ;
+    number x = <span class="dv">123</span> ;
+}</code></pre></div>
+<p>エイリアス宣言はクラスの中でも使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="kw">using</span> number = <span class="dt">int</span> ;
+    number data ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s{<span class="dv">123</span>} ;
+
+    S::number x = s.data ;
+}</code></pre></div>
+<p>クラスの中で宣言されたエイリアス宣言による型名を、'ネストされた型名'という。<code>std::array</code>ではテンプレート引数を直接使う代わりに、<code>ネストされた型名</code>が使われている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size__t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="kw">using</span> <span class="dt">value_type</span> = T ;
+    <span class="kw">using</span> reference = T &amp; ;
+
+    <span class="kw">using</span> <span class="dt">size_type</span> = <span class="bu">std::</span>size_t
+
+    <span class="dt">value_type</span> storage[N] ;
+
+    reference <span class="kw">operator</span> [] ( <span class="dt">size_type</span> i )
+    {
+        <span class="cf">return</span> storage[i] ;
+    }
+} ;</code></pre></div>
+<p>こうすると、<code>T &amp;</code>のようなわかりにくい型ではなく<code>reference</code>のようにわかりやすい名前を使える。さらに、クラス外部から使うこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> <span class="dt">array_type</span> = <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; ;
+    <span class="dt">array_type</span> a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="dt">array_type</span>::<span class="dt">value_type</span> x = <span class="dv">0</span> ;
+    <span class="dt">array_type</span>::reference ref = a[<span class="dv">0</span>] ;
+}</code></pre></div>
+<p>もちろんこれは<code>auto</code>で書くこともできるが、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> <span class="dt">array_type</span> = <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; ;
+    <span class="dt">array_type</span> a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    <span class="kw">auto</span> x = <span class="dv">0</span> ;
+    <span class="kw">auto</span> ref = a[<span class="dv">0</span>] ;
+}</code></pre></div>
+<p>信じられないことに昔のC++には<code>auto</code>がなかったのだ。その他、様々な利点があるのだが、そのすべてを理解するには、まだ読者のC++力が足りない。</p>
+<h2 id="要素数の取得-size">要素数の取得: size()</h2>
+<p><code>std::array&lt;T,N&gt;</code>には<code>size()</code>というメンバー関数がある</p>
+<p><code>size</code>はNを返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a ;
+    a.size() ; <span class="co">// 5</span>
+
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">10</span>&gt; b ;
+    b.size() ; <span class="co">// 10</span>
+}</code></pre></div>
+<p>早速実装しよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="kw">using</span> <span class="dt">size_type</span> = <span class="bu">std::</span>size_t ;
+
+    <span class="dt">size_type</span> size()
+    {
+        <span class="cf">return</span> N ;
+    }
+
+    <span class="co">// ... 省略</span>
+} ;</code></pre></div>
+<p><code>vector</code>にも同じメンバーがある。</p>
+<h2 id="メンバー関数のconst修飾">メンバー関数のconst修飾</h2>
+<p><code>const</code>をつけた変数は値を変更できなくなることはすでに学んだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+    x = <span class="dv">1</span> ;
+    <span class="dt">int</span> <span class="at">const</span> cx = <span class="dv">0</span> ;
+    cx = <span class="dv">0</span> ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p><code>const</code>は変更する必要のない場面でうっかり変更することを防いでくれるとても便利な機能だ。'array'は大きいので関数の引数として渡すときにコピーするのは非効率的だ。なのでコピーを防ぐリファレンスで渡したい。</p>
+<p><code>std::array&lt;T,N&gt;</code>を受け取って要素をすべて出力する関数を書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Array &gt; 
+<span class="dt">void</span> print( Array &amp; c )
+{
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != c.size() ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; c[i] ;
+    }
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    print( a ) ;
+}</code></pre></div>
+<p>関数<code>print</code>がテンプレートなのは任意の<code>T</code>と<code>N</code>を使った<code>std::array&lt;T,N&gt;</code>を受け取れるようにするためだ。</p>
+<p>関数のリファレンスを引数として渡すと、関数の中で変更できてしまう。しかし、上の例のような関数<code>print</code>では、引数を書き換える必要はない。この関数を使う人間も、引数を勝手に書き換えないことを期待している。この場合、<code>const</code>をつけることで値の変更を防ぐことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Container &gt; 
+<span class="dt">void</span> print( Container <span class="at">const</span> &amp; c )
+{
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != c.size() ; ++i )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; c[i] ;
+    }
+}</code></pre></div>
+<p>ではさっそくこれまで実装してきた自作の<code>array</code>クラスを使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    print( a ) ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>なぜかエラーになってしまう。</p>
+<p>この理由はメンバー関数を呼び出しているからだ。</p>
+<p>クラスのメンバー関数はデータメンバーを変更できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> data {} ;
+    <span class="dt">void</span> f()
+    {
+        ++data ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s ;
+    s.f() ; <span class="co">// s.dataを変更</span>
+}</code></pre></div>
+<p>ということは、<code>const S</code>はメンバー関数<code>f()</code>を呼び出すことができない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    S s ;
+    S <span class="at">const</span> &amp; ref = s ;
+
+    ++s.data ;  <span class="co">// エラー</span>
+    s.f() ;     <span class="co">// エラー</span>
+}</code></pre></div>
+<p>ではメンバー関数<code>f()</code>がデータメンバーを変更しなければいいのだろうか。試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> data {} ;
+    <span class="dt">void</span> f()
+    {
+        <span class="co">// 何もしない</span>
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    S <span class="at">const</span> s ;
+    s.f() ; <span class="co">// エラー</span>
+}</code></pre></div>
+<p>まだエラーになる。この理由を完全に理解するためには、まだ説明していない<code>ポインター</code>という機能について学ばなければならない。ポインターの説明はこの次の章で行うとして、今はさしあたり必要な機能である<code>メンバー関数のconst修飾</code>を説明する。</p>
+<p>constをつけていないメンバー関数をconstなクラスのオブジェクトから呼び出せない理由は、メンバー関数がデータメンバーを変更しない保証がないからだ。その保証をつけるのが<code>メンバー関数のconst修飾</code>だ。</p>
+<p>メンバー関数は関数の引数のあと、関数の本体の前にconstを書くことでconst修飾できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> f() <span class="at">const</span>
+    { }
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s ;
+    s.f() ; <span class="co">// OK</span>
+
+    S <span class="at">const</span> cs ;
+    cs.f() ; <span class="co">// OK</span>
+    
+}</code></pre></div>
+<p>const修飾されたメンバー関数はconstなクラスのオブジェクトからでも呼び出すことができる。</p>
+<p>const修飾されたメンバー関数と、const修飾されていないメンバー関数が両方ある場合、クラスのオブジェクトのconstの有無によって適切なメンバー関数が呼び出される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> f() { }        <span class="co">// 1</span>
+    <span class="dt">void</span> f() <span class="at">const</span> { }  <span class="co">// 2</span>
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s ;
+    s.f() ;     <span class="co">// 1</span>
+
+    S <span class="at">const</span> cs ;
+    cs.f() ;    <span class="co">// 2</span>
 }</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>

@@ -93,4 +93,341 @@ int main()
 
 信じられないことに昔のC++には`auto`がなかったのだ。その他、様々な利点があるのだが、そのすべてを理解するには、まだ読者のC++力が足りない。
 
+## 要素数の取得: size()
 
+`std::array<T,N>`には`size()`というメンバー関数がある
+
+`size`はNを返す。
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a ;
+    a.size() ; // 5
+
+    std::array<int, 10> b ;
+    b.size() ; // 10
+}
+~~~
+
+早速実装しよう。
+
+~~~cpp
+template < typename T, std::size_t N >
+struct array
+{
+    using size_type = std::size_t ;
+
+    size_type size()
+    {
+        return N ;
+    }
+
+    // ... 省略
+} ;
+~~~
+
+`vector`にも同じメンバーがある。
+
+
+## メンバー関数のconst修飾
+
+`const`をつけた変数は値を変更できなくなることはすでに学んだ。
+
+~~~c++
+int main()
+{
+    int x = 0 ;
+    x = 1 ;
+    int const cx = 0 ;
+    cx = 0 ; // エラー
+}
+~~~
+
+`const`は変更する必要のない場面でうっかり変更することを防いでくれるとても便利な機能だ。'array'は大きいので関数の引数として渡すときにコピーするのは非効率的だ。なのでコピーを防ぐリファレンスで渡したい。
+
+`std::array<T,N>`を受け取って要素をすべて出力する関数を書いてみよう。
+
+~~~cpp
+template < typename Array > 
+void print( Array & c )
+{
+    for ( std::size_t i = 0 ; i != c.size() ; ++i )
+    {
+        std::cout << c[i] ;
+    }
+}
+
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+    print( a ) ;
+}
+~~~
+
+関数`print`がテンプレートなのは任意の`T`と`N`を使った`std::array<T,N>`を受け取れるようにするためだ。
+
+関数のリファレンスを引数として渡すと、関数の中で変更できてしまう。しかし、上の例のような関数`print`では、引数を書き換える必要はない。この関数を使う人間も、引数を勝手に書き換えないことを期待している。この場合、`const`をつけることで値の変更を防ぐことができる。
+
+~~~cpp
+template < typename Container > 
+void print( Container const & c )
+{
+    for ( std::size_t i = 0 ; i != c.size() ; ++i )
+    {
+        std::cout << c[i] ;
+    }
+}
+~~~
+
+ではさっそくこれまで実装してきた自作の`array`クラスを使ってみよう。
+
+~~~c++
+int main()
+{
+    array<int, 5> a = {1,2,3,4,5} ;
+
+    print( a ) ; // エラー
+}
+~~~
+
+なぜかエラーになってしまう。
+
+この理由はメンバー関数を呼び出しているからだ。
+
+クラスのメンバー関数はデータメンバーを変更できる。
+
+~~~c++
+struct S
+{
+    int data {} ;
+    void f()
+    {
+        ++data ;
+    }
+} ;
+
+int main()
+{
+    S s ;
+    s.f() ; // s.dataを変更
+}
+~~~
+
+ということは、`const S`はメンバー関数`f()`を呼び出すことができない。
+
+~~~c++
+int main()
+{
+    S s ;
+    S const & ref = s ;
+
+    ++s.data ;  // エラー
+    s.f() ;     // エラー
+}
+~~~
+
+ではメンバー関数`f()`がデータメンバーを変更しなければいいのだろうか。試してみよう。
+
+~~~cpp
+struct S
+{
+    int data {} ;
+    void f()
+    {
+        // 何もしない
+    }
+} ;
+
+int main()
+{
+    S const s ;
+    s.f() ; // エラー
+}
+~~~
+
+まだエラーになる。この理由を完全に理解するためには、まだ説明していない`ポインター`という機能について学ばなければならない。ポインターの説明はこの次の章で行うとして、今はさしあたり必要な機能である`メンバー関数のconst修飾`を説明する。
+
+constをつけていないメンバー関数をconstなクラスのオブジェクトから呼び出せない理由は、メンバー関数がデータメンバーを変更しない保証がないからだ。その保証をつけるのが`メンバー関数のconst修飾`だ。
+
+メンバー関数は関数の引数のあと、関数の本体の前にconstを書くことでconst修飾できる。
+
+~~~cpp
+struct S
+{
+    void f() const
+    { }
+} ;
+
+int main()
+{
+    S s ;
+    s.f() ; // OK
+
+    S const cs ;
+    cs.f() ; // OK
+    
+}
+~~~
+
+const修飾されたメンバー関数はconstなクラスのオブジェクトからでも呼び出すことができる。
+
+const修飾されたメンバー関数と、const修飾されていないメンバー関数が両方ある場合、クラスのオブジェクトのconstの有無によって適切なメンバー関数が呼び出される。
+
+~~~cpp
+struct S
+{
+    void f() { }        // 1
+    void f() const { }  // 2
+} ;
+
+int main()
+{
+    S s ;
+    s.f() ;     // 1
+
+    S const cs ;
+    cs.f() ;    // 2
+}
+~~~
+
+そしてもう一つ重要なのは、const修飾されたメンバー関数がデータメンバーへのリファレンスを返す場合、
+
+~~~cpp
+struct S
+{
+    int data {} ;
+    // データメンバーへのリファレンスを返す
+    int & get()
+    {
+        return data ;
+    }
+} ;
+~~~
+
+const修飾されたメンバー関数は自分のデータメンバーを変更できないので、データメンバーの値を変更可能なリファレンスを返すことはできない。そのため以下のようになる。
+
+~~~cpp
+struct S
+{
+    int data {} ;
+    int & get()
+    {
+        return data ;
+    }
+
+    // const版
+    // constリファレンスを返すので変更不可
+    int const & get() const
+    {
+        return data ;
+    }
+} ;
+
+~~~
+
+自作の'array'の`opeartor []`をconstに対応させよう。'std::array'はconstなリファレンスを`const_reference`というネストされた型名にしている。
+
+~~~cpp
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    using reference = T & ;
+    using const_reference = T const & ;
+
+    // 非const版
+    reference operator [] ( std::size_t i )
+    {
+        return storage[i] ;
+    }
+    // const版
+    const_reference operator [] ( std::size_t i ) const
+    {
+        return storage[i] ;
+    }
+} ;
+~~~
+
+これで`const array`にも対応できるようになった。
+
+## 先頭と末尾の要素：front/back
+
+メンバー関数`front`は最初の要素へのリファレンスを返す。`back`は最後の要素へのリファレンスを返す。
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    int & f = a.front() ;   // 1
+    int & b = a.back() ;    // 5
+}
+~~~
+
+`front/back`には`reference`を返すバージョンと`const_reference`を返すバージョンがある。
+
+~~~cpp
+
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    using reference = T & ;
+    using const_reference = T const & ;
+
+    reference front()
+    { return storage[0] ; }
+    const_reference front() const 
+    { return storage[0] ; }
+
+    reference back()
+    { return storage[N-1] ; }
+    const_reference back() const
+    { return storage[N-1] ; }
+
+} ;
+~~~
+
+## 全要素に値を代入: fill
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+    a.fill(0) ;
+    // aは{0,0,0,0,0}
+}
+~~~
+
+すでにアルゴリズムで実装した'std::fill'と同じだ。
+
+~~~cpp
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    void fill( T const & u )
+    {
+        for ( std::size_t i = 0 ; i != N ; ++i )
+        {
+            storage[i] = u ;
+        }
+    }
+
+} ;
+~~~
+
+しかし、せっかく`std::fill`があるのだから以下のように書きたい。
+
+~~~c++
+void fill( T const & u )
+{
+    std::fill( begin(), end(), u ) ;
+}
+~~~
+
+残念ながらこれは動かない。なぜならば、自作の`array`はまだ`begin()/end()`と`イテレーター`に対応していないからだ。これは次の章で学ぶ。
