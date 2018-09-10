@@ -257,7 +257,7 @@ C++はソースファイルをコンパイルする必要がある言語だ。�
 $ time g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
 ~~~
 
-どうだろうか。読者の環境にもよるが、近くできるぐらいの時間がかかっているのではないだろうか。プログラミングの習得にはコードを書いてから実行までの時間が短い方がよい。そこで本格的にC++を学ぶ前に、コンパイル時間を短縮する方法を学ぶ。
+どうだろうか。読者の環境にもよるが、知覚できるぐらいの時間がかかっているのではないだろうか。プログラミングの習得にはコードを書いてから実行までの時間が短い方がよい。そこで本格的にC++を学ぶ前に、コンパイル時間を短縮する方法を学ぶ。
 
 プログラムで変更しないファイルを事前にコンパイルしておくと、変更した部分だけコンパイルすれば良いので、コンパイル時間の短縮になる。GCCでは、ヘッダーファイルを事前にコンパイルする特別な機能がある。標準ライブラリのヘッダーファイルは変更しないので、事前にコンパイルしておけばコンパイル時間の短縮になる。
 
@@ -472,7 +472,7 @@ Makefile program source source01 source02 source03
 すでに`make`を実行した後で、もう一度`make`を実行するとどうなるだろうか。
 
 ~~~
-$make
+$ make
 make: 'program' is up to date.
 ~~~
 
@@ -663,7 +663,7 @@ hi :
 	echo hi
 
 hello :
-    echo hello
+	echo hello
 ~~~
 
 これを実行すると以下のようになる。
@@ -672,7 +672,7 @@ hello :
 $ make
 echo hi
 hi
-$make hi
+$ make hi
 echo hi
 hi
 $ make hello
@@ -694,7 +694,7 @@ GNU makeはこの問題に対処するため、`.PHONY`ターゲットという�
 
 ~~~makefile
 hello :
-    echo hello
+	echo hello
 
 .PHONY : hello
 ~~~
@@ -795,4 +795,4 @@ clean :
 	rm -f ./all.h.gch
 
 .PHONY : run clean
-~~
+~~~
