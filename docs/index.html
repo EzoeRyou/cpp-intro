@@ -302,6 +302,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#ネストされた型名">ネストされた型名</a></li>
 <li><a href="#要素数の取得-size">要素数の取得: size()</a></li>
 <li><a href="#メンバー関数のconst修飾">メンバー関数のconst修飾</a></li>
+<li><a href="#先頭と末尾の要素frontback">先頭と末尾の要素：front/back</a></li>
+<li><a href="#全要素に値を代入-fill">全要素に値を代入: fill</a></li>
+</ul></li>
+<li><a href="#arrayのイテレーター">arrayのイテレーター</a><ul>
+<li><a href="#イテレーターの中身">イテレーターの中身</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -8852,8 +8857,8 @@ T value()
 }</code></pre></div>
 <p>信じられないことに昔のC++には<code>auto</code>がなかったのだ。その他、様々な利点があるのだが、そのすべてを理解するには、まだ読者のC++力が足りない。</p>
 <h2 id="要素数の取得-size">要素数の取得: size()</h2>
-<p><code>std::array&lt;T,N&gt;</code>には<code>size()</code>というメンバー関数がある</p>
-<p><code>size</code>はNを返す。</p>
+<p><code>std::array&lt;T,N&gt;</code>には<code>size()</code>というメンバー関数がある。要素数をかえす。</p>
+<p><code>array</code>の場合、<code>N</code>を返せばよい。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a ;
@@ -8868,14 +8873,26 @@ T value()
 {
     <span class="kw">using</span> <span class="dt">size_type</span> = <span class="bu">std::</span>size_t ;
 
-    <span class="dt">size_type</span> size()
-    {
-        <span class="cf">return</span> N ;
-    }
-
+    <span class="dt">size_type</span> size() ;
     <span class="co">// ... 省略</span>
 } ;</code></pre></div>
-<p><code>vector</code>にも同じメンバーがある。</p>
+<p>ここでは<code>size</code>の宣言だけをしている。</p>
+<p>関数は宣言と定義が分割できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 関数の宣言</span>
+<span class="dt">void</span> f() ;
+<span class="co">// 関数の定義</span>
+<span class="dt">void</span> f() { }</code></pre></div>
+<p>メンバー関数も宣言と定義が分割できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// クラスの宣言</span>
+<span class="kw">struct</span> S
+{
+    <span class="co">// メンバー関数の宣言</span>
+    <span class="dt">void</span> f() ;
+} ;
+
+<span class="co">// メンバー関数の定義</span>
+<span class="dt">void</span> S::f() { }</code></pre></div>
+<p>メンバー関数の定義をクラス宣言の外で書くには、関数名がどのクラスに属するのかを指定しなければならない。これには<code>クラス名::</code>を使う。この場合、<code>S::f</code>だ。</p>
 <h2 id="メンバー関数のconst修飾">メンバー関数のconst修飾</h2>
 <p><code>const</code>をつけた変数は値を変更できなくなることはすでに学んだ。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
@@ -8993,6 +9010,319 @@ T value()
     S <span class="at">const</span> cs ;
     cs.f() ;    <span class="co">// 2</span>
 }</code></pre></div>
+<p>そしてもう一つ重要なのは、const修飾されたメンバー関数がデータメンバーへのリファレンスを返す場合、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> data {} ;
+    <span class="co">// データメンバーへのリファレンスを返す</span>
+    <span class="dt">int</span> &amp; get()
+    {
+        <span class="cf">return</span> data ;
+    }
+} ;</code></pre></div>
+<p>const修飾されたメンバー関数は自分のデータメンバーを変更できないので、データメンバーの値を変更可能なリファレンスを返すことはできない。そのため以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> data {} ;
+    <span class="dt">int</span> &amp; get()
+    {
+        <span class="cf">return</span> data ;
+    }
+
+    <span class="co">// const版</span>
+    <span class="co">// constリファレンスを返すので変更不可</span>
+    <span class="dt">int</span> <span class="at">const</span> &amp; get() <span class="at">const</span>
+    {
+        <span class="cf">return</span> data ;
+    }
+} ;</code></pre></div>
+<p>自作の'array'の<code>opeartor []</code>をconstに対応させよう。'std::array'はconstなリファレンスを<code>const_reference</code>というネストされた型名にしている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    T storage[N] ;
+
+    <span class="kw">using</span> reference = T &amp; ;
+    <span class="kw">using</span> const_reference = T <span class="at">const</span> &amp; ;
+
+    <span class="co">// 非const版</span>
+    reference <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t i )
+    {
+        <span class="cf">return</span> storage[i] ;
+    }
+    <span class="co">// const版</span>
+    const_reference <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t i ) <span class="at">const</span>
+    {
+        <span class="cf">return</span> storage[i] ;
+    }
+} ;</code></pre></div>
+<p>これで<code>const array</code>にも対応できるようになった。</p>
+<h2 id="先頭と末尾の要素frontback">先頭と末尾の要素：front/back</h2>
+<p>メンバー関数<code>front</code>は最初の要素へのリファレンスを返す。<code>back</code>は最後の要素へのリファレンスを返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="dt">int</span> &amp; f = a.front() ;   <span class="co">// 1</span>
+    <span class="dt">int</span> &amp; b = a.back() ;    <span class="co">// 5</span>
+}</code></pre></div>
+<p><code>front/back</code>には<code>reference</code>を返すバージョンと<code>const_reference</code>を返すバージョンがある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    T storage[N] ;
+
+    <span class="kw">using</span> reference = T &amp; ;
+    <span class="kw">using</span> const_reference = T <span class="at">const</span> &amp; ;
+
+    reference front()
+    { <span class="cf">return</span> storage[<span class="dv">0</span>] ; }
+    const_reference front() <span class="at">const</span> 
+    { <span class="cf">return</span> storage[<span class="dv">0</span>] ; }
+
+    reference back()
+    { <span class="cf">return</span> storage[N<span class="dv">-1</span>] ; }
+    const_reference back() <span class="at">const</span>
+    { <span class="cf">return</span> storage[N<span class="dv">-1</span>] ; }
+
+} ;</code></pre></div>
+<h2 id="全要素に値を代入-fill">全要素に値を代入: fill</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+    a.fill(<span class="dv">0</span>) ;
+    <span class="co">// aは{0,0,0,0,0}</span>
+}</code></pre></div>
+<p>すでにアルゴリズムで実装した'std::fill'と同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    T storage[N] ;
+
+    <span class="dt">void</span> fill( T <span class="at">const</span> &amp; u )
+    {
+        <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != N ; ++i )
+        {
+            storage[i] = u ;
+        }
+    }
+
+} ;</code></pre></div>
+<p>しかし、せっかく<code>std::fill</code>があるのだから以下のように書きたい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> fill( T <span class="at">const</span> &amp; u )
+{
+    <span class="bu">std::</span>fill( begin(), end(), u ) ;
+}</code></pre></div>
+<p>残念ながらこれは動かない。なぜならば、自作の<code>array</code>はまだ<code>begin()/end()</code>と<code>イテレーター</code>に対応していないからだ。これは次の章で学ぶ。</p>
+<h1 id="arrayのイテレーター">arrayのイテレーター</h1>
+<h2 id="イテレーターの中身">イテレーターの中身</h2>
+<p>自作の<code>array</code>をイテレーターに対応させる前に、まず'std::array'のイテレーターについて一通り調べよう。</p>
+<p>イテレーターは<code>std::begin/std::end</code>で取得する</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> first = <span class="bu">std::</span>begin(a) ;
+    <span class="kw">auto</span> last = <span class="bu">std::</span>end(a) ;
+}</code></pre></div>
+<p><code>std::begin/std::end</code>は何をしているのか見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> std
+{
+    <span class="kw">template</span> &lt; <span class="kw">typename</span> C &gt;
+    <span class="kw">auto</span> begin( C &amp; c )
+    { <span class="cf">return</span> c.begin() ; }
+
+    <span class="kw">template</span> &lt; <span class="kw">typename</span> C &gt;
+    <span class="kw">auto</span> begin( C <span class="at">const</span> &amp; c )
+    { <span class="cf">return</span> c.begin() ; }
+
+    <span class="kw">template</span> &lt; <span class="kw">typename</span> C &gt;
+    <span class="kw">auto</span> end( C &amp; c )
+    { <span class="cf">return</span> c.end() ;}
+
+    <span class="kw">template</span> &lt; <span class="kw">typename</span> C &gt;
+    <span class="kw">auto</span> begin( C <span class="at">const</span> &amp; c )
+    { <span class="cf">return</span> c.end() ;}
+}</code></pre></div>
+<p>なんと、単に引数に対してメンバー関数<code>begin/end</code>を呼び出してその結果を返しているだけだ。</p>
+<p>早速確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> iter = a.begin() ;
+    <span class="bu">std::</span>cout &lt;&lt; *iter ; <span class="co">// 1</span>
+    ++iter ;
+    <span class="bu">std::</span>cout &lt;&lt; *iter ; <span class="co">// 2</span>
+}</code></pre></div>
+<p>確かに動くようだ。</p>
+<p>すると自作の<code>array</code>でイテレーターに対応する方法がわかってきた。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// イテレーターを表現するクラス</span>
+<span class="kw">struct</span> array_iterator { }
+
+<span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="co">// イテレーター型</span>
+    <span class="kw">using</span> iterator = array_iterator ;
+
+    <span class="co">// イテレーターを返すメンバー関数</span>
+    iterator begin() ;
+    iterator end() ;
+
+    <span class="co">// その他のメンバー</span>
+} ;</code></pre></div>
+<p>イテレーターに対応するには、おおむねこのような実装になるとみていいだろう。おそらく細かい部分で微調整が必要になるが、今はこれでよしとしよう。ではイテレーターが具体的に何をするかを見ていこう。</p>
+<p>すでに学んだように、イテレーターは<code>operator *</code>で参照する要素の値を取得できる。また書き込みもできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> iter = a.begin() ;
+    <span class="dt">int</span> x = *iter ; <span class="co">// 1</span>
+    *iter = <span class="dv">0</span> ;
+    <span class="co">// aは{0,2,3,4,5}</span>
+}</code></pre></div>
+<p>これまでに作った自作の<code>array</code>で最初の要素にアクセスする方法を考えてみよう</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+<span class="dt">int</span> x = a[<span class="dv">0</span>] ; <span class="co">// 1</span>
+a[<span class="dv">0</span>] = <span class="dv">0</span> ;</code></pre></div>
+<p>このことから考えると、先頭要素を指すイテレーターは<code>operator *</code>をオーバーロードして先頭要素をリファレンスで返せば良い。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> array_iterator_int_5_begin
+{
+    array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; &amp; a ;
+
+    array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt;::reference <span class="kw">operator</span> *()
+    {
+        <span class="cf">return</span> a[<span class="dv">0</span>] ;
+    }
+} ;</code></pre></div>
+<p>しかし、この実装では<code>array&lt;int,5&gt;</code>にしか対応できない。<code>array&lt;int,7&gt;</code>や<code>array&lt;double, 10&gt;</code>には対応できない。なぜなら、<code>array</code>に渡すテンプレート実引数が違うと、別の型になるからだ。</p>
+<p><code>array_iterator</code>を様々な<code>array</code>を扱うにはどうすればいいのか。テンプレートを使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Array &gt;
+<span class="kw">struct</span> array_iterator_begin
+{
+    Array &amp; a ;
+
+    array_iterator_begin( Array &amp; a )
+        : a( a ) { }
+
+    <span class="co">// エラー</span>
+    <span class="co">// Array::referenceは型ではない</span>
+    Array::reference <span class="kw">operator</span> *()
+    {
+        <span class="cf">return</span> a[<span class="dv">0</span>] ;
+    }
+} ;</code></pre></div>
+<p>しかしなぜかエラーだとコンパイラーに怒られる。この理由を説明するのはとても難しい。気になる読者は近所のC++グルに教えを乞おう。ここでは答えだけを教える。</p>
+<p><code>T::Y</code>において、<code>T</code>がテンプレート引数に依存する名前で、<code>Y</code>がネストされた型名の場合、<code>typename</code>キーワードをつけなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="dt">void</span> f()
+{
+    <span class="co">// typenameが必要</span>
+    <span class="kw">typename</span> T::Y x = <span class="dv">0</span> ;
+}
+
+<span class="kw">struct</span> S
+{
+    <span class="kw">using</span> Y = <span class="dt">int</span> ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// T = S</span>
+    <span class="co">// T::Y = int</span>
+    f&lt;S&gt;() ;
+}</code></pre></div>
+<p>わかっただろうか。わからなくても無理はない。この問題を理解するにはテンプレートに対する深い理解が必要だ。理解した暁には読者はC++グルとして崇拝されているだろう。</p>
+<p>さしあたって必要なのは<code>Array::reference</code>の前に<code>typename</code>キーワードをつけることだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">typename</span> Array::reference
+<span class="kw">operator</span> * ()
+{
+    <span class="cf">return</span> a[<span class="dv">0</span>] ;
+}</code></pre></div>
+<p>どうやら最初の要素を読み書きするイテレーターはできたようだ。<code>array</code>側も実装して試してみよう。</p>
+<p>array側の実装にはまだ現時点では完全に理解できない黒魔術<code>*this</code>が必要だ。</p>
+<pre class="cp"><code>template &lt; typename T, std::size_t N &gt;
+struct array
+{
+    T storage[N] ;
+    using iterator = array_iterator_begin&lt;array_int_10&gt; ;
+    iterator begin()
+    { return *this ; }
+}</code></pre>
+<p><code>*this</code>はメンバー関数を読んだクラスのオブジェクトへのリファレンスだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">int</span> data {} ;
+    S &amp; THIS() { <span class="cf">return</span> *<span class="kw">this</span> ; } 
+} ;
+
+<span class="dt">int</span> main()
+{
+    S s ;
+    
+    s.THIS().data = <span class="dv">123</span> ;
+}</code></pre></div>
+<p><code>*this</code>を理解するためには、これまたポインターの理解が必要になるが、それは次の章で学ぶ。</p>
+<p><code>array_iterator_begin</code>は先頭の要素しか扱えない。イテレーターで先頭以外の別の要素を扱う方法を思い出してみよう。</p>
+<p>イテレーターは<code>operator ++</code>で次の要素を参照する。<code>operator --</code>で前の要素を参照する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> iter = a.begin() ;
+    *iter ; <span class="co">// 1</span>
+    ++iter ;
+    *iter ; <span class="co">// 2</span>
+    --iter ;
+    *iter ; <span class="co">// 1</span>
+}</code></pre></div>
+<p>この<code>operator ++</code>と<code>operator --</code>はイテレーターへのリファレンスを返す。なぜならば、以下のように書けるからだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">*++iter ;
+*++++iter ;</code></pre></div>
+<p>自作の<code>array_iterator</code>で書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Array &gt;
+<span class="kw">struct</span> array_iterator
+{
+    Array &amp; a ;
+
+    array_iterator_begin( Array &amp; a )
+        : a( a ) { }
+
+    <span class="co">// 次の要素を指す</span>
+    array_iterator &amp; <span class="kw">operator</span> ++() ;
+    <span class="co">// 前の要素を指す</span>
+    array_iterator &amp; <span class="kw">operator</span> --() ;
+    
+    <span class="co">//いま参照している要素へのリファレンスを返す</span>
+    Array::reference <span class="kw">operator</span> *() ;
+} ;</code></pre></div>
+<p>イテレーターの実装で先頭の要素を参照するのは<code>a[0]</code>だった。その次の要素を参照するには<code>a[1]</code>だ。その次の要素は<code>a[2]</code>となり、その前の要素は<code>a[1]</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+<span class="kw">auto</span> iter = a.begin() ; <span class="co">// 最初の要素</span>
+*iter ; <span class="co">// 1</span>
+++iter ; <span class="co">// 次の要素</span>
+*iter ; <span class="co">// 2</span>
+--iter ; <span class="co">// 前の要素、つまり最初の要素</span>
+*iter ; <span class="co">// 1</span></code></pre></div>
+<p>では最初の要素の前の要素や、最後の要素の次の要素を参照しようとするとどうなるのか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> first = a.begin() ;
+--first ;
+*first ; <span class="co">// 最初の前の要素？</span>
+<span class="kw">auto</span> last = a.end() ;
+++last ; <span class="co">//</span>
+*last ; <span class="co">// 最後の次の要素？</span></code></pre></div>
+<p>これはエラーになる。このようなエラーを起こさないように務めるのはユーザーの責任で、イテレーター実装者の責任ではない。しかし、必要であればイテレーターの実装者はこのようなエラーを防ぐような実装もできる。それは後の章で学ぶ。ここでは、こういう場合が起こることは考えなくてもよいとしよう。</p>
+<p>これを考えていくと、イテレーターの実装をどうすればいいのかがわかってくる。</p>
+<p>array_iteratorの<code>operator *</code>は<code>a[i]</code>を返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">typename</span> Array::reference array_iterator::<span class="kw">operator</span> *()
+{
+    <span class="cf">return</span> a[i] ;
+}</code></pre></div>
+<p><code>i</code>は<code>std::size_t</code>型のデータメンバーで、イテレーターが現在参照している<code>i</code>番目の要素を記録している。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
