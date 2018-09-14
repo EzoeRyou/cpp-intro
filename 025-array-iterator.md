@@ -93,7 +93,7 @@ int main()
 }
 ~~~
 
-これまでに作った自作の`array`で最初の要素にアクセスする方法を考えてみよう
+問題を簡単にするために、これまでに作った自作の`array`で最初の要素にアクセスする方法を考えてみよう
 
 ~~~c++
 array<int, 5> a = {1,2,3,4,5} ;
@@ -117,7 +117,7 @@ struct array_iterator_int_5_begin
 
 しかし、この実装では`array<int,5>`にしか対応できない。`array<int,7>`や`array<double, 10>`には対応できない。なぜなら、`array`に渡すテンプレート実引数が違うと、別の型になるからだ。
 
-`array_iterator`を様々な`array`を扱うにはどうすればいいのか。テンプレートを使う。
+`array_iterator`で様々な`array`を扱うにはどうすればいいのか。テンプレートを使う。
 
 ~~~c++
 template < typename Array >
@@ -168,7 +168,7 @@ int main()
 
 ~~~c++
 typename Array::reference
-operator * ()
+array_iterator_begin::operator * ()
 {
     return a[0] ;
 }
@@ -176,37 +176,129 @@ operator * ()
 
 どうやら最初の要素を読み書きするイテレーターはできたようだ。`array`側も実装して試してみよう。
 
-array側の実装にはまだ現時点では完全に理解できない黒魔術`*this`が必要だ。
+array側の実装にはまだ現時点では完全に理解できない黒魔術が必要だ。
 
 ~~~cp
 template < typename T, std::size_t N >
 struct array
 {
     T storage[N] ;
-    using iterator = array_iterator_begin<array_int_10> ;
+    // 黒魔術1: array
+    using iterator = array_iterator_begin<array> ;
     iterator begin()
-    { return *this ; }
+    // 黒魔術2: *this
+    // 黒魔術3: iterator(*this)
+    { return iterator(*this) ; }
 }
 ~~~
 
-`*this`はメンバー関数を読んだクラスのオブジェクトへのリファレンスだ。
+黒魔術1は'array_iterator_begin<array>`の中にある。この`array`は`array<T,N>`と同じ意味になる。つまり全体としては、`array_iterator_begin<array<T,N>>`と書いたものと同じだ。クラステンプレートの中でクラス名を使うと、テンプレート実引数をそれぞれ指定したものと同じになる。
+
+~~~cpp
+template < typename A, typename B, typename C >
+struct S
+{
+    void f()
+    {
+        // S<A,B,C>と同じ
+        S s ;
+    }
+} ;
+~~~
+
+黒魔術2は`*this`だ。`*this`はメンバー関数を読んだクラスのオブジェクトへのリファレンスだ。
 
 ~~~cpp
 struct S
 {
     int data {} ;
+    // *thisはメンバー関数が呼ばれたSのオブジェクト
     S & THIS() { return *this ; } 
 } ;
 
 int main()
 {
-    S s ;
+    S s1 ;
     
-    s.THIS().data = 123 ;
+    s1.THIS().data = 123 ;
+    // 123
+    std::cout << s1.data ;
+
+    S s2 ;
+    s2.THIS().data = 456 ;
+    // 456
+    std::cout << s2.data ;
 }
 ~~~
 
-`*this`を理解するためには、これまたポインターの理解が必要になるが、それは次の章で学ぶ。
+クラスのメンバー関数は対応するクラスのオブジェクトに対して呼ばれる。本来ならばクラスのオブジェクトをリファレンスで取るような形になる。
+
+~~~cpp
+struct S
+{
+    int data {} ;
+    void set(int x)
+    {
+        data = x ;
+    }
+} ;
+
+int main()
+{
+    S object ;
+    object.set(42) ;
+}
+~~~
+
+というコードは、ほぼ同じことを以下のようにも書ける。
+
+~~~cpp
+struct S
+{
+    int data {} ;
+} ;
+
+void set( S & object, int x )
+{
+    object.data = x ;
+}
+
+int main()
+{
+    S ojbect ;
+    set( object, 42 ) ;
+}
+~~~
+
+クラスの意義は変数と関数を結びつけることだ。このように変数と関数がバラバラではわかりにくいので、メンバー関数という形で`object.set(...)`のようにわかりやすく呼び出せるし、その際クラス`S`のオブジェクトは変数`object`であることが文法上わかるので、わざわざ関数の実引数の形で書くことは省略できるようにしている。
+
+メンバー関数の中で、メンバー関数が呼ばれているクラスのオブジェクトを参照する方法が`*this`だ。
+
+しかしなぜ`*this`なのか。もっとわかりやすいキーワードでもいいのではないか。なぜ`*`がついているのか。この謎を理解するためには、これまたポインターの理解が必要になるが、それは次の章で学ぶ。
+
+黒魔術3は`iterator(*this)`だ。クラス名に`()`や`{}`を続けると、コンストラクターを呼び出した結果のクラスの値を得ることができる。
+
+~~~cpp
+struct S
+{
+    S() { }
+    S( int ) { }
+    S( int, int ) { }
+} ;
+
+int main()
+{
+    S a = S() ;
+    S b = S(0) ;
+    S c = S(1,2) ;
+
+    S d = S{} ;
+    S e = S{0} ;
+    S f = S{1,2} ;
+}
+~~~
+
+黒魔術の解説が長くなった。本題に戻ろう。
 
 `array_iterator_begin`は先頭の要素しか扱えない。イテレーターで先頭以外の別の要素を扱う方法を思い出してみよう。
 
@@ -234,7 +326,7 @@ int main()
 *++++iter ;
 ~~~
 
-自作の`array_iterator`で書いてみよう。
+以上を踏まえて、自作の`array_iterator`の宣言を書いてみよう。
 
 
 ~~~c++
@@ -295,6 +387,692 @@ typename Array::reference array_iterator::operator *()
 
 `i`は`std::size_t`型のデータメンバーで、イテレーターが現在参照している`i`番目の要素を記録している。
 
+ということは先程の`array_iterator`の宣言にはデータメンバー`i`を追加する修正が必要だ。
+
+~~~c++
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+    std::size_t i ;
+
+    array_iterator_begin( Array & a, std::size_t i )
+        : a( a ), i(i) { }
+    
+    //いま参照している要素へのリファレンスを返す
+    Array::reference operator *()
+    {
+        return a[i] ;
+    }
+
+    // その他のメンバー
+} ;
+~~~
+
+そして、`array`側にも新しい`array_iterator`への対応が必要になる。
+
+~~~cpp
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator = array_iterator<array> ;
+
+    // 先頭要素のイテレーター
+    iterator begin()
+    {
+        return array( *this, 0 ) ;
+    }
+
+    // 末尾要素へのイテレーター
+    iterator end()
+    {
+        return array( *this, N-1 ) ;
+    }
+} ;
+~~~
+
+何度も書くように、インデックスは0から始まる。要素がN個ある場合、最初の要素は0番目で、最後の要素はN-1番目だ。
+
+インクリメント演算子`opeartor ++`にも対応しよう。
+
+~~~c++
+array_iterator & array_iterator::operator ++()
+{
+    ++i ;
+    return *this ;
+}
+~~~
+
+これで最低限のイテレーターは実装できた。早速試してみよう。
+
+~~~cpp
+int main()
+{
+    array<int,5> a = {1,2,3,4,5} ;
+
+    auto iter = a.begin() ;
+
+    std::cout << *iter ; // 1
+    ++iter ;
+    std::cout << *iter ; // 2
+}
+~~~
+
+実は`operator ++`は2種類ある。前置演算子と後置演算子だ。
+
+~~~cpp
+int main()
+{
+    int i = 0 ;
+
+    // 前置
+    std::cout << ++i ;  // 1
+    // 後置
+    std::cout << i++ ;  // 1
+    std::cout << i      // 2
+}
+~~~
+
+int型では、前置`operator ++`はオペランドの値を1加算した値にする。後置`operator ++`はオペランドの値を1加算するが、式を評価した結果は前のオペランドの値になる。
+
+~~~c++
+++i ; // i+1
+i++ ; // i、ただしiの値はi+1
+~~~
+
+後置`operator ++`のオーバーロードは以下のように書く。
+
+~~~cpp
+struct IntLike
+{
+    int data {} ;
+
+    // 前置
+    IntLike & operator ++()
+    {
+        ++data ;
+        return *this ;
+    }
+    // 後置
+    IntLike operator ++(int)
+    {
+        IntLike copy = *this ;
+        ++*this ;
+        return copy ;
+    }
+} ;
+~~~
+
+このコードは慣れないとわかりにくいが、妥当な理由のあるコードだ。順番に説明しよう。
+
+まず演算子オーバーロードの宣言だ。
+
+~~~c++
+// 前置
+IntLike & operator ++() ;
+// 後置
+IntLike operator ++(int) ;
+~~~
+
+前置はリファレンスを返す。前置演算子の適用結果は更に変更できるようにするためだ。
+
+~~~cpp
+int main()
+{
+    int i { } ;
+
+    ++++i ;
+}
+~~~
+
+もちろん、リファレンスを返さなない実装は可能だ。そもそも何も値を返さないvoidを使うことも可能だ。
+
+~~~cpp
+struct S
+{
+    void operator ++() { }
+} ;
+~~~
+
+ただし、その場合`operator ++`に対して通常期待されるコードが書けなくなる。理由がない限り演算子の自然な挙動を目指すべきだ。
+
+前置と後置は区別できる必要がある。C++はその区別の方法として、`int`型の仮引数をひとつとる`operator ++`を後置演算子だと認識する文法を採用した。この`int`型の実引数は前置と後置を区別するためだけのもので、値に意味はない。
+
+~~~cpp
+struct S
+{
+    void operator ++( int x )
+    {
+        // 値に意味はない。
+        std::cout << x ;
+    }
+} ;
+
+int main()
+{
+    S s ;
+    // 演算子としての使用
+    s++ ;
+    // メンバー関数としての使用
+    s.operator++(123) ;
+}
+~~~
+
+値に意味はないが、演算子として使用した場合、値は0になるというどうでもいい仕様がある。メンバー関数として使用すると好きな値を渡せるというこれまたどうでもいい仕様がある。テストには出ないので覚える必要はない。
+
+前置は自然な挙動のためにリファレンスを返すが、後置はリファレンスではなくコピーした値を返す。
+
+~~~c++
+// 後置
+IntLike IntLike::operator ++(int)
+{
+    // コピーを作る
+    IntLike copy = *this ;
+    // 演算子が呼ばれたオブジェクトをインクリメントする
+    // 前置インクリメント演算子を読んでいる
+    ++*this ;
+    // 値が変更されていないコピーを返す
+    return copy ;
+}
+~~~
+
+このように実装すると、後置として自然な挙動が実装できる。
+
+`++*this`は後置インクリメント演算子が呼ばれたオブジェクトに対して前置インクリメント演算子を使用している。わかりにくければ前置インクリメントと同じ処理を書いてもいい。
+
+~~~c++
+IntLike IntLike::operator ++(int)
+{
+    IntLike copy = *this ;
+    // 同じ処理
+    ++data ;
+    return copy ;
+}
+~~~
+
+IntLikeのように簡単な処理であればこれでもいいが、もっと複雑な何行もある処理の場合は、すでに実装した前置インクリメントを呼び出したほうが楽だ。コードの重複を省けるのでインクリメントの処理を変更するときに、二箇所に同じ変更をしなくても済む。
+
+以上を踏まえて、array_iteratorに後置インクリメント演算子を実装しよう。
+
+~~~c++
+array_iterator array_iterator::operator ++(int)
+{
+    array_iterator copy = *this ;
+    ++*this ;
+    return copy ;
+}
+~~~
+
+デクリメント演算子`operator --`の実装はインクリメント演算子`operator ++`と同じだ。ただ処理がインクリメントではなくデクリメントになっているだけだ。
+
+~~~c++
+// 前置
+array_iterator & array_iterator::operator --()
+{
+    -- i ;
+    return *this ;
+}
+// 後置
+array_iterator array_iterator::operator --(int)
+{
+    array_iterator copy = *this ;
+    --*this ;
+    return copy ;
+}
+~~~
+
+ここまでくればイテレーターに必要な操作はあと一つ。比較だ。
+
+イテレーターは同じ要素を指している場合に等しい。つまり、オペレーター`a`と`b`が同じ要素を指しているならば、`a == b`は`true`で`a != b`は`false`だ。違う要素を指しているならば`a == b`は`false`で`a != b`は`true`だ。
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto a = a.begin() ;
+    auto b = a.begin() ;
+
+    // true
+    bool b1 = (a == b) ;
+    // false
+    bool b2 = (a != b) ;
+    ++a ;
+    // false
+    bool b3 = (a == b) ;
+    // true
+    bool b4 = (a != b) ;
+}
+~~~
+
+イテレーターは比較ができるので、イテレーターが終端に到達するまでループを回すことができる。
+
+~~~cpp
+int main()
+{
+    std::array<int,5> a = {1,2,3,4,5} ;
+
+            // 変数宣言
+    for (   auto iter = std::begin(a),
+            last = std::end(a) ;
+            // 終了条件
+            iter != last ;
+            // ループごとの処理
+            ++iter )
+    {
+        std::cout << *iter ;
+    }
+}
+~~~
+
+イテレーターは比較ができるので、各種アルゴリズムに渡すことができる。
+
+array_iteratorの比較は、単にデータメンバー`i`の比較でよい。
+
+~~~c++
+bool array_iterator::operator ==( array_iterator const & right )
+{
+    return i == right.i ;
+}
+bool array_iterator::operator !=( array_iterator const & right )
+{
+    return i != right.i ;
+}
+~~~
+
+これで自作の`array`と`array_iterator`はアルゴリズムに渡せるようになった。
+
+~~~c++
+int main()
+{
+    array<int, 5> a = {1,2,3,4,5} ;
+
+    std::for_each( std::begin(a), std::end(a),
+        [](auto x){ std::cout << x ; } ) ;
+}
+~~~
+
+## 残りのイテレーターの実装
+
+`std::array`や`std::vector`のイテレーターはとても柔軟にできている。
+
+例えばイテレーター`i`の参照する要素を3つ進めたい場合を考えよう。
+
+~~~c++
+++i ; // 1
+++i ; // 2
+++i ; // 3
+~~~
+
+これは非効率的だ。もっと効率的なイテレーターの進め方として、`operator +=`がある。
+
+~~~c++
+i += 3 ;
+~~~
+
+`i += n`はイテレーター`i`をn回進める。
+
+`operator +`もある
+
+~~~c++
+auto j = i + 3 ;
+~~~
+
+イテレーター`j`の値はイテレーター`i`を3つ進めた値になる。イテレーター`i`の値は変わらない。
+
+実装は簡単だ。データメンバー`i`に対して同じ計算をする。
+
+~~~cpp
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+    std::size_t i ;
+
+    array_iterator & operator += ( std::size_t n )
+    {
+        i += n ;
+        return *this ;
+    }
+
+    array_iterator operator + ( std::size_t n ) const
+    {
+        auto copy = *this ;
+        copy += n ;
+        return copy ;
+    }
+} ;
+~~~
+
+`operator +`はオペランドの値を変更しないので`const`にできる。
+
+同様に、`operator -=`とoperator `-`もある。上を参考に自分で実装してみよう。
+
+`operator +`によって任意のn個先の要素を使うことができるようになったので、以下のようにも書ける。
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    std::cout << a[3] ; // 4
+
+    auto iter = a.begin() ;
+
+    std::cout << *(iter + 3) ; // 4
+}
+~~~
+
+カッコが必要なのは、演算子の評価順序の都合だ。`*iter + 3`は`(*iter) + 3`であり、`iter`の指す要素に対して`+3`される。`*(iter+3)`は`iter`の指す要素の3つ先の要素の値を読む。
+
+イテレーターiのn個先の要素を読み書きするのにいちいち`*(i+n)`と書くのは面倒なので、`std::array`や`std::vector`のイテレーターには`operator []`がある。これを使うと`i[n]`と書ける。
+
+~~~cpp
+
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    std::cout << a[3] ; // 4
+
+    auto iter = a.begin() ;
+
+    std::cout << *(iter + 3) ; // 4
+}
+~~~
+
+イテレーターは大小比較ができる。
+
+~~~cpp
+a <  b ;
+a <= b ;
+a >  b ;
+a >= b ;
+~~~
+
+イテレーターの大小はどういう意味を持つのか。`array`のようにイテレーターが線形に順序のある要素を参照している場合で、前の要素を参照しているイテレーターはあとの要素を参照しているイテレーターより小さい。
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto a = std::begin(a) ;
+    auto b = a + 1 ;
+
+    a <  b ; // true
+    a <= b ; // true
+    a >  b ; // false
+    a >= b ; // false
+}
+~~~
+
+自作の`array'の場合、単にデータメンバー`i`を比較する。
+
+~~~cpp
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+    std::size_t i ;
+
+    bool operator < ( array_iterator const & right ) const
+    {
+        return i < right ;
+    }
+}
+~~~
+
+残りの演算子も同様に実装できる。
+
+## constなイテレーター: const_iterator
+
+`std::array<T,N>`は通常のイテレーターである`std::array<T,N>::iterator`の他に、constなイテレーターである`std::array<T,N>::const_iterator`を提供している。
+
+~~~cpp
+int main()
+{
+    std::array<int,5> a = {1,2,3,4,5} ;
+
+    // iterator
+    std::array<int,5>::iterator iter = a.begin() ;
+    // const_iterator
+    std::array<int,5>::const_iterator const_iter = a.cbegin() ;
+}
+~~~
+
+`const_iterator`は`const iterator`ではない。`const_iterator`とはそれ自体が型名だ。`const`というのは型名を修飾する別の機能だ。
+
+そのため、constの有無の2種類の状態と、`iterator`, `const_iterator`の2つの型をかけ合わせた、以下の型が存在する。
+
++ `iterator`
++ `const iterator`
++ `const_iterator`
++ `const const_iterator`
+
+    
+
+~~~cpp
+int main()
+{
+    using Array = std::array<int,5> ;
+
+    // iterator 
+    Array::iterator i ;
+    // const iterator
+    const Array::iterator c_i ;
+    // const_iterator
+    Array::const_iterator ci ;
+    // const const_iterator
+    const Array::const_iterator c_ci ;
+}
+~~~
+
+`const_iterator`は`iterator`とは別の型だ。自作の`array`に実装するならば以下のようになる。
+
+~~~c++
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator          = array_iterator<array> ;
+    using conste_iterator   = array_const_iterator<array> ;
+} ;
+~~~
+
+それぞれの型に対して、constキーワードをつけた型とそうでない型が存在する。
+
+`const_iterator`を得る方法はいくつかある。
+
++ constなarrayの`begin/end`を呼び出す
+
+~~~cpp
+int main()
+{
+    // constなarray
+    const std::array<int, 5> a = {1,2,3,4,5} ;
+
+    // const_iterator
+    auto i = a.begin() ;
+}
+~~~
+
++ `cbegin/cend`を呼び出す
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    // const_iterator
+    auto i = a.cbegin() ;
+}
+~~~
+
++ `iterator`から`const_iterator`への変換
+
+~~~cpp
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    // iterator
+    Array::iterator i = a.begin() ;
+    // iteratorからconst_iteratorへの変換
+    Array::const_iterator j = i ;
+}
+~~~
+
+constキーワードはすでに学んだように、オブジェクトの値を変更できないようにする機能だ。
+
+なぜ`const_iterator`が存在するのか。`const iterator`ではだめなのか。その理由は、`const iterator`は値の変更ができないためだ。
+
+~~~c++
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    // const iterator
+    const Array::iterator iter = a.begin() ;
+
+    // エラー
+    // constなオブジェクトは変更できない
+    ++iter ;
+
+    // Ok
+    // iterは変更していない
+    auto next_iter = iter + 1 ;
+}
+~~~
+
+`const_iterator`ならばイテレーター自体の変更はできる。イテレーターが参照する要素の変更はできない。
+
+~~~cpp
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    auto citer = a.begin() ;
+
+    // OK
+    // イテレーター自体の変更
+    ++citer ;
+
+    // OK
+    // 要素を変更しない
+    std::cout << *citer ;
+
+    // エラー
+    // 要素を変更してる
+    *citer = 0 ;
+}
+~~~
+
+`const const_iterator`は`const_iterator`の`const`だ。`const const_iterator`は`const iterator`と同じく、イテレーター自体の変更ができない。
 
 
+~~~c++
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
 
+    // const const_iterator
+    auto const iter = a.begin() ;
+
+    // エラー
+    // constなオブジェクトは変更できない
+    ++iter ;
+
+    // Ok
+    // iterは変更していない
+    auto next_iter = iter + 1 ;
+}
+~~~
+
+`auto const`もしくは`const auto`を使うと、変数の型を自動で推定してくれるが、constがつくようになる。
+
+`const_iterator`はどう実装するのか。まず`array`にネストされた型名`const_iterator`を追加する。
+
+~~~c++
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator = array_iterator<array> ;
+    using const_iterator = array_const_iterator<array> ;
+} ;
+~~~
+
+`array`に`const_iterator`を返す`cbegin/cend`と、`const array`のときに`const_iterator`を返す`begin/end`を追加する。
+
+~~~cpp
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator = array_iterator<array> ;
+    using const_iterator = array_const_iterator<array> ;
+
+    // const arrayのときにconst_iteratorを返す
+    const_iterator begin() const
+    { return const_iterator(*this, 0) ; }
+    const_iterator end() const
+    { return const_iterator(*this, N-1) ; }
+
+    // 常にconst_iteratorを返す
+    const_iterator cbegin() const
+    { return const_iterator(*this, 0) ; }
+    const_iterator cend() const
+    { return const_iterator(*this, N-1) ; }
+
+    // その他のメンバー
+} ;
+~~~
+
+あとは`array_const_iterator<array>`を実装する。その実装は`array_iterator<array>`とほぼ同じだ。
+
+~~~cpp
+template < typename Array >
+struct array_const_iterator
+{
+    Array const & a ;
+    std::size_t i ;
+
+    // コンストラクター
+    array_const_iterator( Array const & a, std::size_t i )
+        a(a), i(i) { }
+} ;
+~~~
+
+ただし、`const_iterator`は`iterator`から変換できるので、
+
+~~~cpp
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    // iterator
+    auto i = a.begin() ;
+
+    // iteratorからconst_iteratorへの変換
+    Array::const_iterator j = i ;
+}
+~~~
+
+これに対応するために、`const_iterator`のコンストラクターは`iterator`から変換するためのコンストラクターも持つ。
+
+~~~c++
+
+template < typename Array >
+struct array_const_iterator
+{
+    Array const & a ;
+    std::size_t i ;
+
+    // array_iteratorからの変換コンストラクター
+    array_const_iterator( array_iterator<Array> const & iter )
+        a( iter.a ), i( iter.i ) { }
+} ;
+~~~
