@@ -748,7 +748,7 @@ struct array_iterator
 
 同様に、`operator -=`とoperator `-`もある。上を参考に自分で実装してみよう。
 
-`operator +`によって任意のn個先の要素を使うことができるようになったので、以下のようにも書ける。
+`operator +`によって任意のn個先の要素を使うことができるようになったので、イテレーターiのn個先の要素を参照したければ、以下のように`*(i+n)`も書ける。
 
 ~~~cpp
 int main()
@@ -757,13 +757,13 @@ int main()
 
     std::cout << a[3] ; // 4
 
-    auto iter = a.begin() ;
+    auto i = a.begin() ;
 
-    std::cout << *(iter + 3) ; // 4
+    std::cout << *(i + 3) ; // 4
 }
 ~~~
 
-カッコが必要なのは、演算子の評価順序の都合だ。`*iter + 3`は`(*iter) + 3`であり、`iter`の指す要素に対して`+3`される。`*(iter+3)`は`iter`の指す要素の3つ先の要素の値を読む。
+カッコが必要なのは、演算子の評価順序の都合だ。`*i + 3`は`(*i) + 3`であり、`i`の指す要素に対して`+3`される。`*(i+3)`は`i`の指す要素の3つ先の要素の値を読む。
 
 イテレーターiのn個先の要素を読み書きするのにいちいち`*(i+n)`と書くのは面倒なので、`std::array`や`std::vector`のイテレーターには`operator []`がある。これを使うと`i[n]`と書ける。
 
@@ -775,11 +775,37 @@ int main()
 
     std::cout << a[3] ; // 4
 
-    auto iter = a.begin() ;
+    auto i = a.begin() ;
 
-    std::cout << *(iter + 3) ; // 4
+    std::cout << *(i + 3) ; // 4
 }
 ~~~
+
+`operator []`の実装は文字通り`*(i+n)`と同じことをするだけでよい。
+
+~~~c++
+template < typename Array >
+struct array_iterator
+{
+    typename Array::reference
+    operator [] ( std::size_t n ) const
+    {
+        return *( *this + n ) ;
+    }
+
+    // その他のメンバー
+} ;
+~~~
+
+この`operator []`は、`array_iterator`のデータメンバーを変更しないのでconst修飾できる。
+
+`*this`というのはこのイテレーターのオブジェクトなので、それに対してすでに実装済みの`operator +`を適用し、その結果に`operator *`を適用している。既存の実装を使わない場合、return文は以下のようになる。
+
+~~~c++
+return a[i+n] ;
+~~~
+
+こちらのほうが一見簡単なように見えるが、`operator +`や`operator *`の実装が複雑な場合、この方法では同じコードを複数の箇所に書かなければならず、コードを修正するときは同じ変更を複数の箇所に行わなければならない。すでに実装したメンバー関数は積極的に使って楽をしていこう。
 
 イテレーターは大小比較ができる。
 
@@ -1072,7 +1098,52 @@ struct array_const_iterator
     std::size_t i ;
 
     // array_iteratorからの変換コンストラクター
-    array_const_iterator( array_iterator<Array> const & iter )
+    array_const_iterator( typename array_iterator<Array>::iterator const & iter )
         a( iter.a ), i( iter.i ) { }
 } ;
 ~~~
+
+残りのメンバー関数は`iterator`とほぼ同じだ。
+
+例えば`operator ++`は完全に同じだ。
+
+~~~c++
+// iterator版
+array_iterator & array_iterator::operator++()
+{
+    ++i ;
+    return *this ;
+}
+// const_iterator版
+array_const_iterator & array_const_iterator::operator ++()
+{
+    ++i ;
+    return *this ;
+}
+~~~
+
+`operator *`や`operator []`はconstなリファレンスを返す。
+
+~~~c++
+typename Array::const_reference operator *() const
+{
+    return a[i] ;
+}
+
+typename Array::const_reference operator []( std::size_t i ) const
+{
+    return *(*this + i) ;
+}
+~~~
+
+このために、`array`クラスにもネストされた型名`const_reference`を宣言しておく。
+
+~~~c++
+template < typename T, std::size_t N >
+struct array
+{
+    using const_reference = T const & ;
+} ;
+~~~
+
+残りは`iterator`の実装を参考に読者が自分で実装してみよう。
