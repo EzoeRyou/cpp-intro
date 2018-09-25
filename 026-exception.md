@@ -92,7 +92,7 @@ throw value ;
 ~~~cpp
 int main()
 {
-    // 0を入力するなよ
+    // 0を入力するなよ、絶対するなよ
     std::cout << "Don't type 0. >"s ;
 
     int input {} ;
@@ -107,7 +107,7 @@ int main()
 }
 ~~~
 
-このプログラムを実行すると、0以外を入力したならば"Success!\n"が出力される。0を入力した場合、例外が投げられる。例外が投げられると、通常の実行はすっ飛ばされる。エラー処理はしていないので、プログラムは終了する。
+このプログラムを実行すると、非0を入力した場合、"Success!\n"が出力される。0を入力した場合、例外が投げられる。例外が投げられると、通常の実行はすっ飛ばされる。エラー処理はしていないので、プログラムは終了する。
 
 `std::array`や`std::vector`のメンバー関数`at(n)`は`n`が要素数を超える場合、例外を投げている。
 
@@ -262,4 +262,194 @@ int main()
 
 関数`h`は関数`g`を呼び出し、関数`g`は関数`f`を呼び出し、関数`f`は例外を投げる。このように複雑な関数呼び出しの結果として投げられる例外もキャッチできる。
 
-## 例外による実行の巻き戻し
+すでに学んだように、`std::array<T>::at`に範囲外のインデックスを渡したときは`std::out_of_range`クラスが例外として投げられる。これをキャッチしてみよう。
+
+~~~cpp
+int main()
+{
+    std::array<1,int> a = {0} ;
+
+    try { a[1000] ; }
+    catch( std::out_of_range & e )
+    {
+        // エラー内容を示す文字列
+        std::cout << e.what() ;
+    }
+}
+~~~
+
+
+
+## 例外による巻き戻し
+
+例外が投げられた場合、その例外が投げられた場所を囲むtryブロックと対応するcatchに到達するまで、関数呼び出しが巻き戻される。これを`スタックアンワインディング`(stack unwinding)という。
+
+~~~cpp
+void f() { throw 0 ; } 
+void g() { f() ; }
+void h() { g() ; }
+
+int main()
+{
+    try { h() ; }
+    catch( int e ) { }
+
+}
+~~~
+
+この例では、関数`main`が関数`h`を呼び出し、その結果として最終的に関数`f`の中で例外が投げられる。投げられた例外は関数呼び出しを巻き戻して関数`main`の中のtryブロックまで到達し、対応するcatchに捕まる。
+
+もし関数`main`を抜けてもなお対応するcatchがない場合はどうなるのか。
+
+~~~cpp
+int main()
+{
+    throw 0 ;
+    // 対応するcatchがない
+}
+~~~
+
+その場合、`std::terminate()`という関数が呼ばれる。この関数が呼ばれた場合、プログラムは終了する。
+
+~~~cpp
+int main()
+{
+    // プログラムは終了する
+    std::terminate() ;
+}
+~~~
+
+`tryブロック`はネストできる。その場合、対応するcatchが見つかるまで巻き戻しが起こる。
+
+~~~cpp
+void f()
+{
+    try { throw 0 ; }
+    catch ( double e ) { }
+}
+
+int main()
+{
+    try { // try 1
+        try { // try 2
+            f() ;
+        } catch( std::string & e ) { }
+    } catch ( int e )
+    {
+        // ここで捕まる
+    }
+}
+~~~
+
+上のコードは複雑な`tryブロック`のネストが行われている。プログラムがどのように実行されるのかを考えてみよう。
+
+まず関数`main`が関数`f`を呼び出す。関数`f`は例外を投げる。関数`f`の中のtryブロックは対応するcatchがないので関数`main`に巻き戻る。関数`main`の内側のtryブロック、ソースコードでは`// try 2` とコメントをしているtryブロックのcatchには対応しない。更に上のtryブロックに巻き戻る。`// try 1`の`tryブロック`のcatchはint型なので、このcatchに捕まる。
+
+例外が投げられ、`スタックアンワインディング`による巻き戻しが発生した場合、通常のプログラムの実行は行われない。例えば以下のプログラムは何も出力しない。
+
+~~~cpp
+void f()
+{
+    throw 0 ;
+    // 例外を投げたあとの実行
+    std::cout << "function f\n"s ;
+}
+
+void g()
+{
+    f() ;
+    // 関数fを呼んだあとの実行
+    std::cout << "function g\n"s ;
+}
+
+int main()
+{
+    g() ;
+    // 関数gを呼んだあとの実行
+    std::cout << "function main\n"s ;
+}
+~~~
+
+`スタックアンワインディング`中に通常の実行は行われないが、変数の破棄は行われる。これはとても重要だ。変数が破棄されるとき、デストラクターが実行されるのを覚えているだろうか。
+
+~~~cpp
+struct Object
+{
+    std::string name ;
+    // コンストラクター
+    Object( std::string const & name ) : name(name) 
+    { std::cout << name << " is constructed.\n"s ; }
+
+    // デストラクター
+    ~Object()
+    { std::cout << name << " is destructed.\n"s ; }
+} ;
+
+int main()
+{
+    // 変数objが構築される
+    Object obj("obj"s) ;
+
+    // 変数objが破棄される
+}
+~~~
+
+実行結果
+~~~
+obj is constructed.
+obj is destructed.
+~~~
+
+例外のスタックアンワインディングでは関数内の変数が破棄される。つまりデストラクターが実行される。
+
+~~~c++
+void f()
+{
+    Object obj("f"s) ;
+    throw 0 ;
+}
+
+void g()
+{
+    Object obj("g"s) ;
+    f() ;
+}
+
+int main()
+{
+    Object obj("main"s) ;
+
+    try {
+        g() ;
+    } catch( int e )
+    {
+        std::cout << "catched.\n"s ;
+    }
+
+}
+~~~
+
+このプログラムを実行した結果は以下のようになる。
+
+~~~
+main is constructed.
+g is constructed.
+f is constructed.
+f is destructed.
+g is destructed.
+catched.
+main is destructed.
+~~~
+
+なぜこの順番に出力されるか考えてみよう。
+
+1. プログラムの実行は関数mainから始まる。そのためまずmainが構築される。
+2. 関数mainは関数gを呼ぶ。gが構築される。
+3. 関数gは関数fを呼ぶ。fが構築される。
+4. 関数fは例外を投げるので、fは破棄される。
+5. 関数gに巻き戻ったがcatchがないのでさらに巻き戻る。gが破棄される。
+6. 関数mainに巻き戻ったところ対応するcatchがあるのでスタックアンワインディングは停止する。
+7. `catched.`が出力される。
+8. mainが破棄される。
+
+例外が投げられると通常の実行は飛ばされるので、例外が投げられるかもしれない処理のあとに、例外の有無にかかわらず絶対に実行したい処理がある場合は、クラスのデストラクターに書くとよい。
