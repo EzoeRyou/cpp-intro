@@ -310,6 +310,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#残りのイテレーターの実装">残りのイテレーターの実装</a></li>
 <li><a href="#constなイテレーター-const_iterator">constなイテレーター: const_iterator</a></li>
 </ul></li>
+<li><a href="#傲慢なエラー処理-例外">傲慢なエラー処理: 例外</a><ul>
+<li><a href="#例外を投げる">例外を投げる</a></li>
+<li><a href="#例外を捕まえる">例外を捕まえる</a></li>
+<li><a href="#例外による巻き戻し">例外による巻き戻し</a></li>
+</ul></li>
+<li><a href="#ポインター">ポインター</a><ul>
+<li><a href="#意味上のポインター">意味上のポインター</a><ul>
+<li><a href="#リファレンスと同じ機能">リファレンスと同じ機能</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
 <li><a href="#define">#define</a><ul>
@@ -9653,6 +9663,46 @@ array_iterator array_iterator::<span class="kw">operator</span> --(<span class="
 } ;</code></pre></div>
 <p><code>operator +</code>はオペランドの値を変更しないので<code>const</code>にできる。</p>
 <p>同様に、<code>operator -=</code>とoperator <code>-</code>もある。上を参考に自分で実装してみよう。</p>
+<p><code>operator +</code>によって任意のn個先の要素を使うことができるようになったので、イテレーターiのn個先の要素を参照したければ、以下のように<code>*(i+n)</code>も書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">3</span>] ; <span class="co">// 4</span>
+
+    <span class="kw">auto</span> i = a.begin() ;
+
+    <span class="bu">std::</span>cout &lt;&lt; *(i + <span class="dv">3</span>) ; <span class="co">// 4</span>
+}</code></pre></div>
+<p>カッコが必要なのは、演算子の評価順序の都合だ。<code>*i + 3</code>は<code>(*i) + 3</code>であり、<code>i</code>の指す要素に対して<code>+3</code>される。<code>*(i+3)</code>は<code>i</code>の指す要素の3つ先の要素の値を読む。</p>
+<p>イテレーターiのn個先の要素を読み書きするのにいちいち<code>*(i+n)</code>と書くのは面倒なので、<code>std::array</code>や<code>std::vector</code>のイテレーターには<code>operator []</code>がある。これを使うと<code>i[n]</code>と書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="bu">std::</span>cout &lt;&lt; a[<span class="dv">3</span>] ; <span class="co">// 4</span>
+
+    <span class="kw">auto</span> i = a.begin() ;
+
+    <span class="bu">std::</span>cout &lt;&lt; *(i + <span class="dv">3</span>) ; <span class="co">// 4</span>
+}</code></pre></div>
+<p><code>operator []</code>の実装は文字通り<code>*(i+n)</code>と同じことをするだけでよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Array &gt;
+<span class="kw">struct</span> array_iterator
+{
+    <span class="kw">typename</span> Array::reference
+    <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t n ) <span class="at">const</span>
+    {
+        <span class="cf">return</span> *( *<span class="kw">this</span> + n ) ;
+    }
+
+    <span class="co">// その他のメンバー</span>
+} ;</code></pre></div>
+<p>この<code>operator []</code>は、<code>array_iterator</code>のデータメンバーを変更しないのでconst修飾できる。</p>
+<p><code>*this</code>というのはこのイテレーターのオブジェクトなので、それに対してすでに実装済みの<code>operator +</code>を適用し、その結果に<code>operator *</code>を適用している。既存の実装を使わない場合、return文は以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">return</span> a[i+n] ;</code></pre></div>
+<p>こちらのほうが一見簡単なように見えるが、<code>operator +</code>や<code>operator *</code>の実装が複雑な場合、この方法では同じコードを複数の箇所に書かなければならず、コードを修正するときは同じ変更を複数の箇所に行わなければならない。すでに実装したメンバー関数は積極的に使って楽をしていこう。</p>
 <p>イテレーターは大小比較ができる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">a &lt;  b ;
 a &lt;= b ;
@@ -9690,38 +9740,19 @@ a &gt;= b ;</code></pre></div>
 {
     <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
 
+    <span class="co">// iterator</span>
     <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt;::iterator iter = a.begin() ;
-
+    <span class="co">// const_iterator</span>
     <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt;::const_iterator const_iter = a.cbegin() ;
 }</code></pre></div>
-<p><code>const_iterator</code>は<code>const iterator</code>ではない。<code>const_iterator</code>とはそれ自体が型名だ。<code>const</code>というのは型名を就職できる別の機能だ。</p>
+<p><code>const_iterator</code>は<code>const iterator</code>ではない。<code>const_iterator</code>とはそれ自体が型名だ。<code>const</code>というのは型名を修飾する別の機能だ。</p>
 <p>そのため、constの有無の2種類の状態と、<code>iterator</code>, <code>const_iterator</code>の2つの型をかけ合わせた、以下の型が存在する。</p>
-<table>
-<thead>
-<tr class="header">
-<th align="left">constの有無</th>
-<th align="left">イテレーターの型</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left"></td>
-<td align="left">iterator const_iterator</td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left">---------------- ----------------------</td>
-</tr>
-<tr class="odd">
-<td align="left">無</td>
-<td align="left">iterator const_iteartor</td>
-</tr>
-<tr class="even">
-<td align="left">有</td>
-<td align="left">const iterator const const_iterator</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li><code>iterator</code></li>
+<li><code>const iterator</code></li>
+<li><code>const_iterator</code></li>
+<li><code>const const_iterator</code></li>
+</ul>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
 {
     <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;
@@ -9735,6 +9766,610 @@ a &gt;= b ;</code></pre></div>
     <span class="co">// const const_iterator</span>
     <span class="at">const</span> Array::const_iterator c_ci ;
 }</code></pre></div>
+<p><code>const_iterator</code>は<code>iterator</code>とは別の型だ。自作の<code>array</code>に実装するならば以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="kw">using</span> iterator          = array_iterator&lt;array&gt; ;
+    <span class="kw">using</span> conste_iterator   = array_const_iterator&lt;array&gt; ;
+} ;</code></pre></div>
+<p>それぞれの型に対して、constキーワードをつけた型とそうでない型が存在する。</p>
+<p><code>const_iterator</code>を得る方法はいくつかある。</p>
+<ul>
+<li>constなarrayの<code>begin/end</code>を呼び出す</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// constなarray</span>
+    <span class="at">const</span> <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// const_iterator</span>
+    <span class="kw">auto</span> i = a.begin() ;
+}</code></pre></div>
+<ul>
+<li><code>cbegin/cend</code>を呼び出す</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// const_iterator</span>
+    <span class="kw">auto</span> i = a.cbegin() ;
+}</code></pre></div>
+<ul>
+<li><code>iterator</code>から<code>const_iterator</code>への変換</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;
+    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// iterator</span>
+    Array::iterator i = a.begin() ;
+    <span class="co">// iteratorからconst_iteratorへの変換</span>
+    Array::const_iterator j = i ;
+}</code></pre></div>
+<p>constキーワードはすでに学んだように、オブジェクトの値を変更できないようにする機能だ。</p>
+<p>なぜ<code>const_iterator</code>が存在するのか。<code>const iterator</code>ではだめなのか。その理由は、<code>const iterator</code>は値の変更ができないためだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;
+    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// const iterator</span>
+    <span class="at">const</span> Array::iterator iter = a.begin() ;
+
+    <span class="co">// エラー</span>
+    <span class="co">// constなオブジェクトは変更できない</span>
+    ++iter ;
+
+    <span class="co">// Ok</span>
+    <span class="co">// iterは変更していない</span>
+    <span class="kw">auto</span> next_iter = iter + <span class="dv">1</span> ;
+}</code></pre></div>
+<p><code>const_iterator</code>ならばイテレーター自体の変更はできる。イテレーターが参照する要素の変更はできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;
+    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="kw">auto</span> citer = a.begin() ;
+
+    <span class="co">// OK</span>
+    <span class="co">// イテレーター自体の変更</span>
+    ++citer ;
+
+    <span class="co">// OK</span>
+    <span class="co">// 要素を変更しない</span>
+    <span class="bu">std::</span>cout &lt;&lt; *citer ;
+
+    <span class="co">// エラー</span>
+    <span class="co">// 要素を変更してる</span>
+    *citer = <span class="dv">0</span> ;
+}</code></pre></div>
+<p><code>const const_iterator</code>は<code>const_iterator</code>の<code>const</code>だ。<code>const const_iterator</code>は<code>const iterator</code>と同じく、イテレーター自体の変更ができない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;
+    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// const const_iterator</span>
+    <span class="kw">auto</span> <span class="at">const</span> iter = a.begin() ;
+
+    <span class="co">// エラー</span>
+    <span class="co">// constなオブジェクトは変更できない</span>
+    ++iter ;
+
+    <span class="co">// Ok</span>
+    <span class="co">// iterは変更していない</span>
+    <span class="kw">auto</span> next_iter = iter + <span class="dv">1</span> ;
+}</code></pre></div>
+<p><code>auto const</code>もしくは<code>const auto</code>を使うと、変数の型を自動で推定してくれるが、constがつくようになる。</p>
+<p><code>const_iterator</code>はどう実装するのか。まず<code>array</code>にネストされた型名<code>const_iterator</code>を追加する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="kw">using</span> iterator = array_iterator&lt;array&gt; ;
+    <span class="kw">using</span> const_iterator = array_const_iterator&lt;array&gt; ;
+} ;</code></pre></div>
+<p><code>array</code>に<code>const_iterator</code>を返す<code>cbegin/cend</code>と、<code>const array</code>のときに<code>const_iterator</code>を返す<code>begin/end</code>を追加する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="kw">using</span> iterator = array_iterator&lt;array&gt; ;
+    <span class="kw">using</span> const_iterator = array_const_iterator&lt;array&gt; ;
+
+    <span class="co">// const arrayのときにconst_iteratorを返す</span>
+    const_iterator begin() <span class="at">const</span>
+    { <span class="cf">return</span> const_iterator(*<span class="kw">this</span>, <span class="dv">0</span>) ; }
+    const_iterator end() <span class="at">const</span>
+    { <span class="cf">return</span> const_iterator(*<span class="kw">this</span>, N<span class="dv">-1</span>) ; }
+
+    <span class="co">// 常にconst_iteratorを返す</span>
+    const_iterator cbegin() <span class="at">const</span>
+    { <span class="cf">return</span> const_iterator(*<span class="kw">this</span>, <span class="dv">0</span>) ; }
+    const_iterator cend() <span class="at">const</span>
+    { <span class="cf">return</span> const_iterator(*<span class="kw">this</span>, N<span class="dv">-1</span>) ; }
+
+    <span class="co">// その他のメンバー</span>
+} ;</code></pre></div>
+<p>あとは<code>array_const_iterator&lt;array&gt;</code>を実装する。その実装は<code>array_iterator&lt;array&gt;</code>とほぼ同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Array &gt;
+<span class="kw">struct</span> array_const_iterator
+{
+    Array <span class="at">const</span> &amp; a ;
+    <span class="bu">std::</span>size_t i ;
+
+    <span class="co">// コンストラクター</span>
+    array_const_iterator( Array <span class="at">const</span> &amp; a, <span class="bu">std::</span>size_t i )
+        a(a), i(i) { }
+} ;</code></pre></div>
+<p>ただし、<code>const_iterator</code>は<code>iterator</code>から変換できるので、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;
+    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// iterator</span>
+    <span class="kw">auto</span> i = a.begin() ;
+
+    <span class="co">// iteratorからconst_iteratorへの変換</span>
+    Array::const_iterator j = i ;
+}</code></pre></div>
+<p>これに対応するために、<code>const_iterator</code>のコンストラクターは<code>iterator</code>から変換するためのコンストラクターも持つ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="kw">template</span> &lt; <span class="kw">typename</span> Array &gt;
+<span class="kw">struct</span> array_const_iterator
+{
+    Array <span class="at">const</span> &amp; a ;
+    <span class="bu">std::</span>size_t i ;
+
+    <span class="co">// array_iteratorからの変換コンストラクター</span>
+    array_const_iterator( <span class="kw">typename</span> array_iterator&lt;Array&gt;::iterator <span class="at">const</span> &amp; iter )
+        a( iter.a ), i( iter.i ) { }
+} ;</code></pre></div>
+<p>残りのメンバー関数は<code>iterator</code>とほぼ同じだ。</p>
+<p>例えば<code>operator ++</code>は完全に同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// iterator版</span>
+array_iterator &amp; array_iterator::<span class="kw">operator</span>++()
+{
+    ++i ;
+    <span class="cf">return</span> *<span class="kw">this</span> ;
+}
+<span class="co">// const_iterator版</span>
+array_const_iterator &amp; array_const_iterator::<span class="kw">operator</span> ++()
+{
+    ++i ;
+    <span class="cf">return</span> *<span class="kw">this</span> ;
+}</code></pre></div>
+<p><code>operator *</code>や<code>operator []</code>はconstなリファレンスを返す。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">typename</span> Array::const_reference <span class="kw">operator</span> *() <span class="at">const</span>
+{
+    <span class="cf">return</span> a[i] ;
+}
+
+<span class="kw">typename</span> Array::const_reference <span class="kw">operator</span> []( <span class="bu">std::</span>size_t i ) <span class="at">const</span>
+{
+    <span class="cf">return</span> *(*<span class="kw">this</span> + i) ;
+}</code></pre></div>
+<p>このために、<code>array</code>クラスにもネストされた型名<code>const_reference</code>を宣言しておく。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+    <span class="kw">using</span> const_reference = T <span class="at">const</span> &amp; ;
+} ;</code></pre></div>
+<p>残りは<code>iterator</code>の実装を参考に読者が自分で実装してみよう。</p>
+<h1 id="傲慢なエラー処理-例外">傲慢なエラー処理: 例外</h1>
+<h2 id="例外を投げる">例外を投げる</h2>
+<p><code>std::array</code>の実装方法はほとんど解説した。読者は<code>std::array</code>の実装方法を知り、確固たる自信のもとに<code>std::array</code>を使えるようになった。ただし、ひとつだけ問題がある。</p>
+<p>&quot;std::array&quot;のユーザーはあらかじめ設定した要素数を超える範囲の要素にアクセスすることができてしまう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 妥当な要素はa[0]のみ</span>
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">1</span>&gt; a = {<span class="dv">1</span>} ;
+
+    <span class="co">// エラー、範囲外</span>
+    a[<span class="dv">1000</span>] = <span class="dv">0</span> ;
+}</code></pre></div>
+<p><code>array</code>を自力で実装できる傲慢な読者としては、ユーザーごときが間違った使い方をできるのが許せない。間違いを起こした時点でエラーを発生させ、問題を知らしめ、対処できるようにしたい。</p>
+<p><code>operator []</code>に範囲外チェックを入れるのは簡単だ。問題は、エラーをユーザーに通知する方法がない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">reference array::<span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t i )
+{
+    <span class="co">// 範囲外チェック</span>
+    <span class="cf">if</span> ( i &gt;= size() )
+    {
+        <span class="co">// エラー検出</span>
+        <span class="co">// しかし何をreturnすればいいのだろう。</span>
+    }
+
+    <span class="cf">return</span> storage[i] ;
+}</code></pre></div>
+<p><code>operator []</code>は伝統的にエラーチェックをしない要素アクセスをするものだ。</p>
+<p><code>vector</code>で一番最初に説明した要素アクセスの方法であるメンバー関数<code>at</code>を覚えているだろうか。実はメンバー関数<code>at</code>はエラーチェックをする。試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">1</span>&gt; a = {<span class="dv">1</span>} ;
+
+    <span class="bu">std::</span>cout &lt;&lt; a.at(<span class="dv">1000</span>) = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>以下が実行結果だ。</p>
+<pre><code>terminate called after throwing an instance of &#39;std::out_of_range&#39;
+  what():  array::at: __n (which is 1000) &gt;= _Nm (which is 1)</code></pre>
+<p>何やらよくわからないがエラーのようだ。以下のような意味であることがわかる。</p>
+<pre><code>`std::out_of_range`がthrowされたあとにterminateが呼ばれた
+  what(): array_at: __n(値は1000) &gt;= _Nm (値は1)</code></pre>
+<p>どうやらエラーメッセージのようだ。わかりづらいメッセージだが、なんとなく言わんとすることはわかる。<code>_Nm</code>がarrayの要素数で、<code>__n</code>がメンバー関数<code>at</code>に渡した実引数だ。要素数<code>_Nm</code>よりも<code>__n</code>が大きい。</p>
+<p>このエラー処理は、「例外」を使って行われる。</p>
+<p>例外は通常の処理をすっ飛ばして特別なエラー処理をする機能だ。何もエラー処理をしない場合、プログラムは終了する。例外を発生させることを、「例外を投げる」という。</p>
+<p>例外は文字通り投げるという意味の<code>throw</code>キーワードを使い、何らかの値を投げる(throw)。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int型の値123を投げる</span>
+<span class="cf">throw</span> <span class="dv">123</span> ;
+
+<span class="co">// double型の値3.14を投げる</span>
+<span class="cf">throw</span> <span class="fl">3.14</span> ;
+
+<span class="bu">std::</span>array&lt;<span class="dt">int</span>, <span class="dv">5</span>&gt; value = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+<span class="co">// std::array&lt;int,5&gt;型の変数valueの値を投げる</span>
+<span class="cf">throw</span> value ;</code></pre></div>
+<p>この例では、int型、double型、<code>std::array&lt;int,5&gt;</code>型の値を投げている。</p>
+<p>一度例外が投げられると、通常の実行はすっ飛ばされる。</p>
+<p>以下は0を入力すると例外を投げるプログラムだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 0を入力するなよ、絶対するなよ</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Don&#39;t type 0. &gt;&quot;</span>s ;
+
+    <span class="dt">int</span> input {} ;
+    <span class="bu">std::</span>cin &gt;&gt; input ;
+
+    <span class="co">/// 入力が0なら例外を投げる</span>
+    <span class="cf">if</span> ( input == <span class="dv">0</span> )
+        <span class="cf">throw</span> <span class="dv">0</span> ;
+
+    <span class="co">// 通常の処理</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Succcess!</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>このプログラムを実行すると、非0を入力した場合、&quot;Success!&quot;が出力される。0を入力した場合、例外が投げられる。例外が投げられると、通常の実行はすっ飛ばされる。エラー処理はしていないので、プログラムは終了する。</p>
+<p><code>std::array</code>や<code>std::vector</code>のメンバー関数<code>at(n)</code>は<code>n</code>が要素数を超える場合、例外を投げている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">array::reference array::at( <span class="bu">std::</span>size_t n )
+{
+    <span class="cf">if</span> ( n &gt;= size() )
+        <span class="cf">throw</span> 何らかの値
+
+    <span class="cf">return</span> storage[n] ;
+}</code></pre></div>
+<p>投げる例外は、<code>std::out_of_range</code>というクラスの値だ。このクラスを完全に説明するのは現時点では難しいが、以下のように振る舞うと考えておこう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">namespace</span> std {
+
+<span class="kw">struct</span> out_of_range
+{
+    <span class="co">// エラー内容の文字列を受け取るコンストラクター</span>
+    out_of_range( <span class="bu">std::</span>string <span class="at">const</span> &amp; ) ;
+    <span class="co">// エラー内容の文字列を返すメンバー関数</span>
+    <span class="kw">auto</span> what() ;
+} ;
+
+}</code></pre></div>
+<p>とりあえず使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>out_of_range err(<span class="st">&quot;I am error.&quot;</span>) ;
+
+    <span class="co">// I am error.</span>
+    <span class="bu">std::</span>cout &lt;&lt; err.what() ;
+}</code></pre></div>
+<p>コンストラクターでエラー内容を表現した文字列を受け取り、メンバー関数<code>what</code>でエラー内容の文字列を取得する。</p>
+<p>必要な情報は全て学んだ。あとはメンバー関数<code>at</code>を実装するだけだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">array::reference array::at( <span class="bu">std::</span>size_t n )
+{
+    <span class="cf">if</span> ( n &gt;= size() )
+        <span class="cf">throw</span> <span class="bu">std::</span>out_of_range(<span class="st">&quot;Error: Out of Range&quot;</span>) ;
+
+    <span class="cf">return</span> storage[n] ;
+}</code></pre></div>
+<h2 id="例外を捕まえる">例外を捕まえる</h2>
+<p>現状では、エラーを発見して例外を投げたら即座にプログラムが終了してしまう。投げた例外を途中で捕まえて、プログラムを通常の実行に戻す機能がほしい。その機能が「例外のキャッチ」だ。</p>
+<p>例外のキャッチには<code>try</code>キーワードと<code>catch</code>キーワードを使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="cf">try</span> {
+    <span class="co">// 例外を投げるコード</span>
+} <span class="cf">catch</span>( 型 名前 )
+{
+    エラー処理
+}</code></pre></div>
+<p><code>try {}</code>ブロックの中で投げられた例外は、<code>catch</code>で型が一致する場合にキャッチされる。例外がキャッチされた場合、<code>catch</code>のブロックが実行される。そして実行が再開される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+
+    <span class="cf">try</span> {
+        <span class="cf">throw</span> <span class="dv">123</span> ; <span class="co">// int型</span>
+    }
+    <span class="co">// キャッチする</span>
+    <span class="cf">catch</span>( <span class="dt">int</span> e )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; e ;
+    }
+
+    <span class="co">// 実行される</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;resumed.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p><code>catch</code>の型と投げられた例外の型が一致しない場合は、キャッチしない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">try</span> {
+        <span class="cf">throw</span> <span class="fl">3.14</span> ; <span class="co">// double型</span>
+    }
+    <span class="co">// キャッチしない</span>
+    <span class="cf">catch</span>( <span class="dt">int</span> e ) { }
+
+    <span class="co">// 実行されない</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;You won&#39;t read this.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p><code>catch</code>は複数書くことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">try</span> {
+        <span class="cf">throw</span> <span class="st">&quot;error&quot;</span>s ; <span class="co">// std::string型</span>
+    }
+    <span class="co">// キャッチしない</span>
+    <span class="cf">catch</span>( <span class="dt">int</span> e ) { }
+    <span class="co">// キャッチしない</span>
+    <span class="cf">catch</span>( <span class="dt">double</span> e ) { }
+    <span class="co">// キャッチする</span>
+    <span class="cf">catch</span>( <span class="bu">std::</span>string &amp; e )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; e ;
+    }
+}</code></pre></div>
+<p><code>tryブロック</code>の中で投げられた例外は、たとえ複雑な関数呼び出しの奥底にある例外でもあますところなくキャッチされる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="cf">throw</span> <span class="dv">123</span> ;
+}
+
+<span class="dt">void</span> g() { f() ; } 
+<span class="dt">void</span> h() { g() ; }
+
+
+<span class="dt">int</span> main()
+{
+    <span class="cf">try</span> {
+        h() ;
+    }
+    <span class="co">// キャッチされる</span>
+    <span class="cf">catch</span>( <span class="dt">int</span> e ) { }
+}</code></pre></div>
+<p>関数<code>h</code>は関数<code>g</code>を呼び出し、関数<code>g</code>は関数<code>f</code>を呼び出し、関数<code>f</code>は例外を投げる。このように複雑な関数呼び出しの結果として投げられる例外もキャッチできる。</p>
+<p>すでに学んだように、<code>std::array&lt;T&gt;::at</code>に範囲外のインデックスを渡したときは<code>std::out_of_range</code>クラスが例外として投げられる。これをキャッチしてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>array&lt;<span class="dv">1</span>,<span class="dt">int</span>&gt; a = {<span class="dv">0</span>} ;
+
+    <span class="cf">try</span> { a[<span class="dv">1000</span>] ; }
+    <span class="cf">catch</span>( <span class="bu">std::</span>out_of_range &amp; e )
+    {
+        <span class="co">// エラー内容を示す文字列</span>
+        <span class="bu">std::</span>cout &lt;&lt; e.what() ;
+    }
+}</code></pre></div>
+<h2 id="例外による巻き戻し">例外による巻き戻し</h2>
+<p>例外が投げられた場合、その例外が投げられた場所を囲むtryブロックと対応するcatchに到達するまで、関数呼び出しが巻き戻される。これを<code>スタックアンワインディング</code>(stack unwinding)という。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f() { <span class="cf">throw</span> <span class="dv">0</span> ; } 
+<span class="dt">void</span> g() { f() ; }
+<span class="dt">void</span> h() { g() ; }
+
+<span class="dt">int</span> main()
+{
+    <span class="cf">try</span> { h() ; }
+    <span class="cf">catch</span>( <span class="dt">int</span> e ) { }
+
+}</code></pre></div>
+<p>この例では、関数<code>main</code>が関数<code>h</code>を呼び出し、その結果として最終的に関数<code>f</code>の中で例外が投げられる。投げられた例外は関数呼び出しを巻き戻して関数<code>main</code>の中のtryブロックまで到達し、対応するcatchに捕まる。</p>
+<p>もし関数<code>main</code>を抜けてもなお対応するcatchがない場合はどうなるのか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="cf">throw</span> <span class="dv">0</span> ;
+    <span class="co">// 対応するcatchがない</span>
+}</code></pre></div>
+<p>その場合、<code>std::terminate()</code>という関数が呼ばれる。この関数が呼ばれた場合、プログラムは終了する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// プログラムは終了する</span>
+    <span class="bu">std::</span>terminate() ;
+}</code></pre></div>
+<p><code>tryブロック</code>はネストできる。その場合、対応するcatchが見つかるまで巻き戻しが起こる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="cf">try</span> { <span class="cf">throw</span> <span class="dv">0</span> ; }
+    <span class="cf">catch</span> ( <span class="dt">double</span> e ) { }
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="cf">try</span> { <span class="co">// try 1</span>
+        <span class="cf">try</span> { <span class="co">// try 2</span>
+            f() ;
+        } <span class="cf">catch</span>( <span class="bu">std::</span>string &amp; e ) { }
+    } <span class="cf">catch</span> ( <span class="dt">int</span> e )
+    {
+        <span class="co">// ここで捕まる</span>
+    }
+}</code></pre></div>
+<p>上のコードは複雑な<code>tryブロック</code>のネストが行われている。プログラムがどのように実行されるのかを考えてみよう。</p>
+<p>まず関数<code>main</code>が関数<code>f</code>を呼び出す。関数<code>f</code>は例外を投げる。関数<code>f</code>の中のtryブロックは対応するcatchがないので関数<code>main</code>に巻き戻る。関数<code>main</code>の内側のtryブロック、ソースコードでは<code>// try 2</code> とコメントをしているtryブロックのcatchには対応しない。更に上のtryブロックに巻き戻る。<code>// try 1</code>の<code>tryブロック</code>のcatchはint型なので、このcatchに捕まる。</p>
+<p>例外が投げられ、<code>スタックアンワインディング</code>による巻き戻しが発生した場合、通常のプログラムの実行は行われない。例えば以下のプログラムは何も出力しない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="cf">throw</span> <span class="dv">0</span> ;
+    <span class="co">// 例外を投げたあとの実行</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;function f</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="dt">void</span> g()
+{
+    f() ;
+    <span class="co">// 関数fを呼んだあとの実行</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;function g</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="dt">int</span> main()
+{
+    g() ;
+    <span class="co">// 関数gを呼んだあとの実行</span>
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;function main</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p><code>スタックアンワインディング</code>中に通常の実行は行われないが、変数の破棄は行われる。これはとても重要だ。変数が破棄されるとき、デストラクターが実行されるのを覚えているだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Object
+{
+    <span class="bu">std::</span>string name ;
+    <span class="co">// コンストラクター</span>
+    Object( <span class="bu">std::</span>string <span class="at">const</span> &amp; name ) : name(name) 
+    { <span class="bu">std::</span>cout &lt;&lt; name &lt;&lt; <span class="st">&quot; is constructed.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+
+    <span class="co">// デストラクター</span>
+    ~Object()
+    { <span class="bu">std::</span>cout &lt;&lt; name &lt;&lt; <span class="st">&quot; is destructed.</span><span class="sc">\n</span><span class="st">&quot;</span>s ; }
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// 変数objが構築される</span>
+    Object obj(<span class="st">&quot;obj&quot;</span>s) ;
+
+    <span class="co">// 変数objが破棄される</span>
+}</code></pre></div>
+<p>実行結果 <sub>~</sub> obj is constructed. obj is destructed. <sub>~</sub></p>
+<p>例外のスタックアンワインディングでは関数内の変数が破棄される。つまりデストラクターが実行される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    Object obj(<span class="st">&quot;f&quot;</span>s) ;
+    <span class="cf">throw</span> <span class="dv">0</span> ;
+}
+
+<span class="dt">void</span> g()
+{
+    Object obj(<span class="st">&quot;g&quot;</span>s) ;
+    f() ;
+}
+
+<span class="dt">int</span> main()
+{
+    Object obj(<span class="st">&quot;main&quot;</span>s) ;
+
+    <span class="cf">try</span> {
+        g() ;
+    } <span class="cf">catch</span>( <span class="dt">int</span> e )
+    {
+        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;catched.</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+    }
+
+}</code></pre></div>
+<p>このプログラムを実行した結果は以下のようになる。</p>
+<pre><code>main is constructed.
+g is constructed.
+f is constructed.
+f is destructed.
+g is destructed.
+catched.
+main is destructed.</code></pre>
+<p>なぜこの順番に出力されるか考えてみよう。</p>
+<ol style="list-style-type: decimal">
+<li>プログラムの実行は関数mainから始まる。そのためまずmainが構築される。</li>
+<li>関数mainは関数gを呼ぶ。gが構築される。</li>
+<li>関数gは関数fを呼ぶ。fが構築される。</li>
+<li>関数fは例外を投げるので、fは破棄される。</li>
+<li>関数gに巻き戻ったがcatchがないのでさらに巻き戻る。gが破棄される。</li>
+<li>関数mainに巻き戻ったところ対応するcatchがあるのでスタックアンワインディングは停止する。</li>
+<li><code>catched.</code>が出力される。</li>
+<li>mainが破棄される。</li>
+</ol>
+<p>例外が投げられると通常の実行は飛ばされるので、例外が投げられるかもしれない処理のあとに、例外の有無にかかわらず絶対に実行したい処理がある場合は、クラスのデストラクターに書くとよい。</p>
+<h1 id="ポインター">ポインター</h1>
+<p>ポインターは難しいとよく言われる。世の中にはポインターのためにC言語とC++を挫折し、他の軟弱な言語に逃げるプログラマーがいる。ポインターしか解説していない本が出版される。Joel Spolskyがエッセイを書く。</p>
+<p>ポインターの理解は優秀なプログラマーとなるために必須である。ポインターを理解できない人間は優秀なプログラマーにはなれない。もし、本書を呼んでポインターが理解できない場合、プログラマーには向いていないということだ。</p>
+<p>ポインターを難しくしている原因には、意味上のポインターと、文法上のポインターと、ポインターを使って解く問題とがある。いずれも難しいが、本書を読めばポインターは完全に理解できる。</p>
+<h2 id="意味上のポインター">意味上のポインター</h2>
+<h3 id="リファレンスと同じ機能">リファレンスと同じ機能</h3>
+<p>ポインターはオブジェクトを参照するための機能だ。この点ではリファレンスと同じ機能を提供している。</p>
+<p>リファレンスを覚えているだろうか。T型へのリファレンスはT型のオブジェクトそのものではなく、T型のオブジェクトへの参照だ。リファレンスへの操作は、参照したオブジェクトへの操作になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// int型のオブジェクト</span>
+    <span class="dt">int</span> object = <span class="dv">0</span> ;
+
+    <span class="co">// オブジェクトを変更</span>
+    object = <span class="dv">123</span> ;
+
+    <span class="co">// 123</span>
+    <span class="bu">std::</span>cout &lt;&lt; object ;
+
+    <span class="co">// T型へのリファレンス</span>
+    <span class="co">// objectを参照する</span>
+    <span class="dt">int</span> &amp; reference = object ;
+
+    <span class="co">// objectが変更される</span>
+    reference = <span class="dv">456</span> ;
+
+    <span class="co">// 456</span>
+    <span class="bu">std::</span>cout &lt;&lt; object ;
+
+    <span class="co">// referenceはobjectを参照している</span>
+    object = <span class="dv">789</span> ;
+
+    <span class="co">// 参照するobjectの値</span>
+    <span class="co">// 789</span>
+    <span class="bu">std::</span>cout &lt;&lt; reference ;
+}</code></pre></div>
+<p>リファレンスは宣言と同時に初期化する。リファレンスの参照先をあとから返ることはできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> x = <span class="dv">0</span> ;
+
+    <span class="co">// rはxを参照する</span>
+    <span class="dt">int</span> r = x ;
+
+    <span class="dt">int</span> y = <span class="dv">1</span> ;
+
+    <span class="co">// xに1が代入される</span>
+    r = y ;
+}</code></pre></div>
+<p>最後の<code>r = y ;</code>はリファレンスrの参照先をyに変えるという意味ではない。リファレンスrの参照先にyの値を代入するという意味だ。</p>
+<p>ポインターはリファレンスに似ている。並べてみるとほとんど同じ意味だ。</p>
+<ul>
+<li>T型へのリファレンスはT型のオブジェクトを参照する</li>
+<li>T型へのポインターはT型のオブジェクトを参照する</li>
+</ul>
+<p>T型へのリファレンス型が<code>T &amp;</code>であるのに対し、T型へのポインター型は<code>T *</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// intへのリファレンス型</span>
+<span class="kw">using</span> <span class="dt">ref_type</span> = <span class="dt">int</span> &amp; ;
+<span class="co">// intへのポインター型</span>
+<span class="kw">using</span> <span class="dt">ptr_type</span> = <span class="dt">int</span> * ;</code></pre></div>
+<p>リファレンスの初期化は、単に参照したい変数名をそのまま書けばよかった。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> object { } ;
+<span class="dt">int</span> &amp; reference = object ;</code></pre></div>
+<p>ポインターの場合、参照したい変数名に、<code>&amp;</code>をつける必要がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> object { } ;
+<span class="dt">int</span> * pointer = &amp;object ;</code></pre></div>
+<p>リファレンスを経由してリファレンスが参照するオブジェクトを操作するには、単にリファレンス名を使えばよかった。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 書き込み</span>
+reference = <span class="dv">0</span>
+<span class="co">// 読み込み</span>
+<span class="dt">int</span> read = reference ;  </code></pre></div>
+<p>ポインターの場合、ポインター名に<code>*</code>をつける必要がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 書き込み</span>
+*pointer = <span class="dv">0</span> ;
+<span class="co">// 読み込み</span>
+<span class="dt">int</span> read = *pointer ;</code></pre></div>
+<p>ポインター名をそのまま使った場合、それは参照先のオブジェクトの値ではなく、ポインターという値になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// オブジェクト</span>
+<span class="dt">int</span> object { } ;
+
+<span class="co">// オブジェクトのポインター値で初期化</span>
+<span class="dt">int</span> * p1 = &amp;object
+
+<span class="co">// p1のポインター値で代入</span>
+<span class="co">// つまりobjectを参照する</span>
+<span class="dt">int</span> * p2 = p1 ;</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
