@@ -829,4 +829,137 @@ auto (*ptr)(func_ptr) -> func_ptr = &g ;
 ~~~
 
 
+### ポインター型の作り方
+
+T型へのポインター型は`T *`で作ることができる。
+
+ただし、Tが`int (int)`のような関数型である場合は、`int (*)(int)`になる。
+
+ただしただし、エイリアス宣言で型に別名をつけると`T *`でよくなる。
+
+~~~cpp
+using function_type = int (int) ;
+using pointer_to_function_type = function_type * ;
+~~~
+
+ポインターの型を書く際に、このようなことをいちいち考えるのは面倒だ。ここで必要のなのは、ある型`T`を受け取ったときに型`T *`を得るような方法だ。ところで、物覚えのいい読者は前にも似たような文章を読んだことに気がつくだろう。そう、テンプレートだ。
+
+テンプレートは型を引数化できる機能だ。今まではクラスや関数にしか使っていなかったが、実はエイリアス宣言にも使えるのだ。
+
+~~~cpp
+template < typename T >
+using type = T ;
+~~~
+
+これは引数と同じ型になるエイリアステンプレートだ。使ってみよう。
+
+~~~cpp
+template < typename T > using type = T ;
+
+// aはint
+type<int> a = 123 ;
+// bはdouble
+type<double> b = 1.23 ;
+// cはstd::vector<int>
+type<std::vector<int>> c = {1,2,3,4,5} ;
+~~~
+
+`using type = int ;`というエイリアス宣言があるとき`type`の型はintだ。エイリアス宣言は新しい`type`という型を作るわけではない。
+
+同様に、上のエイリアステンプレートtypeによる`type<int>`の型は`int`だ。新しい`type<int>`という型ができるわけではない。
+
+もう少し複雑な使い方もしてみよう。
+
+~~~c++
+// int
+type<type<int>> a = 0 ;
+// int
+type<type<type<int>>> b = 0 ;
+~~~
+
+`type<int>`の型は`int`なので、それを引数に渡した`type< type<int> >`も`int`だ。`type<T>`をいくつネストしようとも`int`になる。
+
+
+~~~c++
+// std::vector<int>
+std::vector< type<int> > a = {1,2,3,4,5} ;
+// std::vector<int>
+type<std::vector<type<int>>> b = {1,2,3,4,5} ;
+~~~
+
+`type<int>`は`int`なので、`std::vector<type<int>>`は`std::vector<int>`になる。それを更に`type<T>`で囲んでも同じ型だ。
+
+`type<T>`は面白いがなんの役に立つのだろうか。`type<T>`は型として使える。つまり`type<T> *`はポインターとして機能するのだ。
+
+~~~cpp
+template < typename T > using type = T ;
+
+// int *
+type<int> * a = nullptr ;
+// int (*)(int)
+type<int(int)> * b = nullptr ;
+~~~
+
+`type<int> *`は`int *`型だ。`type<int(int)> *`は`int(*)(int)`型だ。これでもう`*`をどこに書くかという問題に悩まされることはなくなった。
+
+しかしわざわざ`type<T> *`と書くのは依然として面倒だ。T型は引数で受け取っているのだから、最初からポインターを返してどうだろうか。
+
+~~~cpp
+template < typename T >
+using add_pointer_t = T * ;
+~~~
+
+さっそく試してみよう。
+
+~~~cpp
+// int *
+add_pointer_t<int> a = nullptr ;
+// int **
+add_pointer_t<int *> b = nullptr ;
+// int(*)(int)
+add_pointer_t<int(int)> c = nullptr ;
+~~~
+
+どうやら動くようだ。もっと複雑な例も試してみよう。
+
+~~~c++
+// int **
+add_pointer_t<add_pointer_t<int>> a = nullptr ;
+~~~
+
+`add_pointer_t<int>`は`int *`なので、その型を`add_pointer_t<T>`で囲むとその型へのポインターになる。結果として`int **`になる。
+
+ここで実装した`add_pointer_t<T>`は`T`がリファレンスのときにエラーになる。
+
+~~~cpp
+template < typename T > using add_pointer_t = T * ;
+// エラー
+add_pointer_t<int &> ptr = nullptr ;
+~~~
+
+実は標準ライブラリにも`std::add_pointer_t<T>`があり、こちらはリファレンス`U &`を渡しても、`U *`になる。
+
+~~~cpp
+// OK
+// int *
+std::add_pointer_t<int &> ptr = nullptr ;
+~~~
+
+標準ライブラリ`std::add_pointer_t<T>`は、`T`がリファレンス型の場合、リファレンスは剥がしてポインターを付与するという実装になっている。これをどうやって実装するかについてだが、まだ読者の知識では実装できない。テンプレートについて深く学ぶ必要がある。今は標準ライブラリに頼っておこう。
+
+標準ライブラリには他にも、ポインターを取り除く`std::remove_pointer_t<T>`もある。
+
+~~~cpp
+// int
+std::remove_pointer_t<int * > a = 0 ;
+// int
+std::remove_pointer_t<
+    std::add_pointer_t<int>
+    > b = 0 ;
+~~~
+
+
+
 ### thisポインター
+
+

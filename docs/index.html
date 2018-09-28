@@ -315,9 +315,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#例外を捕まえる">例外を捕まえる</a></li>
 <li><a href="#例外による巻き戻し">例外による巻き戻し</a></li>
 </ul></li>
-<li><a href="#ポインター">ポインター</a><ul>
+<li><a href="#ポインターの基礎">ポインターの基礎</a><ul>
 <li><a href="#意味上のポインター">意味上のポインター</a><ul>
 <li><a href="#リファレンスと同じ機能">リファレンスと同じ機能</a></li>
+<li><a href="#リファレンスと違う機能">リファレンスと違う機能</a></li>
+<li><a href="#代入">代入</a></li>
+<li><a href="#何も参照しない状態">何も参照しない状態</a></li>
+<li><a href="#明示的に何も参照しないポインター-nullptr">明示的に何も参照しないポインター: nullptr</a></li>
+</ul></li>
+<li><a href="#文法上のポインター">文法上のポインター</a><ul>
+<li><a href="#ポインターとconstの関係">ポインターとconstの関係</a></li>
+<li><a href="#ポインターのポインター">ポインターのポインター</a></li>
+<li><a href="#関数へのポインター">関数へのポインター</a></li>
+<li><a href="#ポインター型の作り方">ポインター型の作り方</a></li>
+<li><a href="#thisポインター">thisポインター</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
@@ -10284,10 +10295,10 @@ main is destructed.</code></pre>
 <li>mainが破棄される。</li>
 </ol>
 <p>例外が投げられると通常の実行は飛ばされるので、例外が投げられるかもしれない処理のあとに、例外の有無にかかわらず絶対に実行したい処理がある場合は、クラスのデストラクターに書くとよい。</p>
-<h1 id="ポインター">ポインター</h1>
+<h1 id="ポインターの基礎">ポインターの基礎</h1>
 <p>ポインターは難しいとよく言われる。世の中にはポインターのためにC言語とC++を挫折し、他の軟弱な言語に逃げるプログラマーがいる。ポインターしか解説していない本が出版される。Joel Spolskyがエッセイを書く。</p>
 <p>ポインターの理解は優秀なプログラマーとなるために必須である。ポインターを理解できない人間は優秀なプログラマーにはなれない。もし、本書を呼んでポインターが理解できない場合、プログラマーには向いていないということだ。</p>
-<p>ポインターを難しくしている原因には、意味上のポインターと、文法上のポインターと、ポインターを使って解く問題とがある。いずれも難しいが、本書を読めばポインターは完全に理解できる。</p>
+<p>ポインターを難しくしている原因には、意味上のポインターと、文法上のポインターと、ポインターの内部実装がある。いずれも難しいが、本書を読めばポインターは完全に理解できる。</p>
 <h2 id="意味上のポインター">意味上のポインター</h2>
 <h3 id="リファレンスと同じ機能">リファレンスと同じ機能</h3>
 <p>ポインターはオブジェクトを参照するための機能だ。この点ではリファレンスと同じ機能を提供している。</p>
@@ -10370,6 +10381,507 @@ reference = <span class="dv">0</span>
 <span class="co">// p1のポインター値で代入</span>
 <span class="co">// つまりobjectを参照する</span>
 <span class="dt">int</span> * p2 = p1 ;</code></pre></div>
+<p>このように比較すると、ポインターはリファレンスと同じ機能を提供していることがわかる。実際、リファレンスというのはポインターのシンタックスシュガーにすぎない。ポインターの機能を制限して、文法をわかりやすくしたものだ。</p>
+<h3 id="リファレンスと違う機能">リファレンスと違う機能</h3>
+<p>リファレンスがポインターの機能制限版だというのであれば、ポインターにあってリファレンスにはない機能はなんだろうか。代入と、何も参照しない状態だ。</p>
+<h3 id="代入">代入</h3>
+<p>リファレンスは代入ができないが、ポインターは代入ができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> x { } ;
+<span class="dt">int</span> y { } ;
+
+<span class="dt">int</span> &amp; reference = x ;
+<span class="co">// xにyの値を代入</span>
+<span class="co">// リファレンスの参照先は変わらない</span>
+reference = y ;
+
+<span class="dt">int</span> * pointer = &amp;x ;
+<span class="co">// pointerの参照先をyに変更</span>
+pointer = &amp;y ;</code></pre></div>
+<h3 id="何も参照しない状態">何も参照しない状態</h3>
+<p>リファレンスは必ず初期化しなければならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// エラー、初期化されていない</span>
+<span class="dt">int</span> &amp; reference ; </code></pre></div>
+<p>そのため、リファレンスは常にオブジェクトを参照している。</p>
+<p>ポインターは初期化しなくてもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * pointer ;</code></pre></div>
+<p>この場合、具体的に何かを参照していない状態になる。この場合にポインターの値はどうなるかはわからない。初期化のない整数の値がわからないのと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 値はわからない</span>
+<span class="dt">int</span> data ;</code></pre></div>
+<p>このわからない値が発生することを、専門用語では「未規定の挙動」という。</p>
+<p>わからない値の整数を読むことは推奨できない。書くことはできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// 値はわからない</span>
+    <span class="dt">int</span> data ; 
+
+    <span class="co">// 推奨できない</span>
+    <span class="bu">std::</span>cout &lt;&lt; data ;
+
+    <span class="co">// OK</span>
+    data = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>このプログラムは何らかの値を出力するはずだが、具体的にどういう値を出力するのかはわからない。</p>
+<p>そしてここからがポインターの恐ろしいところだが、ポインターの場合にもこのわからない値は発生する。わからない値を持ったポインターの参照先への読み書きは、「未定義の挙動」を引き起こす。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> * pointer ;
+
+    <span class="co">// 未定義の挙動</span>
+    <span class="bu">std::</span>cout &lt;&lt; *pointer ;
+
+    <span class="co">// 未定義の挙動</span>
+    *pointer = <span class="dv">123</span> ;
+}</code></pre></div>
+<p>なぜ未定義の挙動になるかというと、わからない値のポインターは、たまたまどこかの妥当なオブジェクトを参照してしまっているかもしれないからだ。</p>
+<p>未定義の挙動は恐ろしい。未定義の挙動が発生した場合、何が起こっても文句は言えない。なぜならばその挙動は本来存在するはずがないのだから。上のプログラムはコンパイル時にエラーになるかもしれないし、実行時にエラーになるかもしれない。いや、もっとひどいことにはエラーにならないかもしれない。そして人生、宇宙、すべてのものの答えと、あろうことか答えに対する質問まで出力するかもしれない。</p>
+<h3 id="明示的に何も参照しないポインター-nullptr">明示的に何も参照しないポインター: nullptr</h3>
+<p>ポインターを未初期化にしていると、よくわからない値になってしまう。そのため、何も参照していないことを明示的に示すためのポインターの値、nullポインター値がある。<code>nullptr</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * pointer = <span class="kw">nullptr</span> ;</code></pre></div>
+<p>nullptrはどんな型へのポインターに対しても、何も参照していない値となる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// doubleへのポインター</span>
+<span class="dt">double</span> * p1 = <span class="kw">nullptr</span> ;
+
+<span class="co">// std::stringへのポインター</span>
+<span class="bu">std::</span>string p2 = <span class="kw">nullptr</span> ;</code></pre></div>
+<p>C言語とC++では歴史的な理由で、<code>nullptr</code>の他にも<code>NULL</code>もnullポインター値</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * pointer = NULL ;</code></pre></div>
+<p>C++ではさらに歴史的な理由で、<code>0</code>もnullポインター値として扱う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * pointer = <span class="dv">0</span> ;</code></pre></div>
+<p>ただし、nullポインター値が実際に0である保証はない。ポインターの値についてはあとで詳しく扱う。</p>
+<h2 id="文法上のポインター">文法上のポインター</h2>
+<p>ポインターが難しいと言われる理由の一つに、ポインターの文法が難しい問題がある。</p>
+<h3 id="ポインターとconstの関係">ポインターとconstの関係</h3>
+<p>型としてのポインターは、ある型Tがあるときに、Tへのポインター型となる。</p>
+<p>Tへのポインター型は<code>T *</code>と書く。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// intへのポインター型</span>
+<span class="kw">using</span> t1 = <span class="dt">int</span> * ;
+<span class="co">// doubleへのポインター型</span>
+<span class="kw">using</span> t2 = <span class="dt">double</span> * ;
+<span class="co">// std::stringへのポインター型</span>
+<span class="kw">using</span> t3 = <span class="bu">std::</span>string * ;
+<span class="co">// std::array&lt;int,5&gt;へのポインター型</span>
+<span class="kw">using</span> t4 = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; * ;
+<span class="co">// std::array&lt;double,10&gt;へのポインター型</span>
+<span class="kw">using</span> t5 = <span class="bu">std::</span>array&lt;<span class="dt">double</span>,<span class="dv">10</span>&gt; * ;</code></pre></div>
+<p>リファレンスやconstも同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int型へのポインター型</span>
+<span class="kw">using</span> t1 = <span class="dt">int</span> * ;
+<span class="co">// int型へのリファレンス型</span>
+<span class="kw">using</span> t2 = <span class="dt">int</span> &amp; ;
+<span class="co">// どちらも同じconstなint型</span>
+<span class="kw">using</span> t3 = <span class="at">const</span> <span class="dt">int</span> ;
+<span class="kw">using</span> t4 = <span class="dt">int</span> <span class="at">const</span> ;</code></pre></div>
+<p><code>const int</code>と<code>int const</code>は同じ型だ。この場合、constはint型のあとにつけても前につけても同じ意味になる。</p>
+<p>すると当然の疑問が生じる。組み合わせるとどうなるのかということだ。</p>
+<p>ポインター型へのリファレンス型はできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int *型へのリファレンス</span>
+<span class="kw">using</span> type = <span class="dt">int</span> * &amp; ;</code></pre></div>
+<p>リファレンス型へのポインター型はできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// エラー、できない</span>
+<span class="kw">using</span> error = <span class="dt">int</span> &amp; * ;</code></pre></div>
+<p>理由は、リファレンスへのポインターというのは意味がないからだ。ポインターへのリファレンスは意味がある。</p>
+<p>リファレンスからポインターの値を得るには、参照先のオブジェクトと同じく<code>&amp;</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> data { } ;
+<span class="dt">int</span> ref = data ;
+<span class="co">// &amp;dataと同じ</span>
+<span class="dt">int</span> * ptr = &amp;ref ;</code></pre></div>
+<p>リファレンスは参照先のオブジェクトと全く同じように振る舞うのでリファレンス自体のポインターの値を得ることはできない。</p>
+<p>ポインターのリファレンスを得るのは、ポインター以外の値と全く同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * ptr = <span class="kw">nullptr</span> ;
+<span class="co">// ptrを参照する</span>
+<span class="dt">int</span> * &amp; ref = ptr ;
+
+<span class="dt">int</span> data { } ;
+<span class="co">// ptrの値が&amp;dataになる。</span>
+ref = &amp;data ;</code></pre></div>
+<p>constとポインターの組み合わせは難しい。</p>
+<p>まず型Tとそのconst版がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> T = <span class="dt">int</span> ;
+<span class="kw">using</span> const_T = <span class="at">const</span> T ;</code></pre></div>
+<p>そして型Tとそのポインター版がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> T = <span class="dt">int</span> ;
+<span class="kw">using</span> T_pointer = T * ;</code></pre></div>
+<p>これを組みわせると、以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 型T</span>
+<span class="kw">using</span> T = <span class="dt">int</span> ;
+<span class="co">// どちらもconstなT</span>
+<span class="kw">using</span> const_T_1 = <span class="at">const</span> T ;
+<span class="kw">using</span> const_T_2 = T <span class="at">const</span> ;
+<span class="co">// Tへのポインター</span>
+<span class="kw">using</span> T_pointer = T * ;
+
+<span class="co">// どちらもconstなTへのポインター</span>
+<span class="kw">using</span> const_T_pointer_1 = <span class="at">const</span> T * ;
+<span class="kw">using</span> const_T_pointer_2 = T <span class="at">const</span> * ;
+
+<span class="co">// Tへのconstなポインター</span>
+<span class="kw">using</span> T_const_pointer = T * <span class="at">const</span> ;
+
+<span class="co">// どちらもconstなTへのconstなポインター</span>
+<span class="kw">using</span> const_T_const_pointer_1 = <span class="at">const</span> T * <span class="at">const</span> ;
+<span class="kw">using</span> const_T_const_pointer_2 = T <span class="at">const</span> * <span class="at">const</span> ;</code></pre></div>
+<p>順番に見ていこう。まずは組み合わせない型から。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> T = <span class="dt">int</span> ;
+<span class="co">// どちらもconstなT</span>
+<span class="kw">using</span> const_T_1 = <span class="at">const</span> T ;
+<span class="kw">using</span> const_T_2 = T <span class="at">const</span> ;
+<span class="co">// Tへのポインター</span>
+<span class="kw">using</span> T_pointer = T * ;</code></pre></div>
+<p>Tはここではint型だ。T型はどんな型でもよい。</p>
+<p><code>const T</code>と<code>T const</code>が同じ型であることを思い出せば、<code>const_T_1</code>と<code>const_T_2</code>は同じ型であることがわかるだろう。</p>
+<p><code>T_pointer</code>はTへのポインターだ。</p>
+<p>次を見ていこう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// どちらもconstなTへのポインター</span>
+<span class="kw">using</span> const_T_pointer_1 = <span class="at">const</span> T * ;
+<span class="kw">using</span> const_T_pointer_2 = T <span class="at">const</span> * ;</code></pre></div>
+<p>これはどちらも同じ型だ。constなTへのポインターとなる。わかりにくければ以下のように書いてもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// constなT</span>
+<span class="kw">using</span> const_T = <span class="at">const</span> <span class="dt">int</span> ;
+<span class="co">// constなTへのポインター</span>
+<span class="kw">using</span> const_T_pointer = const_T * ;</code></pre></div>
+<p>実際に使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="at">const</span> <span class="dt">int</span> data = <span class="dv">123</span> ;
+    <span class="co">// int const *でもよい</span>
+    <span class="at">const</span> <span class="dt">int</span> * ptr = &amp;data ;
+
+    <span class="co">// 読み込み</span>
+    <span class="dt">int</span> read = *ptr ;
+}</code></pre></div>
+<p>constなintへのポインターなので、このポインターの参照先を変更することはできない。ポインターは変更できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="at">const</span> <span class="dt">int</span> x {} ;
+    <span class="at">const</span> <span class="dt">int</span> * ptr = &amp;x ;
+
+    <span class="co">// エラー</span>
+    <span class="co">// constな参照先を変更できない</span>
+    *ptr = <span class="dv">0</span> ;
+
+    <span class="dt">int</span> y {} ;
+    <span class="co">// OK</span>
+    <span class="co">// ポインターはconstではないので値が変更できる</span>
+    ptr = &amp;y ;
+}</code></pre></div>
+<p>constなのはintであってポインターではない。<code>const int *</code>、もしくは<code>int const *</code>は参照先のintがconstなので、参照先を変更することができない。ポインターはconstではないので、ポインターの値は変更できる。</p>
+<p>constなT型へのリファレンスでconstではないT型のオブジェクトを参照できるように、constなT型へのポインターからconstではないT型のオブジェクトを参照できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// constではない</span>
+    <span class="dt">int</span> data { } ;
+
+    <span class="co">// OK</span>
+    <span class="at">const</span> <span class="dt">int</span> &amp; ref = data ;
+    <span class="co">// OK</span>
+    <span class="at">const</span> <span class="dt">int</span> * ptr = &amp;data ;
+}</code></pre></div>
+<p>この場合、リファレンスやポインターは<code>const int</code>扱いなので、リファレンスやポインターを経由して読むことはできるが変更はできない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data = <span class="dv">123</span> ;
+    <span class="at">const</span> <span class="dt">int</span> * ptr = &amp;data ;
+    <span class="co">// エラー</span>
+    <span class="co">// 変更できない</span>
+    *ptr = <span class="dv">0</span> ;
+
+    <span class="co">// 変更できる</span>
+    data = <span class="dv">0</span> ;
+}</code></pre></div>
+<p>その次はconstなポインターだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// Tへのconstなポインター</span>
+<span class="kw">using</span> T_const_pointer = T * <span class="at">const</span> ;</code></pre></div>
+<p>これはポインターがconstなのであって、Tはconstではない。したがってポインターを経由して参照先を変更することはできるが、ポインターの値自体は変更できない型だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data { } ;
+
+    <span class="co">// constなポインター</span>
+    <span class="dt">int</span> * <span class="at">const</span> ptr = &amp;data ;
+
+    <span class="co">// OK、参照先は変更できる</span>
+    *ptr = <span class="dv">1</span> ;
+
+    <span class="co">// エラー、値は変更できない</span>
+    ptr = <span class="kw">nullptr</span> ;
+}</code></pre></div>
+<p>最後はconstなTへのconstなポインターだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// どちらもconstなTへのconstなポインター</span>
+<span class="kw">using</span> const_T_const_pointer_1 = <span class="at">const</span> T * <span class="at">const</span> ;
+<span class="kw">using</span> const_T_const_pointer_2 = T <span class="at">const</span> * <span class="at">const</span> ;</code></pre></div>
+<p>これはconstなTなので、ポインターを経由して参照先を変更できないし、constなポインターなのでポインターの値も変更できない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data = <span class="dv">123</span> ;
+
+    <span class="dt">int</span> <span class="at">const</span> * <span class="at">const</span> ptr = &amp;data ;
+
+    <span class="co">// OK、参照先は読める</span>
+    <span class="dt">int</span> read = *ptr ;
+    <span class="co">// エラー、参照先は変更できない</span>
+    *ptr = <span class="dv">0</span> ;
+    <span class="co">// エラー、ポインターは変更できない</span>
+    ptr = <span class="kw">nullptr</span> ;
+}</code></pre></div>
+<h3 id="ポインターのポインター">ポインターのポインター</h3>
+<p>ポインター型というのは、「ある型Tへのポインター」という形で表現できる。この型Tにはどんな型でも使うことができる。ところで、ポインターというのは型だ。もしTがポインター型の場合はどうなるのだろう。</p>
+<p>例えば、「T型へのポインター型」で、型Tが「U型へのポインター型」の場合、全体としては「U型へのポインター型へのポインター型」になる。これはC++の文法では<code>U **</code>となる。</p>
+<p>C++のコードで確認しよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 適当なU型</span>
+<span class="kw">using</span> U = <span class="dt">int</span> ;
+<span class="co">// ポインターとしてのT型</span>
+<span class="kw">using</span> T = U * ;
+<span class="co">// T型へのポインター型</span>
+<span class="co">// つまりU型へのポインター型へのポインター型</span>
+<span class="co">// つまりU **</span>
+<span class="kw">using</span> type = T * ;</code></pre></div>
+<p>具体的に書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="co">// int</span>
+    <span class="dt">int</span> x = <span class="dv">123</span> ;
+    <span class="co">// intへのポインター</span>
+    <span class="dt">int</span> * p = &amp;x ;
+    <span class="co">// intへのポインターのポインター</span>
+    <span class="dt">int</span> ** pp = &amp;p ;
+
+
+    <span class="co">// 123</span>
+    <span class="co">// ポインターを経由したポインターを経由したxの読み込み</span>
+    <span class="dt">int</span> value1 = **pp ; 
+
+    <span class="dt">int</span> y = <span class="dv">456</span> ;
+    <span class="co">// ポインターを経由した変数pの変更</span>
+    *pp = &amp;y ;
+
+    <span class="co">// 456</span>
+    <span class="co">// ポインターを経由したポインターを経由したyの読み込み</span>
+    <span class="dt">int</span> value2 = **pp ;
+}</code></pre></div>
+<p>xはintだ。pはintへのポインターだ。ここまでは今までどおりだ。</p>
+<p>ppは<code>int **</code>という型で、「intへのポインターへのポインター」型だ。このポインターの値のためには「intへのポインターのポインター」が必要だ。変数pのポインターは<code>&amp;p</code>で得られる。この場合、変数pは「intへのポインター」でなければならない。そうした場合、変数pのポインターは「intへのポインターのポインター」型の値になる。</p>
+<p>変数ppは「intへのポインターのポインター」だ。変数ppの参照先の変数pを読み書きするには、<code>*pp</code>と書く。これはまだ「intへのポインター」だ。ここからさらに参照先のint型のオブジェクトにアクセスするには、その結果にさらに<code>*</code>を書く。結果として<code>**pp</code>となる。</p>
+<p>わかりにくければ変数に代入するとよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> object { } ;
+
+    <span class="dt">int</span> *   a = &amp;object ;
+    <span class="dt">int</span> **  b = &amp;a ;
+
+    <span class="co">// cとaは同じ値</span>
+    <span class="dt">int</span> * c = *pointer_to_pointer_to_object ;
+
+    <span class="co">// objectに1が代入される</span>
+    *c = <span class="dv">1</span> ;
+    <span class="co">// objectに2が代入される</span>
+    **b = <span class="dv">2</span> ;
+}</code></pre></div>
+<p>リファレンスを使うという手もある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> object { } ;
+
+    <span class="dt">int</span> *   a = &amp;object ;
+    <span class="dt">int</span> **  b = &amp;a ;
+
+    <span class="dt">int</span> &amp; r1 = *a ;
+
+    <span class="co">// objectに1が代入される</span>
+    r1 = <span class="dv">1</span> ;
+
+    <span class="dt">int</span> &amp;r2 = **b ;
+
+    <span class="co">// objectに2が代入される</span>
+    r2 = <span class="dv">2</span> ;
+}</code></pre></div>
+<p>「ポインターへのポインター」があるということは、「ポインターへのポインターへのポインター」もあるということだろうか。もちろんある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// intへのポインターへのポインターへのポインター型</span>
+<span class="kw">using</span> type = <span class="dt">int</span> *** ;
+
+<span class="co">// intへのポインターへのポインターへのポインターへのポインター型</span>
+<span class="co">// int ****</span>
+<span class="kw">using</span> <span class="dt">pointer_to_type</span> = type * ;</code></pre></div>
+<p>もちろんconstもつけられる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> type = <span class="dt">int</span> <span class="at">const</span> * <span class="at">const</span> * <span class="at">const</span> * <span class="at">const</span> ;</code></pre></div>
+<h3 id="関数へのポインター">関数へのポインター</h3>
+<p>関数へのポインターを説明する前に、まず型としての関数を説明しなければならない。</p>
+<p>関数にも型がある。例えば以下のような関数、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> f( <span class="dt">int</span> ) ;
+<span class="dt">double</span> g( <span class="dt">double</span>, <span class="dt">double</span> ) ;</code></pre></div>
+<p>の型は、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="dt">f_type</span> = <span class="dt">int</span> ( <span class="dt">int</span> ) ;
+<span class="kw">using</span> <span class="va">g_type</span> = <span class="dt">double</span> ( <span class="dt">double</span>, <span class="dt">double</span> ) ;</code></pre></div>
+<p>となる。関数から関数名を取り除いたものが関数の型だ。すると関数へのポインター型は以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> f_pointer = <span class="dt">f_type</span> * ;
+<span class="kw">using</span> <span class="va">g_pointer</span> = <span class="va">g_type</span> * ;</code></pre></div>
+<p>早速試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 実引数を出力して返す関数</span>
+<span class="dt">int</span> f( <span class="dt">int</span> x )
+{
+    <span class="bu">std::</span>cout &lt;&lt; x ;
+    <span class="cf">return</span> x ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">using</span> <span class="dt">f_type</span> = <span class="dt">int</span> ( <span class="dt">int</span> ) ;
+    <span class="kw">using</span> f_pointer = <span class="dt">f_type</span> * ;
+
+    f_pointer ptr = &amp;f ;
+
+    <span class="co">// 関数へのポインターを経由した関数呼び出し</span>
+    (*ptr)(<span class="dv">123</span>) ;
+}</code></pre></div>
+<p>動くようだ。最後の関数呼び出しはまず参照先を得て<code>(*ptr)</code>、その後に関数呼び出し<code>(123)</code>をしている。これは面倒なので、C++では特別に関数へのポインターはそのまま関数呼び出しすることができるようになっている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 関数へのポインターを経由した関数呼び出し</span>
+ptr(<span class="dv">123</span>) ;</code></pre></div>
+<p>ところで、変数ptrの宣言を、f_pointerというエイリアス宣言を使わずに書くと、以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 適当な関数</span>
+<span class="dt">int</span> f( <span class="dt">int</span> ) { <span class="cf">return</span> <span class="dv">0</span> ; }
+
+<span class="co">// 変数ptrの宣言</span>
+<span class="co">// int (int)へのポインター</span>
+<span class="dt">int</span> (*ptr)(<span class="dt">int</span>) = &amp;f ;</code></pre></div>
+<p>なぜこうなるのか。これを完全に理解するためにはC++の宣言子(declarator)という文法の詳細な理解が必要だ。</p>
+<p>ここでは詳細を飛ばして重要な部分だけ伝えるが、型名のうちポインターであることを指定する<code>*</code>は、名前にかかる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// この *はnameにかかる</span>
+<span class="dt">int</span> * name ;</code></pre></div>
+<p>つまり以下のような意味だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> (*name) ;</code></pre></div>
+<p>型名だけを指定する場合、名前が省略される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 名前が省略されている</span>
+<span class="kw">using</span> type = <span class="dt">int</span> * ;</code></pre></div>
+<p>つまり以下のような意味だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> type = <span class="dt">int</span> (*) ;</code></pre></div>
+<p>そのため、<code>int * name( int )</code>と書いた場合、これは「int型の引数を取り、int型へのポインターを戻り値として返す関数」となる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * f( <span class="dt">int</span> ){ <span class="cf">return</span> <span class="kw">nullptr</span> ; }</code></pre></div>
+<p>そうではなく、「int型の引数をとりint型の戻り値を返す関数へのポインター」を書きたい場合は、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> type = <span class="dt">int</span> (*)(<span class="dt">int</span>) ;</code></pre></div>
+<p>としなければならない。</p>
+<p>変数の名前を入れる場所は以下の通り <sub><del>cpp using type = int ( * // ポインター // ここに変数が省略されている )(int) ;</del></sub></p>
+<p>なので、</p>
+<pre><code>int (*ptr)(int) = nullptr ;</code></pre>
+<p>となる。あるいは以下のように書いてもいい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="dt">function_type</span> = <span class="dt">int</span> (<span class="dt">int</span>) ;
+<span class="kw">using</span> <span class="dt">function_pointer_type</span> = <span class="dt">function_type</span> * ;
+
+<span class="dt">function_pointer_type</span> ptr = <span class="kw">nullptr</span> ;</code></pre></div>
+<p>関数へのポインターは型であり、値でもある。値であるということは、関数は引数として関数へのポインターを受け取ったり、関数へのポインターを返したりできるということだ。</p>
+<p>早速書いてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> f( <span class="dt">int</span> x ) { <span class="cf">return</span> x ; }
+<span class="kw">using</span> f_ptr = <span class="dt">int</span> (*) (<span class="dt">int</span> ) ;
+<span class="co">// 関数へのポインターを引数にとり</span>
+<span class="co">// 関数へのポインターを戻り値として返す</span>
+<span class="co">// 関数g</span>
+f_ptr g( f_ptr p )
+{
+    p(<span class="dv">0</span>) ;
+    <span class="cf">return</span> p ;
+}
+
+<span class="dt">int</span> main()
+{
+    g(&amp;f) ;
+}</code></pre></div>
+<p>これは動く。ところでこの関数gへのポインターはどう書けばいいのだろうか。つまり、</p>
+<pre><code>auto ptr = &amp;g ;</code></pre>
+<p>を<code>auto</code>を使わずに書くとどうなるのだろうか。</p>
+<p>以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> (*(*ptr)(<span class="dt">int</span> (*)(<span class="dt">int</span>)))(<span class="dt">int</span>) = &amp;g ;</code></pre></div>
+<p>なぜこうなるのか。分解すると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> (* <span class="co">// 戻り値型前半</span>
+    (*ptr) <span class="co">// 変数名</span>
+    (<span class="co">// 関数の引数</span>
+        <span class="dt">int</span> (*)(<span class="dt">int</span>) <span class="co">// 引数としての関数へのポインター</span>
+    )<span class="co">// 関数の引数</span>
+
+)(<span class="dt">int</span>) <span class="co">// 戻り値の型後半</span>
+
+ = &amp;g ; <span class="co">// 初期化子</span></code></pre></div>
+<p>これはわかりにくい。戻り値の型を後ろに書く文法を使うと少し読みやすくなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> (*ptr)( <span class="dt">int</span> (*)(<span class="dt">int</span>) ) -&gt; <span class="dt">int</span> (*)(<span class="dt">int</span>) = &amp;g ;</code></pre></div>
+<p>これを分解すると以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">auto</span> <span class="co">// プレイスホルダー</span>
+(*ptr) <span class="co">// 変数名</span>
+( <span class="dt">int</span> (*)(<span class="dt">int</span>) ) <span class="co">// 引数</span>
+-&gt; <span class="dt">int</span> (*)(<span class="dt">int</span>) <span class="co">// 戻り値の型</span>
+= &amp;g ; <span class="co">// 初期化子</span></code></pre></div>
+<p>もちろん、これでもまだわかりにくいので、エイリアス宣言を使ったほうがよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> func_ptr = <span class="dt">int</span>(*)(<span class="dt">int</span>) ;
+
+<span class="kw">auto</span> (*ptr)(func_ptr) -&gt; func_ptr = &amp;g ;</code></pre></div>
+<h3 id="ポインター型の作り方">ポインター型の作り方</h3>
+<p>T型へのポインター型は<code>T *</code>で作ることができる。</p>
+<p>ただし、Tが<code>int (int)</code>のような関数型である場合は、<code>int (*)(int)</code>になる。</p>
+<p>ただしただし、エイリアス宣言で型に別名をつけると<code>T *</code>でよくなる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="dt">function_type</span> = <span class="dt">int</span> (<span class="dt">int</span>) ;
+<span class="kw">using</span> <span class="dt">pointer_to_function_type</span> = <span class="dt">function_type</span> * ;</code></pre></div>
+<p>ポインターの型を書く際に、このようなことをいちいち考えるのは面倒だ。ここで必要のなのは、ある型<code>T</code>を受け取ったときに型<code>T *</code>を得るような方法だ。ところで、物覚えのいい読者は前にも似たような文章を読んだことに気がつくだろう。そう、テンプレートだ。</p>
+<p>テンプレートは型を引数化できる機能だ。今まではクラスや関数にしか使っていなかったが、実はエイリアス宣言にも使えるのだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="kw">using</span> type = T ;</code></pre></div>
+<p>これは引数と同じ型になるエイリアステンプレートだ。使ってみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt; <span class="kw">using</span> type = T ;
+
+<span class="co">// aはint</span>
+type&lt;<span class="dt">int</span>&gt; a = <span class="dv">123</span> ;
+<span class="co">// bはdouble</span>
+type&lt;<span class="dt">double</span>&gt; b = <span class="fl">1.23</span> ;
+<span class="co">// cはstd::vector&lt;int&gt;</span>
+type&lt;<span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt;&gt; c = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;</code></pre></div>
+<p><code>using type = int ;</code>というエイリアス宣言があるとき<code>type</code>の型はintだ。エイリアス宣言は新しい<code>type</code>という型を作るわけではない。</p>
+<p>同様に、上のエイリアステンプレートtypeによる<code>type&lt;int&gt;</code>の型は<code>int</code>だ。新しい<code>type&lt;int&gt;</code>という型ができるわけではない。</p>
+<p>もう少し複雑な使い方もしてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+type&lt;type&lt;<span class="dt">int</span>&gt;&gt; a = <span class="dv">0</span> ;
+<span class="co">// int</span>
+type&lt;type&lt;type&lt;<span class="dt">int</span>&gt;&gt;&gt; b = <span class="dv">0</span> ;</code></pre></div>
+<p><code>type&lt;int&gt;</code>の型は<code>int</code>なので、それを引数に渡した<code>type&lt; type&lt;int&gt; &gt;</code>も<code>int</code>だ。<code>type&lt;T&gt;</code>をいくつネストしようとも<code>int</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// std::vector&lt;int&gt;</span>
+<span class="bu">std::</span>vector&lt; type&lt;<span class="dt">int</span>&gt; &gt; a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+<span class="co">// std::vector&lt;int&gt;</span>
+type&lt;<span class="bu">std::</span>vector&lt;type&lt;<span class="dt">int</span>&gt;&gt;&gt; b = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;</code></pre></div>
+<p><code>type&lt;int&gt;</code>は<code>int</code>なので、<code>std::vector&lt;type&lt;int&gt;&gt;</code>は<code>std::vector&lt;int&gt;</code>になる。それを更に<code>type&lt;T&gt;</code>で囲んでも同じ型だ。</p>
+<p><code>type&lt;T&gt;</code>は面白いがなんの役に立つのだろうか。<code>type&lt;T&gt;</code>は型として使える。つまり<code>type&lt;T&gt; *</code>はポインターとして機能するのだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt; <span class="kw">using</span> type = T ;
+
+<span class="co">// int *</span>
+type&lt;<span class="dt">int</span>&gt; * a = <span class="kw">nullptr</span> ;
+<span class="co">// int (*)(int)</span>
+type&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; * b = <span class="kw">nullptr</span> ;</code></pre></div>
+<p><code>type&lt;int&gt; *</code>は<code>int *</code>型だ。<code>type&lt;int(int)&gt; *</code>は<code>int(*)(int)</code>型だ。これでもう<code>*</code>をどこに書くかという問題に悩まされることはなくなった。</p>
+<p>しかしわざわざ<code>type&lt;T&gt; *</code>と書くのは依然として面倒だ。T型は引数で受け取っているのだから、最初からポインターを返してどうだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="kw">using</span> <span class="dt">add_pointer_t</span> = T * ;</code></pre></div>
+<p>さっそく試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int *</span>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span>&gt; a = <span class="kw">nullptr</span> ;
+<span class="co">// int **</span>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span> *&gt; b = <span class="kw">nullptr</span> ;
+<span class="co">// int(*)(int)</span>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; c = <span class="kw">nullptr</span> ;</code></pre></div>
+<p>どうやら動くようだ。もっと複雑な例も試してみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int **</span>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span>&gt;&gt; a = <span class="kw">nullptr</span> ;</code></pre></div>
+<p><code>add_pointer_t&lt;int&gt;</code>は<code>int *</code>なので、その型を<code>add_pointer_t&lt;T&gt;</code>で囲むとその型へのポインターになる。結果として<code>int **</code>になる。</p>
+<p>ここで実装した<code>add_pointer_t&lt;T&gt;</code>は<code>T</code>がリファレンスのときにエラーになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt; <span class="kw">using</span> <span class="dt">add_pointer_t</span> = T * ;
+<span class="co">// エラー</span>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span> &amp;&gt; ptr = <span class="kw">nullptr</span> ;</code></pre></div>
+<p>実は標準ライブラリにも<code>std::add_pointer_t&lt;T&gt;</code>があり、こちらはリファレンス<code>U &amp;</code>を渡しても、<code>U *</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// OK</span>
+<span class="co">// int *</span>
+<span class="bu">std::</span>add_pointer_t&lt;<span class="dt">int</span> &amp;&gt; ptr = <span class="kw">nullptr</span> ;</code></pre></div>
+<p>標準ライブラリ<code>std::add_pointer_t&lt;T&gt;</code>は、<code>T</code>がリファレンス型の場合、リファレンスは剥がしてポインターを付与するという実装になっている。これをどうやって実装するかについてだが、まだ読者の知識では実装できない。テンプレートについて深く学ぶ必要がある。今は標準ライブラリに頼っておこう。</p>
+<p>標準ライブラリには他にも、ポインターを取り除く<code>std::remove_pointer_t&lt;T&gt;</code>もある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int</span>
+<span class="bu">std::</span>remove_pointer_t&lt;<span class="dt">int</span> * &gt; a = <span class="dv">0</span> ;
+<span class="co">// int</span>
+<span class="bu">std::</span>remove_pointer_t&lt;
+    <span class="bu">std::</span>add_pointer_t&lt;<span class="dt">int</span>&gt;
+    &gt; b = <span class="dv">0</span> ;</code></pre></div>
+<h3 id="thisポインター">thisポインター</h3>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
