@@ -1,0 +1,721 @@
+
+## 文法上のポインター 
+
+ポインターが難しいと言われる理由の一つに、ポインターの文法が難しい問題がある。
+
+### ポインターとconstの関係
+
+型としてのポインターは、ある型Tがあるときに、Tへのポインター型となる。
+
+Tへのポインター型は`T *`と書く。
+
+~~~cpp
+// intへのポインター型
+using t1 = int * ;
+// doubleへのポインター型
+using t2 = double * ;
+// std::stringへのポインター型
+using t3 = std::string * ;
+// std::array<int,5>へのポインター型
+using t4 = std::array<int,5> * ;
+// std::array<double,10>へのポインター型
+using t5 = std::array<double,10> * ;
+~~~
+
+リファレンスやconstも同じだ。
+
+~~~cpp
+// int型へのポインター型
+using t1 = int * ;
+// int型へのリファレンス型
+using t2 = int & ;
+// どちらも同じconstなint型
+using t3 = const int ;
+using t4 = int const ;
+~~~
+
+`const int`と`int const`は同じ型だ。この場合、constはint型のあとにつけても前につけても同じ意味になる。
+
+すると当然の疑問が生じる。組み合わせるとどうなるのかということだ。
+
+ポインター型へのリファレンス型はできる。
+
+~~~cpp
+// int *型へのリファレンス
+using type = int * & ;
+~~~
+
+リファレンス型へのポインター型はできない。
+
+~~~c++
+// エラー、できない
+using error = int & * ;
+~~~
+
+理由は、リファレンスへのポインターというのは意味がないからだ。ポインターへのリファレンスは意味がある。
+
+リファレンスからポインターの値を得るには、参照先のオブジェクトと同じく`&`を使う。
+
+~~~cpp
+int data { } ;
+int ref = data ;
+// &dataと同じ
+int * ptr = &ref ;
+~~~
+
+リファレンスは参照先のオブジェクトと全く同じように振る舞うのでリファレンス自体のポインターの値を得ることはできない。
+
+ポインターのリファレンスを得るのは、ポインター以外の値と全く同じだ。
+
+~~~cpp
+int * ptr = nullptr ;
+// ptrを参照する
+int * & ref = ptr ;
+
+int data { } ;
+// ptrの値が&dataになる。
+ref = &data ;
+~~~
+
+constとポインターの組み合わせは難しい。
+
+まず型Tとそのconst版がある。
+
+~~~cpp
+using T = int ;
+using const_T = const T ;
+~~~
+
+そして型Tとそのポインター版がある。
+
+~~~cpp
+using T = int ;
+using T_pointer = T * ;
+~~~
+
+これを組みわせると、以下のようになる。
+
+~~~cpp
+// 型T
+using T = int ;
+// どちらもconstなT
+using const_T_1 = const T ;
+using const_T_2 = T const ;
+// Tへのポインター
+using T_pointer = T * ;
+
+// どちらもconstなTへのポインター
+using const_T_pointer_1 = const T * ;
+using const_T_pointer_2 = T const * ;
+
+// Tへのconstなポインター
+using T_const_pointer = T * const ;
+
+// どちらもconstなTへのconstなポインター
+using const_T_const_pointer_1 = const T * const ;
+using const_T_const_pointer_2 = T const * const ;
+~~~
+
+順番に見ていこう。まずは組み合わせない型から。
+
+~~~c++
+using T = int ;
+// どちらもconstなT
+using const_T_1 = const T ;
+using const_T_2 = T const ;
+// Tへのポインター
+using T_pointer = T * ;
+~~~
+
+Tはここではint型だ。T型はどんな型でもよい。
+
+`const T`と`T const`が同じ型であることを思い出せば、`const_T_1`と`const_T_2`は同じ型であることがわかるだろう。
+
+`T_pointer`はTへのポインターだ。
+
+次を見ていこう。
+
+~~~c++
+// どちらもconstなTへのポインター
+using const_T_pointer_1 = const T * ;
+using const_T_pointer_2 = T const * ;
+~~~
+
+これはどちらも同じ型だ。constなTへのポインターとなる。わかりにくければ以下のように書いてもよい。
+
+~~~cpp
+// constなT
+using const_T = const int ;
+// constなTへのポインター
+using const_T_pointer = const_T * ;
+~~~
+
+実際に使ってみよう。
+
+~~~cpp
+int main()
+{
+    const int data = 123 ;
+    // int const *でもよい
+    const int * ptr = &data ;
+
+    // 読み込み
+    int read = *ptr ;
+}
+~~~
+
+constなintへのポインターなので、このポインターの参照先を変更することはできない。ポインターは変更できる。
+
+~~~c++
+int main()
+{
+    const int x {} ;
+    const int * ptr = &x ;
+
+    // エラー
+    // constな参照先を変更できない
+    *ptr = 0 ;
+
+    int y {} ;
+    // OK
+    // ポインターはconstではないので値が変更できる
+    ptr = &y ;
+}
+~~~
+
+constなのはintであってポインターではない。`const int *`、もしくは`int const *`は参照先のintがconstなので、参照先を変更することができない。ポインターはconstではないので、ポインターの値は変更できる。
+
+constなT型へのリファレンスでconstではないT型のオブジェクトを参照できるように、constなT型へのポインターからconstではないT型のオブジェクトを参照できる。
+
+~~~cpp
+int main()
+{
+    // constではない
+    int data { } ;
+
+    // OK
+    const int & ref = data ;
+    // OK
+    const int * ptr = &data ;
+}
+~~~
+
+この場合、リファレンスやポインターは`const int`扱いなので、リファレンスやポインターを経由して読むことはできるが変更はできない。
+
+~~~c++
+int main()
+{
+    int data = 123 ;
+    const int * ptr = &data ;
+    // エラー
+    // 変更できない
+    *ptr = 0 ;
+
+    // 変更できる
+    data = 0 ;
+}
+~~~
+
+その次はconstなポインターだ。
+
+~~~c++
+// Tへのconstなポインター
+using T_const_pointer = T * const ;
+~~~
+
+これはポインターがconstなのであって、Tはconstではない。したがってポインターを経由して参照先を変更することはできるが、ポインターの値自体は変更できない型だ。
+
+~~~c++
+int main()
+{
+    int data { } ;
+
+    // constなポインター
+    int * const ptr = &data ;
+
+    // OK、参照先は変更できる
+    *ptr = 1 ;
+
+    // エラー、値は変更できない
+    ptr = nullptr ;
+}
+~~~
+
+最後はconstなTへのconstなポインターだ。
+
+~~~c++
+// どちらもconstなTへのconstなポインター
+using const_T_const_pointer_1 = const T * const ;
+using const_T_const_pointer_2 = T const * const ;
+~~~
+
+これはconstなTなので、ポインターを経由して参照先を変更できないし、constなポインターなのでポインターの値も変更できない。
+
+~~~cpp
+int main()
+{
+    int data = 123 ;
+
+    int const * const ptr = &data ;
+
+    // OK、参照先は読める
+    int read = *ptr ;
+    // エラー、参照先は変更できない
+    *ptr = 0 ;
+    // エラー、ポインターは変更できない
+    ptr = nullptr ;
+}
+~~~
+
+### ポインターのポインター
+
+ポインター型というのは、「ある型Tへのポインター」という形で表現できる。この型Tにはどんな型でも使うことができる。ところで、ポインターというのは型だ。もしTがポインター型の場合はどうなるのだろう。
+
+例えば、「T型へのポインター型」で、型Tが「U型へのポインター型」の場合、全体としては「U型へのポインター型へのポインター型」になる。これはC++の文法では`U **`となる。
+
+C++のコードで確認しよう。
+
+~~~cpp
+// 適当なU型
+using U = int ;
+// ポインターとしてのT型
+using T = U * ;
+// T型へのポインター型
+// つまりU型へのポインター型へのポインター型
+// つまりU **
+using type = T * ;
+~~~
+
+具体的に書いてみよう。
+
+~~~cpp
+int main()
+{
+    // int
+    int x = 123 ;
+    // intへのポインター
+    int * p = &x ;
+    // intへのポインターのポインター
+    int ** pp = &p ;
+
+
+    // 123
+    // ポインターを経由したポインターを経由したxの読み込み
+    int value1 = **pp ; 
+
+    int y = 456 ;
+    // ポインターを経由した変数pの変更
+    *pp = &y ;
+
+    // 456
+    // ポインターを経由したポインターを経由したyの読み込み
+    int value2 = **pp ;
+}
+~~~
+
+xはintだ。pはintへのポインターだ。ここまでは今までどおりだ。
+
+ppは`int **`という型で、「intへのポインターへのポインター」型だ。このポインターの値のためには「intへのポインターのポインター」が必要だ。変数pのポインターは`&p`で得られる。この場合、変数pは「intへのポインター」でなければならない。そうした場合、変数pのポインターは「intへのポインターのポインター」型の値になる。
+
+変数ppは「intへのポインターのポインター」だ。変数ppの参照先の変数pを読み書きするには、`*pp`と書く。これはまだ「intへのポインター」だ。ここからさらに参照先のint型のオブジェクトにアクセスするには、その結果にさらに`*`を書く。結果として`**pp`となる。
+
+わかりにくければ変数に代入するとよい。
+
+~~~cpp
+int main()
+{
+    int object { } ;
+
+    int *   a = &object ;
+    int **  b = &a ;
+
+    // cとaは同じ値
+    int * c = *pointer_to_pointer_to_object ;
+
+    // objectに1が代入される
+    *c = 1 ;
+    // objectに2が代入される
+    **b = 2 ;
+}
+~~~
+
+リファレンスを使うという手もある。
+
+~~~cpp
+int main()
+{
+    int object { } ;
+
+    int *   a = &object ;
+    int **  b = &a ;
+
+    int & r1 = *a ;
+
+    // objectに1が代入される
+    r1 = 1 ;
+
+    int &r2 = **b ;
+
+    // objectに2が代入される
+    r2 = 2 ;
+}
+~~~
+
+「ポインターへのポインター」があるということは、「ポインターへのポインターへのポインター」もあるということだろうか。もちろんある。
+
+~~~cpp
+// intへのポインターへのポインターへのポインター型
+using type = int *** ;
+
+// intへのポインターへのポインターへのポインターへのポインター型
+// int ****
+using pointer_to_type = type * ;
+~~~
+
+もちろんconstもつけられる。
+
+~~~cpp
+using type = int const * const * const * const ;
+~~~
+
+### 関数へのポインター
+
+関数へのポインターを説明する前に、まず型としての関数を説明しなければならない。
+
+関数にも型がある。例えば以下のような関数、
+
+~~~cpp
+int f( int ) ;
+double g( double, double ) ;
+~~~
+
+の型は、
+
+~~~cpp
+using f_type = int ( int ) ;
+using g_type = double ( double, double ) ;
+~~~
+
+となる。関数から関数名を取り除いたものが関数の型だ。すると関数へのポインター型は以下のようになる。
+
+~~~c++
+using f_pointer = f_type * ;
+using g_pointer = g_type * ;
+~~~
+
+早速試してみよう。
+
+~~~cpp
+// 実引数を出力して返す関数
+int f( int x )
+{
+    std::cout << x ;
+    return x ;
+}
+
+int main()
+{
+    using f_type = int ( int ) ;
+    using f_pointer = f_type * ;
+
+    f_pointer ptr = &f ;
+
+    // 関数へのポインターを経由した関数呼び出し
+    (*ptr)(123) ;
+}
+~~~
+
+動くようだ。最後の関数呼び出しはまず参照先を得て`(*ptr)`、その後に関数呼び出し`(123)`をしている。これは面倒なので、C++では特別に関数へのポインターはそのまま関数呼び出しすることができるようになっている。
+
+~~~c++
+// 関数へのポインターを経由した関数呼び出し
+ptr(123) ;
+~~~
+
+ところで、変数ptrの宣言を、f_pointerというエイリアス宣言を使わずに書くと、以下のようになる。
+
+~~~cpp
+// 適当な関数
+int f( int ) { return 0 ; }
+
+// 変数ptrの宣言
+// int (int)へのポインター
+int (*ptr)(int) = &f ;
+~~~
+
+なぜこうなるのか。これを完全に理解するためにはC++の宣言子(declarator)という文法の詳細な理解が必要だ。
+
+ここでは詳細を飛ばして重要な部分だけ伝えるが、型名のうちポインターであることを指定する`*`は、名前にかかる。
+
+~~~c++
+// この *はnameにかかる
+int * name ;
+~~~
+
+つまり以下のような意味だ。
+
+~~~c++
+int (*name) ;
+~~~
+
+型名だけを指定する場合、名前が省略される。
+
+~~~cpp
+// 名前が省略されている
+using type = int * ;
+~~~
+
+つまり以下のような意味だ。
+
+
+~~~c++
+using type = int (*) ;
+~~~
+
+そのため、`int * name( int )`と書いた場合、これは「int型の引数を取り、int型へのポインターを戻り値として返す関数」となる。
+
+~~~cpp
+int * f( int ){ return nullptr ; }
+~~~
+
+そうではなく、「int型の引数をとりint型の戻り値を返す関数へのポインター」を書きたい場合は、
+
+~~~cpp
+using type = int (*)(int) ;
+~~~
+
+としなければならない。
+
+変数の名前を入れる場所は以下の通り
+~~~cpp
+using type =
+int
+( * // ポインター
+// ここに変数が省略されている
+)(int) ;
+~~~
+
+なので、
+
+~~~
+int (*ptr)(int) = nullptr ;
+~~~
+
+となる。あるいは以下のように書いてもいい。
+
+~~~cpp
+using function_type = int (int) ;
+using function_pointer_type = function_type * ;
+
+function_pointer_type ptr = nullptr ;
+~~~
+
+関数へのポインターは型であり、値でもある。値であるということは、関数は引数として関数へのポインターを受け取ったり、関数へのポインターを返したりできるということだ。
+
+早速書いてみよう。
+
+~~~cpp
+int f( int x ) { return x ; }
+using f_ptr = int (*) (int ) ;
+// 関数へのポインターを引数にとり
+// 関数へのポインターを戻り値として返す
+// 関数g
+f_ptr g( f_ptr p )
+{
+    p(0) ;
+    return p ;
+}
+
+int main()
+{
+    g(&f) ;
+}
+~~~
+
+これは動く。ところでこの関数gへのポインターはどう書けばいいのだろうか。つまり、
+
+~~~
+auto ptr = &g ;
+~~~
+
+を`auto`を使わずに書くとどうなるのだろうか。
+
+以下のようになる。
+
+~~~c++
+int (*(*ptr)(int (*)(int)))(int) = &g ;
+~~~
+
+なぜこうなるのか。分解すると以下のようになる。
+
+~~~c++
+int (* // 戻り値型前半
+    (*ptr) // 変数名
+    (// 関数の引数
+        int (*)(int) // 引数としての関数へのポインター
+    )// 関数の引数
+
+)(int) // 戻り値の型後半
+
+ = &g ; // 初期化子
+~~~
+
+これはわかりにくい。戻り値の型を後ろに書く文法を使うと少し読みやすくなる。
+
+~~~c++
+auto (*ptr)( int (*)(int) ) -> int (*)(int) = &g ;
+~~~
+
+これを分解すると以下のようになる。
+
+~~~c++
+auto // プレイスホルダー
+(*ptr) // 変数名
+( int (*)(int) ) // 引数
+-> int (*)(int) // 戻り値の型
+= &g ; // 初期化子
+~~~
+
+もちろん、これでもまだわかりにくいので、エイリアス宣言を使ったほうがよい。
+
+~~~c++
+using func_ptr = int(*)(int) ;
+
+auto (*ptr)(func_ptr) -> func_ptr = &g ;
+~~~
+
+
+### ポインター型の作り方
+
+T型へのポインター型は`T *`で作ることができる。
+
+ただし、Tが`int (int)`のような関数型である場合は、`int (*)(int)`になる。
+
+ただしただし、エイリアス宣言で型に別名をつけると`T *`でよくなる。
+
+~~~cpp
+using function_type = int (int) ;
+using pointer_to_function_type = function_type * ;
+~~~
+
+ポインターの型を書く際に、このようなことをいちいち考えるのは面倒だ。ここで必要のなのは、ある型`T`を受け取ったときに型`T *`を得るような方法だ。ところで、物覚えのいい読者は前にも似たような文章を読んだことに気がつくだろう。そう、テンプレートだ。
+
+テンプレートは型を引数化できる機能だ。今まではクラスや関数にしか使っていなかったが、実はエイリアス宣言にも使えるのだ。
+
+~~~cpp
+template < typename T >
+using type = T ;
+~~~
+
+これは引数と同じ型になるエイリアステンプレートだ。使ってみよう。
+
+~~~cpp
+template < typename T > using type = T ;
+
+// aはint
+type<int> a = 123 ;
+// bはdouble
+type<double> b = 1.23 ;
+// cはstd::vector<int>
+type<std::vector<int>> c = {1,2,3,4,5} ;
+~~~
+
+`using type = int ;`というエイリアス宣言があるとき`type`の型はintだ。エイリアス宣言は新しい`type`という型を作るわけではない。
+
+同様に、上のエイリアステンプレートtypeによる`type<int>`の型は`int`だ。新しい`type<int>`という型ができるわけではない。
+
+もう少し複雑な使い方もしてみよう。
+
+~~~c++
+// int
+type<type<int>> a = 0 ;
+// int
+type<type<type<int>>> b = 0 ;
+~~~
+
+`type<int>`の型は`int`なので、それを引数に渡した`type< type<int> >`も`int`だ。`type<T>`をいくつネストしようとも`int`になる。
+
+
+~~~c++
+// std::vector<int>
+std::vector< type<int> > a = {1,2,3,4,5} ;
+// std::vector<int>
+type<std::vector<type<int>>> b = {1,2,3,4,5} ;
+~~~
+
+`type<int>`は`int`なので、`std::vector<type<int>>`は`std::vector<int>`になる。それを更に`type<T>`で囲んでも同じ型だ。
+
+`type<T>`は面白いがなんの役に立つのだろうか。`type<T>`は型として使える。つまり`type<T> *`はポインターとして機能するのだ。
+
+~~~cpp
+template < typename T > using type = T ;
+
+// int *
+type<int> * a = nullptr ;
+// int (*)(int)
+type<int(int)> * b = nullptr ;
+~~~
+
+`type<int> *`は`int *`型だ。`type<int(int)> *`は`int(*)(int)`型だ。これでもう`*`をどこに書くかという問題に悩まされることはなくなった。
+
+しかしわざわざ`type<T> *`と書くのは依然として面倒だ。T型は引数で受け取っているのだから、最初からポインターを返してどうだろうか。
+
+~~~cpp
+template < typename T >
+using add_pointer_t = T * ;
+~~~
+
+さっそく試してみよう。
+
+~~~cpp
+// int *
+add_pointer_t<int> a = nullptr ;
+// int **
+add_pointer_t<int *> b = nullptr ;
+// int(*)(int)
+add_pointer_t<int(int)> c = nullptr ;
+~~~
+
+どうやら動くようだ。もっと複雑な例も試してみよう。
+
+~~~c++
+// int **
+add_pointer_t<add_pointer_t<int>> a = nullptr ;
+~~~
+
+`add_pointer_t<int>`は`int *`なので、その型を`add_pointer_t<T>`で囲むとその型へのポインターになる。結果として`int **`になる。
+
+ここで実装した`add_pointer_t<T>`は`T`がリファレンスのときにエラーになる。
+
+~~~cpp
+template < typename T > using add_pointer_t = T * ;
+// エラー
+add_pointer_t<int &> ptr = nullptr ;
+~~~
+
+実は標準ライブラリにも`std::add_pointer_t<T>`があり、こちらはリファレンス`U &`を渡しても、`U *`になる。
+
+~~~cpp
+// OK
+// int *
+std::add_pointer_t<int &> ptr = nullptr ;
+~~~
+
+標準ライブラリ`std::add_pointer_t<T>`は、`T`がリファレンス型の場合、リファレンスは剥がしてポインターを付与するという実装になっている。これをどうやって実装するかについてだが、まだ読者の知識では実装できない。テンプレートについて深く学ぶ必要がある。今は標準ライブラリに頼っておこう。
+
+標準ライブラリには他にも、ポインターを取り除く`std::remove_pointer_t<T>`もある。
+
+~~~cpp
+// int
+std::remove_pointer_t<int * > a = 0 ;
+// int
+std::remove_pointer_t<
+    std::add_pointer_t<int>
+    > b = 0 ;
+~~~
+
+
+
+### thisポインター
+
+
