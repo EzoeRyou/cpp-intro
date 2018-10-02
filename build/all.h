@@ -15,6 +15,8 @@
 #include <cerrno>
 #include <system_error>
 #include <string>
+#include <utility>
+#include <functional>
 
 #if __has_include(<string_view>)
 #   include <string_view>
