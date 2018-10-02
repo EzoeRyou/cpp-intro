@@ -322,13 +322,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#代入">代入</a></li>
 <li><a href="#何も参照しない状態">何も参照しない状態</a></li>
 <li><a href="#明示的に何も参照しないポインター-nullptr">明示的に何も参照しないポインター: nullptr</a></li>
+<li><a href="#無効な参照先の作り方">無効な参照先の作り方</a></li>
 </ul></li>
 <li><a href="#文法上のポインター">文法上のポインター</a><ul>
 <li><a href="#ポインターとconstの関係">ポインターとconstの関係</a></li>
 <li><a href="#ポインターのポインター">ポインターのポインター</a></li>
 <li><a href="#関数へのポインター">関数へのポインター</a></li>
+<li><a href="#配列へのポインター">配列へのポインター</a></li>
 <li><a href="#ポインター型の作り方">ポインター型の作り方</a></li>
+<li><a href="#クラスへのポインター">クラスへのポインター</a></li>
 <li><a href="#thisポインター">thisポインター</a></li>
+<li><a href="#メンバーへのポインター">メンバーへのポインター</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
@@ -10448,6 +10452,30 @@ pointer = &amp;y ;</code></pre></div>
 <p>C++ではさらに歴史的な理由で、<code>0</code>もnullポインター値として扱う。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * pointer = <span class="dv">0</span> ;</code></pre></div>
 <p>ただし、nullポインター値が実際に0である保証はない。ポインターの値についてはあとで詳しく扱う。</p>
+<h3 id="無効な参照先の作り方">無効な参照先の作り方</h3>
+<p>ポインターやリファレンスによって参照先が参照される時点では有向だったが、後に無効になる参照先を作ることができてしまう。</p>
+<p>例えば以下のコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> * f()
+{
+    <span class="co">// 寿命は関数</span>
+    <span class="dt">int</span> variable {} ;
+
+    <span class="cf">return</span> &amp;variable ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> * ptr = f() ;
+    <span class="co">// エラー</span>
+    <span class="dt">int</span> read = *ptr ;
+}</code></pre></div>
+<p>このコードの問題は、関数fの中の変数variableの寿命は関数fの中だけで、呼び出し元に戻ったときには寿命が尽きるというところにある。変数variableへのポインターは変数variableの寿命が尽きたあとも存在してしまうので、存在しないオブジェクトにポインター経由でアクセスしようとしてエラーになる。</p>
+<p>同じ問題はリファレンスでも起きるが、ポインターのほうがこの問題を起こしやすい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> &amp; f()
+{
+    <span class="dt">int</span> variable {} ;
+    <span class="cf">return</span> variable ;
+}</code></pre></div>
 <h2 id="文法上のポインター">文法上のポインター</h2>
 <p>ポインターが難しいと言われる理由の一つに、ポインターの文法が難しい問題がある。</p>
 <h3 id="ポインターとconstの関係">ポインターとconstの関係</h3>
@@ -10811,10 +10839,41 @@ f_ptr g( f_ptr p )
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> func_ptr = <span class="dt">int</span>(*)(<span class="dt">int</span>) ;
 
 <span class="kw">auto</span> (*ptr)(func_ptr) -&gt; func_ptr = &amp;g ;</code></pre></div>
+<h3 id="配列へのポインター">配列へのポインター</h3>
+<p>配列へのポインターについて学ぶ前に、配列の型について学ぶ必要がある。</p>
+<p>配列の型は、要素の型をT、要素数をNとすると、<code>T [N]</code>となる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 要素型int、要素数5の配列型</span>
+<span class="kw">using</span> int5 = <span class="dt">int</span> [<span class="dv">5</span>] ;
+<span class="co">// 要素型double、要素数10の配列型</span>
+<span class="kw">using</span> double10 = <span class="dt">double</span> [<span class="dv">10</span>] ;</code></pre></div>
+<p>関数型と同じく、ポインター宣言子である<code>*</code>は名前につく。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 要素型int、要素数5の配列へのポインター型</span>
+<span class="kw">using</span> <span class="dt">pointer_to_array_type</span> = <span class="dt">int</span> (*)[<span class="dv">5</span>] ;
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">5</span>] ;
+    <span class="dt">pointer_to_function_type</span> = &amp;a ;
+}</code></pre></div>
+<p>エイリアス宣言を使わない変数の宣言は以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">5</span>] ;
+    <span class="dt">int</span> (*p)[<span class="dv">5</span>] = &amp;a ;
+}</code></pre></div>
+<p>配列とポインターは密接に関係している。そのため、配列名は配列の先頭要素へのポインターに暗黙に変換される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">5</span>] = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;
+
+    <span class="co">// &amp;a[0]と同じ</span>
+    <span class="dt">int</span> * ptr = a ;
+}</code></pre></div>
+<p>配列とポインターの関係については、ポインターの詳細で詳しく説明する。</p>
 <h3 id="ポインター型の作り方">ポインター型の作り方</h3>
 <p>T型へのポインター型は<code>T *</code>で作ることができる。</p>
-<p>ただし、Tが<code>int (int)</code>のような関数型である場合は、<code>int (*)(int)</code>になる。</p>
-<p>ただしただし、エイリアス宣言で型に別名をつけると<code>T *</code>でよくなる。</p>
+<p>ただし、Tが<code>int (int)</code>のような関数型である場合は、<code>int (*)(int)</code>になる。配列型の場合は要素数Nまで必要で<code>T (*)[N]</code>になる。</p>
+<p>エイリアス宣言で型に別名をつけると<code>T *</code>でよくなる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> <span class="dt">function_type</span> = <span class="dt">int</span> (<span class="dt">int</span>) ;
 <span class="kw">using</span> <span class="dt">pointer_to_function_type</span> = <span class="dt">function_type</span> * ;</code></pre></div>
 <p>ポインターの型を書く際に、このようなことをいちいち考えるのは面倒だ。ここで必要のなのは、ある型<code>T</code>を受け取ったときに型<code>T *</code>を得るような方法だ。ところで、物覚えのいい読者は前にも似たような文章を読んだことに気がつくだろう。そう、テンプレートだ。</p>
@@ -10849,8 +10908,10 @@ type&lt;<span class="bu">std::</span>vector&lt;type&lt;<span class="dt">int</spa
 <span class="co">// int *</span>
 type&lt;<span class="dt">int</span>&gt; * a = <span class="kw">nullptr</span> ;
 <span class="co">// int (*)(int)</span>
-type&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; * b = <span class="kw">nullptr</span> ;</code></pre></div>
-<p><code>type&lt;int&gt; *</code>は<code>int *</code>型だ。<code>type&lt;int(int)&gt; *</code>は<code>int(*)(int)</code>型だ。これでもう<code>*</code>をどこに書くかという問題に悩まされることはなくなった。</p>
+type&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; * b = <span class="kw">nullptr</span> ;
+<span class="co">// int (*) [5]</span>
+type&lt;<span class="dt">int</span> [<span class="dv">5</span>]&gt; * c = <span class="kw">nullptr</span> ;</code></pre></div>
+<p><code>type&lt;int&gt; *</code>は<code>int *</code>型だ。<code>type&lt;int(int)&gt; *</code>は<code>int(*)(int)</code>型だ。<code>type&lt;int [5]&gt; *</code>は<code>int (*) [5]</code>型だ。これでもう<code>*</code>をどこに書くかという問題に悩まされることはなくなった。</p>
 <p>しかしわざわざ<code>type&lt;T&gt; *</code>と書くのは依然として面倒だ。T型は引数で受け取っているのだから、最初からポインターを返してどうだろうか。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
 <span class="kw">using</span> <span class="dt">add_pointer_t</span> = T * ;</code></pre></div>
@@ -10860,7 +10921,9 @@ type&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; * b = <span
 <span class="co">// int **</span>
 <span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span> *&gt; b = <span class="kw">nullptr</span> ;
 <span class="co">// int(*)(int)</span>
-<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; c = <span class="kw">nullptr</span> ;</code></pre></div>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; c = <span class="kw">nullptr</span> ;
+<span class="co">// int(*)[5]</span>
+<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span> [<span class="dv">5</span>]&gt; d = <span class="kw">nullptr</span> ;</code></pre></div>
 <p>どうやら動くようだ。もっと複雑な例も試してみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int **</span>
 <span class="dt">add_pointer_t</span>&lt;<span class="dt">add_pointer_t</span>&lt;<span class="dt">int</span>&gt;&gt; a = <span class="kw">nullptr</span> ;</code></pre></div>
@@ -10881,7 +10944,337 @@ type&lt;<span class="dt">int</span>(<span class="dt">int</span>)&gt; * b = <span
 <span class="bu">std::</span>remove_pointer_t&lt;
     <span class="bu">std::</span>add_pointer_t&lt;<span class="dt">int</span>&gt;
     &gt; b = <span class="dv">0</span> ;</code></pre></div>
+<h3 id="クラスへのポインター">クラスへのポインター</h3>
+<p>クラスへのポインターは今までに学んだものと同じ文法だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C { } ;
+
+<span class="dt">int</span> main()
+{
+    C object ;
+    C * pointer = &amp;object ;
+} </code></pre></div>
+<p>ただし、ポインターを経由してメンバーにアクセスするのが曲者だ。</p>
+<p>以下のようなメンバーにアクセスするコードがある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> data_member ;
+    <span class="dt">void</span> member_function() {}
+} ;
+
+<span class="dt">int</span> main()
+{
+    C object ;
+
+    object.data_member = <span class="dv">0</span> ;
+    object.member_function() ;
+}</code></pre></div>
+<p>これをポインターを経由して書いてみよう。</p>
+<p>以下のように書くとエラーだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    C object ;
+    C * pointer = &amp;object ;
+
+    <span class="co">// エラー</span>
+    *pointer.data_member = <span class="dv">0</span> ;
+    <span class="co">// エラー</span>
+    *pointer.member_function() ;
+}</code></pre></div>
+<p>この理由は演算子の優先順位の問題だ。上の式は以下のように解釈される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">*(pointer.data_member) = <span class="dv">0</span> ;
+*(pointer.member_function()) ;</code></pre></div>
+<p>ポインターを参照する演算子<code>*</code>よりも、演算子ドット('.')のほうが演算子の優先順位が高い。</p>
+<p>このような式を可能にする変数pointerとは以下のようなものだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Pointer
+{
+    <span class="dt">int</span> data  = <span class="dv">42</span> ;
+    <span class="dt">int</span> * data_member = &amp;data ;
+    <span class="dt">int</span> * member_function()
+    {
+        <span class="cf">return</span> &amp;data ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    Pointer pointer ;
+
+    *pointer.data_member = <span class="dv">0</span>;
+    *pointer.member_function() ;
+}</code></pre></div>
+<p><code>pointer.data_member</code>はポインターなのでそれに演算子<code>*</code>を適用して参照した上で0を代入している。</p>
+<p><code>pointer.member_function()</code>は関数呼び出しで戻り値としてポインターを返すのでそれに演算子<code>*</code>を適用している。</p>
+<p>演算子<code>*</code>を先にポインターの値である<code>pointer</code>に適用するには、括弧を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">(*pointer).data_member = <span class="dv">0</span> ;
+(*pointer).member_function() ;</code></pre></div>
+<p>リファレンスを使ってポインターを参照した結果をリファレンスに束縛して使うこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">C &amp; ref = *pointer ;
+ref.data_member = <span class="dv">0</span> ;
+ref.member_function() ;</code></pre></div>
+<p>ただし、ポインターを介してクラスを扱う際に、毎回括弧を使ったりリファレンスを使ったりするのは面倒なので、簡単なシンタックスシュガーとして演算子<code>-&gt;</code>が用意されている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">pointer-&gt;data_member = <span class="dv">0</span> ;
+pointer-&gt;member_function() ;</code></pre></div>
+<p><code>a-&gt;b</code>は、<code>(*(a))-&gt;b</code>と同じ意味になる。そのため、上は以下のコードと同じ意味になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+(*(pointer)).data_member = <span class="dv">0</span> ;
+(*(pointer)).member_function() ;</code></pre></div>
 <h3 id="thisポインター">thisポインター</h3>
+<p>メンバー関数はクラスのデータメンバーにアクセスできる。このときのデータメンバーはメンバー関数が呼ばれたクラスのオブジェクトのサブオブジェクトになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> data { } ;
+
+    <span class="dt">void</span> set( <span class="dt">int</span> n )
+    {
+        data = n ;
+    }
+} ;
+
+<span class="dt">int</span> main()
+{
+    C a ;
+    C b ;
+
+    <span class="co">// a.dataを変更</span>
+    a.set(<span class="dv">1</span>) ;
+    <span class="co">// b.dataを変更</span>
+    b.set(<span class="dv">2</span>) ;
+}</code></pre></div>
+<p>すでに説明したように、メンバー関数が自分を呼びだしたクラスのオブジェクトのサブオブジェクトを参照できるのは、クラスのオブジェクトへの参照を知っているからだ。内部的には以下のような隠し引数を持つコードが生成されたかのような挙動になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// コンパイラーが生成するコードのたとえ</span>
+<span class="kw">struct</span> C
+{
+    <span class="dt">int</span> data { } ;
+} ;
+
+<span class="co">// 隠し引数</span>
+<span class="dt">void</span> set( C &amp; obj, <span class="dt">int</span> n )
+{
+    obj.data = n ;
+}</code></pre></div>
+<p>つまり、メンバー関数は自分を呼び出したクラスのオブジェクトへの参照を知っている。その参照にアクセスする方法が<code>this</code>キーワードだ。</p>
+<p><code>this</code>キーワードはクラスのメンバー関数の中で使うと、メンバー関数を呼び出したクラスのオブジェクトへのポインターとして扱われる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> data { } ;
+
+    <span class="dt">void</span> set( <span class="dt">int</span> n )
+    {
+        <span class="co">// このメンバー関数を呼び出したクラスのオブジェクトへのポインター</span>
+        C * pointer = <span class="kw">this</span> ;
+        <span class="kw">this</span>-&gt;data = n ;
+    }
+} ;</code></pre></div>
+<p>さきほど、関数<code>C::set</code>の中で<code>data = n ;</code>と書いたのは、<code>this-&gt;data = n ;</code>と書いたのと同じ意味になる。</p>
+<p><code>this</code>はリファレンスではなくてポインターだ。この理由は歴史的なものだ。本来ならばリファレンスのほうがよいのだが、今更変更できないのでポインターになっている。わかりにくければリファレンスに束縛してもよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> f()
+    {
+        <span class="kw">auto</span> &amp; this_ref = *<span class="kw">this</span> ;
+    }
+} ;</code></pre></div>
+<p>constなメンバー関数の中では、<code>this</code>の型もconstなクラス型へのポインターになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S
+{
+    <span class="dt">void</span> f()
+    {
+        <span class="co">// thisの型はS *</span>
+        S * pointer = <span class="kw">this</span> ;
+    }
+
+    <span class="dt">void</span> f() <span class="at">const</span>
+    {
+        <span class="co">// thisの型はS const *</span>
+        S <span class="at">const</span> * pointer = <span class="kw">this</span> ;
+    }
+} ;</code></pre></div>
+<p>この理由は、constなメンバー関数はクラスのオブジェクトへの参照としてconstなリファレンスを隠し引数として持つからだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// コンパイラーが生成するコードのたとえ</span>
+<span class="kw">struct</span> S { } ;
+
+<span class="co">// 非constなメンバー関数</span>
+<span class="dt">void</span> f( S &amp; obj ) ;
+
+<span class="co">// constなメンバー関数</span>
+<span class="dt">void</span> f( S <span class="at">const</span> &amp; obj ) ;</code></pre></div>
+<h3 id="メンバーへのポインター">メンバーへのポインター</h3>
+<p>メンバーへのポインターはかなり文法的にややこしい。そもそも、通常のポインターとは概念でも実装でも異なる。</p>
+<p>ここで取り扱うのはメンバーへのポインターという概念で、クラスのオブジェクトのサブオブジェクトへのポインターではない。サブオブジェクトへのポインターは通常のポインターと同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Object
+{
+    <span class="co">// サブオブジェクト</span>
+    <span class="dt">int</span> subobject ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// クラスのオブジェクト</span>
+    Object object ;
+
+    <span class="co">// サブオブジェクトへのポインター</span>
+    <span class="dt">int</span> * pointer = &amp;object.subobject ;
+
+    *pointer = <span class="dv">123</span> ;
+    <span class="dt">int</span> read = object.subobject ;
+}</code></pre></div>
+<p>メンバーへのポインターとは、クラスのデータメンバーやメンバー関数を参照するもので、クラスのオブジェクトとともに使うことでそのデータメンバーやメンバー関数を参照できるものだ。</p>
+<p>細かい文法の解説はあとにして例を見せよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Object
+{
+    <span class="dt">int</span> data_member ;
+    <span class="dt">void</span> member_function()
+    { <span class="bu">std::</span>cout &lt;&lt; data_member ; }
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// Object::data_memberメンバーへのポインター</span>
+    <span class="dt">int</span> Object::* int_ptr = &amp;Object::data_member ;
+    <span class="co">// Object::member_functionメンバーへのポインター</span>
+    <span class="dt">void</span> (Object::* func_ptr)() = &amp;Object::member_function ;
+
+    <span class="co">// クラスのオブジェクト</span>
+    Object object ;
+
+    <span class="co">// objectに対するメンバーポインターを介した参照</span>
+    object.*int_ptr = <span class="dv">123</span> ;
+    <span class="co">// objectに対するメンバーポインターを介した参照</span>
+    <span class="co">// 123</span>
+    (object.*func_ptr)() ;
+
+    <span class="co">// 別のオブジェクト</span>
+    Object another_object ;
+    another_object.data_member = <span class="dv">456</span> ;
+    <span class="co">// 456</span>
+    (another_object.*func_ptr)() ;
+}</code></pre></div>
+<p>細かい文法はあとで学ぶとして、肝心の機能としてはこうだ。クラスのオブジェクトからは独立したデータメンバーやメンバー関数自体へのポインターを取得する。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Object
+{
+    <span class="dt">int</span> data_member ;
+} ;
+
+<span class="co">// メンバーへのポインター</span>
+<span class="dt">int</span> Object::*int_ptr = &amp;Object::data_member ; </code></pre></div>
+<p>このポインターをクラスのオブジェクトと組み合わせることで、ポインターが参照するクラスのメンバーで、かつオブジェクトのサブオブジェクトの部分を参照できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">Object object ;
+
+<span class="co">// メンバーへのポインターをオブジェクトに適用してサブオブジェクトを参照する</span>
+object.*int_ptr = <span class="dv">123</span> ;</code></pre></div>
+<p>では文法の説明に入ろう。</p>
+<p>メンバーへのポインターは文法がややこしい。</p>
+<p>あるクラス名Cの型名Tのメンバーへのポインター型は以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">型名 クラス名:::*
+T C::*</code></pre></div>
+<p>以下のクラスの各データメンバーへの型はそれぞれコメントのとおりになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> ABC
+{
+    <span class="co">// int ABC::*</span>
+    <span class="dt">int</span> x ;
+    <span class="co">// int ABC::*</span>
+    <span class="dt">int</span> y ;
+    <span class="co">// double ABC::*</span>
+    <span class="dt">double</span> d ;
+    <span class="co">// int * ABC::*</span>
+    <span class="dt">int</span> * ptr ;
+} ;
+
+<span class="kw">struct</span> DEF
+{
+    <span class="co">// ABC * DEF::*</span>
+    ABC * abc ;
+} ;</code></pre></div>
+<p>順を追って説明していこう。まずクラスABCのメンバー、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int ABC::*</span>
+<span class="dt">int</span> x ;
+<span class="co">// int ABC::*</span>
+<span class="dt">int</span> y ;</code></pre></div>
+<p>このメンバーへのポインターの型はどちらも<code>int ABC::*</code>になる。データメンバーの型はintで、クラス名がABCなので、<code>型名 クラス名::*</code>に当てはめると<code>int ABC::*</code>になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// double ABC::*</span>
+<span class="dt">double</span> d ;</code></pre></div>
+<p>このメンバーへのポインターの型は<code>double ABC::*</code>になる。</p>
+<p>最後のクラスABCのメンバー、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int * ABC::*</span>
+<span class="dt">int</span> * ptr ;</code></pre></div>
+<p>これが<code>int * ABC::*</code>になる理由も、最初に説明した<code>型名 クラス名::*</code>のルールに従っている。型名が<code>int *</code>、クラス名が<code>ABC</code>なので、<code>int * ABC::*</code>だ。</p>
+<p>最後の例はクラスDEFのメンバーとしてクラスABCのポインター型のメンバーだ。<code>ABC DEF::*</code>になる。</p>
+<p>クラス名Cのメンバー名Mのメンバーへのポインターを得るには以下の文法を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">&amp;クラス名::メンバー名
+&amp;C::M</code></pre></div>
+<p>具体的な例を見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> x = <span class="dv">1</span> ;
+    <span class="dt">int</span> y = <span class="dv">2</span> ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> C::* x_ptr = &amp;C::x ;
+    <span class="dt">int</span> C::* y_ptr = &amp;C::y ;
+
+    C object ;
+
+    <span class="co">// 1</span>
+    <span class="bu">std::</span>cout &lt;&lt; object.*x_ptr ;
+    <span class="co">// 2 </span>
+    <span class="bu">std::</span>cout &lt;&lt; object.*y_ptr ;
+}</code></pre></div>
+<p>分かりづらければエイリアス宣言を使うとよい。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">using</span> type = <span class="dt">int</span> C::* ;
+type x_ptr = &amp;C::x ;</code></pre></div>
+<p>あるいはauto使うという手もある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// int C::*</span>
+<span class="kw">auto</span> x_ptr = &amp;C::x ;</code></pre></div>
+<p>メンバー関数へのポインターは、メンバーへのポインターと関数へのポインターを組み合わせた複雑な文法となるので、とてもわかりづらい。</p>
+<p>復習すると、int型の引数を一つ受け取りint型の戻り値を返す関数へのポインターの型は<code>int (*)(int)</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> f(<span class="dt">int</span>) { <span class="cf">return</span> <span class="dv">0</span> ; }
+<span class="dt">int</span> (*ptr)(<span class="dt">int</span>) = &amp;f ;</code></pre></div>
+<p>この関数がクラスCのメンバー関数の場合、以下のようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> f(<span class="dt">int</span>) { <span class="cf">return</span> <span class="dv">0</span> ; }
+} ;</code></pre></div>
+<p>ところで、メンバーへのポインターは<code>型名 クラス名::*</code>だった。この2つを組み合わせると、以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> f(<span class="dt">int</span>) { <span class="cf">return</span> <span class="dv">0</span> ; }
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="co">// メンバー関数へのポインター</span>
+    <span class="dt">int</span> (C::*ptr)(<span class="dt">int</span>) = &amp;C::f ;
+    <span class="co">// クラスのオブジェクト</span>
+    C object ;
+
+    <span class="co">// オブジェクトを指定したメンバー関数へのポインターを介した関数呼び出し</span>
+    (object.*ptr)( <span class="dv">123</span> ) ;
+}</code></pre></div>
+<p>メンバー関数へのポインターは難しい。</p>
+<p>関数fの型は<code>int (int)</code>で、そのポインターの型は<code>int (*)(int)</code>だ。するとクラス名Cのメンバー関数fへのポインターの型は、<code>int (C::*)(int)</code>になる。</p>
+<p>メンバー関数へのポインター型の変数を宣言してその値を<code>C::f</code>へのポインターに初期化しているのが以下の行だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// メンバー関数へのポインター</span>
+<span class="dt">int</span> (C::*ptr)(<span class="dt">int</span>) = &amp;C::f ;</code></pre></div>
+<p>この<code>ptr</code>を経由したメンバー関数fの呼び出し方だが、まずクラスのオブジェクトが必要になるので作る。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">C object ;</code></pre></div>
+<p>そして演算子の<code>operator .*</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">(object.*ptr)(<span class="dv">123</span>) ;</code></pre></div>
+<p><code>object.*ptr</code>を括弧で囲んでいるのは、演算子の優先順位のためだ。もしこれを以下のように書くと、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">object.*ptr(<span class="dv">123</span>)</code></pre></div>
+<p>これは<code>ptr(123)</code>という式を評価した結果をメンバーへのポインターと解釈してクラスのオブジェクトを介して参照していることになる。例えば以下のようなコードだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C { <span class="dt">int</span> data { } ; } ;
+
+<span class="kw">auto</span> ptr( <span class="dt">int</span> ) -&gt; <span class="dt">int</span> C::*
+{ <span class="cf">return</span> &amp;C::data ; }
+
+<span class="dt">int</span> main()
+{
+    C object ;
+    object.*ptr(<span class="dv">123</span>) ;
+}</code></pre></div>
+<p>演算子の優先順位の問題のために、<code>(object.*ptr)</code>と括弧で包んで先に評価させ、その後に関数呼び出し式である<code>(123)</code>を評価させる。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>

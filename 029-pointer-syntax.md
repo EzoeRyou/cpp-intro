@@ -584,14 +584,63 @@ using func_ptr = int(*)(int) ;
 auto (*ptr)(func_ptr) -> func_ptr = &g ;
 ~~~
 
+### 配列へのポインター
+
+配列へのポインターについて学ぶ前に、配列の型について学ぶ必要がある。
+
+配列の型は、要素の型をT、要素数をNとすると、`T [N]`となる。
+
+~~~cpp
+// 要素型int、要素数5の配列型
+using int5 = int [5] ;
+// 要素型double、要素数10の配列型
+using double10 = double [10] ;
+~~~
+
+関数型と同じく、ポインター宣言子である`*`は名前につく。
+
+~~~cpp
+// 要素型int、要素数5の配列へのポインター型
+using pointer_to_array_type = int (*)[5] ;
+
+int main()
+{
+    int a[5] ;
+    pointer_to_function_type = &a ;
+}
+~~~
+
+エイリアス宣言を使わない変数の宣言は以下のようになる。
+
+~~~cpp
+int main()
+{
+    int a[5] ;
+    int (*p)[5] = &a ;
+}
+~~~
+
+配列とポインターは密接に関係している。そのため、配列名は配列の先頭要素へのポインターに暗黙に変換される。
+
+~~~cpp
+int main()
+{
+    int a[5] = {1,2,3,4,5} ;
+
+    // &a[0]と同じ
+    int * ptr = a ;
+}
+~~~
+
+配列とポインターの関係については、ポインターの詳細で詳しく説明する。
 
 ### ポインター型の作り方
 
 T型へのポインター型は`T *`で作ることができる。
 
-ただし、Tが`int (int)`のような関数型である場合は、`int (*)(int)`になる。
+ただし、Tが`int (int)`のような関数型である場合は、`int (*)(int)`になる。配列型の場合は要素数Nまで必要で`T (*)[N]`になる。
 
-ただしただし、エイリアス宣言で型に別名をつけると`T *`でよくなる。
+エイリアス宣言で型に別名をつけると`T *`でよくなる。
 
 ~~~cpp
 using function_type = int (int) ;
@@ -654,9 +703,11 @@ template < typename T > using type = T ;
 type<int> * a = nullptr ;
 // int (*)(int)
 type<int(int)> * b = nullptr ;
+// int (*) [5]
+type<int [5]> * c = nullptr ;
 ~~~
 
-`type<int> *`は`int *`型だ。`type<int(int)> *`は`int(*)(int)`型だ。これでもう`*`をどこに書くかという問題に悩まされることはなくなった。
+`type<int> *`は`int *`型だ。`type<int(int)> *`は`int(*)(int)`型だ。`type<int [5]> *`は`int (*) [5]`型だ。これでもう`*`をどこに書くかという問題に悩まされることはなくなった。
 
 しかしわざわざ`type<T> *`と書くのは依然として面倒だ。T型は引数で受け取っているのだから、最初からポインターを返してどうだろうか。
 
@@ -674,6 +725,8 @@ add_pointer_t<int> a = nullptr ;
 add_pointer_t<int *> b = nullptr ;
 // int(*)(int)
 add_pointer_t<int(int)> c = nullptr ;
+// int(*)[5]
+add_pointer_t<int [5]> d = nullptr ;
 ~~~
 
 どうやら動くようだ。もっと複雑な例も試してみよう。
@@ -716,6 +769,503 @@ std::remove_pointer_t<
 
 
 
+### クラスへのポインター
+
+クラスへのポインターは今までに学んだものと同じ文法だ。
+
+~~~cpp
+struct C { } ;
+
+int main()
+{
+    C object ;
+    C * pointer = &object ;
+} 
+~~~
+
+
+ただし、ポインターを経由してメンバーにアクセスするのが曲者だ。
+
+以下のようなメンバーにアクセスするコードがある。
+
+~~~cpp
+struct C
+{
+    int data_member ;
+    void member_function() {}
+} ;
+
+int main()
+{
+    C object ;
+
+    object.data_member = 0 ;
+    object.member_function() ;
+}
+~~~
+
+これをポインターを経由して書いてみよう。
+
+以下のように書くとエラーだ。
+
+~~~c++
+int main()
+{
+    C object ;
+    C * pointer = &object ;
+
+    // エラー
+    *pointer.data_member = 0 ;
+    // エラー
+    *pointer.member_function() ;
+}
+~~~
+
+この理由は演算子の優先順位の問題だ。上の式は以下のように解釈される。
+
+~~~c++
+*(pointer.data_member) = 0 ;
+*(pointer.member_function()) ;
+~~~
+
+ポインターを参照する演算子`*`よりも、演算子ドット('.')のほうが演算子の優先順位が高い。
+
+このような式を可能にする変数pointerとは以下のようなものだ。
+
+~~~cpp
+struct Pointer
+{
+    int data  = 42 ;
+    int * data_member = &data ;
+    int * member_function()
+    {
+        return &data ;
+    }
+} ;
+
+int main()
+{
+    Pointer pointer ;
+
+    *pointer.data_member = 0;
+    *pointer.member_function() ;
+}
+~~~
+
+`pointer.data_member`はポインターなのでそれに演算子`*`を適用して参照した上で0を代入している。
+
+`pointer.member_function()`は関数呼び出しで戻り値としてポインターを返すのでそれに演算子`*`を適用している。
+
+
+演算子`*`を先にポインターの値である`pointer`に適用するには、括弧を使う。
+
+~~~c++
+(*pointer).data_member = 0 ;
+(*pointer).member_function() ;
+~~~
+
+リファレンスを使ってポインターを参照した結果をリファレンスに束縛して使うこともできる。
+
+~~~c++
+C & ref = *pointer ;
+ref.data_member = 0 ;
+ref.member_function() ;
+~~~
+
+ただし、ポインターを介してクラスを扱う際に、毎回括弧を使ったりリファレンスを使ったりするのは面倒なので、簡単なシンタックスシュガーとして演算子`->`が用意されている。
+
+~~~c++
+pointer->data_member = 0 ;
+pointer->member_function() ;
+~~~
+
+`a->b`は、`(*(a))->b`と同じ意味になる。そのため、上は以下のコードと同じ意味になる。
+
+~~~c++
+
+(*(pointer)).data_member = 0 ;
+(*(pointer)).member_function() ;
+~~~
+
 ### thisポインター
+
+メンバー関数はクラスのデータメンバーにアクセスできる。このときのデータメンバーはメンバー関数が呼ばれたクラスのオブジェクトのサブオブジェクトになる。
+
+~~~cpp
+struct C
+{
+    int data { } ;
+
+    void set( int n )
+    {
+        data = n ;
+    }
+} ;
+
+int main()
+{
+    C a ;
+    C b ;
+
+    // a.dataを変更
+    a.set(1) ;
+    // b.dataを変更
+    b.set(2) ;
+}
+~~~
+
+すでに説明したように、メンバー関数が自分を呼びだしたクラスのオブジェクトのサブオブジェクトを参照できるのは、クラスのオブジェクトへの参照を知っているからだ。内部的には以下のような隠し引数を持つコードが生成されたかのような挙動になる。
+
+~~~c++
+// コンパイラーが生成するコードのたとえ
+struct C
+{
+    int data { } ;
+} ;
+
+// 隠し引数
+void set( C & obj, int n )
+{
+    obj.data = n ;
+}
+~~~
+
+つまり、メンバー関数は自分を呼び出したクラスのオブジェクトへの参照を知っている。その参照にアクセスする方法が`this`キーワードだ。
+
+`this`キーワードはクラスのメンバー関数の中で使うと、メンバー関数を呼び出したクラスのオブジェクトへのポインターとして扱われる。
+
+~~~cpp
+struct C
+{
+    int data { } ;
+
+    void set( int n )
+    {
+        // このメンバー関数を呼び出したクラスのオブジェクトへのポインター
+        C * pointer = this ;
+        this->data = n ;
+    }
+} ;
+~~~
+
+さきほど、関数`C::set`の中で`data = n ;`と書いたのは、`this->data = n ;`と書いたのと同じ意味になる。
+
+`this`はリファレンスではなくてポインターだ。この理由は歴史的なものだ。本来ならばリファレンスのほうがよいのだが、今更変更できないのでポインターになっている。わかりにくければリファレンスに束縛してもよい。
+
+~~~cpp
+struct S
+{
+    void f()
+    {
+        auto & this_ref = *this ;
+    }
+} ;
+~~~
+
+constなメンバー関数の中では、`this`の型もconstなクラス型へのポインターになる。
+
+~~~cpp
+struct S
+{
+    void f()
+    {
+        // thisの型はS *
+        S * pointer = this ;
+    }
+
+    void f() const
+    {
+        // thisの型はS const *
+        S const * pointer = this ;
+    }
+} ;
+~~~
+
+この理由は、constなメンバー関数はクラスのオブジェクトへの参照としてconstなリファレンスを隠し引数として持つからだ。
+
+~~~c++
+// コンパイラーが生成するコードのたとえ
+struct S { } ;
+
+// 非constなメンバー関数
+void f( S & obj ) ;
+
+// constなメンバー関数
+void f( S const & obj ) ;
+~~~
+
+
+### メンバーへのポインター
+
+メンバーへのポインターはかなり文法的にややこしい。そもそも、通常のポインターとは概念でも実装でも異なる。
+
+ここで取り扱うのはメンバーへのポインターという概念で、クラスのオブジェクトのサブオブジェクトへのポインターではない。サブオブジェクトへのポインターは通常のポインターと同じだ。
+
+~~~cpp
+struct Object
+{
+    // サブオブジェクト
+    int subobject ;
+} ;
+
+int main()
+{
+    // クラスのオブジェクト
+    Object object ;
+
+    // サブオブジェクトへのポインター
+    int * pointer = &object.subobject ;
+
+    *pointer = 123 ;
+    int read = object.subobject ;
+}
+~~~
+
+メンバーへのポインターとは、クラスのデータメンバーやメンバー関数を参照するもので、クラスのオブジェクトとともに使うことでそのデータメンバーやメンバー関数を参照できるものだ。
+
+細かい文法の解説はあとにして例を見せよう。
+
+~~~cpp
+struct Object
+{
+    int data_member ;
+    void member_function()
+    { std::cout << data_member ; }
+} ;
+
+int main()
+{
+    // Object::data_memberメンバーへのポインター
+    int Object::* int_ptr = &Object::data_member ;
+    // Object::member_functionメンバーへのポインター
+    void (Object::* func_ptr)() = &Object::member_function ;
+
+    // クラスのオブジェクト
+    Object object ;
+
+    // objectに対するメンバーポインターを介した参照
+    object.*int_ptr = 123 ;
+    // objectに対するメンバーポインターを介した参照
+    // 123
+    (object.*func_ptr)() ;
+
+    // 別のオブジェクト
+    Object another_object ;
+    another_object.data_member = 456 ;
+    // 456
+    (another_object.*func_ptr)() ;
+}
+~~~
+
+細かい文法はあとで学ぶとして、肝心の機能としてはこうだ。クラスのオブジェクトからは独立したデータメンバーやメンバー関数自体へのポインターを取得する。
+
+~~~c++
+struct Object
+{
+    int data_member ;
+} ;
+
+// メンバーへのポインター
+int Object::*int_ptr = &Object::data_member ; 
+~~~
+
+このポインターをクラスのオブジェクトと組み合わせることで、ポインターが参照するクラスのメンバーで、かつオブジェクトのサブオブジェクトの部分を参照できる。
+
+~~~c++
+Object object ;
+
+// メンバーへのポインターをオブジェクトに適用してサブオブジェクトを参照する
+object.*int_ptr = 123 ;
+~~~
+
+では文法の説明に入ろう。
+
+メンバーへのポインターは文法がややこしい。
+
+あるクラス名Cの型名Tのメンバーへのポインター型は以下のようになる。
+
+~~~c++
+型名 クラス名:::*
+T C::*
+~~~
+
+以下のクラスの各データメンバーへの型はそれぞれコメントのとおりになる。
+
+~~~cpp
+struct ABC
+{
+    // int ABC::*
+    int x ;
+    // int ABC::*
+    int y ;
+    // double ABC::*
+    double d ;
+    // int * ABC::*
+    int * ptr ;
+} ;
+
+struct DEF
+{
+    // ABC * DEF::*
+    ABC * abc ;
+} ;
+~~~
+
+順を追って説明していこう。まずクラスABCのメンバー、
+
+~~~c++
+// int ABC::*
+int x ;
+// int ABC::*
+int y ;
+~~~
+
+このメンバーへのポインターの型はどちらも`int ABC::*`になる。データメンバーの型はintで、クラス名がABCなので、`型名 クラス名::*`に当てはめると`int ABC::*`になる。
+
+~~~c++
+// double ABC::*
+double d ;
+~~~
+
+このメンバーへのポインターの型は`double ABC::*`になる。
+
+最後のクラスABCのメンバー、
+
+~~~c++
+// int * ABC::*
+int * ptr ;
+~~~
+
+これが`int * ABC::*`になる理由も、最初に説明した`型名 クラス名::*`のルールに従っている。型名が`int *`、クラス名が`ABC`なので、`int * ABC::*`だ。
+
+最後の例はクラスDEFのメンバーとしてクラスABCのポインター型のメンバーだ。`ABC DEF::*`になる。
+
+クラス名Cのメンバー名Mのメンバーへのポインターを得るには以下の文法を使う。
+
+~~~c++
+&クラス名::メンバー名
+&C::M
+~~~
+
+具体的な例を見てみよう。
+
+~~~cpp
+struct C
+{
+    int x = 1 ;
+    int y = 2 ;
+} ;
+
+int main()
+{
+    int C::* x_ptr = &C::x ;
+    int C::* y_ptr = &C::y ;
+
+    C object ;
+
+    // 1
+    std::cout << object.*x_ptr ;
+    // 2 
+    std::cout << object.*y_ptr ;
+}
+~~~
+
+分かりづらければエイリアス宣言を使うとよい。
+
+~~~cpp
+using type = int C::* ;
+type x_ptr = &C::x ;
+~~~
+
+あるいはauto使うという手もある。
+
+~~~cpp
+// int C::*
+auto x_ptr = &C::x ;
+~~~
+
+メンバー関数へのポインターは、メンバーへのポインターと関数へのポインターを組み合わせた複雑な文法となるので、とてもわかりづらい。
+
+復習すると、int型の引数を一つ受け取りint型の戻り値を返す関数へのポインターの型は`int (*)(int)`だ。
+
+~~~cpp
+int f(int) { return 0 ; }
+int (*ptr)(int) = &f ;
+~~~
+
+この関数がクラスCのメンバー関数の場合、以下のようになる。
+
+~~~cpp
+struct C
+{
+    int f(int) { return 0 ; }
+} ;
+~~~
+
+ところで、メンバーへのポインターは`型名 クラス名::*`だった。この2つを組み合わせると、以下のように書ける。
+
+~~~cpp
+struct C
+{
+    int f(int) { return 0 ; }
+} ;
+
+int main()
+{
+    // メンバー関数へのポインター
+    int (C::*ptr)(int) = &C::f ;
+    // クラスのオブジェクト
+    C object ;
+
+    // オブジェクトを指定したメンバー関数へのポインターを介した関数呼び出し
+    (object.*ptr)( 123 ) ;
+}
+~~~
+
+メンバー関数へのポインターは難しい。
+
+関数fの型は`int (int)`で、そのポインターの型は`int (*)(int)`だ。するとクラス名Cのメンバー関数fへのポインターの型は、`int (C::*)(int)`になる。
+
+メンバー関数へのポインター型の変数を宣言してその値を`C::f`へのポインターに初期化しているのが以下の行だ。
+
+~~~c++
+// メンバー関数へのポインター
+int (C::*ptr)(int) = &C::f ;
+~~~
+
+この`ptr`を経由したメンバー関数fの呼び出し方だが、まずクラスのオブジェクトが必要になるので作る。
+
+~~~c++
+C object ;
+~~~
+
+そして演算子の`operator .*`を使う。
+
+~~~c++
+(object.*ptr)(123) ;
+~~~
+
+`object.*ptr`を括弧で囲んでいるのは、演算子の優先順位のためだ。もしこれを以下のように書くと、
+
+~~~c++
+object.*ptr(123)
+~~~
+
+これは`ptr(123)`という式を評価した結果をメンバーへのポインターと解釈してクラスのオブジェクトを介して参照していることになる。例えば以下のようなコードだ。
+
+~~~cpp
+struct C { int data { } ; } ;
+
+auto ptr( int ) -> int C::*
+{ return &C::data ; }
+
+int main()
+{
+    C object ;
+    object.*ptr(123) ;
+}
+~~~
+
+演算子の優先順位の問題のために、`(object.*ptr)`と括弧で包んで先に評価させ、その後に関数呼び出し式である`(123)`を評価させる。
 
 
