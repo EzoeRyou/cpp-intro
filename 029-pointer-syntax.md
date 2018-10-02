@@ -1268,4 +1268,131 @@ int main()
 
 演算子の優先順位の問題のために、`(object.*ptr)`と括弧で包んで先に評価させ、その後に関数呼び出し式である`(123)`を評価させる。
 
+実は演算子`operator .*`の他に、`operator ->*`という演算子がある。
 
+`.*`はクラスのオブジェクトがリファレンスの場合の演算子だが、`->*はクラスのオブジェクトがポインターの場合の演算子だ。
+
+~~~cpp
+struct C{ int data { } : } ;
+
+int main()
+{
+    auto data_ptr = &C::data ;
+
+    C object ;
+    auto c_ptr = &object ;
+
+    c_ptr->*object = 123 ;
+}
+~~~
+
+演算子`a->b`が`(*(a)).b`となるように、演算子`a->*b`も`(*(a)).*b`と置き換えられるシンタックスシュガーだ。
+
+上の例で、
+
+~~~c++
+c_ptr->*object = 123 ;
+~~~
+
+は、以下と同じだ。
+
+~~~c++
+(*(c_ptr)).*object = 123 ;
+~~~
+
+`.*`や`->*`の文法を覚えるのが面倒な場合、標準ライブラリに`std::invoke( f, t1, ... )`という便利な関数が用意されている。
+
+fがデータメンバーへのポインターで、t1がクラスのオブジェクトの場合、`std::invoke(f, t1)`は以下のような関数になる。
+
+~~~c++
+template < typename F, typename T1 >
+適切な戻り値の型 std::invoke( F f, T1 t1 )
+{
+    return t1.*f ;
+}
+~~~
+
+
+なので以下のように書ける。
+
+~~~c++
+struct C { int data { } ; } ;
+
+int main()
+{
+    auto data_ptr = &C::data ;
+
+    C object ;
+
+    // どちらも同じ意味
+    object.*data_ptr = 123 ;
+    std::invoke( data_ptr, object ) = 123 ;
+}
+~~~
+
+便利なことにt1がポインターの場合は、
+
+~~~c++
+template < typename F, typename T1 >
+適切な戻り値の型 std::invoke( F f, T1 t1 )
+{
+    return (*(t1)).*f ;
+}
+~~~
+
+という関数として振る舞う。そのため、リファレンスでもポインターでも気にせずに使うことができる。
+
+~~~c++
+C * c_ptr = &object ;
+
+// どちらも同じ意味
+c_ptr->*data_ptr = 123 ;
+std::invoke( data_ptr, c_ptr ) = 123 ;
+~~~
+
+
+`std::invoke`が更に凄いことに、メンバー関数へのポインターにも対応している。
+
+
+`std::invoke( f, t1, ... )`で、fがメンバー関数へのポインターで、t1がクラスのオブジェクトへのリファレンスで、`...`が関数呼び出しの際の引数の場合、以下のような関数として振る舞う。
+
+~~~c++
+template < typename F, typename T1,
+    // まだ知らない機能
+    typename ... Ts >
+適切な戻り値の型
+invoke( F f, T1 t1,
+// まだ知らない機能
+Ts ... ts )
+{
+    return (t1.*f)(ts...)
+}
+~~~
+
+厳密にはこの宣言は間違っているのだが、まだ知らない機能を使っているので気にしなくてもよい。大事なことは、`std::invoke`の第三引数以降の実引数が、関数呼び出しの実引数として使われるということだ。
+
+~~~cpp
+struct C
+{
+    int f0() { return 0 ; }
+    int f1(int) { return 1 ; } 
+    int f2( int, int ) { return 2 ; }
+} ;
+
+int main()
+{
+    C object ;
+
+    // 同じ
+    (object.*&C::f0)() ;
+    std::invoke( &C::f0, object ) ;
+    // 同じ
+    (object.*&C::f1)(1) ;
+    std::invoke( &C::f1, object, 1) ;
+    // 同じ
+    (object.*&C::f2)(1,2) ;
+    std::invoke( &C::f2, object, 1,2) ;
+}
+~~~
+
+この場合も、objectがCへのリファレンスではなく、Cへのポインターでも自動で認識していいように処理してくれる。
