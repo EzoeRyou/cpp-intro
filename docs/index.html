@@ -315,7 +315,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#例外を捕まえる">例外を捕まえる</a></li>
 <li><a href="#例外による巻き戻し">例外による巻き戻し</a></li>
 </ul></li>
-<li><a href="#ポインターの基礎">ポインターの基礎</a><ul>
+<li><a href="#ポインター">ポインター</a><ul>
 <li><a href="#意味上のポインター">意味上のポインター</a><ul>
 <li><a href="#リファレンスと同じ機能">リファレンスと同じ機能</a></li>
 <li><a href="#リファレンスと違う機能">リファレンスと違う機能</a></li>
@@ -333,6 +333,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#クラスへのポインター">クラスへのポインター</a></li>
 <li><a href="#thisポインター">thisポインター</a></li>
 <li><a href="#メンバーへのポインター">メンバーへのポインター</a></li>
+</ul></li>
+<li><a href="#ポインターの内部実装">ポインターの内部実装</a><ul>
+<li><a href="#キロバイトとキビバイト">キロバイトとキビバイト</a></li>
+<li><a href="#メモリとアドレス">メモリとアドレス</a></li>
+<li><a href="#ポインターのサイズ">ポインターのサイズ</a></li>
+<li><a href="#ポインターの値">ポインターの値</a></li>
+<li><a href="#stdbit_castの実装"><code>std::bit_cast</code>の実装</a></li>
+<li><a href="#stdmemcpyの実装"><code>std::memcpy</code>の実装</a><ul>
+<li><a href="#void型">void型</a></li>
+<li><a href="#void-型">void *型</a></li>
+<li><a href="#stdbyte型">std::byte型</a></li>
+<li><a href="#配列のメモリ上での表現">配列のメモリ上での表現</a></li>
+<li><a href="#ポインターと整数の演算">ポインターと整数の演算</a></li>
+</ul></li>
 </ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
@@ -10299,7 +10313,7 @@ main is destructed.</code></pre>
 <li>mainが破棄される。</li>
 </ol>
 <p>例外が投げられると通常の実行は飛ばされるので、例外が投げられるかもしれない処理のあとに、例外の有無にかかわらず絶対に実行したい処理がある場合は、クラスのデストラクターに書くとよい。</p>
-<h1 id="ポインターの基礎">ポインターの基礎</h1>
+<h1 id="ポインター">ポインター</h1>
 <p>ポインターは難しいとよく言われる。世の中にはポインターのためにC言語とC++を挫折し、他の軟弱な言語に逃げるプログラマーがいる。ポインターしか解説していない本が出版される。Joel Spolskyがエッセイを書く。</p>
 <p>ポインターの理解は優秀なプログラマーとなるために必須である。ポインターを理解できない人間は優秀なプログラマーにはなれない。もし、本書を呼んでポインターが理解できない場合、プログラマーには向いていないということだ。</p>
 <p>ポインターを難しくしている原因には、意味上のポインターと、文法上のポインターと、ポインターの内部実装がある。いずれも難しいが、本書を読めばポインターは完全に理解できる。</p>
@@ -11275,6 +11289,408 @@ type x_ptr = &amp;C::x ;</code></pre></div>
     object.*ptr(<span class="dv">123</span>) ;
 }</code></pre></div>
 <p>演算子の優先順位の問題のために、<code>(object.*ptr)</code>と括弧で包んで先に評価させ、その後に関数呼び出し式である<code>(123)</code>を評価させる。</p>
+<p>実は演算子<code>operator .*</code>の他に、<code>operator -&gt;*</code>という演算子がある。</p>
+<p><code>.*</code>はクラスのオブジェクトがリファレンスの場合の演算子だが、`-&gt;*はクラスのオブジェクトがポインターの場合の演算子だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C{ <span class="dt">int</span> data { } : } ;
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> data_ptr = &amp;C::data ;
+
+    C object ;
+    <span class="kw">auto</span> c_ptr = &amp;object ;
+
+    c_ptr-&gt;*object = <span class="dv">123</span> ;
+}</code></pre></div>
+<p>演算子<code>a-&gt;b</code>が<code>(*(a)).b</code>となるように、演算子<code>a-&gt;*b</code>も<code>(*(a)).*b</code>と置き換えられるシンタックスシュガーだ。</p>
+<p>上の例で、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">c_ptr-&gt;*object = <span class="dv">123</span> ;</code></pre></div>
+<p>は、以下と同じだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">(*(c_ptr)).*object = <span class="dv">123</span> ;</code></pre></div>
+<p><code>.*</code>や<code>-&gt;*</code>の文法を覚えるのが面倒な場合、標準ライブラリに<code>std::invoke( f, t1, ... )</code>という便利な関数が用意されている。</p>
+<p>fがデータメンバーへのポインターで、t1がクラスのオブジェクトの場合、<code>std::invoke(f, t1)</code>は以下のような関数になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> F, <span class="kw">typename</span> T1 &gt;
+適切な戻り値の型 <span class="bu">std::</span>invoke( F f, T1 t1 )
+{
+    <span class="cf">return</span> t1.*f ;
+}</code></pre></div>
+<p>なので以下のように書ける。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C { <span class="dt">int</span> data { } ; } ;
+
+<span class="dt">int</span> main()
+{
+    <span class="kw">auto</span> data_ptr = &amp;C::data ;
+
+    C object ;
+
+    <span class="co">// どちらも同じ意味</span>
+    object.*data_ptr = <span class="dv">123</span> ;
+    <span class="bu">std::</span>invoke( data_ptr, object ) = <span class="dv">123</span> ;
+}</code></pre></div>
+<p>便利なことにt1がポインターの場合は、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> F, <span class="kw">typename</span> T1 &gt;
+適切な戻り値の型 <span class="bu">std::</span>invoke( F f, T1 t1 )
+{
+    <span class="cf">return</span> (*(t1)).*f ;
+}</code></pre></div>
+<p>という関数として振る舞う。そのため、リファレンスでもポインターでも気にせずに使うことができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">C * c_ptr = &amp;object ;
+
+<span class="co">// どちらも同じ意味</span>
+c_ptr-&gt;*data_ptr = <span class="dv">123</span> ;
+<span class="bu">std::</span>invoke( data_ptr, c_ptr ) = <span class="dv">123</span> ;</code></pre></div>
+<p><code>std::invoke</code>が更に凄いことに、メンバー関数へのポインターにも対応している。</p>
+<p><code>std::invoke( f, t1, ... )</code>で、fがメンバー関数へのポインターで、t1がクラスのオブジェクトへのリファレンスで、<code>...</code>が関数呼び出しの際の引数の場合、以下のような関数として振る舞う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> F, <span class="kw">typename</span> T1,
+    <span class="co">// まだ知らない機能</span>
+    <span class="kw">typename</span> ... Ts &gt;
+適切な戻り値の型
+invoke( F f, T1 t1,
+<span class="co">// まだ知らない機能</span>
+Ts ... ts )
+{
+    <span class="cf">return</span> (t1.*f)(ts...)
+}</code></pre></div>
+<p>厳密にはこの宣言は間違っているのだが、まだ知らない機能を使っているので気にしなくてもよい。大事なことは、<code>std::invoke</code>の第三引数以降の実引数が、関数呼び出しの実引数として使われるということだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> C
+{
+    <span class="dt">int</span> f0() { <span class="cf">return</span> <span class="dv">0</span> ; }
+    <span class="dt">int</span> f1(<span class="dt">int</span>) { <span class="cf">return</span> <span class="dv">1</span> ; } 
+    <span class="dt">int</span> f2( <span class="dt">int</span>, <span class="dt">int</span> ) { <span class="cf">return</span> <span class="dv">2</span> ; }
+} ;
+
+<span class="dt">int</span> main()
+{
+    C object ;
+
+    <span class="co">// 同じ</span>
+    (object.*&amp;C::f0)() ;
+    <span class="bu">std::</span>invoke( &amp;C::f0, object ) ;
+    <span class="co">// 同じ</span>
+    (object.*&amp;C::f1)(<span class="dv">1</span>) ;
+    <span class="bu">std::</span>invoke( &amp;C::f1, object, <span class="dv">1</span>) ;
+    <span class="co">// 同じ</span>
+    (object.*&amp;C::f2)(<span class="dv">1</span>,<span class="dv">2</span>) ;
+    <span class="bu">std::</span>invoke( &amp;C::f2, object, <span class="dv">1</span>,<span class="dv">2</span>) ;
+}</code></pre></div>
+<p>この場合も、objectがCへのリファレンスではなく、Cへのポインターでも自動で認識していいように処理してくれる。</p>
+<h2 id="ポインターの内部実装">ポインターの内部実装</h2>
+<p>ポインターの意味上と文法上の解説は終えた。ここからはポインターの内部実装についてだ。ポインターの値とは外でもない、メモリー上のアドレスのことだ。</p>
+<h3 id="キロバイトとキビバイト">キロバイトとキビバイト</h3>
+<p>メモリとアドレスについて解説する前に、キロバイト(Kilo byte)とキビバイト(Kibi byte)の違いについて解説する。</p>
+<p>キロ(Kilo)というのはSI接頭語で、<span class="math inline">\(1000^1\)</span>を意味する。1キロは1000だ。SI接頭語には他にもメガ(Mega, <span class="math inline">\(1000^2\)</span>)、ギガ(Giga, <span class="math inline">\(1000^3\)</span>)やテラ(Tera, <span class="math inline">\(1000^4\)</span>)などの接頭語もある。</p>
+<p>長さ1キロメートルは1000メートルで、重さ1キログラムは1000グラムだ。</p>
+<p>今「このCPUのクロック周波数は1GHzだ」と言ったとき、それは<span class="math inline">\(1000^3 Hz = 1000000000 Hz\)</span>のことだ。</p>
+<p>しかし、メモリ容量だけは慣習的に<span class="math inline">\(1000^n\)</span>ではなく、<span class="math inline">\(1024^n\)</span>を使う。</p>
+<p>一般人が「このメモリは1KBだ」と言ったとき、それは1024バイトのことだ。1GBのメモリは<span class="math inline">\(1024^3 バイト = 1073741824 バイト\)</span>だ。筆者が本書を執筆するのに使ったラップトップコンピューターは32GBのメモリを積んでいるがこれは34359738368バイトだ。</p>
+<p>メモリの容量が10進数ではなく2進数で数えられているのは、メモリは2進数で扱うのがハードウェア的に都合がいいからだ。そのため、慣習的にキロは<span class="math inline">\(1000^1\)</span>ではなく<span class="math inline">\(1024^1\)</span>を意味するようになってしまった。</p>
+<p>このため、IEEE 1541では10進SI接頭語と対になる2進接頭語を定義した。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">接頭語</th>
+<th align="left">値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">キビ(kibi, Ki)</td>
+<td align="left"><span class="math inline">\(2^{10}\)</span></td>
+</tr>
+<tr class="even">
+<td align="left">メビ(mebi, Mi)</td>
+<td align="left"><span class="math inline">\(2^{20}\)</span></td>
+</tr>
+<tr class="odd">
+<td align="left">ギビ(gibi, Gi)</td>
+<td align="left"><span class="math inline">\(2^{30}\)</span></td>
+</tr>
+<tr class="even">
+<td align="left">テビ(tebi, Ti)</td>
+<td align="left"><span class="math inline">\(2^{40}\)</span></td>
+</tr>
+<tr class="odd">
+<td align="left">ペビ(pebi, Pi)</td>
+<td align="left"><span class="math inline">\(2^{50}\)</span></td>
+</tr>
+<tr class="even">
+<td align="left">エクスビ(exbi, Ei)</td>
+<td align="left"><span class="math inline">\(2^{60}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>本書では1KBは1000バイトで、1KiBが1024バイトを意味する。</p>
+<h3 id="メモリとアドレス">メモリとアドレス</h3>
+<p>コンピューターにはメモリーやストレージと呼ばれる記憶領域がある。情報の最小単位はすでに学んだようにビットだが、情報をビット単位で扱うのは不便なので、慣習的に複数の連続したビットを束ねたバイトという単位で扱っている。1バイトはほとんどのアーキテクチャで8ビットだ。メモリは複数の連続したバイト列で成り立っている。</p>
+<p>この連続したバイト列の中の任意の1バイトを指し示すのがアドレスだ。メモリのバイト列の最初の1バイトのアドレスを0とし、次の1バイトアドレスを1とし、以降、その次を前のアドレスに1加えた値にしてみよう。</p>
+<p>そのようなメモリーとアドレスのコンピューターでは、1バイトの符号なし整数で表現されたアドレスは、256バイトのメモリの中の任意の1バイトをアドレスとして参照することができる。</p>
+<p>これはとても抽象化された計算機で、現実の計算機はもっと複雑な実装になっている。しかしC++の規格としては、メモリとはフラットな連続したバイト列であって、その任意の各バイトをアドレスから参照可能だという想定になっている。</p>
+<p>アドレスが1バイトの符号なし整数で表現され、そのすべてのビットが使われる場合、256バイトの連続したメモリをアドレス可能だ。</p>
+<p>アドレスが2バイトならば、64KiBのメモリをアドレス可能だ。</p>
+<p>アドレスが4バイトならば、4GiBのメモリをアドレス可能だ。</p>
+<p>アドレスが8バイトならば、16EiBのメモリをアドレス可能だ。</p>
+<p>ポインターの値というのは、このアドレスの値のことだ。</p>
+<h3 id="ポインターのサイズ">ポインターのサイズ</h3>
+<p>ポインターの値というのはアドレスの値だ。ポインターの値を格納するのにもメモリが必要だ。ではポインターのサイズは何バイトあるのだろう。</p>
+<p>型Tのサイズを調べるには<code>sizeof(T)</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt;<span class="kw">typename</span> T &gt;
+<span class="dt">void</span> print_size()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">sizeof</span>(T) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="dt">int</span> main()
+{
+    print_size&lt;<span class="dt">int</span> *&gt;() ;
+    print_size&lt;<span class="dt">double</span> *&gt;() ;
+
+    <span class="co">// ポインターへのポインター</span>
+    print_size&lt;<span class="dt">int</span> **&gt;() ; 
+}</code></pre></div>
+<p>筆者の環境でこのプログラムを実行した結果は以下のようになった。</p>
+<pre><code>8
+8
+8</code></pre>
+<p>どうやら筆者の環境ではポインターのサイズはすべて8バイトらしい。</p>
+<h3 id="ポインターの値">ポインターの値</h3>
+<p>ポインターが8バイト、つまり64ビットの値であるならば、それを8バイトの符号なし整数として解釈した値はどうなるのだろう。</p>
+<p>C++にはすべてのポインターの値を格納できるサイズの符号なし整数型が用意されている。<code>std::uintptr_t</code>だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">sizeof</span>( <span class="bu">std::</span>uintptr_t ) ;
+}</code></pre></div>
+<p>筆者の環境でこのプログラムを実行した結果も8が出力される。</p>
+<p>ポインターも<code>std::uintptr_t</code>も8バイトだ。ポインターのバイト列を<code>std::uintptr_t</code>として強引に解釈すれば、符号なし整数としての値を出力してみよう。</p>
+<p>ある値fromのバイト列を、同じバイト数のある型toの値として強引に解釈するC++20で追加された標準ライブラリに、<code>std::bit_cast&lt;to&gt;(from)</code>がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;bit&gt;</span>
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data {} ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(&amp;data) ;
+}</code></pre></div>
+<p>このプログラムを何度か実行した結果、以下のような結果を得た。</p>
+<pre><code>$ make run
+140725678382588
+$ make run
+140721510940268
+$ make run
+140731669632396</code></pre>
+<p>私の環境ではポインターの具体的な値は実行ごとに異なる。これは私の使っているOSがASLR(Address Space Layout Randomization)を実装しているためだ。興味のある読者は調べてみるとよい。</p>
+<p>この値はint型の変数dataのポインターの整数としての値だ。このアドレスの場所に、int型のオブジェクトの最初の1バイトがあり、その次の場所に次の1バイトがある。</p>
+<p>筆者の環境ではint型は4バイトだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="kw">sizeof</span>(<span class="dt">int</span>) ;
+}</code></pre></div>
+<p>int型のオブジェクトは4バイトの連続したメモリー上に構築されている。つまり、本質的には以下のようなコードと同等になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>byte data[<span class="dv">4</span>] ;
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(&amp;data[<span class="dv">0</span>]) ;
+}</code></pre></div>
+<p><code>std::byte</code>というのは<code>sizeof(std::byte)</code>の結果が1になる、サイズが1バイトの符号なし整数型だ。</p>
+<p><code>std::byte</code>はC++で1バイトの生の値を表現するために使うことができる。配列は連続したバイト列なので、4バイトのint型は、本質的には上のようなコードになる。ただし上のコードはアライメントという概念が欠けている。これについては後で説明する。</p>
+<p>ところで、<code>std::bit_cast</code>は2020年に制定される国際標準規格C++20から入った。しかるに筆者がこの文章を書いているのは2018年だ。まだC++20を完全に実装したC++コンパイラーは存在しない。この本が出版されてしばらくは、読者の手元にもC++20コンパイラーは存在しないだろう。</p>
+<h3 id="stdbit_castの実装"><code>std::bit_cast</code>の実装</h3>
+<p>ないものは自分で実装すればいい。<code>std::bit_cast</code>に近いものを実装してみよう。</p>
+<p>今回実装する<code>bit_cast</code>は以下のような関数テンプレートだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> To, <span class="kw">typename</span> From &gt;
+To bit_cast( From <span class="at">const</span> &amp; from )
+{
+    <span class="co">// 値fromのバイト列をTo型の値として解釈して返す。</span>
+}</code></pre></div>
+<p>bit_castの実装にはポインターが必要だ。Fromの値を表現するバイト列への先頭のポインターをとり、バイト単位でToの値を表現するバイト列にコピーすればよい。</p>
+<p>標準ライブラリにはそのような処理を行ってくれる<code>std::memcpy(dest, src, n)</code>がある。ポインターsrcからnバイトをポインターdestからnバイトに書き込む関数だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> To, <span class="kw">typename</span> From &gt;
+To bit_cast( From <span class="at">const</span> &amp; from )
+{
+    To to ;
+    <span class="bu">std::</span>memcpy( &amp;to, &amp;from, <span class="kw">sizeof</span>(To) ) ;
+    <span class="cf">return</span> to ;
+}</code></pre></div>
+<p>これで<code>std::bit_cast</code>の実装はできた。しかしこの実装は問題を<code>std::memcpy</code>にたらい回しにしただけだ。<code>std::memcpy</code>も実装できて初めて<code>std::bit_cast</code>を自前で実装できたと言える。</p>
+<h3 id="stdmemcpyの実装"><code>std::memcpy</code>の実装</h3>
+<p><code>std::memcpy</code>はC++コンパイラーによって効率の良いコードに置き換えられる。そのため自分で実装した<code>std::memcpy</code>を標準ライブラリと同じ効率にすることは難しいが、機能的にはほとんど同じものを作ることができる。</p>
+<p><code>memcpy</code>の実装にはポインターの詳細な理解が必要だ。</p>
+<p><code>std::memcpy</code>関数は以下のようになっている。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> * memcpy( <span class="dt">void</span> * dest, <span class="dt">void</span> <span class="at">const</span> * src, <span class="bu">std::</span>size_t n )
+{
+    <span class="co">// srcの先頭バイトからnバイトを</span>
+    <span class="co">// destの先頭バイトからのバイト列にコピーし</span>
+    <span class="co">// destを返す</span>
+}</code></pre></div>
+<p>みなれない<code>void *</code>という型が出てきた。まずはこれについて学ぼう。</p>
+<h4 id="void型">void型</h4>
+<p><code>void</code>は特別な型だ。void型は何も値を持たない型という意味を持つ。例えば関数が戻り値を何も返さない場合、void型を返す関数として宣言される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 何も値を返さない関数</span>
+<span class="dt">void</span> f()
+{
+    <span class="co">// 何も値を返さない</span>
+    <span class="cf">return</span> ;
+}</code></pre></div>
+<p>あらゆる値はvoid型に変換することができる。変換した結果は、何も値を持たない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> f()
+{
+    <span class="cf">return</span> <span class="kw">static_cast</span>&lt;<span class="dt">void</span>&gt;(<span class="dv">123</span>) ;
+}</code></pre></div>
+<p>C++17では、void型の変数は作れない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// エラー</span>
+<span class="dt">void</span> x ;</code></pre></div>
+<p>ところで、読者が本書を読む頃には、C++規格ではvoid型の変数が作れるようになっているかもしれない。これはvoid型だけ変数を作れないのが面倒だからつくれるようになるだけで、具体的な値のない変数になる。</p>
+<h4 id="void-型">void *型</h4>
+<p><code>void *</code>型は「void型へのポインター型」だ。<code>int *</code>が「int型へのポインター型」であるのと同じだ。</p>
+<p><code>void *</code>型の値は、ある型Tへのポインター型から型Tという情報が消え去ったポインターの値だ。ポインターの値というのはアドレスで、アドレスというのは単なるバイト単位のメモリを指す整数値だということを学んだ。<code>void *</code>型は特定の型を意味しないポインター型だ。</p>
+<p>ある型Tへのポインター型の値は、<code>void *</code>型に変換できる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data { } ;
+
+    <span class="co">// int *からvoid *への変換</span>
+    <span class="dt">void</span> * ptr = &amp;data ;
+}</code></pre></div>
+<p><code>void *</code>型の値eから元の型Tへのポインターに変換するには<code>static_cast&lt;T *&gt;(e)</code>が必要だ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data { } ;
+    <span class="dt">void</span> * void_ptr = &amp;data ;
+
+    <span class="dt">int</span> * int_ptr = <span class="kw">static_cast</span>&lt;<span class="dt">int</span> *&gt;(void_ptr) ;
+}</code></pre></div>
+<p>もし<code>static_cast&lt;T *&gt;(e)</code>のeが<code>T *</code>として妥当なアドレスの値であれば、変換後も正しく動く。</p>
+<p><code>T const *</code>型は<code>void const *</code>型に変換できる。その逆変換もできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data {} ;
+    <span class="dt">int</span> <span class="at">const</span> * int_const_ptr = &amp;data ;
+    <span class="dt">void</span> <span class="at">const</span> * void_const_ptr = int_const_ptr ;
+    <span class="dt">int</span> <span class="at">const</span> * original = <span class="kw">static_cast</span>&lt;<span class="dt">int</span> <span class="at">const</span> *&gt;(void_const_ptr) ;
+}</code></pre></div>
+<p>ポインター間の型変換でconstを消すことはできない。</p>
+<p>memcpyは<code>void *</code>を使うことで、どんなポインターの値でも取れるようにしている。C++にはテンプレートがあるので以下のように宣言してもよいのだが、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> Dest, <span class="kw">typename</span> Src &gt;
+Dest * memcpy( Dest * dest, Src <span class="at">const</span> * src, <span class="bu">std::</span>size_t n ) ;</code></pre></div>
+<p>memcpyはC++以前からあるC言語ライブラリなので、こうなっている。</p>
+<h4 id="stdbyte型">std::byte型</h4>
+<p><code>void *</code>型はアドレスだけを意味するポインター型なので、参照することができない。<code>memcpy</code>の実装にはポインターを経由して参照先を1バイトづつ読み書きする必要がある。そのための型としてstd::byteがある。</p>
+<p><code>std::byte</code>型は1バイトを表現するための型だ。<code>sizeof(std::byte)</code>の結果は1になる。</p>
+<p>1バイトというのは10進数で<span class="math inline">\(0 \leqq n \leqq 255\)</span>までの値を扱う。</p>
+<p><code>std::byte</code>はとても厳格に1バイトの符号なし整数として振る舞うので、普通の整数で初期化や代入をすることができない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// エラー</span>
+<span class="bu">std::</span>byte a = <span class="dv">123</span> ;
+<span class="bu">std::</span>byte b(<span class="dv">123</span>) ;
+
+<span class="co">// これもエラー</span>
+a = <span class="dv">123</span> ;</code></pre></div>
+<p>std::byteに具体的な値で初期化するには<code>{x}</code>を使う。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="bu">std::</span>byte a{<span class="dv">123</span>} ;</code></pre></div>
+<p>std::byteに値を代入するには<code>std::byte{x}</code>を使う</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="bu">std::</span>byte a ;
+a = <span class="bu">std::</span>byte{<span class="dv">123</span>} ;</code></pre></div>
+<p><code>static_cast&lt;std::byte&gt;(x)</code>や<code>std::byte(x)</code>はコンパイルできるが、使ってはならない。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 使ってはならない</span>
+<span class="bu">std::</span>byte a = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte&gt;(<span class="dv">123</span>) ;
+<span class="bu">std::</span>byte b = <span class="bu">std::</span>byte(<span class="dv">123</span>) ;</code></pre></div>
+<p>何故使ってはならないかというと、範囲外の値を無理やり変換してしまうからだ。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="bu">std::</span>byte a = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte&gt;(<span class="dv">256</span>) ;
+<span class="bu">std::</span>byte b = <span class="bu">std::</span>byte(<span class="dv">-1</span>) ;</code></pre></div>
+<h4 id="配列のメモリ上での表現">配列のメモリ上での表現</h4>
+<p>配列は要素型を表現するバイト列をメモリ上に連続して配置する。</p>
+<p>例えば<code>int [3]</code>という配列があり、<code>sizeof(int)</code>が4の場合、全体で12バイトのメモリが確保される。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> data[<span class="dv">3</span>] = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;</code></pre></div>
+<p>最初の4バイト（0バイト目から3バイトまで）の領域は0番目の要素である<code>data[0]</code>で、その値は1だ。</p>
+<p>次の4バイト（4バイト目から7バイト目まで）の領域は1番目の要素である<code>data[1]</code>で、その値は2だ。</p>
+<p>最後の4バイト（8バイト目から11バイト目まで）の領域は2番めの要素である<code>data[2]</code>で、その値は3だ。</p>
+<pre><code>TODO: メモリの図示
+
+   ↓最初の4バイト
+&lt;-----&gt;
+□-□-□-□-□-□-□-□-□-□-□-□
+        &lt;-----&gt;
+       　　↑次の4バイト
+                &lt;-----&gt;
+                   ↑最後の4バイト</code></pre>
+<p>実際にアドレスの生の値を出力して確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 生のアドレスを出力する関数</span>
+<span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="dt">void</span> print_raw_address( T * ptr )
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(ptr) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> data[<span class="dv">3</span>] = {<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>} ;
+    print_raw_address( &amp;data[<span class="dv">0</span>] ) ;
+    print_raw_address( &amp;data[<span class="dv">1</span>] ) ;
+    print_raw_address( &amp;data[<span class="dv">2</span>] ) ;
+}</code></pre></div>
+<p>このプログラムを筆者の環境で実行すると以下のように出力された。</p>
+<pre><code>140736120015884
+140736120015888
+140736120015892</code></pre>
+<p>筆者の環境では<code>sizeof(int)</code>は4だ。<code>&amp;data[0]</code>の生のアドレスに4を足した値が<code>&amp;data[1]</code>になっていることがわかる。</p>
+<h4 id="ポインターと整数の演算">ポインターと整数の演算</h4>
+<p>ポインターと整数を加減算することができる。</p>
+<p>ポインター<code>T *</code>に整数nを足すと、ポインターのアドレスが<code>sizeof(T) * n</code>加算される。この結果、ポインターは要素が配列のように配置された場合にn個先の要素を指すようになる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="dt">void</span> print_raw_address( T * ptr )
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(ptr) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">4</span>] = {<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>} ;
+
+    <span class="co">// 0個目の要素へのポインター</span>
+    <span class="dt">int</span> * a0 = &amp;a[<span class="dv">0</span>] ;
+    print_raw_address( a0 ) ;
+    
+
+    <span class="co">// アドレスがsizeof(int) * 3加算される</span>
+    <span class="co">// a3は3個目の要素へのポインター</span>
+    <span class="dt">int</span> * a3 = a0 + <span class="dv">3</span> ;
+    print_raw_address( a3 ) ;
+
+    <span class="co">// アドレスがsizeof(int) * 2減算される。</span>
+    <span class="co">// a1は1個目の要素へのポインター</span>
+    <span class="dt">int</span> * a1 = a3 - <span class="dv">2</span> ;
+    print_raw_address( a1 ) ;
+}</code></pre></div>
+<p>これを筆者の環境で実行すると以下のように出力された。</p>
+<pre><code>140722117900224
+140722117900236
+140722117900228</code></pre>
+<p>最初の値がa0, 次の値がa3, 最後の値がa3だ。</p>
+<p>筆者の環境では<code>sizeof(int)</code>は4だ。するとa3の値はa0の値より12多い値になっているはずだ。実際にそうなっている。a1はa3に対して8少ない値になっているはずだ。実際にそうなっている。</p>
+<ol style="list-style-type: decimal">
+<li>destを<code>std::byte *</code>型に変換する</li>
+<li>srcを<code>std::byte const *</code>型に変換する</li>
+<li>srcの参照先からnバイトをdestの参照先にコピーする</li>
+<li>destを返す</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> * memcpy( <span class="dt">void</span> * dest, <span class="dt">void</span> <span class="at">const</span> * src, <span class="bu">std::</span>size_t n )
+{
+    <span class="co">// destをstd::byte *型に変換</span>
+    <span class="bu">std::</span>byte * d = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte *&gt;(dest) ;
+    <span class="co">// srcをstd::byte const *型に変換する</span>
+    <span class="bu">std::</span>byte <span class="at">const</span> * s = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte <span class="at">const</span> *&gt;(src) ;
+
+    <span class="co">// srcからnバイトコピーするのでnバイト先のアドレスを得る </span>
+    <span class="bu">std::</span>byte <span class="at">const</span> * last = s + n ;
+
+    <span class="co">// nバイトコピーする</span>
+    <span class="cf">while</span> ( s != last )
+    {
+        *d = *s ;
+        ++d ;
+        ++s ;
+    }
+
+    <span class="co">// destを返す</span>
+    <span class="cf">return</span> dest ;
+}</code></pre></div>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
