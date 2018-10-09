@@ -455,12 +455,12 @@ int main()
 void * memcpy( void * dest, void const * src, std::size_t n )
 {
     // destをstd::byte *型に変換
-    std::byte * d = static_cast<std::byte *>(dest) ;
+    auto d = static_cast<std::byte *>(dest) ;
     // srcをstd::byte const *型に変換する
-    std::byte const * s = static_cast<std::byte const *>(src) ;
+    auto s = static_cast<std::byte const *>(src) ;
 
     // srcからnバイトコピーするのでnバイト先のアドレスを得る 
-    std::byte const * last = s + n ;
+    auto last = s + n ;
 
     // nバイトコピーする
     while ( s != last )
@@ -471,6 +471,43 @@ void * memcpy( void * dest, void const * src, std::size_t n )
     }
 
     // destを返す
+    return dest ;
+}
+~~~
+
+#### memcpyの別の実装
+
+ポインターは`operator []`に対応している。
+
+ポインターpと整数iに対して`p[i]`と書いたとき、`*(p + i)`という意味になる。
+
+~~~cpp
+int main()
+{
+    int a[5] = {0,1,2,3,4} ;
+    int * p = &a[0] ;
+
+    p[0] ; // 0
+    p[2] ; // 2
+
+    int * p2 = &p[2] ;
+    p2[1] ; // 3
+}
+~~~
+
+`memcpy`は`operator []`を使って書くこともできる。
+
+~~~cpp
+void * memcpy( void * dest, void const * src, std::size_t n )
+{
+    auto d = static_cast<std::byte *>(dest) ;
+    auto s = static_cast<std::byte const *>(src) ;
+
+    for ( std::size_t i = 0 ; i != n ; ++i )
+    {
+        d[i] = s[i] ;
+    }
+
     return dest ;
 }
 ~~~
@@ -579,7 +616,7 @@ int main()
 8
 ~~~
 
-どうやら筆者の環境では、xはクラスの先頭アドレスからオフセット0バイトに、yはオフセット4バイトに、zはオフセット8バイトに配置されているようだ。
+筆者の環境では、xはクラスの先頭アドレスからオフセット0バイトに、yはオフセット4バイトに、zはオフセット8バイトに配置されているようだ。
 
 確かめてみよう。
 
@@ -615,7 +652,5 @@ int main()
 ~~~
 123456789
 ~~~
-
-どうやら筆者の環境ではそのように実装されているようだ。
 
 このプログラムの実行結果は環境によって変わる。読者の使っている環境でデータメンバーへのポインターが筆者の環境と同じように実装されているとは限らない。
