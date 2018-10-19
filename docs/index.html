@@ -346,8 +346,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#stdbyte型">std::byte型</a></li>
 <li><a href="#配列のメモリ上での表現">配列のメモリ上での表現</a></li>
 <li><a href="#ポインターと整数の演算">ポインターと整数の演算</a></li>
+<li><a href="#いよいよmemcpyの実装">いよいよmemcpyの実装</a></li>
+<li><a href="#memcpyの別の実装">memcpyの別の実装</a></li>
+</ul></li>
+<li><a href="#データメンバーへのポインターの内部実装">データメンバーへのポインターの内部実装</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#イテレーター操作">イテレーター操作</a><ul>
+<li><a href="#イテレーターとポインターの関係">イテレーターとポインターの関係</a></li>
+<li><a href="#イテレーターカテゴリー">イテレーターカテゴリー</a></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -11613,7 +11620,7 @@ a = <span class="bu">std::</span>byte{<span class="dv">123</span>} ;</code></pre
 <p>実際にアドレスの生の値を出力して確かめてみよう。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// 生のアドレスを出力する関数</span>
 <span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
-<span class="dt">void</span> print_raw_address( T * ptr )
+<span class="dt">void</span> print_raw_address( T ptr )
 {
     <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(ptr) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 }
@@ -11634,7 +11641,7 @@ a = <span class="bu">std::</span>byte{<span class="dv">123</span>} ;</code></pre
 <p>ポインターと整数を加減算することができる。</p>
 <p>ポインター<code>T *</code>に整数nを足すと、ポインターのアドレスが<code>sizeof(T) * n</code>加算される。この結果、ポインターは要素が配列のように配置された場合にn個先の要素を指すようになる。</p>
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
-<span class="dt">void</span> print_raw_address( T * ptr )
+<span class="dt">void</span> print_raw_address( T ptr )
 {
     <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(ptr) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
 }
@@ -11664,6 +11671,8 @@ a = <span class="bu">std::</span>byte{<span class="dv">123</span>} ;</code></pre
 140722117900228</code></pre>
 <p>最初の値がa0, 次の値がa3, 最後の値がa3だ。</p>
 <p>筆者の環境では<code>sizeof(int)</code>は4だ。するとa3の値はa0の値より12多い値になっているはずだ。実際にそうなっている。a1はa3に対して8少ない値になっているはずだ。実際にそうなっている。</p>
+<h4 id="いよいよmemcpyの実装">いよいよmemcpyの実装</h4>
+<p>これまで学んできたことをすべて使い、ようやくmemcpyが実装できる。</p>
 <ol style="list-style-type: decimal">
 <li>destを<code>std::byte *</code>型に変換する</li>
 <li>srcを<code>std::byte const *</code>型に変換する</li>
@@ -11673,12 +11682,12 @@ a = <span class="bu">std::</span>byte{<span class="dv">123</span>} ;</code></pre
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> * memcpy( <span class="dt">void</span> * dest, <span class="dt">void</span> <span class="at">const</span> * src, <span class="bu">std::</span>size_t n )
 {
     <span class="co">// destをstd::byte *型に変換</span>
-    <span class="bu">std::</span>byte * d = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte *&gt;(dest) ;
+    <span class="kw">auto</span> d = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte *&gt;(dest) ;
     <span class="co">// srcをstd::byte const *型に変換する</span>
-    <span class="bu">std::</span>byte <span class="at">const</span> * s = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte <span class="at">const</span> *&gt;(src) ;
+    <span class="kw">auto</span> s = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte <span class="at">const</span> *&gt;(src) ;
 
     <span class="co">// srcからnバイトコピーするのでnバイト先のアドレスを得る </span>
-    <span class="bu">std::</span>byte <span class="at">const</span> * last = s + n ;
+    <span class="kw">auto</span> last = s + n ;
 
     <span class="co">// nバイトコピーする</span>
     <span class="cf">while</span> ( s != last )
@@ -11691,6 +11700,251 @@ a = <span class="bu">std::</span>byte{<span class="dv">123</span>} ;</code></pre
     <span class="co">// destを返す</span>
     <span class="cf">return</span> dest ;
 }</code></pre></div>
+<h4 id="memcpyの別の実装">memcpyの別の実装</h4>
+<p>ポインターは<code>operator []</code>に対応している。</p>
+<p>ポインターpと整数iに対して<code>p[i]</code>と書いたとき、<code>*(p + i)</code>という意味になる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main()
+{
+    <span class="dt">int</span> a[<span class="dv">5</span>] = {<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>} ;
+    <span class="dt">int</span> * p = &amp;a[<span class="dv">0</span>] ;
+
+    p[<span class="dv">0</span>] ; <span class="co">// 0</span>
+    p[<span class="dv">2</span>] ; <span class="co">// 2</span>
+
+    <span class="dt">int</span> * p2 = &amp;p[<span class="dv">2</span>] ;
+    p2[<span class="dv">1</span>] ; <span class="co">// 3</span>
+}</code></pre></div>
+<p><code>memcpy</code>は<code>operator []</code>を使って書くこともできる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">void</span> * memcpy( <span class="dt">void</span> * dest, <span class="dt">void</span> <span class="at">const</span> * src, <span class="bu">std::</span>size_t n )
+{
+    <span class="kw">auto</span> d = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte *&gt;(dest) ;
+    <span class="kw">auto</span> s = <span class="kw">static_cast</span>&lt;<span class="bu">std::</span>byte <span class="at">const</span> *&gt;(src) ;
+
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != n ; ++i )
+    {
+        d[i] = s[i] ;
+    }
+
+    <span class="cf">return</span> dest ;
+}</code></pre></div>
+<h3 id="データメンバーへのポインターの内部実装">データメンバーへのポインターの内部実装</h3>
+<p>データメンバーへのポインターの整数としての値は少し変わっている。</p>
+<p>ポインターの生の値は、メモリー上で値を表現しているバイト列の先頭アドレスだ。</p>
+<p>データメンバーへのポインターは、具体的なクラスのオブジェクトへのポインターやリファレンスがあって初めて意味がある。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> S { <span class="dt">int</span> x = <span class="dv">123</span> ; } ;
+
+<span class="dt">int</span> main(
+{
+    <span class="dt">int</span> data = <span class="dv">123</span> ;
+    <span class="dt">int</span> * ptr = &amp;data ;
+    <span class="co">// ptr単体で参照できる</span>
+    <span class="dt">int</span> read1 = *ptr ;
+
+    S object ;
+    <span class="dt">int</span> S::* mem_ptr = &amp;S::x ;
+    <span class="co">// objectとmem_ptrの2つで参照できる</span>
+    <span class="dt">int</span> read2 = object.*mem_ptr ;
+
+}</code></pre></div>
+<p>配列が要素型のバイト列を連続して配置したメモリレイアウトをしているように、クラスもデータメンバーを連続して配置したメモリーレイアウトをしている。</p>
+<p>たとえば以下のようなクラスObjectがある場合、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Object
+{
+    <span class="dt">int</span> x ;
+    <span class="dt">int</span> y ;
+    <span class="dt">int</span> z ;
+} ;</code></pre></div>
+<p>このクラスのサイズは<code>sizeof(Object)</code>だ。このクラスはint型のサブオブジェクトを3つ持っているので、そのサイズは少なくとも<code>size(int)*3</code>はある。</p>
+<p>実際に確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> Object
+{
+    <span class="dt">int</span> x ;
+    <span class="dt">int</span> y ;
+    <span class="dt">int</span> z ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;sizeof(int): &quot;</span> &lt;&lt; <span class="kw">sizeof</span>(<span class="dt">int</span>) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+
+    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;sizeof(Object): &quot;</span> &lt;&lt; <span class="kw">sizeof</span>(Object) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}</code></pre></div>
+<p>このプログラムを筆者の環境で実行すると以下のように出力された。</p>
+<pre><code>sizeof(int): 4
+sizeof(Object): 12</code></pre>
+<p>int型のサイズが4で、Object型のサイズが12ということは、クラスObjectにはint型のサブオブジェクトが3つ、隙間なく連続して配置されているということだ。すべてのクラスがこうではないが、今回の私の環境ではそうなっている。</p>
+<p>全体で12バイトということは、配列<code>int [3]</code>と同じように、最初の4バイトにx,y,zのどれかが、次の4バイトに残りのどちらかが、最後の4バイトに残りが配置されている。</p>
+<p>データメンバーへのポインターというのは、このクラスのオブジェクトを表現するバイト列の先頭から何バイト目に配置されているかというオフセット値になっている。</p>
+<p>具体的な値を見てみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;
+<span class="dt">void</span> print_raw_address( T ptr )
+{
+    <span class="bu">std::</span>cout &lt;&lt; bit_cast&lt;<span class="bu">std::</span>uintptr_t&gt;(ptr) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>s ;
+}
+
+<span class="kw">struct</span> Object
+{
+    <span class="dt">int</span> x ;
+    <span class="dt">int</span> y ;
+    <span class="dt">int</span> z ;
+} ;
+
+<span class="dt">int</span> main()
+{
+    print_raw_address( &amp;Object::x ) ;
+    print_raw_address( &amp;Object::y ) ;
+    print_raw_address( &amp;Object::z ) ;
+}</code></pre></div>
+<p>このプログラムを筆者の環境で実行すると以下のように出力される。</p>
+<pre><code>0
+4
+8</code></pre>
+<p>筆者の環境では、xはクラスの先頭アドレスからオフセット0バイトに、yはオフセット4バイトに、zはオフセット8バイトに配置されているようだ。</p>
+<p>確かめてみよう。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">
+<span class="kw">struct</span> Object
+{
+    <span class="dt">int</span> x = <span class="dv">123</span> ;
+    <span class="dt">int</span> y = <span class="dv">456</span> ;
+    <span class="dt">int</span> z = <span class="dv">789</span> ;
+} ;
+
+<span class="dt">int</span> main()
+{
+
+    Object object ;
+
+    <span class="co">// クラスのオブジェクトの先頭アドレス</span>
+    <span class="bu">std::</span>byte * start = bit_cast&lt;<span class="bu">std::</span>byte *&gt;(&amp;object) ;
+    <span class="co">// オフセット0</span>
+    <span class="dt">int</span> * x = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">0</span>) ;
+    <span class="co">// オフセット4</span>
+    <span class="dt">int</span> * y = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">4</span>) ;
+    <span class="co">// オフセット8</span>
+    <span class="dt">int</span> * z = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">8</span>) ;
+
+    <span class="bu">std::</span>cout &lt;&lt; *x &lt;&lt; *y &lt;&lt; *z ;
+}</code></pre></div>
+<p>筆者の環境では以下のように出力される</p>
+<pre><code>123456789</code></pre>
+<p>このプログラムの実行結果は環境によって変わる。読者の使っている環境でデータメンバーへのポインターが筆者の環境と同じように実装されているとは限らない。</p>
+<h1 id="イテレーター操作">イテレーター操作</h1>
+<h2 id="イテレーターとポインターの関係">イテレーターとポインターの関係</h2>
+<p>arrayのイテレーターの実装を振り返ろう。前回実装したイテレーターは、リファレンスとインデックスを使うものだった。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; Array &gt;
+<span class="kw">struct</span> array_iterator
+{
+    <span class="kw">using</span> reference = <span class="kw">typename</span> Array::reference ;
+
+    Array &amp; a ;
+    <span class="bu">std::</span>size_t i ;
+
+    array_iterator( Array * a, <span class="bu">std::</span>size_t i )
+        a(a), i(i) { }
+
+    reference <span class="kw">operator</span> *() <span class="at">const</span>
+    { <span class="cf">return</span> a[i] ; }
+
+    array_iterator &amp; <span class="kw">operator</span> ++()
+    {
+        ++i ;
+        <span class="cf">return</span> *<span class="kw">this</span> ;
+    }
+
+    reference <span class="kw">operator</span> [] ( <span class="bu">std::</span>size_t n )
+    { <span class="cf">return</span> a[i + n] ; }
+} ;</code></pre></div>
+<p>このコードは単にポインターをクラスで実装しているだけではないだろうか。ならば、ポインターでイテレーターを実装することもできるのではないか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">struct</span> array_iterator
+{
+    <span class="kw">using</span> pointer = <span class="kw">typename</span> Array::pointer ;
+    <span class="kw">using</span> reference = <span class="kw">typename</span> Array::reference ;
+    pointer p ;
+
+    array_iterator( pointer p )
+        : p(p) { }
+
+    reference <span class="kw">operator</span> *()
+    { <span class="cf">return</span> *p ; }
+
+    array_iterator &amp; <span class="kw">operator</span> ++()
+    {
+        ++p ;
+        <span class="cf">return</span> *<span class="kw">this</span> ;
+    }
+
+    reference <span class="kw">operator</span>[] ( <span class="bu">std::</span>size_t n )
+    { <span class="cf">return</span> p[n] ; }
+} ;</code></pre></div>
+<p>このコードは本当にポインターをクラスで実装しているだけだ。ならばイテレータークラスの代わりにポインターでもいいのではないだろうか。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> T, <span class="bu">std::</span>size_t N &gt;
+<span class="kw">struct</span> array
+{
+
+    T storage[N] ;
+
+    <span class="co">// ポインター</span>
+    <span class="kw">using</span> iterator = T * ;
+
+    iterator begin()
+    { <span class="cf">return</span> &amp;storage[<span class="dv">0</span>] ;  }
+
+    iterator end()
+    { <span class="cf">return</span> egin() + N ; }
+} ;</code></pre></div>
+<p>これは動く。そして実際の<code>std::array</code>の実装もこうなっている。</p>
+<p>実はイテレーターはポインターを参考にして作られた。インクリメントで次の要素を参照、<code>operator *</code>で参照先の要素にアクセスといった操作は、すべてポインターの操作をより抽象化したものだ。</p>
+<p>ポインターの操作をすべてサポートしたイテレーターは、ランダムアクセスイテレーターと呼ばれる。</p>
+<h2 id="イテレーターカテゴリー">イテレーターカテゴリー</h2>
+<p>イテレーターにはサポートしている操作に応じて以下のような種類が存在する。</p>
+<ul>
+<li>入力イテレーター(Input Iterator)</li>
+<li>出力イテレーター(Output Iterator)</li>
+<li>前方イテレーター(Forward Iterator)</li>
+<li>双方向イテレーター(Bidirectional Iterator)</li>
+<li>ランダムアクセスイテレーター(Random Access Iterator)</li>
+</ul>
+<p>イテレーターの関係は以下のようになっている。</p>
+<pre><code>TODO: 図示
+ランダムアクセスイテレーター → 双方向イテレーター → 前方イテレーター → 入力イテレーター
+                                                                     → 出力イテレーター</code></pre>
+<p>矢印<code>A → B</code>はAがBであることを意味している。</p>
+<p>ランダムアクセスイテレーターは双方向イテレーターのすべての操作をサポートする。故にランダムアクセスイテレーターは双方向イテレーターである。</p>
+<p>同様に、双方向イテレーターは前方イテレーターである。前方イテレーターは入力イテレーター/出力イテレーターである。</p>
+<p>AはBであることに加えて、追加の操作をサポートしている。</p>
+<p>ランダムアクセスイテレーターは名前の通りランダムアクセスができる。イテレーターiをn個進めたければ</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> RandomAccessIterator &gt;
+<span class="dt">void</span> f( RandomAccessIterator i, <span class="bu">std::</span>size_t n  )
+{
+    i + n ;
+}</code></pre></div>
+<p>と書ける。イテレーターiのn個先の要素を参照したい場合は、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> RandomAccessIterator &gt;
+<span class="dt">void</span> f( RandomAccessIterator i, <span class="bu">std::</span>size_t n )
+{
+    i[n] ;
+}</code></pre></div>
+<p>と書ける。この操作は双方向イテレーターにはできない。</p>
+<p>双方向イテレーターは名前の通り双方向のイテレーターの移動ができる。イテレーターiの前後の要素を指したければ、</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> BidirectionalIterator &gt;
+<span class="dt">void</span> f( BidirectionalIterator i )
+{
+    ++i ; <span class="co">// 前の要素</span>
+    i-- ; <span class="co">// 後の要素</span>
+}</code></pre></div>
+<p>と書ける。この操作は前方イテレーターにはできない。</p>
+<p>前後というのは、今3個の要素集があり、イテレーターが1番目の要素を指している場合、前の要素は0番目、後の要素は1番目だ。</p>
+<p>1個づつ移動できるのであれば、イテレーターをn個進めることもできそうなものだ。実際、双方向イテレーターを以下のようにして後にn個進めることができる。</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span> &lt; <span class="kw">typename</span> BidirectionalIterator &gt;
+BidirectionalIterator
+nth_next( BidirectionalIterator iter, <span class="bu">std::</span>size_t n )
+{
+    <span class="cf">for</span> ( <span class="bu">std::</span>size_t i = <span class="dv">0</span> ; i != n ; ++i )
+        ++iter ;
+    <span class="cf">return</span> iter ;
+}</code></pre></div>
+<p>たしかにこれはできる。できるが、効率的ではない。双方向イテレーターが提供される場合というのは、ランダムアクセスが技術的に可能ではあるが非効率的な場合だ。具体的なデータ構造を出すと、例えばリンクリストがある。リンクリストに対するランダムアクセスは技術的に可能であるが非効率的だ。</p>
+<p>前方イテレーターは前方にしか移動できない。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
