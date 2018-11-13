@@ -5,7 +5,7 @@ clean :
 	rm -f index.html
 	rm -f bin/sample-code-checker
 
-test : cpptest texttest
+test : cpptest
 
 texttest : *.md
 	textlint -f unix *.md

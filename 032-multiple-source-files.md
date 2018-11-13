@@ -363,7 +363,7 @@ int main()
 
 変数の場合も、間違いを防ぐためにヘッダーファイルに書いて`#include`するとよい。
 
-~~~cpp
+~~~c++
 // global.h
 extern int variable ;
 
@@ -512,7 +512,7 @@ Foo * ptr = nullptr ;
 
 宣言だけされたクラスのオブジェクトを作ることはできないし、ポインターの演算もできない。
 
-~~~cpp
+~~~c++
 struct Foo ;
 
 int main()
@@ -593,6 +593,7 @@ void main()
     S s ;
     // サブオブジェクト
     s.data_member ; 
+}
 ~~~
 
 ##### staticメンバー
@@ -652,7 +653,7 @@ struct S
     static void g()
     {// thisは使えない
     }
-}
+} ;
 ~~~
 
 staticデータメンバーはクラスのオブジェクトの外の独立したオブジェクトだ。staticデータメンバーのクラス定義内での宣言は定義ではないので、クラスの定義外で定義する必要がある。

@@ -523,7 +523,7 @@ void * memcpy( void * dest, void const * src, std::size_t n )
 ~~~cpp
 struct S { int x = 123 ; } ;
 
-int main(
+int main()
 {
     int data = 123 ;
     int * ptr = &data ;

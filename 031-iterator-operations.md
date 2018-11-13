@@ -33,6 +33,7 @@ struct array_iterator
 このコードは単にポインターをクラスで実装しているだけではないだろうか。ならば、ポインターでイテレーターを実装することもできるのではないか。
 
 ~~~cpp
+template < typename Array >
 struct array_iterator
 {
     using pointer = typename Array::pointer ;
@@ -72,7 +73,7 @@ struct array
     { return &storage[0] ;  }
 
     iterator end()
-    { return egin() + N ; }
+    { return begin() + N ; }
 } ;
 ~~~
 
@@ -268,7 +269,7 @@ nth_next( BidirectionalIterator iter, std::size_t n )
 前方イテレーターは前方にしか移動できない。イテレーターが0番目の要素を指しているならば1番目、1番目の要素を指しているならば2番めに移動できる。
 
 ~~~cpp
-template < ForwardIterator >
+template < typename ForwardIterator >
 void f( ForwardIterator i )
 {
     ++i ;
@@ -289,7 +290,7 @@ void f( ForwardIterator i )
     ++prev ;
 
     // true
-    bool b = ( i == prev )
+    bool b = ( i == prev ) ;
 
     // r1, r2は同じ要素を指す
     auto & r1 = *i ;
@@ -464,7 +465,7 @@ int main()
     std::array<int, 5> a = {1,2,3,4,5} ;
     std::vector<int> v(5) ;
 
-    std::copy( std::begin(a) std::end(a), std::begin(v) ) ;
+    std::copy( std::begin(a), std::end(a), std::begin(v) ) ;
 }
 ~~~
 
@@ -652,7 +653,7 @@ struct cin_iterator
     const reference operator *() const
     { return value ; }
 
-　  // 新しい値をキャッシュする
+    // 新しい値をキャッシュする
     cin_iterator & operator ++()
     {
         if ( !fail )
@@ -689,7 +690,7 @@ bool operator !=( cin_iterator<T> const & l, cin_iterator<T> const & r )
 
 以下のように使える。
 
-~~~cpp
+~~~c++
 int main()
 {
     cin_iterator<int> input, fail(true) ;
@@ -859,7 +860,7 @@ int main()
 
 以下のように使える。
 
-~~~cpp
+~~~c++
 int main()
 {
     iota_iterator iter(0) ;
@@ -909,7 +910,7 @@ struct iota_iterator
 
 これでイテレーターとしてオブジェクトを作ることができるようになる。コピーは自動的に生成されるので書く必要はない。
 
-~~~cpp
+~~~c++
 int main()
 {
     // i(0)
@@ -935,7 +936,7 @@ const reference operator *() const noexcept
 
 非const版とconst版があるのは、constなiota_iteratorのオブジェクトからも使えるようにするためだ。
 
-~~~cpp
+~~~c++
 int main()
 {
     // 非constなオブジェクト
@@ -1014,10 +1015,10 @@ struct forward_link_list
 
 int main()
 {
-    forward_link_list list3{ 3, nullptr } ;
-    forward_link_list list2{ 2, &list3 } ;
-    forward_link_list list1{ 1, &list2 } ;
-    forward_link_list list0{ 0, &list1 } ;
+    forward_link_list<int> list3{ 3, nullptr } ;
+    forward_link_list<int> list2{ 2, &list3 } ;
+    forward_link_list<int> list1{ 1, &list2 } ;
+    forward_link_list<int> list0{ 0, &list1 } ;
 }
 ~~~
 

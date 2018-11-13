@@ -402,7 +402,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="#双方向イテレーター-1">双方向イテレーター</a></li>
 <li><a href="#ランダムアクセスイテレーター-1">ランダムアクセスイテレーター</a></li>
 </ul></li>
-<li><a href="#イテレーター操作">イテレーター操作</a></li>
+<li><a href="#イテレーター操作">イテレーター操作</a><ul>
+<li><a href="#advance-i-n-n移動する"><code>advance( i, n )</code>: n移動する</a></li>
+<li><a href="#distance-first-last-firstからlastまでの距離"><code>distance( first, last )</code>: firstからlastまでの距離</a></li>
+<li><a href="#nextprev-移動したイテレーターを返す">next/prev : 移動したイテレーターを返す</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#分割コンパイル">分割コンパイル</a><ul>
+<li><a href="#ソースファイルとコンパイル">ソースファイルとコンパイル</a></li>
+<li><a href="#単一のソースファイルのコンパイル">単一のソースファイルのコンパイル</a></li>
+<li><a href="#ヘッダーファイルはコピペ">ヘッダーファイルはコピペ</a></li>
+<li><a href="#複数のソースファイルのコンパイル">複数のソースファイルのコンパイル</a></li>
+<li><a href="#オブジェクトファイル">オブジェクトファイル</a></li>
+<li><a href="#複数のソースファイルの書き方">複数のソースファイルの書き方</a><ul>
+<li><a href="#関数">関数</a></li>
+<li><a href="#変数-1">変数</a></li>
+<li><a href="#インライン関数インライン変数">インライン関数/インライン変数</a></li>
+<li><a href="#クラス">クラス</a><ul>
+<li><a href="#staticメンバー">staticメンバー</a></li>
+</ul></li>
+<li><a href="#テンプレート-2">テンプレート</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -12862,124 +12882,703 @@ sizeof(Object): 12</code></pre>
 <a class="sourceLine" id="cb1188-7" data-line-number="7">}</a></code></pre></div>
 <p>そのため、イテレーターのネストされた型名を使うときには、直接使うのではなく、一度<code>iterator_traits</code>を経由してつかうとよい。</p>
 <h2 id="イテレーター操作">イテレーター操作</h2>
-<p>イテレーターはそのまま使うことができるが、</p>
+<p>イテレーターはそのまま使うこともできるが、一部の操作を簡単に行うための標準ライブラリがある。</p>
+<h3 id="advance-i-n-n移動する"><code>advance( i, n )</code>: n移動する</h3>
+<p>イテレーター iをn回移動したいとする。ランダムアクセスイテレーターならば以下のようにする。</p>
+<div class="sourceCode" id="cb1189"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1189-1" data-line-number="1">i += n ;</a></code></pre></div>
+<p>しかし前方イテレーターの場合、<code>operator +=</code>は使えない。n回<code>operator ++</code>を呼び出す必要がある。</p>
+<div class="sourceCode" id="cb1190"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1190-1" data-line-number="1"><span class="cf">for</span> ( <span class="kw">auto</span> count = <span class="dv">0</span> ; count != n ; ++count )</a>
+<a class="sourceLine" id="cb1190-2" data-line-number="2">    ++i ;</a></code></pre></div>
+<p>双方向イテレーターの場合、nは負数の場合がある。nが負数の場合、n回<code>operator --</code>を呼び出すことになる。</p>
+<div class="sourceCode" id="cb1191"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1191-1" data-line-number="1"><span class="cf">if</span> ( n &gt; <span class="dv">0</span> )</a>
+<a class="sourceLine" id="cb1191-2" data-line-number="2">    <span class="cf">for</span> ( <span class="kw">auto</span> count = <span class="dv">0</span> ; count != n ; ++count )</a>
+<a class="sourceLine" id="cb1191-3" data-line-number="3">        ++i ;</a>
+<a class="sourceLine" id="cb1191-4" data-line-number="4"><span class="cf">else</span></a>
+<a class="sourceLine" id="cb1191-5" data-line-number="5">    <span class="cf">for</span> ( <span class="kw">auto</span> count = <span class="dv">0</span> count != n ; --count )</a>
+<a class="sourceLine" id="cb1191-6" data-line-number="6">        --i ;</a></code></pre></div>
+<p>双方向イテレーター用のコードはランダムアクセスイテレーターでも動くが非効率的だ。</p>
+<p>今使っているイテレーターの種類を把握して適切な方法を選ぶコードを書くのは面倒だ。そこで標準ライブラリには、イテレーター iをn回移動してくれる<code>advance(i, n)</code>がある。</p>
+<div class="sourceCode" id="cb1192"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1192-1" data-line-number="1"><span class="co">// iを1前方に移動</span></a>
+<a class="sourceLine" id="cb1192-2" data-line-number="2"><span class="bu">std::</span>advance(i, <span class="dv">1</span>) ;</a>
+<a class="sourceLine" id="cb1192-3" data-line-number="3"><span class="co">// iを5前方に移動</span></a>
+<a class="sourceLine" id="cb1192-4" data-line-number="4"><span class="bu">std::</span>advance(i, <span class="dv">5</span>) ;</a>
+<a class="sourceLine" id="cb1192-5" data-line-number="5"><span class="co">// iを5後方に移動</span></a>
+<a class="sourceLine" id="cb1192-6" data-line-number="6"><span class="bu">std::</span>advance(i, <span class="dv">-5</span>) ;</a>
+<a class="sourceLine" id="cb1192-7" data-line-number="7"><span class="co">// iは移動しない</span></a>
+<a class="sourceLine" id="cb1192-8" data-line-number="8"><span class="bu">std::</span>advance(i, <span class="dv">0</span>) ;</a></code></pre></div>
+<p>nが正数の場合は前方(i+1の方向)に、nが負数の場合は後方(i-1の方向)に、それぞれn回移動させる。</p>
+<p><code>advance(i,n)</code>はi自体が書き換わる。</p>
+<div class="sourceCode" id="cb1193"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1193-1" data-line-number="1">i ; <span class="co">// n番目を指す</span></a>
+<a class="sourceLine" id="cb1193-2" data-line-number="2"><span class="bu">std::</span>advance( i, <span class="dv">1</span> ) ;</a>
+<a class="sourceLine" id="cb1193-3" data-line-number="3">i ; <span class="co">// n+1番目を指す</span></a></code></pre></div>
+<h3 id="distance-first-last-firstからlastまでの距離"><code>distance( first, last )</code>: firstからlastまでの距離</h3>
+<p>イテレーター firstからlastまでの距離を求めたいとする。</p>
+<p>ランダムアクセスイテレーターならば以下のようにする。</p>
+<div class="sourceCode" id="cb1194"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1194-1" data-line-number="1"><span class="kw">auto</span> dist = last - first ;</a></code></pre></div>
+<p>それ以外のイテレーターならば、firstがlastと等しくなるまで<code>operator ++</code>を呼び出す。</p>
+<div class="sourceCode" id="cb1195"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1195-1" data-line-number="1"><span class="bu">std::</span>size_t dist = <span class="dv">0</span> ;</a>
+<a class="sourceLine" id="cb1195-2" data-line-number="2"><span class="cf">for</span> ( <span class="kw">auto</span> iter = first ; iter != last ; ++iter )</a>
+<a class="sourceLine" id="cb1195-3" data-line-number="3">    ++dist ;</a></code></pre></div>
+<p>これをやるのも面倒なので標準ライブラリがある。</p>
+<p><code>distance( first, last )</code>はfirstからlastまでの距離を返す。</p>
+<div class="sourceCode" id="cb1196"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1196-1" data-line-number="1"><span class="co">// iからjまでの距離を返す</span></a>
+<a class="sourceLine" id="cb1196-2" data-line-number="2"><span class="kw">auto</span> dist = <span class="bu">std::</span>distance( i, j ) ;</a></code></pre></div>
+<p>ランダムアクセスイテレーターならば<code>j - i</code>と同じで、そうでなければiがjと等しくなるまで<code>operator ++</code>を呼び出す。</p>
+<p><code>distance</code>に渡したイテレーターは変更されない。</p>
+<h3 id="nextprev-移動したイテレーターを返す">next/prev : 移動したイテレーターを返す</h3>
+<p><code>advance(i, n)</code>はイテレーターiを変更してしまう。イテレーターを変更させずに移動後のイテレーターも欲しい場合、以下のように書かなければならない。</p>
+<div class="sourceCode" id="cb1197"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1197-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Iterator &gt;</a>
+<a class="sourceLine" id="cb1197-2" data-line-number="2"><span class="dt">void</span> f( Iterator i )</a>
+<a class="sourceLine" id="cb1197-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1197-4" data-line-number="4">    <span class="kw">auto</span> j = i ;</a>
+<a class="sourceLine" id="cb1197-5" data-line-number="5">    <span class="bu">std::</span>advance( j, <span class="dv">3</span> ) ;</a>
+<a class="sourceLine" id="cb1197-6" data-line-number="6">    <span class="co">// jはiより3前方に移動している</span></a>
+<a class="sourceLine" id="cb1197-7" data-line-number="7">}</a></code></pre></div>
+<p>標準ライブラリのnext/prevは、引数に渡したイテレーターを変更せず、移動後のイテレーターを返してくれる。</p>
+<div class="sourceCode" id="cb1198"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1198-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Iterator &gt;</a>
+<a class="sourceLine" id="cb1198-2" data-line-number="2"><span class="dt">void</span> f( Iterator i )</a>
+<a class="sourceLine" id="cb1198-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1198-4" data-line-number="4">    <span class="kw">auto</span> j = <span class="bu">std::</span>next( i, <span class="dv">3</span> ) ;</a>
+<a class="sourceLine" id="cb1198-5" data-line-number="5">    <span class="co">// jはiより3前方に移動している</span></a>
+<a class="sourceLine" id="cb1198-6" data-line-number="6">}</a></code></pre></div>
+<p>prevはその逆だ。</p>
+<div class="sourceCode" id="cb1199"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1199-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Iterator &gt;</a>
+<a class="sourceLine" id="cb1199-2" data-line-number="2"><span class="dt">void</span> f( Iterator i )</a>
+<a class="sourceLine" id="cb1199-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1199-4" data-line-number="4">    <span class="kw">auto</span> j = <span class="bu">std::</span>prev( i, <span class="dv">3</span> ) ;</a>
+<a class="sourceLine" id="cb1199-5" data-line-number="5">    <span class="co">// jはiより3後方に移動している</span></a>
+<a class="sourceLine" id="cb1199-6" data-line-number="6">    <span class="co">// jはstd::advance(i, 3)した後のiと同じ値</span></a>
+<a class="sourceLine" id="cb1199-7" data-line-number="7">}</a></code></pre></div>
+<p>next/prevに第二引数を渡さない場合、前後に1だけ移動する。</p>
+<div class="sourceCode" id="cb1200"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1200-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Iterator &gt;</a>
+<a class="sourceLine" id="cb1200-2" data-line-number="2"><span class="dt">void</span> f( Iterator i )</a>
+<a class="sourceLine" id="cb1200-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1200-4" data-line-number="4">    <span class="kw">auto</span> j = <span class="bu">std::</span>next(i) ;</a>
+<a class="sourceLine" id="cb1200-5" data-line-number="5">    <span class="co">// jは++iしたのと同じ値</span></a>
+<a class="sourceLine" id="cb1200-6" data-line-number="6">    <span class="kw">auto</span> k = <span class="bu">std::</span>prev(i) ;</a>
+<a class="sourceLine" id="cb1200-7" data-line-number="7">    <span class="co">// kは--iしたのと同じ値</span></a>
+<a class="sourceLine" id="cb1200-8" data-line-number="8">}</a></code></pre></div>
+<h1 id="分割コンパイル">分割コンパイル</h1>
+<p>これまで、プログラムはひとつのソースファイルから作っていた。プログラムは複数のソースファイルから作ることもできる。ソースファイルを複数に分割することで、ソースファイルの管理がしやすくなったり、プログラムのビルド時間の短縮にもつながる。</p>
+<h3 id="ソースファイルとコンパイル">ソースファイルとコンパイル</h3>
+<p>ソースファイルを分割すると、C++の書き方にも注意が必要になる。だがその前に、複数のソースファイルをコンパイルしてひとつのプログラムにする方法を学ぶ。</p>
+<h3 id="単一のソースファイルのコンパイル">単一のソースファイルのコンパイル</h3>
+<p>C++のソースファイルをコンパイルして実行可能ファイルを作る方法を今一度おさらいをしよう。</p>
+<p><code>source.cpp</code>という名前のソースファイルがあるとき、ここから<code>program</code>という名前の実行可能ファイルを作るには、</p>
+<pre><code>$ g++ -o program source.file</code></pre>
+<p>としていた。毎回このコマンドを入力するのは面倒なので、<code>Makefile</code>を以下のように書いていた。</p>
+<pre><code>program: source.cpp
+    g++ $&lt; -o $@</code></pre>
+<h3 id="ヘッダーファイルはコピペ">ヘッダーファイルはコピペ</h3>
+<p>すでに、ソースファイルの他にヘッダーファイルというファイルも使っている。ヘッダーファイルはソースファイルではない。コンパイル前にソースファイルにコピペされるだけのものだ。</p>
+<p>例えば以下のような内容の<code>header.h</code>というヘッダーファイルがあるとして、</p>
+<div class="sourceCode" id="cb1203"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1203-1" data-line-number="1"><span class="co">// header.h</span></a>
+<a class="sourceLine" id="cb1203-2" data-line-number="2">++i ;</a></code></pre></div>
+<p><code>soruce.cpp</code>が以下のようであるとき、</p>
+<div class="sourceCode" id="cb1204"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1204-1" data-line-number="1"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1204-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1204-3" data-line-number="3">    <span class="dt">int</span> i = <span class="dv">0</span> ;</a>
+<a class="sourceLine" id="cb1204-4" data-line-number="4"><span class="pp">#include </span><span class="im">&quot;header.h&quot;</span></a>
+<a class="sourceLine" id="cb1204-5" data-line-number="5"><span class="pp">#include </span><span class="im">&quot;header.h&quot;</span></a>
+<a class="sourceLine" id="cb1204-6" data-line-number="6"><span class="pp">#include </span><span class="im">&quot;header.h&quot;</span></a>
+<a class="sourceLine" id="cb1204-7" data-line-number="7">    <span class="dt">int</span> result = i ;</a>
+<a class="sourceLine" id="cb1204-8" data-line-number="8">}</a></code></pre></div>
+<p><code>source.cpp</code>をコンパイルすると、まずヘッダーファイルが以下のように展開される。</p>
+<div class="sourceCode" id="cb1205"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1205-1" data-line-number="1"></a>
+<a class="sourceLine" id="cb1205-2" data-line-number="2"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1205-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1205-4" data-line-number="4">    <span class="dt">int</span> i = <span class="dv">0</span> ;</a>
+<a class="sourceLine" id="cb1205-5" data-line-number="5"><span class="co">// header.h</span></a>
+<a class="sourceLine" id="cb1205-6" data-line-number="6">++i ;</a>
+<a class="sourceLine" id="cb1205-7" data-line-number="7"><span class="co">// header.h</span></a>
+<a class="sourceLine" id="cb1205-8" data-line-number="8">++i ;</a>
+<a class="sourceLine" id="cb1205-9" data-line-number="9"><span class="co">// header.h</span></a>
+<a class="sourceLine" id="cb1205-10" data-line-number="10">++i ;</a>
+<a class="sourceLine" id="cb1205-11" data-line-number="11">    <span class="dt">int</span> result = i ;</a>
+<a class="sourceLine" id="cb1205-12" data-line-number="12">}</a></code></pre></div>
+<p>ヘッダーファイルとはこれだけのものだ。コンパイラーが<code>#include</code>された場所に、ヘッダーファイルの中身を愚直にコピペするだけだ。</p>
+<h3 id="複数のソースファイルのコンパイル">複数のソースファイルのコンパイル</h3>
+<p>2つのソースファイル、<code>foo.cpp</code>と<code>bar.cpp</code>からなるプログラムをコンパイルするには、</p>
+<pre><code>$ g++ -o program foo.cpp bar.cpp</code></pre>
+<p>とする。</p>
+<h2 id="オブジェクトファイル">オブジェクトファイル</h2>
+<p>単にソースファイルを分割したいだけならば、GCCに分割したソースファイルをすべて指定すればよい。しかしその場合、複数あるソースファイルのひとつだけを編集した場合でも、すべてのソースファイルをコンパイルしなければならない。</p>
+<p>C++では伝統的に、ソースファイルを部分的にコンパイルしてオブジェクトファイルを生成し、オブジェクトファイルをリンクしてプログラムを生成する方法がある。</p>
+<p>ソースファイルをオブジェクトファイルにコンパイルするのは<code>コンパイラー</code>、オブジェクトファイルをプログラムにリンクするのは<code>リンカー</code>の仕事だ。</p>
+<pre><code>TODO: 図示
+ソースファイル→(コンパイラー)→オブジェクトファイル→(リンカー)→プログラム</code></pre>
+<p>GCCではC++コンパイラーの名前は<code>g++</code>で、リンカーの名前は<code>ld</code>だ。ただし、C++のオブジェクトファイルをリンクするのにリンカーを直接使うことはない。<code>g++</code>は<code>ld</code>を適切に呼び出してくれるからだ。</p>
+<p>ソースファイル<code>source.cpp</code>をコンパイルしてオブジェクトファイルを生成するには、<code>-c</code>オプションを使う。</p>
+<pre><code>$ g++ -c source.cpp</code></pre>
+<p>生成されるオブジェクトファイルの名前はソースファイルの名前の拡張子を<code>.o</code>に置き換えたものになる。上のコマンドをじっこうした結果、オブジェクトファイル<code>souce.o</code>が生成される。</p>
+<p>生成したオブジェクトファイルは、<code>g++</code>の入力として使うことで、リンクしてプログラムにすることができる。<code>g++</code>は裏でリンカー<code>ld</code>を適切に呼び出してくれる。</p>
+<pre><code>$ g++ -o program source.o</code></pre>
+<p>オブジェクトファイル名を別の名前にしたい場合は、<code>-o object-file-name</code>オプションを使う。</p>
+<pre><code>$ g++ -o object.o -c source.cpp</code></pre>
+<p>複数のソースファイル、<code>foo.cpp</code>と<code>bar.cpp</code>からオブジェクトファイルを生成し、リンクして実行可能ファイル<code>program</code>を生成するには以下のようにする。</p>
+<pre><code>$ ls
+bar.cpp  foo.cpp
+$ g++ -c foo.cpp
+$ g++ -c bar.cpp
+$ ls
+bar.cpp  bar.o  foo.cpp  foo.o
+$ g++ -o program foo.o bar.o
+$ ls
+bar.cpp  bar.o  foo.cpp  foo.o  program</code></pre>
+<p>こうすることによって、ひとつのソースファイルを編集しただけで、すべてのソースファイルをコンパイルする必要がなくなる。</p>
+<p>これをMakefileで書くには、出力するファイルと依存するファイルを考える。</p>
+<ul>
+<li><code>program</code>は<code>foo.o</code>と<code>bar.o</code>に依存する</li>
+<li><code>foo.o</code>は<code>foo.cpp</code>に依存する</li>
+<li><code>bar.o</code>は<code>bar.cpp</code>に依存する</li>
+</ul>
+<p>これを素直に書き出していけばよい。</p>
+<pre><code># programはfoo.oとbar.oに依存する
+program : foo.o bar.o
+    g++ -o $@ $^
+# foo.oはfoo.cppに依存する
+foo.o : foo.cpp
+    g++ -c $&lt;
+# bar.oはbar.cppに依存する
+bar.o : bar.cpp
+    g++ -c $&lt;</code></pre>
+<p><code>$^</code>はそのルールの依存するファイル名をすべて空白区切りで得る自動変数だ。この場合、<code>foo.o bar.o</code>に置換される。</p>
+<h2 id="複数のソースファイルの書き方">複数のソースファイルの書き方</h2>
+<p>C++のひとつのソースファイルは、1つの<code>翻訳単位</code>(translation unit)として扱われる。別の翻訳単位の定義を使うには、様々な制約がある。具体的な例で学ぼう。</p>
+<h3 id="関数">関数</h3>
+<p>以下のコードを見てみよう。</p>
+<div class="sourceCode" id="cb1213"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1213-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb1213-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1213-3" data-line-number="3"><span class="dt">void</span> print_int( <span class="dt">int</span> x )</a>
+<a class="sourceLine" id="cb1213-4" data-line-number="4">{</a>
+<a class="sourceLine" id="cb1213-5" data-line-number="5">    <span class="bu">std::</span>cout &lt;&lt; x ;    </a>
+<a class="sourceLine" id="cb1213-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb1213-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1213-8" data-line-number="8"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1213-9" data-line-number="9">{</a>
+<a class="sourceLine" id="cb1213-10" data-line-number="10">    print_int( <span class="dv">123</span> ) ;</a>
+<a class="sourceLine" id="cb1213-11" data-line-number="11">}</a></code></pre></div>
+<p>このコードには2つの定義がある。<code>print_int</code>と<code>main</code>だ。</p>
+<p>関数<code>print_int</code>を別のソースファイルである<code>print_int.cpp</code>に分割してみよう。</p>
+<div class="sourceCode" id="cb1214"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1214-1" data-line-number="1"><span class="co">// print_int.cpp</span></a>
+<a class="sourceLine" id="cb1214-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb1214-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1214-4" data-line-number="4"><span class="dt">void</span> print_int( <span class="dt">int</span> x )</a>
+<a class="sourceLine" id="cb1214-5" data-line-number="5">{</a>
+<a class="sourceLine" id="cb1214-6" data-line-number="6">    <span class="bu">std::</span>cout &lt;&lt; x ;    </a>
+<a class="sourceLine" id="cb1214-7" data-line-number="7">}</a></code></pre></div>
+<p>このコードは問題なくコンパイルできる。</p>
+<pre><code>$ g++ -c print_int.cpp</code></pre>
+<p>すると残りのソースファイルを<code>main.cpp</code>とすると以下のようになる。</p>
+<div class="sourceCode" id="cb1216"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1216-1" data-line-number="1"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1216-2" data-line-number="2"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1216-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1216-4" data-line-number="4">    print_int( <span class="dv">123</span> ) ;</a>
+<a class="sourceLine" id="cb1216-5" data-line-number="5">}</a></code></pre></div>
+<p>このコードはコンパイルできない。なぜならば、C++では名前は使う前に宣言しなければならないからだ。</p>
+<p>関数を宣言するには、関数の本体以外の部分を書き、セミコロンで終端する。</p>
+<div class="sourceCode" id="cb1217"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1217-1" data-line-number="1"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1217-2" data-line-number="2"><span class="dt">void</span> print_int( <span class="dt">int</span> ) ;</a>
+<a class="sourceLine" id="cb1217-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1217-4" data-line-number="4"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1217-5" data-line-number="5">{</a>
+<a class="sourceLine" id="cb1217-6" data-line-number="6">    print_int( <span class="dv">123</span> ) ;</a>
+<a class="sourceLine" id="cb1217-7" data-line-number="7">}</a></code></pre></div>
+<p>これでコンパイル、リンクができるようになった。</p>
+<pre><code>$ g++ -c main.cpp
+$ g++ -o program main.o print_int.o</code></pre>
+<p>このとき、<code>main.cpp</code>で関数<code>print_int</code>を定義することはできない。</p>
+<div class="sourceCode" id="cb1219"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1219-1" data-line-number="1"><span class="co">// エラー、print_int.cppでも定義されている</span></a>
+<a class="sourceLine" id="cb1219-2" data-line-number="2"><span class="dt">void</span> print_int( <span class="dt">int</span> ) { }</a>
+<a class="sourceLine" id="cb1219-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1219-4" data-line-number="4"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1219-5" data-line-number="5">{</a>
+<a class="sourceLine" id="cb1219-6" data-line-number="6">    print_int( <span class="dv">123</span> ) ;</a>
+<a class="sourceLine" id="cb1219-7" data-line-number="7">}</a></code></pre></div>
+<p>C++では定義は全翻訳単位にひとつしか書くことができないルール、ODR(One Definition Rule、単一定義原則)があるからだ。</p>
+<div class="sourceCode" id="cb1220"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1220-1" data-line-number="1"><span class="co">// 宣言</span></a>
+<a class="sourceLine" id="cb1220-2" data-line-number="2"><span class="dt">void</span> f() ;</a>
+<a class="sourceLine" id="cb1220-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1220-4" data-line-number="4"><span class="co">// OK、再宣言</span></a>
+<a class="sourceLine" id="cb1220-5" data-line-number="5"><span class="dt">void</span> f() ;</a>
+<a class="sourceLine" id="cb1220-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1220-7" data-line-number="7"><span class="co">// 定義</span></a>
+<a class="sourceLine" id="cb1220-8" data-line-number="8"><span class="dt">void</span> f() { }</a>
+<a class="sourceLine" id="cb1220-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb1220-10" data-line-number="10"><span class="co">// エラー、再定義</span></a>
+<a class="sourceLine" id="cb1220-11" data-line-number="11"><span class="co">// ODR違反</span></a>
+<a class="sourceLine" id="cb1220-12" data-line-number="12"><span class="dt">void</span> f() { }</a></code></pre></div>
+<p>なぜODRがあるのか。なぜ定義はひとつしか書けないのか。理由は簡単だ。もし定義が複数書けるならば、異なる定義を書くことができてしまうからだ。</p>
+<div class="sourceCode" id="cb1221"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1221-1" data-line-number="1"><span class="dt">bool</span> f() { <span class="cf">return</span> <span class="kw">true</span> ; }</a>
+<a class="sourceLine" id="cb1221-2" data-line-number="2"><span class="dt">bool</span> f() { <span class="cf">return</span> <span class="kw">false</span> ; }</a></code></pre></div>
+<p>もし定義を複数書くことができる場合、この関数<code>f</code>は<code>true</code>を返すべきだろうか。それとも<code>false</code>を返すべきだろうか。</p>
+<p>この問題を防ぐために、C++にはODRがある。</p>
+<p>複数のソースファイル、つまり複数の翻訳単位からなるプログラムの場合でもODRは適用される。定義はすべての翻訳単位内でひとつでなければならない。</p>
+<p>引数リストが違う関数は別の関数で、別の定義になる。</p>
+<div class="sourceCode" id="cb1222"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1222-1" data-line-number="1"><span class="co">// 定義</span></a>
+<a class="sourceLine" id="cb1222-2" data-line-number="2"><span class="dt">void</span> f() { }</a>
+<a class="sourceLine" id="cb1222-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1222-4" data-line-number="4"><span class="co">// OK、別の定義</span></a>
+<a class="sourceLine" id="cb1222-5" data-line-number="5"><span class="dt">void</span> f( <span class="dt">int</span> ) { }</a>
+<a class="sourceLine" id="cb1222-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1222-7" data-line-number="7"><span class="co">// OK、別の定義</span></a>
+<a class="sourceLine" id="cb1222-8" data-line-number="8"><span class="dt">void</span> f( <span class="dt">double</span> ) { }</a></code></pre></div>
+<p>名前は使う前に宣言が必要だが、肝心の定義は別のソースファイルに書いてある。宣言と定義を間違えてしまった場合はエラーになる。</p>
+<div class="sourceCode" id="cb1223"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1223-1" data-line-number="1"><span class="co">// print_int.hpp</span></a>
+<a class="sourceLine" id="cb1223-2" data-line-number="2"><span class="co">// 失敗状態を返す</span></a>
+<a class="sourceLine" id="cb1223-3" data-line-number="3"><span class="dt">bool</span> print_int( <span class="dt">int</span> x )</a>
+<a class="sourceLine" id="cb1223-4" data-line-number="4">{</a>
+<a class="sourceLine" id="cb1223-5" data-line-number="5">    <span class="bu">std::</span>cout &lt;&lt; x ;</a>
+<a class="sourceLine" id="cb1223-6" data-line-number="6">    <span class="cf">return</span> <span class="bu">std::</span>cout.fail() ;</a>
+<a class="sourceLine" id="cb1223-7" data-line-number="7">}</a>
+<a class="sourceLine" id="cb1223-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb1223-9" data-line-number="9"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1223-10" data-line-number="10"><span class="dt">void</span> print_int( <span class="dt">int</span> ) ;</a>
+<a class="sourceLine" id="cb1223-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1223-12" data-line-number="12"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1223-13" data-line-number="13">{</a>
+<a class="sourceLine" id="cb1223-14" data-line-number="14">    <span class="co">// エラー</span></a>
+<a class="sourceLine" id="cb1223-15" data-line-number="15">    print_int( <span class="dv">123</span> ) ;</a>
+<a class="sourceLine" id="cb1223-16" data-line-number="16">}</a></code></pre></div>
+<p>このような間違いを防ぐためのお作法として、宣言はヘッダーファイルに書いて<code>#include</code>する。 ~~~c++ // print_int.h bool print_int( int x ) ;</p>
+<p>// main.cpp #include “print_int.h”</p>
+<p>int main() { // 間違えない bool result = print_int( 123 ) ; } ~~~</p>
+<h3 id="変数-1">変数</h3>
+<p>変数にも宣言と定義がある。通常、変数の宣言は定義を兼ねる。</p>
+<div class="sourceCode" id="cb1224"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1224-1" data-line-number="1"><span class="co">// 宣言かつ定義</span></a>
+<a class="sourceLine" id="cb1224-2" data-line-number="2"><span class="dt">int</span> variable ;</a></code></pre></div>
+<p>そのため、別の翻訳単位の変数を使うために変数を書くと、定義が重複してしまい、ODR違反になる。</p>
+<div class="sourceCode" id="cb1225"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1225-1" data-line-number="1"><span class="co">// global.cpp</span></a>
+<a class="sourceLine" id="cb1225-2" data-line-number="2"><span class="dt">int</span> variable ;</a>
+<a class="sourceLine" id="cb1225-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1225-4" data-line-number="4"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1225-5" data-line-number="5"><span class="co">// エラー、ODR違反</span></a>
+<a class="sourceLine" id="cb1225-6" data-line-number="6"><span class="dt">int</span> variable ;</a>
+<a class="sourceLine" id="cb1225-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1225-8" data-line-number="8"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1225-9" data-line-number="9">{</a>
+<a class="sourceLine" id="cb1225-10" data-line-number="10">    variable = <span class="dv">0</span> ;</a>
+<a class="sourceLine" id="cb1225-11" data-line-number="11">}</a></code></pre></div>
+<p>変数を定義せずに宣言だけしたい場合は、<code>extern</code>キーワードを使う。</p>
+<div class="sourceCode" id="cb1226"><pre class="sourceCode pp"><code class="sourceCode pascal"><a class="sourceLine" id="cb1226-1" data-line-number="1"><span class="co">// global.cpp</span></a>
+<a class="sourceLine" id="cb1226-2" data-line-number="2">int variable ;</a>
+<a class="sourceLine" id="cb1226-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1226-4" data-line-number="4"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1226-5" data-line-number="5"><span class="co">// OK</span></a>
+<a class="sourceLine" id="cb1226-6" data-line-number="6"><span class="co">// 別の翻訳単位の定義を参照する</span></a>
+<a class="sourceLine" id="cb1226-7" data-line-number="7">extern int variable ;</a>
+<a class="sourceLine" id="cb1226-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb1226-9" data-line-number="9">int main()</a>
+<a class="sourceLine" id="cb1226-10" data-line-number="10"><span class="co">{</span></a>
+<a class="sourceLine" id="cb1226-11" data-line-number="11"><span class="co">    variable = 123 ;</span></a>
+<a class="sourceLine" id="cb1226-12" data-line-number="12"><span class="co">}</span></a></code></pre></div>
+<p><code>extern</code>キーワードを名前空間スコープで宣言された変数に使うと、定義せずに別の翻訳単位の定義を参照する意味になる。</p>
+<p>変数の場合も、間違いを防ぐためにヘッダーファイルに書いて<code>#include</code>するとよい。</p>
+<div class="sourceCode" id="cb1227"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1227-1" data-line-number="1"><span class="co">// global.h</span></a>
+<a class="sourceLine" id="cb1227-2" data-line-number="2"><span class="at">extern</span> <span class="dt">int</span> variable ;</a>
+<a class="sourceLine" id="cb1227-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1227-4" data-line-number="4"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1227-5" data-line-number="5"><span class="pp">#include </span><span class="im">&quot;global.h&quot;</span></a>
+<a class="sourceLine" id="cb1227-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1227-7" data-line-number="7"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1227-8" data-line-number="8">{</a>
+<a class="sourceLine" id="cb1227-9" data-line-number="9">    variable = <span class="dv">123</span> ;</a>
+<a class="sourceLine" id="cb1227-10" data-line-number="10">}</a></code></pre></div>
+<h3 id="インライン関数インライン変数">インライン関数/インライン変数</h3>
+<p>変数や関数の定義はODRにより重複できない。ということはヘッダーファイルに書いて複数の翻訳単位で<code>#include</code>できないということだ。</p>
+<div class="sourceCode" id="cb1228"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1228-1" data-line-number="1"><span class="co">// library.h</span></a>
+<a class="sourceLine" id="cb1228-2" data-line-number="2"><span class="bu">std::</span>string delimiter{<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>} ;</a>
+<a class="sourceLine" id="cb1228-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1228-4" data-line-number="4"><span class="dt">void</span> print_int( <span class="dt">int</span> x )</a>
+<a class="sourceLine" id="cb1228-5" data-line-number="5">{ <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; delimiter ; }</a>
+<a class="sourceLine" id="cb1228-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1228-7" data-line-number="7"><span class="co">// foo.cpp</span></a>
+<a class="sourceLine" id="cb1228-8" data-line-number="8"><span class="co">// エラー、ODR違反</span></a>
+<a class="sourceLine" id="cb1228-9" data-line-number="9"><span class="pp">#include </span><span class="im">&quot;library.h&quot;</span></a>
+<a class="sourceLine" id="cb1228-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb1228-11" data-line-number="11"><span class="co">// bar.cpp</span></a>
+<a class="sourceLine" id="cb1228-12" data-line-number="12"><span class="co">// エラー、ODR違反</span></a>
+<a class="sourceLine" id="cb1228-13" data-line-number="13"><span class="pp">#include </span><span class="im">&quot;library.h&quot;</span></a></code></pre></div>
+<p><code>library.h</code>には宣言だけを書いて、別途翻訳単位となるソースファイル、例えば<code>library.cpp</code>を用意しなければならない。</p>
+<div class="sourceCode" id="cb1229"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1229-1" data-line-number="1"><span class="co">// library.h</span></a>
+<a class="sourceLine" id="cb1229-2" data-line-number="2"><span class="dt">void</span> print_int( <span class="dt">int</span> x ) ;</a>
+<a class="sourceLine" id="cb1229-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1229-4" data-line-number="4"><span class="co">// library.cpp</span></a>
+<a class="sourceLine" id="cb1229-5" data-line-number="5"><span class="bu">std::</span>string delimiter ;</a>
+<a class="sourceLine" id="cb1229-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1229-7" data-line-number="7"><span class="dt">void</span> print_int( <span class="dt">int</span> x )</a>
+<a class="sourceLine" id="cb1229-8" data-line-number="8">{ <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; delimiter ; }</a></code></pre></div>
+<p>小さなライブラリの場合、この制約は煩わしい。できればヘッダーファイルだけで済ませてしまいたい。このためにC++には特別なODRを例外的に回避する方法がある。</p>
+<p>キーワード<code>inline</code>をつけて定義した関数と変数は、インライン関数、インライン変数となる。</p>
+<div class="sourceCode" id="cb1230"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1230-1" data-line-number="1"><span class="co">// library.h</span></a>
+<a class="sourceLine" id="cb1230-2" data-line-number="2"><span class="co">// インライン変数</span></a>
+<a class="sourceLine" id="cb1230-3" data-line-number="3"><span class="kw">inline</span> <span class="bu">std::</span>string delimiter{<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>} ;</a>
+<a class="sourceLine" id="cb1230-4" data-line-number="4"><span class="co">// インライン関数</span></a>
+<a class="sourceLine" id="cb1230-5" data-line-number="5"><span class="kw">inline</span> <span class="dt">void</span> print_int( <span class="dt">int</span> x )</a>
+<a class="sourceLine" id="cb1230-6" data-line-number="6">{ <span class="bu">std::</span>cout &lt;&lt; x &lt;&lt; delimiter ; }</a></code></pre></div>
+<p>インライン関数とインライン変数は、複数の翻訳単位で重複して定義できる。</p>
+<div class="sourceCode" id="cb1231"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1231-1" data-line-number="1"><span class="co">// foo.cpp</span></a>
+<a class="sourceLine" id="cb1231-2" data-line-number="2"><span class="pp">#include </span><span class="im">&quot;library.h&quot;</span></a>
+<a class="sourceLine" id="cb1231-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1231-4" data-line-number="4"><span class="co">// bar.cpp</span></a>
+<a class="sourceLine" id="cb1231-5" data-line-number="5"><span class="pp">#include </span><span class="im">&quot;library.h&quot;</span></a></code></pre></div>
+<p><code>inline</code>はODRを例外的に回避できるとは言え、強い制約がある。</p>
+<ol type="1">
+<li>異なる翻訳単位に限る</li>
+</ol>
+<p>同じ翻訳単位の中で重複することはできない。</p>
+<div class="sourceCode" id="cb1232"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1232-1" data-line-number="1"><span class="co">// ひとつの翻訳単位</span></a>
+<a class="sourceLine" id="cb1232-2" data-line-number="2"><span class="kw">inline</span> <span class="dt">int</span> variable ;</a>
+<a class="sourceLine" id="cb1232-3" data-line-number="3"><span class="co">// エラー、再定義</span></a>
+<a class="sourceLine" id="cb1232-4" data-line-number="4"><span class="kw">inline</span> <span class="dt">int</span> variable ;</a></code></pre></div>
+<ol start="2" type="1">
+<li>同じトークン列である</li>
+</ol>
+<p>インライン関数、インライン変数の定義のトークン列、つまりソースコードの文字列は完全に同じでなければならない。</p>
+<p>たとえば以下はトークン列が違う。 ~<del>c++ inline int f( int x ) { return x ; } inline int f( int y ) { return y ; }</del>~</p>
+<p>インライン関数と変数のトークン列を同じにするには、ヘッダーファイルに書いて<code>#include</code>で取り込むことを徹底する。</p>
+<ol start="3" type="1">
+<li>意味が同じである。</li>
+</ol>
+<p>同じトークン列でも意味が異なることがある。</p>
+<div class="sourceCode" id="cb1233"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1233-1" data-line-number="1"><span class="co">// foo.cpp</span></a>
+<a class="sourceLine" id="cb1233-2" data-line-number="2"><span class="dt">void</span> f( <span class="dt">int</span> ) {  }</a>
+<a class="sourceLine" id="cb1233-3" data-line-number="3"><span class="kw">inline</span> <span class="dt">bool</span> g( )</a>
+<a class="sourceLine" id="cb1233-4" data-line-number="4">{</a>
+<a class="sourceLine" id="cb1233-5" data-line-number="5">    <span class="cf">return</span> f( <span class="dv">0</span> ) ;</a>
+<a class="sourceLine" id="cb1233-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb1233-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1233-8" data-line-number="8"><span class="co">// bar.cpp</span></a>
+<a class="sourceLine" id="cb1233-9" data-line-number="9"><span class="dt">void</span> f( <span class="dt">double</span> ) {  }</a>
+<a class="sourceLine" id="cb1233-10" data-line-number="10"><span class="kw">inline</span> <span class="dt">bool</span> g()</a>
+<a class="sourceLine" id="cb1233-11" data-line-number="11">{</a>
+<a class="sourceLine" id="cb1233-12" data-line-number="12">    <span class="cf">return</span> f( <span class="dv">0</span> ) ;</a>
+<a class="sourceLine" id="cb1233-13" data-line-number="13">}</a></code></pre></div>
+<p><code>foo.cpp</code>のインライン関数<code>g</code>は<code>f(int)</code>を呼び出すが、<code>bar.cpp</code>のインライン関数<code>g</code>は<code>f(double)</code>を呼び出す。インライン関数<code>g</code>のトークン列はどちらも同じだが、意味が異なる。</p>
+<p>ODRの例外的な回避の怖いところは、間違えてしまってもコンパイラーがエラーメッセージを出してくれる保証がないところだ。上の同じトークン列で違う意味のような関数は、そのままコンパイルが通ってリンクされ、実行可能なプログラムが生成されてしまうかも知れない。そのようなプログラムの挙動がどうなるかはわからない。この理由は、ODR違反を完全に発見するコンパイラーの実装が技術的に困難だからだ。ODR違反をしないのはユーザーの責任だ。</p>
+<p>インライン変数とインライン関数はわざわざ翻訳単位を分けて分割コンパイルするまでもないライブラリに使うとよい。</p>
+<h3 id="クラス">クラス</h3>
+<p>クラスにも宣言と定義がある。</p>
+<div class="sourceCode" id="cb1234"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1234-1" data-line-number="1"><span class="co">// 宣言</span></a>
+<a class="sourceLine" id="cb1234-2" data-line-number="2">strut Foo ;</a>
+<a class="sourceLine" id="cb1234-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1234-4" data-line-number="4"><span class="co">// 定義</span></a>
+<a class="sourceLine" id="cb1234-5" data-line-number="5"><span class="kw">struct</span> Foo</a>
+<a class="sourceLine" id="cb1234-6" data-line-number="6">{</a>
+<a class="sourceLine" id="cb1234-7" data-line-number="7">    <span class="dt">int</span> data_member ;</a>
+<a class="sourceLine" id="cb1234-8" data-line-number="8">    <span class="dt">int</span> member_function() ;</a>
+<a class="sourceLine" id="cb1234-9" data-line-number="9">} ;</a></code></pre></div>
+<p>クラスを複数の翻訳単位で使うには、関数と同じように宣言と定義に分ければよいと考えるかも知れないが、残念ながらクラスの宣言だけでできることは少ない。</p>
+<p>クラスの宣言だけでできることは、クラス名を型名として使うとか、クラスのポインター型を作るぐらいのものだ。</p>
+<div class="sourceCode" id="cb1235"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1235-1" data-line-number="1"><span class="kw">struct</span> Foo ;</a>
+<a class="sourceLine" id="cb1235-2" data-line-number="2"><span class="kw">using</span> Bar = Foo ;</a>
+<a class="sourceLine" id="cb1235-3" data-line-number="3">Foo * ptr = <span class="kw">nullptr</span> ;</a></code></pre></div>
+<p>宣言だけされたクラスのオブジェクトを作ることはできないし、ポインターの演算もできない。</p>
+<div class="sourceCode" id="cb1236"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1236-1" data-line-number="1"><span class="kw">struct</span> Foo ;</a>
+<a class="sourceLine" id="cb1236-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1236-3" data-line-number="3"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1236-4" data-line-number="4">{</a>
+<a class="sourceLine" id="cb1236-5" data-line-number="5">    <span class="co">// エラー</span></a>
+<a class="sourceLine" id="cb1236-6" data-line-number="6">    Foo foo ;</a>
+<a class="sourceLine" id="cb1236-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1236-8" data-line-number="8">    Foo * ptr = <span class="kw">nullptr</span> ;</a>
+<a class="sourceLine" id="cb1236-9" data-line-number="9">    <span class="co">// エラー</span></a>
+<a class="sourceLine" id="cb1236-10" data-line-number="10">    ++ptr ;</a>
+<a class="sourceLine" id="cb1236-11" data-line-number="11">}</a></code></pre></div>
+<p>この理由は、宣言だけされたクラスは<code>不完全型(Incomplete type)</code>という特別な扱いの型になるからだ。クラスのオブジェクトを作ったりポインター演算をするには、クラスのオブジェクトのサイズを決定する必要があるが、そのための情報はまだコンパイラーが得ていないために起こる制約だ。</p>
+<p>クラスの定義では、インライン変数やインライン関数と同じく、ODRの例外的な回避が認められている。条件も同じで、1. 異なる翻訳単位で、2. 同じトークン列で、3. 意味も同じ場合だ。</p>
+<p>ODR違反を起こさないために、クラス定義はインクルードファイルに書いて<code>#include</code>するのがお作法だ。</p>
+<pre><code>// Foo.h
+// クラス定義
+struct Foo
+{
+    int data_member ;
+    // メンバー関数の宣言
+    int member_function() const noexcept;
+} ;
+
+// Foo.cpp
+#include &quot;Foo.h&quot;
+// メンバー関数の定義
+int Foo::member_function() const noexcept
+{
+    return data_member ;
+} 
+
+// main.cpp
+#include &quot;Foo.h&quot;
+
+int main()
+{
+    Foo foo ;
+    foo.data_member = 42 ;
+    int value = foo.member_function() ;
+}</code></pre>
+<p>クラス定義の中で定義されたメンバー関数は、自動的にインライン関数になる。</p>
+<div class="sourceCode" id="cb1238"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1238-1" data-line-number="1"><span class="co">// Foo.h</span></a>
+<a class="sourceLine" id="cb1238-2" data-line-number="2"><span class="kw">struct</span> Foo</a>
+<a class="sourceLine" id="cb1238-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1238-4" data-line-number="4">    <span class="dt">int</span> data_member ;</a>
+<a class="sourceLine" id="cb1238-5" data-line-number="5">    <span class="co">// インライン関数</span></a>
+<a class="sourceLine" id="cb1238-6" data-line-number="6">    <span class="dt">int</span> member_function() <span class="at">const</span> <span class="kw">noexcept</span></a>
+<a class="sourceLine" id="cb1238-7" data-line-number="7">    {</a>
+<a class="sourceLine" id="cb1238-8" data-line-number="8">        <span class="cf">return</span> data_member ;</a>
+<a class="sourceLine" id="cb1238-9" data-line-number="9">    }</a>
+<a class="sourceLine" id="cb1238-10" data-line-number="10">} ;</a></code></pre></div>
+<p>このように書くと、ヘッダーファイル<code>Foo.h</code>を<code>#include</code>するだけでどこでもクラス<code>Foo</code>が使えるようになる。メンバー関数を定義するための<code>Foo.cpp</code>は必要がなくなる。</p>
+<p>クラスのデータメンバーは具体的なオブジェクトではないので、インライン変数ではない。</p>
+<div class="sourceCode" id="cb1239"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1239-1" data-line-number="1"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1239-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1239-3" data-line-number="3">    <span class="co">// これはオブジェクトではない</span></a>
+<a class="sourceLine" id="cb1239-4" data-line-number="4">    <span class="dt">int</span> data_member ;</a>
+<a class="sourceLine" id="cb1239-5" data-line-number="5">} ;</a>
+<a class="sourceLine" id="cb1239-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1239-7" data-line-number="7"><span class="dt">void</span> main()</a>
+<a class="sourceLine" id="cb1239-8" data-line-number="8">{</a>
+<a class="sourceLine" id="cb1239-9" data-line-number="9">    <span class="co">// オブジェクト</span></a>
+<a class="sourceLine" id="cb1239-10" data-line-number="10">    S s ;</a>
+<a class="sourceLine" id="cb1239-11" data-line-number="11">    <span class="co">// サブオブジェクト</span></a>
+<a class="sourceLine" id="cb1239-12" data-line-number="12">    s.data_member ; </a></code></pre></div>
+<h5 id="staticメンバー">staticメンバー</h5>
+<p>クラスのメンバーは非staticメンバーとstaticメンバーにわけることができる。staticメンバーは<code>static</code>キーワードをつけて宣言する。</p>
+<div class="sourceCode" id="cb1240"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1240-1" data-line-number="1"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1240-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1240-3" data-line-number="3">    <span class="co">// 非staticメンバー</span></a>
+<a class="sourceLine" id="cb1240-4" data-line-number="4">    <span class="dt">int</span> data_member ;</a>
+<a class="sourceLine" id="cb1240-5" data-line-number="5">    <span class="dt">void</span> member_function() ;</a>
+<a class="sourceLine" id="cb1240-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1240-7" data-line-number="7">    <span class="co">// staticメンバー</span></a>
+<a class="sourceLine" id="cb1240-8" data-line-number="8">    <span class="kw">inline</span> <span class="at">static</span> <span class="dt">int</span> static_data_member ;</a>
+<a class="sourceLine" id="cb1240-9" data-line-number="9">    <span class="at">static</span> <span class="dt">void</span> static_member_funciton() ;</a>
+<a class="sourceLine" id="cb1240-10" data-line-number="10">} ;</a></code></pre></div>
+<p>staticメンバー関数はクラスのオブジェクトには依存していない。そのため、クラスのオブジェクトなしで呼び出すことができる</p>
+<div class="sourceCode" id="cb1241"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1241-1" data-line-number="1"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1241-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1241-3" data-line-number="3">    <span class="co">// 非staticメンバー</span></a>
+<a class="sourceLine" id="cb1241-4" data-line-number="4">    <span class="dt">void</span> member_function() { }</a>
+<a class="sourceLine" id="cb1241-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1241-6" data-line-number="6">    <span class="co">// staticメンバー</span></a>
+<a class="sourceLine" id="cb1241-7" data-line-number="7">    <span class="at">static</span> <span class="dt">void</span> static_member_funciton() { }</a>
+<a class="sourceLine" id="cb1241-8" data-line-number="8">} ;</a>
+<a class="sourceLine" id="cb1241-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb1241-10" data-line-number="10"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1241-11" data-line-number="11">{</a>
+<a class="sourceLine" id="cb1241-12" data-line-number="12">    S s ;</a>
+<a class="sourceLine" id="cb1241-13" data-line-number="13">    <span class="co">// オブジェクトが必要</span></a>
+<a class="sourceLine" id="cb1241-14" data-line-number="14">    s.member_function() ;</a>
+<a class="sourceLine" id="cb1241-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb1241-16" data-line-number="16">    <span class="co">// オブジェクトは不要</span></a>
+<a class="sourceLine" id="cb1241-17" data-line-number="17">    S::static_member_funciton() ;</a>
+<a class="sourceLine" id="cb1241-18" data-line-number="18">    <span class="co">// このように呼び出すこともできる</span></a>
+<a class="sourceLine" id="cb1241-19" data-line-number="19">    s.static_member_funciton() ;</a>
+<a class="sourceLine" id="cb1241-20" data-line-number="20">}</a></code></pre></div>
+<p>staticメンバー関数の呼び出しにクラスのオブジェクトを必要としない。そのため、<code>this</code>も使うことはできない。</p>
+<div class="sourceCode" id="cb1242"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1242-1" data-line-number="1"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1242-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1242-3" data-line-number="3">    <span class="dt">int</span> data_member() ;</a>
+<a class="sourceLine" id="cb1242-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1242-5" data-line-number="5">    <span class="dt">void</span> f()</a>
+<a class="sourceLine" id="cb1242-6" data-line-number="6">    {<span class="co">// thisが使える</span></a>
+<a class="sourceLine" id="cb1242-7" data-line-number="7">        <span class="kw">this</span>-&gt;data_member ;</a>
+<a class="sourceLine" id="cb1242-8" data-line-number="8">    }</a>
+<a class="sourceLine" id="cb1242-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb1242-10" data-line-number="10">    <span class="at">static</span> <span class="dt">void</span> g()</a>
+<a class="sourceLine" id="cb1242-11" data-line-number="11">    {<span class="co">// thisは使えない</span></a>
+<a class="sourceLine" id="cb1242-12" data-line-number="12">    }</a>
+<a class="sourceLine" id="cb1242-13" data-line-number="13">}</a></code></pre></div>
+<p>staticデータメンバーはクラスのオブジェクトの外の独立したオブジェクトだ。staticデータメンバーのクラス定義内での宣言は定義ではないので、クラスの定義外で定義する必要がある。</p>
+<div class="sourceCode" id="cb1243"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1243-1" data-line-number="1"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1243-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb1243-3" data-line-number="3">    <span class="co">// 宣言</span></a>
+<a class="sourceLine" id="cb1243-4" data-line-number="4">    <span class="at">static</span> <span class="dt">int</span> static_data_member ;</a>
+<a class="sourceLine" id="cb1243-5" data-line-number="5">} ;</a>
+<a class="sourceLine" id="cb1243-6" data-line-number="6"><span class="co">// 定義</span></a>
+<a class="sourceLine" id="cb1243-7" data-line-number="7"><span class="dt">int</span> S::static_data_member ;</a>
+<a class="sourceLine" id="cb1243-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb1243-9" data-line-number="9"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1243-10" data-line-number="10">{</a>
+<a class="sourceLine" id="cb1243-11" data-line-number="11">    S::static_data_member = <span class="dv">123</span> ;</a>
+<a class="sourceLine" id="cb1243-12" data-line-number="12">}</a></code></pre></div>
+<p>複数の翻訳単位からなるプログラムの場合、ODRにより定義はひとつしか書けないので、どこか1つのソースファイルだけに定義を書くことになる。</p>
+<div class="sourceCode" id="cb1244"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1244-1" data-line-number="1"><span class="co">// S.h</span></a>
+<a class="sourceLine" id="cb1244-2" data-line-number="2"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1244-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1244-4" data-line-number="4">    <span class="co">// 宣言</span></a>
+<a class="sourceLine" id="cb1244-5" data-line-number="5">    <span class="at">static</span> <span class="dt">int</span> static_data_member ;</a>
+<a class="sourceLine" id="cb1244-6" data-line-number="6">} ;</a>
+<a class="sourceLine" id="cb1244-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1244-8" data-line-number="8"><span class="co">// S.cpp</span></a>
+<a class="sourceLine" id="cb1244-9" data-line-number="9"><span class="pp">#include </span><span class="im">&quot;S.h&quot;</span></a>
+<a class="sourceLine" id="cb1244-10" data-line-number="10"><span class="co">// 定義</span></a>
+<a class="sourceLine" id="cb1244-11" data-line-number="11"><span class="dt">int</span> S::static_data_member ;</a></code></pre></div>
+<p>これは面倒なので、通常はstatic変数はインライン変数にする。</p>
+<div class="sourceCode" id="cb1245"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1245-1" data-line-number="1"><span class="co">// S.h</span></a>
+<a class="sourceLine" id="cb1245-2" data-line-number="2"><span class="kw">struct</span> S</a>
+<a class="sourceLine" id="cb1245-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1245-4" data-line-number="4">    <span class="co">// インライン変数かつstatic変数</span></a>
+<a class="sourceLine" id="cb1245-5" data-line-number="5">    <span class="kw">inline</span> <span class="at">static</span> <span class="dt">int</span> static_data_member ;</a>
+<a class="sourceLine" id="cb1245-6" data-line-number="6">} ;</a></code></pre></div>
+<p>これでstatic変数を定義するだけのソースファイルを用意する必要はない。ただしインライン変数はC++17以降の機能なので、読者が昔のC++で書かれたコードを読む際には、まだ昔ながらのstaticデータメンバーの定義に出くわすだろうから、覚えておこう。</p>
+<p>staticメンバーはクラススコープの下に関数と変数というだけで、その実態は名前空間スコープ内の関数と変数と同じだ。</p>
+<div class="sourceCode" id="cb1246"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1246-1" data-line-number="1"><span class="co">// 名前空間</span></a>
+<a class="sourceLine" id="cb1246-2" data-line-number="2"><span class="kw">namespace</span> A {</a>
+<a class="sourceLine" id="cb1246-3" data-line-number="3">    <span class="dt">int</span> variable ;</a>
+<a class="sourceLine" id="cb1246-4" data-line-number="4">    <span class="dt">void</span> function() { }</a>
+<a class="sourceLine" id="cb1246-5" data-line-number="5">}</a>
+<a class="sourceLine" id="cb1246-6" data-line-number="6"><span class="co">// クラス</span></a>
+<a class="sourceLine" id="cb1246-7" data-line-number="7"><span class="kw">struct</span> B {</a>
+<a class="sourceLine" id="cb1246-8" data-line-number="8">    <span class="kw">inline</span> <span class="at">static</span> <span class="dt">int</span> variable ;</a>
+<a class="sourceLine" id="cb1246-9" data-line-number="9">    <span class="at">static</span> <span class="dt">void</span> function() { }</a>
+<a class="sourceLine" id="cb1246-10" data-line-number="10">} ;</a>
+<a class="sourceLine" id="cb1246-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1246-12" data-line-number="12"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1246-13" data-line-number="13">{</a>
+<a class="sourceLine" id="cb1246-14" data-line-number="14">    <span class="co">// 名前空間</span></a>
+<a class="sourceLine" id="cb1246-15" data-line-number="15">    A::variable = <span class="dv">1</span> ;</a>
+<a class="sourceLine" id="cb1246-16" data-line-number="16">    A::function() ;</a>
+<a class="sourceLine" id="cb1246-17" data-line-number="17">    <span class="co">// クラス</span></a>
+<a class="sourceLine" id="cb1246-18" data-line-number="18">    B::variable = <span class="dv">1</span> ;</a>
+<a class="sourceLine" id="cb1246-19" data-line-number="19">    B::function() ;</a>
+<a class="sourceLine" id="cb1246-20" data-line-number="20">}</a></code></pre></div>
+<h3 id="テンプレート-2">テンプレート</h3>
+<p>テンプレートにもODRの例外が認められている。</p>
+<p>テンプレートは具体的なテンプレート引数が与えられて実体化する。</p>
+<div class="sourceCode" id="cb1247"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1247-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;</a>
+<a class="sourceLine" id="cb1247-2" data-line-number="2"><span class="kw">struct</span> holder</a>
+<a class="sourceLine" id="cb1247-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1247-4" data-line-number="4">    T value ;</a>
+<a class="sourceLine" id="cb1247-5" data-line-number="5">} ;</a>
+<a class="sourceLine" id="cb1247-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1247-7" data-line-number="7">holder&lt;<span class="dt">int</span>&gt; a ;</a>
+<a class="sourceLine" id="cb1247-8" data-line-number="8">holder&lt;<span class="dt">double</span>&gt; b ;</a></code></pre></div>
+<p>このため、翻訳単位ごとに、同じトークン列で同じ意味のテンプレートコードが必要だ。インクルードファイルに書いて<code>#include</code>するお作法も同じだ。</p>
+<div class="sourceCode" id="cb1248"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1248-1" data-line-number="1"><span class="co">// holder.h</span></a>
+<a class="sourceLine" id="cb1248-2" data-line-number="2"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;</a>
+<a class="sourceLine" id="cb1248-3" data-line-number="3"><span class="kw">struct</span> holder</a>
+<a class="sourceLine" id="cb1248-4" data-line-number="4">{</a>
+<a class="sourceLine" id="cb1248-5" data-line-number="5">    T value ;</a>
+<a class="sourceLine" id="cb1248-6" data-line-number="6">} ;</a>
+<a class="sourceLine" id="cb1248-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1248-8" data-line-number="8">holder&lt;<span class="dt">int</span>&gt; a ;</a>
+<a class="sourceLine" id="cb1248-9" data-line-number="9">holder&lt;<span class="dt">double</span>&gt; b ;</a></code></pre></div>
+<p>C++に将来的に追加される予定のモジュールが入るまでは、テンプレートコードはすべてをインクルードファイルに書いて<code>#include</code>して使う慣習が続くだろう。</p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
 <p>Cプリプロセッサーはプリプロセッシングディレクティブ(preprocessing directive)を認識し、トークン列を処理する。ディレクティブはソースファイルの文頭に文字<code>#</code>から始まり、改行文字で終わる。<code>#</code>とディレクティブの間に空白文字を入れてもよい。</p>
-<div class="sourceCode" id="cb1189"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1189-1" data-line-number="1"><span class="pp">#define NOSPACE</span></a>
-<a class="sourceLine" id="cb1189-2" data-line-number="2"><span class="pp">#    define SPACE</span></a></code></pre></div>
+<div class="sourceCode" id="cb1249"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1249-1" data-line-number="1"><span class="pp">#define NOSPACE</span></a>
+<a class="sourceLine" id="cb1249-2" data-line-number="2"><span class="pp">#    define SPACE</span></a></code></pre></div>
 <h2 id="includeディレクティブ">#includeディレクティブ</h2>
 <p><code>#include</code>は指定したファイルの内容をその場に挿入する。本質的にはコピペだ。C++では<code>#include</code>はライブラリを利用するのに使われる。</p>
 <p><code>#include</code>は以下のいずれかの文法を持つ。</p>
-<div class="sourceCode" id="cb1190"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1190-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;ヘッダーファイルパス&gt;</span><span class="pp"> 改行文字</span></a>
-<a class="sourceLine" id="cb1190-2" data-line-number="2"><span class="pp">#include </span><span class="im">&quot;ヘッダーファイルパス&quot;</span><span class="pp"> 改行文字</span></a></code></pre></div>
+<div class="sourceCode" id="cb1250"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1250-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;ヘッダーファイルパス&gt;</span><span class="pp"> 改行文字</span></a>
+<a class="sourceLine" id="cb1250-2" data-line-number="2"><span class="pp">#include </span><span class="im">&quot;ヘッダーファイルパス&quot;</span><span class="pp"> 改行文字</span></a></code></pre></div>
 <p><code>#include</code>は指定したファイルパスのファイルの内容をその場所に挿入する。このファイルをヘッダーファイルという。<code>&lt;&gt;</code>によるファイルパスは、標準ライブラリやシステムのヘッダーファイルを格納したディレクトリーからヘッダーファイルを探す。<code>&quot;&quot;</code>によるファイルパスは、システム以外のディレクトリーからもヘッダーファイルを探す。例えばカレントディレクトリーなどだ。</p>
 <p>例えば、以下のようなヘッダーファイル<code>foo.h</code>があり、</p>
-<div class="sourceCode" id="cb1191"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1191-1" data-line-number="1"><span class="co">// foo.h</span></a>
-<a class="sourceLine" id="cb1191-2" data-line-number="2">foo foo foo</a></code></pre></div>
+<div class="sourceCode" id="cb1251"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1251-1" data-line-number="1"><span class="co">// foo.h</span></a>
+<a class="sourceLine" id="cb1251-2" data-line-number="2">foo foo foo</a></code></pre></div>
 <p>以下のようなソースファイル<code>bar.cpp</code>がある場合、</p>
-<div class="sourceCode" id="cb1192"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1192-1" data-line-number="1"><span class="co">// bar.cpp</span></a>
-<a class="sourceLine" id="cb1192-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1192-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;foo.h&quot;</span></a>
-<a class="sourceLine" id="cb1192-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1192-5" data-line-number="5"><span class="co">// end bar.cpp</span></a></code></pre></div>
+<div class="sourceCode" id="cb1252"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1252-1" data-line-number="1"><span class="co">// bar.cpp</span></a>
+<a class="sourceLine" id="cb1252-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1252-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;foo.h&quot;</span></a>
+<a class="sourceLine" id="cb1252-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1252-5" data-line-number="5"><span class="co">// end bar.cpp</span></a></code></pre></div>
 <p><code>bar.cpp</code>をCプリプロセッサーにかけると、以下のようなソースファイルが出力される</p>
-<div class="sourceCode" id="cb1193"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1193-1" data-line-number="1"><span class="co">// bar.cpp</span></a>
-<a class="sourceLine" id="cb1193-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1193-3" data-line-number="3"><span class="co">// foo.h</span></a>
-<a class="sourceLine" id="cb1193-4" data-line-number="4">foo foo foo</a>
-<a class="sourceLine" id="cb1193-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1193-6" data-line-number="6"><span class="co">// end bar.h</span></a></code></pre></div>
+<div class="sourceCode" id="cb1253"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1253-1" data-line-number="1"><span class="co">// bar.cpp</span></a>
+<a class="sourceLine" id="cb1253-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1253-3" data-line-number="3"><span class="co">// foo.h</span></a>
+<a class="sourceLine" id="cb1253-4" data-line-number="4">foo foo foo</a>
+<a class="sourceLine" id="cb1253-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1253-6" data-line-number="6"><span class="co">// end bar.h</span></a></code></pre></div>
 <p>このソースファイルはC++のソースファイルとしてはエラーとなるが、Cプリプロセッサーは単純にトークン列で分割したテキストファイルとしてソースファイルを処理するため、Cプリプロセッサーとしてはエラーにはならない。</p>
 <p>冒頭で述べたように、<code>#include</code>の本質はコンパイラーによるコピペである。あるテキストファイルの内容をその場に挿入するコピペ機能を提供する。</p>
 <p><code>#include</code>は、他の言語でモジュール、importなどと呼ばれている機能を簡易的に提供する。C++の標準ライブラリを使うには、<code>&lt;iostream&gt;</code>や<code>&lt;string&gt;</code>や<code>&lt;vector&gt;</code>のようなヘッダーファイルを<code>#include</code>する必要がある。</p>
-<div class="sourceCode" id="cb1194"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1194-1" data-line-number="1"><span class="co">// iostreamライブラリを使う</span></a>
-<a class="sourceLine" id="cb1194-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
-<a class="sourceLine" id="cb1194-3" data-line-number="3"><span class="co">// stringライブラリを使う</span></a>
-<a class="sourceLine" id="cb1194-4" data-line-number="4"><span class="pp">#include </span><span class="im">&lt;string&gt;</span></a>
-<a class="sourceLine" id="cb1194-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1194-6" data-line-number="6"><span class="dt">int</span> main()</a>
-<a class="sourceLine" id="cb1194-7" data-line-number="7">{</a>
-<a class="sourceLine" id="cb1194-8" data-line-number="8">    <span class="co">// &lt;string&gt;のライブラリ</span></a>
-<a class="sourceLine" id="cb1194-9" data-line-number="9">    <span class="bu">std::</span>string s(<span class="st">&quot;hello&quot;</span>) ;</a>
-<a class="sourceLine" id="cb1194-10" data-line-number="10">    <span class="co">// iostreamのライブラリ</span></a>
-<a class="sourceLine" id="cb1194-11" data-line-number="11">    <span class="bu">std::</span>cout &lt;&lt; s ;</a>
-<a class="sourceLine" id="cb1194-12" data-line-number="12">}</a></code></pre></div>
+<div class="sourceCode" id="cb1254"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1254-1" data-line-number="1"><span class="co">// iostreamライブラリを使う</span></a>
+<a class="sourceLine" id="cb1254-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb1254-3" data-line-number="3"><span class="co">// stringライブラリを使う</span></a>
+<a class="sourceLine" id="cb1254-4" data-line-number="4"><span class="pp">#include </span><span class="im">&lt;string&gt;</span></a>
+<a class="sourceLine" id="cb1254-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1254-6" data-line-number="6"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1254-7" data-line-number="7">{</a>
+<a class="sourceLine" id="cb1254-8" data-line-number="8">    <span class="co">// &lt;string&gt;のライブラリ</span></a>
+<a class="sourceLine" id="cb1254-9" data-line-number="9">    <span class="bu">std::</span>string s(<span class="st">&quot;hello&quot;</span>) ;</a>
+<a class="sourceLine" id="cb1254-10" data-line-number="10">    <span class="co">// iostreamのライブラリ</span></a>
+<a class="sourceLine" id="cb1254-11" data-line-number="11">    <span class="bu">std::</span>cout &lt;&lt; s ;</a>
+<a class="sourceLine" id="cb1254-12" data-line-number="12">}</a></code></pre></div>
 <p>すでに述べたように<code>#include</code>はファイルの内容をその場に挿入するだけであり、他の言語にあるモジュールのための高級な機能ではない。本書を執筆時点で規格策定中のC++20では、より高級なモジュール機能を追加する予定がある。</p>
 <p>同じヘッダーファイルを複数回<code>#include</code>すると、当然複数回挿入される。</p>
 <p>以下のような<code>val.h</code>を、</p>
-<div class="sourceCode" id="cb1195"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1195-1" data-line-number="1"><span class="co">// val.h</span></a>
-<a class="sourceLine" id="cb1195-2" data-line-number="2"><span class="kw">inline</span> <span class="dt">int</span> val ;</a></code></pre></div>
+<div class="sourceCode" id="cb1255"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1255-1" data-line-number="1"><span class="co">// val.h</span></a>
+<a class="sourceLine" id="cb1255-2" data-line-number="2"><span class="kw">inline</span> <span class="dt">int</span> val ;</a></code></pre></div>
 <p>以下のように複数回<code>#include</code>すると、</p>
-<div class="sourceCode" id="cb1196"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1196-1" data-line-number="1"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a>
-<a class="sourceLine" id="cb1196-2" data-line-number="2"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a></code></pre></div>
+<div class="sourceCode" id="cb1256"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1256-1" data-line-number="1"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a>
+<a class="sourceLine" id="cb1256-2" data-line-number="2"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a></code></pre></div>
 <p>以下のように置換される。</p>
-<div class="sourceCode" id="cb1197"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1197-1" data-line-number="1"><span class="co">// val.h</span></a>
-<a class="sourceLine" id="cb1197-2" data-line-number="2"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
-<a class="sourceLine" id="cb1197-3" data-line-number="3"><span class="co">// val.h</span></a>
-<a class="sourceLine" id="cb1197-4" data-line-number="4"><span class="kw">inline</span> <span class="dt">int</span> val ;</a></code></pre></div>
+<div class="sourceCode" id="cb1257"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1257-1" data-line-number="1"><span class="co">// val.h</span></a>
+<a class="sourceLine" id="cb1257-2" data-line-number="2"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
+<a class="sourceLine" id="cb1257-3" data-line-number="3"><span class="co">// val.h</span></a>
+<a class="sourceLine" id="cb1257-4" data-line-number="4"><span class="kw">inline</span> <span class="dt">int</span> val ;</a></code></pre></div>
 <p>これはvalの定義が重複しているためエラーとなる。</p>
 <p>しかし、ヘッダーファイルを一度しか<code>#include</code>しないようにするのは困難だ。なぜならば、ヘッダーファイルは他のヘッダーファイルから間接的に<code>#include</code>されることもあるからだ。</p>
-<div class="sourceCode" id="cb1198"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1198-1" data-line-number="1"><span class="co">// lib_f.h</span></a>
-<a class="sourceLine" id="cb1198-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1198-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a>
-<a class="sourceLine" id="cb1198-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1198-5" data-line-number="5"><span class="dt">int</span> f() ;</a></code></pre></div>
-<div class="sourceCode" id="cb1199"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1199-1" data-line-number="1"><span class="co">// lib_g.h</span></a>
-<a class="sourceLine" id="cb1199-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1199-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a>
-<a class="sourceLine" id="cb1199-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1199-5" data-line-number="5"><span class="dt">int</span> g() ;</a></code></pre></div>
-<div class="sourceCode" id="cb1200"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1200-1" data-line-number="1"><span class="co">// main.cpp</span></a>
-<a class="sourceLine" id="cb1200-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1200-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;lib_f.h&quot;</span></a>
-<a class="sourceLine" id="cb1200-4" data-line-number="4"><span class="pp">#include </span><span class="im">&quot;lib_g.h&quot;</span></a>
-<a class="sourceLine" id="cb1200-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1200-6" data-line-number="6"><span class="dt">int</span> main()</a>
-<a class="sourceLine" id="cb1200-7" data-line-number="7">{</a>
-<a class="sourceLine" id="cb1200-8" data-line-number="8">    <span class="dt">int</span> result = f() + g() ;</a>
-<a class="sourceLine" id="cb1200-9" data-line-number="9">}</a></code></pre></div>
+<div class="sourceCode" id="cb1258"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1258-1" data-line-number="1"><span class="co">// lib_f.h</span></a>
+<a class="sourceLine" id="cb1258-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1258-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a>
+<a class="sourceLine" id="cb1258-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1258-5" data-line-number="5"><span class="dt">int</span> f() ;</a></code></pre></div>
+<div class="sourceCode" id="cb1259"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1259-1" data-line-number="1"><span class="co">// lib_g.h</span></a>
+<a class="sourceLine" id="cb1259-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1259-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;val.h&quot;</span></a>
+<a class="sourceLine" id="cb1259-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1259-5" data-line-number="5"><span class="dt">int</span> g() ;</a></code></pre></div>
+<div class="sourceCode" id="cb1260"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1260-1" data-line-number="1"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1260-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1260-3" data-line-number="3"><span class="pp">#include </span><span class="im">&quot;lib_f.h&quot;</span></a>
+<a class="sourceLine" id="cb1260-4" data-line-number="4"><span class="pp">#include </span><span class="im">&quot;lib_g.h&quot;</span></a>
+<a class="sourceLine" id="cb1260-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1260-6" data-line-number="6"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1260-7" data-line-number="7">{</a>
+<a class="sourceLine" id="cb1260-8" data-line-number="8">    <span class="dt">int</span> result = f() + g() ;</a>
+<a class="sourceLine" id="cb1260-9" data-line-number="9">}</a></code></pre></div>
 <p>この<code>main.cpp</code>をCプリプロセッサーにかけると以下のように置換される。</p>
-<div class="sourceCode" id="cb1201"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1201-1" data-line-number="1"><span class="co">// main.cpp</span></a>
-<a class="sourceLine" id="cb1201-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1201-3" data-line-number="3"><span class="co">// lib_f.h</span></a>
-<a class="sourceLine" id="cb1201-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1201-5" data-line-number="5"><span class="co">// val.h</span></a>
-<a class="sourceLine" id="cb1201-6" data-line-number="6"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
-<a class="sourceLine" id="cb1201-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1201-8" data-line-number="8"><span class="dt">int</span> f() ;</a>
-<a class="sourceLine" id="cb1201-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb1201-10" data-line-number="10"><span class="co">// lib_g.h</span></a>
-<a class="sourceLine" id="cb1201-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb1201-12" data-line-number="12"><span class="co">// val.h</span></a>
-<a class="sourceLine" id="cb1201-13" data-line-number="13"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
-<a class="sourceLine" id="cb1201-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb1201-15" data-line-number="15"><span class="dt">int</span> g() ;</a>
-<a class="sourceLine" id="cb1201-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb1201-17" data-line-number="17"></a>
-<a class="sourceLine" id="cb1201-18" data-line-number="18"><span class="dt">int</span> main()</a>
-<a class="sourceLine" id="cb1201-19" data-line-number="19">{</a>
-<a class="sourceLine" id="cb1201-20" data-line-number="20">    <span class="dt">int</span> result = f() + g() ;</a>
-<a class="sourceLine" id="cb1201-21" data-line-number="21">}</a></code></pre></div>
+<div class="sourceCode" id="cb1261"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1261-1" data-line-number="1"><span class="co">// main.cpp</span></a>
+<a class="sourceLine" id="cb1261-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1261-3" data-line-number="3"><span class="co">// lib_f.h</span></a>
+<a class="sourceLine" id="cb1261-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1261-5" data-line-number="5"><span class="co">// val.h</span></a>
+<a class="sourceLine" id="cb1261-6" data-line-number="6"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
+<a class="sourceLine" id="cb1261-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1261-8" data-line-number="8"><span class="dt">int</span> f() ;</a>
+<a class="sourceLine" id="cb1261-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb1261-10" data-line-number="10"><span class="co">// lib_g.h</span></a>
+<a class="sourceLine" id="cb1261-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1261-12" data-line-number="12"><span class="co">// val.h</span></a>
+<a class="sourceLine" id="cb1261-13" data-line-number="13"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
+<a class="sourceLine" id="cb1261-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb1261-15" data-line-number="15"><span class="dt">int</span> g() ;</a>
+<a class="sourceLine" id="cb1261-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb1261-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb1261-18" data-line-number="18"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1261-19" data-line-number="19">{</a>
+<a class="sourceLine" id="cb1261-20" data-line-number="20">    <span class="dt">int</span> result = f() + g() ;</a>
+<a class="sourceLine" id="cb1261-21" data-line-number="21">}</a></code></pre></div>
 <p>これはvalの定義が重複しているためエラーとなる。</p>
 <p>この問題に対処するためには、複数回<code>#include</code>されると困るヘッダーファイルでは、インクルードガード(include guard)と呼ばれている方法を使う。</p>
-<div class="sourceCode" id="cb1202"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1202-1" data-line-number="1"><span class="co">// val.h</span></a>
-<a class="sourceLine" id="cb1202-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1202-3" data-line-number="3"><span class="pp">#ifdef INCLUDE_GUARD_HEADER_VAL_H</span></a>
-<a class="sourceLine" id="cb1202-4" data-line-number="4"><span class="pp">#define INCLUDE_GUARD_HEADER_VAL_H</span></a>
-<a class="sourceLine" id="cb1202-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1202-6" data-line-number="6"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
-<a class="sourceLine" id="cb1202-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1202-8" data-line-number="8"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1262"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1262-1" data-line-number="1"><span class="co">// val.h</span></a>
+<a class="sourceLine" id="cb1262-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1262-3" data-line-number="3"><span class="pp">#ifdef INCLUDE_GUARD_HEADER_VAL_H</span></a>
+<a class="sourceLine" id="cb1262-4" data-line-number="4"><span class="pp">#define INCLUDE_GUARD_HEADER_VAL_H</span></a>
+<a class="sourceLine" id="cb1262-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1262-6" data-line-number="6"><span class="kw">inline</span> <span class="dt">int</span> val ;</a>
+<a class="sourceLine" id="cb1262-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1262-8" data-line-number="8"><span class="pp">#endif</span></a></code></pre></div>
 <p>このように記述した<code>val.h</code>を複数回<code>#include</code>しても、最初のifdefのみがコンパイル対象になるため、問題は起こらない。</p>
 <p>インクルードガードは以下の様式を持つ。</p>
-<div class="sourceCode" id="cb1203"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1203-1" data-line-number="1"><span class="pp">#ifdef 十分にユニークなマクロ名</span></a>
-<a class="sourceLine" id="cb1203-2" data-line-number="2"><span class="pp">#define 十分にユニークなマクロ名 </span></a>
-<a class="sourceLine" id="cb1203-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1203-4" data-line-number="4"><span class="co">// 重複してコンパイルされたくないコードをここに書く</span></a>
-<a class="sourceLine" id="cb1203-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1203-6" data-line-number="6"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1263"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1263-1" data-line-number="1"><span class="pp">#ifdef 十分にユニークなマクロ名</span></a>
+<a class="sourceLine" id="cb1263-2" data-line-number="2"><span class="pp">#define 十分にユニークなマクロ名 </span></a>
+<a class="sourceLine" id="cb1263-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1263-4" data-line-number="4"><span class="co">// 重複してコンパイルされたくないコードをここに書く</span></a>
+<a class="sourceLine" id="cb1263-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1263-6" data-line-number="6"><span class="pp">#endif</span></a></code></pre></div>
 <p><code>十分にユニークなマクロ名</code>は全ソースファイル中で衝突しないそのヘッダーに固有のマクロ名を使う。慣習的に推奨される方法としてはすべて大文字を使い、十分に長いマクロ名にすることだ。</p>
 <h2 id="define">#define</h2>
 <p><code>#define</code>はマクロ置換を行う。マクロにはオブジェクト風マクロ(object-like macro)と関数風マクロ(function-like macro)がある。風というのは、マクロはオブジェクトでも関数でもないからだ。ただ、文法上オブジェクトや関数の似ているだけで、実態はトークン列の愚直な置換だ。</p>
@@ -12987,76 +13586,76 @@ sizeof(Object): 12</code></pre>
 <p>オブジェクト風マクロの文法は以下の通り</p>
 <pre><code>#define マクロ名 置換リスト　改行文字</code></pre>
 <p><code>#define</code>以降の行では、マクロ名が置換リストに置き換わる</p>
-<div class="sourceCode" id="cb1205"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1205-1" data-line-number="1"><span class="pp">#define ONE             1</span></a>
-<a class="sourceLine" id="cb1205-2" data-line-number="2"><span class="pp">#define ONE_PLUS_ONE    ONE + ONE</span></a>
-<a class="sourceLine" id="cb1205-3" data-line-number="3"><span class="pp">#define GNU GNU&#39;s is NOT UNIX</span></a>
-<a class="sourceLine" id="cb1205-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1205-5" data-line-number="5">ONE</a>
-<a class="sourceLine" id="cb1205-6" data-line-number="6">ONE_PLUS_ONE</a></code></pre></div>
+<div class="sourceCode" id="cb1265"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1265-1" data-line-number="1"><span class="pp">#define ONE             1</span></a>
+<a class="sourceLine" id="cb1265-2" data-line-number="2"><span class="pp">#define ONE_PLUS_ONE    ONE + ONE</span></a>
+<a class="sourceLine" id="cb1265-3" data-line-number="3"><span class="pp">#define GNU GNU&#39;s is NOT UNIX</span></a>
+<a class="sourceLine" id="cb1265-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1265-5" data-line-number="5">ONE</a>
+<a class="sourceLine" id="cb1265-6" data-line-number="6">ONE_PLUS_ONE</a></code></pre></div>
 <p>これをプリプロセスすると以下のソースコードになる。</p>
-<div class="sourceCode" id="cb1206"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1206-1" data-line-number="1"><span class="dv">1</span></a>
-<a class="sourceLine" id="cb1206-2" data-line-number="2"><span class="dv">1</span> + <span class="dv">1</span></a></code></pre></div>
+<div class="sourceCode" id="cb1266"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1266-1" data-line-number="1"><span class="dv">1</span></a>
+<a class="sourceLine" id="cb1266-2" data-line-number="2"><span class="dv">1</span> + <span class="dv">1</span></a></code></pre></div>
 <p>マクロ名<code>ONE</code>は<code>1</code>に置換される。</p>
 <p>マクロ名<code>ONE_PLUS_ONE</code>は<code>ONE + ONE</code>に置換される。置換された結果に別のマクロ名があれば、そのマクロ名も置換される。</p>
 <p>あるマクロ名を置換した結果、そのマクロ名が現れても再帰的に置換されることはない。</p>
-<div class="sourceCode" id="cb1207"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1207-1" data-line-number="1"><span class="pp">#define GNU GNU&#39;s NOT UNIX!</span></a>
-<a class="sourceLine" id="cb1207-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1207-3" data-line-number="3">GNU</a></code></pre></div>
+<div class="sourceCode" id="cb1267"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1267-1" data-line-number="1"><span class="pp">#define GNU GNU&#39;s NOT UNIX!</span></a>
+<a class="sourceLine" id="cb1267-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1267-3" data-line-number="3">GNU</a></code></pre></div>
 <p>これは以下のように置換される。</p>
-<div class="sourceCode" id="cb1208"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1208-1" data-line-number="1">GNU<span class="ch">&#39;s NOT UNIX!</span></a></code></pre></div>
+<div class="sourceCode" id="cb1268"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1268-1" data-line-number="1">GNU<span class="ch">&#39;s NOT UNIX!</span></a></code></pre></div>
 <p>マクロ名<code>GNU</code>を展開するとトークン`GNU’が現れるが、これは置換されたマクロ名と同じなので、再帰的に置換されることはない。</p>
 <h3 id="関数風マクロ">関数風マクロ</h3>
 <p>関数風マクロの文法は以下の通り。</p>
 <pre><code>#define マクロ名( 識別子リスト ) 置換リスト 改行文字</code></pre>
 <p>関数風マクロはあたかも関数のように記述できる。関数風マクロに実引数として渡したトークン列は、置換リスト内で仮引数としての識別子で参照できる。</p>
-<div class="sourceCode" id="cb1210"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1210-1" data-line-number="1"><span class="pp">#define NO_ARGUMENT()           No argument</span></a>
-<a class="sourceLine" id="cb1210-2" data-line-number="2"><span class="pp">#define ONE_ARGUMENT( ARG )     begin ARG end</span></a>
-<a class="sourceLine" id="cb1210-3" data-line-number="3"><span class="pp">#define MAKE_IT_DOUBLE( ARG )   ONE_ARGUMENT( ARG ARG )</span></a>
-<a class="sourceLine" id="cb1210-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1210-5" data-line-number="5">NO_ARGUMENT()</a>
-<a class="sourceLine" id="cb1210-6" data-line-number="6">ONE_ARGUMENT( foo bar )</a>
-<a class="sourceLine" id="cb1210-7" data-line-number="7">MAKE_IT_DOUBLE( foo bar )</a></code></pre></div>
+<div class="sourceCode" id="cb1270"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1270-1" data-line-number="1"><span class="pp">#define NO_ARGUMENT()           No argument</span></a>
+<a class="sourceLine" id="cb1270-2" data-line-number="2"><span class="pp">#define ONE_ARGUMENT( ARG )     begin ARG end</span></a>
+<a class="sourceLine" id="cb1270-3" data-line-number="3"><span class="pp">#define MAKE_IT_DOUBLE( ARG )   ONE_ARGUMENT( ARG ARG )</span></a>
+<a class="sourceLine" id="cb1270-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1270-5" data-line-number="5">NO_ARGUMENT()</a>
+<a class="sourceLine" id="cb1270-6" data-line-number="6">ONE_ARGUMENT( foo bar )</a>
+<a class="sourceLine" id="cb1270-7" data-line-number="7">MAKE_IT_DOUBLE( foo bar )</a></code></pre></div>
 <p>これは以下のように置換される。</p>
-<div class="sourceCode" id="cb1211"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1211-1" data-line-number="1">No argument</a>
-<a class="sourceLine" id="cb1211-2" data-line-number="2">begin foo bar end</a>
-<a class="sourceLine" id="cb1211-3" data-line-number="3">begin foo bar foo bar end</a></code></pre></div>
+<div class="sourceCode" id="cb1271"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1271-1" data-line-number="1">No argument</a>
+<a class="sourceLine" id="cb1271-2" data-line-number="2">begin foo bar end</a>
+<a class="sourceLine" id="cb1271-3" data-line-number="3">begin foo bar foo bar end</a></code></pre></div>
 <p>複数の引数を取るマクロへの実引数は、カンマで区切られたトークン列を渡す。</p>
-<div class="sourceCode" id="cb1212"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1212-1" data-line-number="1"><span class="pp">#define TWO( A, B ) A B</span></a>
-<a class="sourceLine" id="cb1212-2" data-line-number="2"><span class="pp">#define THREE( A, B, C ) C B A</span></a>
-<a class="sourceLine" id="cb1212-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1212-4" data-line-number="4">TWO( <span class="dv">1</span> <span class="dv">2</span>, <span class="dv">3</span> <span class="dv">4</span> )</a>
-<a class="sourceLine" id="cb1212-5" data-line-number="5">THREE( <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span> )</a></code></pre></div>
+<div class="sourceCode" id="cb1272"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1272-1" data-line-number="1"><span class="pp">#define TWO( A, B ) A B</span></a>
+<a class="sourceLine" id="cb1272-2" data-line-number="2"><span class="pp">#define THREE( A, B, C ) C B A</span></a>
+<a class="sourceLine" id="cb1272-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1272-4" data-line-number="4">TWO( <span class="dv">1</span> <span class="dv">2</span>, <span class="dv">3</span> <span class="dv">4</span> )</a>
+<a class="sourceLine" id="cb1272-5" data-line-number="5">THREE( <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span> )</a></code></pre></div>
 <p>これは以下のように置換される。</p>
-<div class="sourceCode" id="cb1213"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1213-1" data-line-number="1"><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span></a>
-<a class="sourceLine" id="cb1213-2" data-line-number="2"><span class="dv">3</span> <span class="dv">2</span> <span class="dv">1</span></a></code></pre></div>
+<div class="sourceCode" id="cb1273"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1273-1" data-line-number="1"><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span></a>
+<a class="sourceLine" id="cb1273-2" data-line-number="2"><span class="dv">3</span> <span class="dv">2</span> <span class="dv">1</span></a></code></pre></div>
 <p>ただし、括弧で囲まれたトークン列の中にあるカンマは、マクロの実引数の区切りとはみなされない。</p>
-<div class="sourceCode" id="cb1214"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1214-1" data-line-number="1"><span class="pp">#define MACRO( A ) A</span></a>
-<a class="sourceLine" id="cb1214-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1214-3" data-line-number="3">MACRO( (a,b) )</a></code></pre></div>
+<div class="sourceCode" id="cb1274"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1274-1" data-line-number="1"><span class="pp">#define MACRO( A ) A</span></a>
+<a class="sourceLine" id="cb1274-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1274-3" data-line-number="3">MACRO( (a,b) )</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>(a,b)</code></pre>
 <h3 id="va_args__可変長引数マクロ"><code>__VA_ARGS__</code>(可変長引数マクロ)</h3>
 <p><code>#define</code>の識別子リストを<code>...</code>だけにしたマクロは、可変長引数マクロになる。このときマクロの実引数のトークン列は、置換リストのなかで<code>__VA_ARGS__</code>として参照できる。</p>
-<div class="sourceCode" id="cb1216"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1216-1" data-line-number="1"><span class="pp">#define MACRO(...) </span><span class="ot">__VA_ARGS__</span></a>
-<a class="sourceLine" id="cb1216-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1216-3" data-line-number="3">MACRO( You can write , <span class="kw">and</span> ,, <span class="kw">or</span> even ,,,, )</a></code></pre></div>
+<div class="sourceCode" id="cb1276"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1276-1" data-line-number="1"><span class="pp">#define MACRO(...) </span><span class="ot">__VA_ARGS__</span></a>
+<a class="sourceLine" id="cb1276-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1276-3" data-line-number="3">MACRO( You can write , <span class="kw">and</span> ,, <span class="kw">or</span> even ,,,, )</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>You can write , and ,, or even ,,,,</code></pre>
 <p>カンマも含めてすべてのトークン列がそのまま<code>__VA_ARGS__</code>で参照できる。</p>
 <p>可変長引数マクロの識別子リストに仮引数と<code>...</code>を書いたマクロの置換リストでは、仮引数の数だけの実引数は仮引数で参照され、残りが<code>__VA_ARGS__</code>で参照される。</p>
-<div class="sourceCode" id="cb1218"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1218-1" data-line-number="1"><span class="pp">#define MACRO( X, Y, Z, ... ) X Y Z and </span><span class="ot">__VA_ARGS__</span></a>
-<a class="sourceLine" id="cb1218-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1218-3" data-line-number="3">MACRO( <span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span> )</a></code></pre></div>
+<div class="sourceCode" id="cb1278"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1278-1" data-line-number="1"><span class="pp">#define MACRO( X, Y, Z, ... ) X Y Z and </span><span class="ot">__VA_ARGS__</span></a>
+<a class="sourceLine" id="cb1278-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1278-3" data-line-number="3">MACRO( <span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span> )</a></code></pre></div>
 <p>これは以下のように置換される</p>
 <pre><code>1 2 3 and 4,5,6</code></pre>
 <p>X, Y, Zにそれぞれ1, 2, 3が入り、<code>__VA_ARGS__</code>には<code>4,5,6</code>が入る。</p>
 <h3 id="va_opt__"><code>__VA_OPT__</code></h3>
 <p><code>__VA_OPT__</code>は可変長引数マクロで<code>__VA_ARGS__</code>にトークン列が渡されたかどうかで置換結果を変えることができる。</p>
 <p><code>__VA_OPT__</code>は可変引数マクロの置換リストでのみ使える。<code>__VA_OPT__(content)</code>は<code>__VA_ARGS__</code>にトークンがない場合はトークンなしに置換され、トークンがある場合はトークン列<code>content</code>に置換される。</p>
-<div class="sourceCode" id="cb1220"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1220-1" data-line-number="1"><span class="pp">#define MACRO( X, ... ) f( X __VA_OPT__(,) </span><span class="ot">__VA_ARGS__</span><span class="pp"> )</span></a>
-<a class="sourceLine" id="cb1220-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1220-3" data-line-number="3">MACRO(<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb1220-4" data-line-number="4">MACRO(<span class="dv">1</span>,<span class="dv">2</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1280"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1280-1" data-line-number="1"><span class="pp">#define MACRO( X, ... ) f( X __VA_OPT__(,) </span><span class="ot">__VA_ARGS__</span><span class="pp"> )</span></a>
+<a class="sourceLine" id="cb1280-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1280-3" data-line-number="3">MACRO(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1280-4" data-line-number="4">MACRO(<span class="dv">1</span>,<span class="dv">2</span>)</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>f( 1 )
 f( 1, 2 )</code></pre>
@@ -13066,71 +13665,71 @@ f( 1, 2 )</code></pre>
 <h3 id="演算子">#演算子</h3>
 <p><code>#</code>はマクロ実引数を文字列リテラルにする。</p>
 <p><code>#</code>は関数風マクロの置換リストの中のみで使うことができる。<code>#</code>は関数風マクロの仮引数の識別子の直前に書くことができる。<code>#</code>が直前に書かれた識別子は、マクロ実引数のトークン列の文字列リテラルになる。</p>
-<div class="sourceCode" id="cb1222"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1222-1" data-line-number="1"><span class="pp">#define STRING( X ) # X</span></a>
-<a class="sourceLine" id="cb1222-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1222-3" data-line-number="3">STRING( hello )</a>
-<a class="sourceLine" id="cb1222-4" data-line-number="4">STRING( hello world )</a></code></pre></div>
+<div class="sourceCode" id="cb1282"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1282-1" data-line-number="1"><span class="pp">#define STRING( X ) # X</span></a>
+<a class="sourceLine" id="cb1282-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1282-3" data-line-number="3">STRING( hello )</a>
+<a class="sourceLine" id="cb1282-4" data-line-number="4">STRING( hello world )</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>&quot;hello&quot;
 &quot;hello world&quot;</code></pre>
 <p>また、可変長マクロと組み合わせた場合、</p>
-<div class="sourceCode" id="cb1224"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1224-1" data-line-number="1"><span class="pp">#define STRING( ... ) # </span><span class="ot">__VA_ARGS__</span></a>
-<a class="sourceLine" id="cb1224-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1224-3" data-line-number="3">STRING()</a>
-<a class="sourceLine" id="cb1224-4" data-line-number="4">STRING( hello,world )</a></code></pre></div>
+<div class="sourceCode" id="cb1284"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1284-1" data-line-number="1"><span class="pp">#define STRING( ... ) # </span><span class="ot">__VA_ARGS__</span></a>
+<a class="sourceLine" id="cb1284-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1284-3" data-line-number="3">STRING()</a>
+<a class="sourceLine" id="cb1284-4" data-line-number="4">STRING( hello,world )</a></code></pre></div>
 <p>以下のように置換される。</p>
-<div class="sourceCode" id="cb1225"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1225-1" data-line-number="1"><span class="st">&quot;&quot;</span></a>
-<a class="sourceLine" id="cb1225-2" data-line-number="2"><span class="st">&quot;hello,world&quot;</span></a></code></pre></div>
+<div class="sourceCode" id="cb1285"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1285-1" data-line-number="1"><span class="st">&quot;&quot;</span></a>
+<a class="sourceLine" id="cb1285-2" data-line-number="2"><span class="st">&quot;hello,world&quot;</span></a></code></pre></div>
 <h3 id="演算子-1">##演算子</h3>
 <p><code>##</code>はマクロ実引数の結合を行う。</p>
 <p><code>##</code>は関数風マクロの置換リストの中にしか書けない。<code>##</code>は両端にマクロの仮引数の識別子を書かなければならない。<code>##</code>は両端の識別子の参照するマクロ実引数のトークン列を結合した置換を行う。</p>
-<div class="sourceCode" id="cb1226"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1226-1" data-line-number="1"><span class="pp">#define CONCAT( A, B ) A ## B</span></a>
-<a class="sourceLine" id="cb1226-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1226-3" data-line-number="3">CONCAT( foo, bar )</a>
-<a class="sourceLine" id="cb1226-4" data-line-number="4">CONCAT( aaa bbb, ccc ddd)</a></code></pre></div>
+<div class="sourceCode" id="cb1286"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1286-1" data-line-number="1"><span class="pp">#define CONCAT( A, B ) A ## B</span></a>
+<a class="sourceLine" id="cb1286-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1286-3" data-line-number="3">CONCAT( foo, bar )</a>
+<a class="sourceLine" id="cb1286-4" data-line-number="4">CONCAT( aaa bbb, ccc ddd)</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>foobar
 aaa bbbccc ddd</code></pre>
 <p>結合した結果のトークンは更にマクロ置換の対象となる。</p>
-<div class="sourceCode" id="cb1228"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1228-1" data-line-number="1"><span class="pp">#define CONCAT( A, B ) A ## B</span></a>
-<a class="sourceLine" id="cb1228-2" data-line-number="2"><span class="pp">#define FOOBAR hello</span></a>
-<a class="sourceLine" id="cb1228-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1228-4" data-line-number="4">CONCAT( FOO, BAR )</a></code></pre></div>
+<div class="sourceCode" id="cb1288"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1288-1" data-line-number="1"><span class="pp">#define CONCAT( A, B ) A ## B</span></a>
+<a class="sourceLine" id="cb1288-2" data-line-number="2"><span class="pp">#define FOOBAR hello</span></a>
+<a class="sourceLine" id="cb1288-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1288-4" data-line-number="4">CONCAT( FOO, BAR )</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>hello</code></pre>
 <p><code>CONCAT(FOO,BAR)</code>は<code>FOOBAR</code>に置換され、FOOBARという名前のマクロ名があるためにさらに<code>hello</code>に置換される。</p>
 <h3 id="複数行の置換リスト">複数行の置換リスト</h3>
 <p><code>#define</code>ディレクティブの置換リストは複数行に渡って書くことができない。これは文法上の制約によるものだ。<code>#define</code>ディレクティブは改行文字で終端される。</p>
 <p>しかし、関数やクラスを生成するような複雑なマクロは、複数行に分けて書きたい。</p>
-<div class="sourceCode" id="cb1230"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1230-1" data-line-number="1"><span class="pp">#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE</span></a>
-<a class="sourceLine" id="cb1230-2" data-line-number="2"><span class="pp">#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )</span></a>
-<a class="sourceLine" id="cb1230-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1230-4" data-line-number="4"><span class="pp">#define DEFINE_LIST( TYPE ) struct LIST_NAME(TYPE){TYPE value ;LIST_NAME(TYPE) * prev ;LIST_NAME(TYPE) * next ;} ; </span></a>
-<a class="sourceLine" id="cb1230-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1230-6" data-line-number="6">DEFINE_LIST(<span class="dt">int</span>)</a>
-<a class="sourceLine" id="cb1230-7" data-line-number="7">DEFINE_LIST(<span class="dt">double</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1290"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1290-1" data-line-number="1"><span class="pp">#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE</span></a>
+<a class="sourceLine" id="cb1290-2" data-line-number="2"><span class="pp">#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )</span></a>
+<a class="sourceLine" id="cb1290-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1290-4" data-line-number="4"><span class="pp">#define DEFINE_LIST( TYPE ) struct LIST_NAME(TYPE){TYPE value ;LIST_NAME(TYPE) * prev ;LIST_NAME(TYPE) * next ;} ; </span></a>
+<a class="sourceLine" id="cb1290-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1290-6" data-line-number="6">DEFINE_LIST(<span class="dt">int</span>)</a>
+<a class="sourceLine" id="cb1290-7" data-line-number="7">DEFINE_LIST(<span class="dt">double</span>)</a></code></pre></div>
 <p>この場合、行末にバックスラッシュに続けて改行を書くと、バックスラッシュと改行がプリプロセッサーによって削除される。</p>
 <p>上の例は以下のように、プリプロセッサーとしては比較的わかりやすく書くことができる。</p>
-<div class="sourceCode" id="cb1231"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1231-1" data-line-number="1"><span class="pp">#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE</span></a>
-<a class="sourceLine" id="cb1231-2" data-line-number="2"><span class="pp">#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )</span></a>
-<a class="sourceLine" id="cb1231-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1231-4" data-line-number="4"><span class="pp">#define DEFINE_LIST( TYPE )</span>\</a>
-<a class="sourceLine" id="cb1231-5" data-line-number="5"><span class="pp">struct LIST_NAME(TYPE)</span>\</a>
-<a class="sourceLine" id="cb1231-6" data-line-number="6"><span class="pp">{</span>\</a>
-<a class="sourceLine" id="cb1231-7" data-line-number="7"><span class="pp">    TYPE value ;</span>\</a>
-<a class="sourceLine" id="cb1231-8" data-line-number="8"><span class="pp">    LIST_NAME(TYPE) * prev ;</span>\</a>
-<a class="sourceLine" id="cb1231-9" data-line-number="9"><span class="pp">    LIST_NAME(TYPE) * next ;</span>\</a>
-<a class="sourceLine" id="cb1231-10" data-line-number="10"><span class="pp">} ; </span></a>
-<a class="sourceLine" id="cb1231-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb1231-12" data-line-number="12">DEFINE_LIST(<span class="dt">int</span>)</a>
-<a class="sourceLine" id="cb1231-13" data-line-number="13">DEFINE_LIST(<span class="dt">double</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1291"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1291-1" data-line-number="1"><span class="pp">#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE</span></a>
+<a class="sourceLine" id="cb1291-2" data-line-number="2"><span class="pp">#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )</span></a>
+<a class="sourceLine" id="cb1291-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1291-4" data-line-number="4"><span class="pp">#define DEFINE_LIST( TYPE )</span>\</a>
+<a class="sourceLine" id="cb1291-5" data-line-number="5"><span class="pp">struct LIST_NAME(TYPE)</span>\</a>
+<a class="sourceLine" id="cb1291-6" data-line-number="6"><span class="pp">{</span>\</a>
+<a class="sourceLine" id="cb1291-7" data-line-number="7"><span class="pp">    TYPE value ;</span>\</a>
+<a class="sourceLine" id="cb1291-8" data-line-number="8"><span class="pp">    LIST_NAME(TYPE) * prev ;</span>\</a>
+<a class="sourceLine" id="cb1291-9" data-line-number="9"><span class="pp">    LIST_NAME(TYPE) * next ;</span>\</a>
+<a class="sourceLine" id="cb1291-10" data-line-number="10"><span class="pp">} ; </span></a>
+<a class="sourceLine" id="cb1291-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1291-12" data-line-number="12">DEFINE_LIST(<span class="dt">int</span>)</a>
+<a class="sourceLine" id="cb1291-13" data-line-number="13">DEFINE_LIST(<span class="dt">double</span>)</a></code></pre></div>
 <p>C++ではテンプレートがあるために、このようなマクロを書く必要はない。</p>
 <h3 id="undefディレクティブ">#undefディレクティブ</h3>
 <p><code>#undef</code>はそれ以前に定義されたマクロを削除する。</p>
-<div class="sourceCode" id="cb1232"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1232-1" data-line-number="1"><span class="pp">#define FOO BAR</span></a>
-<a class="sourceLine" id="cb1232-2" data-line-number="2">FOO</a>
-<a class="sourceLine" id="cb1232-3" data-line-number="3"><span class="pp">#undef FOO</span></a>
-<a class="sourceLine" id="cb1232-4" data-line-number="4">FOO</a></code></pre></div>
+<div class="sourceCode" id="cb1292"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1292-1" data-line-number="1"><span class="pp">#define FOO BAR</span></a>
+<a class="sourceLine" id="cb1292-2" data-line-number="2">FOO</a>
+<a class="sourceLine" id="cb1292-3" data-line-number="3"><span class="pp">#undef FOO</span></a>
+<a class="sourceLine" id="cb1292-4" data-line-number="4">FOO</a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>BAR
 FOO</code></pre>
@@ -13139,120 +13738,120 @@ FOO</code></pre>
 <h3 id="プリプロセッサーの定数式">プリプロセッサーの定数式</h3>
 <p>プリプロセッサーで使える条件式は、C++の条件式とは比べてだいぶ制限がある。基本的には整数定数式で、<code>true</code>, <code>false</code>が使える他、<code>123</code>, <code>1+1</code>, <code>1 == 1</code>, <code>1 &lt; 1</code>のような式も使える。ただし、識別子はすべてマクロ名として置換できるものは置換され、置換できない識別子は、<code>true</code>, <code>false</code>以外はキーワードも含めてすべて0に置換される。</p>
 <p>したがって、プリプロセッサーで以下のように書くと、</p>
-<div class="sourceCode" id="cb1234"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1234-1" data-line-number="1"><span class="pp">#if UNDEFINED</span></a>
-<a class="sourceLine" id="cb1234-2" data-line-number="2"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1294"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1294-1" data-line-number="1"><span class="pp">#if UNDEFINED</span></a>
+<a class="sourceLine" id="cb1294-2" data-line-number="2"><span class="pp">#endif</span></a></code></pre></div>
 <p>以下のように書いたものと同じになる。</p>
-<div class="sourceCode" id="cb1235"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1235-1" data-line-number="1"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1235-2" data-line-number="2"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1295"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1295-1" data-line-number="1"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1295-2" data-line-number="2"><span class="pp">#endif</span></a></code></pre></div>
 <p>プリプロセッサーであるので、C++としてのconstexpr変数やconstexpr関数も使えない。</p>
-<div class="sourceCode" id="cb1236"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1236-1" data-line-number="1"><span class="kw">constexpr</span> <span class="dt">int</span> x = <span class="dv">1</span> ;</a>
-<a class="sourceLine" id="cb1236-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1236-3" data-line-number="3"><span class="pp">#if x</span></a>
-<a class="sourceLine" id="cb1236-4" data-line-number="4">hello</a>
-<a class="sourceLine" id="cb1236-5" data-line-number="5"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1296"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1296-1" data-line-number="1"><span class="kw">constexpr</span> <span class="dt">int</span> x = <span class="dv">1</span> ;</a>
+<a class="sourceLine" id="cb1296-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1296-3" data-line-number="3"><span class="pp">#if x</span></a>
+<a class="sourceLine" id="cb1296-4" data-line-number="4">hello</a>
+<a class="sourceLine" id="cb1296-5" data-line-number="5"><span class="pp">#endif</span></a></code></pre></div>
 <p>これは以下のように置換される。</p>
 <pre><code>constexpr int x = 1 ;</code></pre>
 <p>プリプロセッサーはC++の文法と意味を理解しない。単にトークン列として処理する。</p>
 <p>以下の例はエラーになる。</p>
-<div class="sourceCode" id="cb1238"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1238-1" data-line-number="1"><span class="kw">constexpr</span> <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }</a>
-<a class="sourceLine" id="cb1238-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1238-3" data-line-number="3"><span class="pp">#if f()</span></a>
-<a class="sourceLine" id="cb1238-4" data-line-number="4"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1298"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1298-1" data-line-number="1"><span class="kw">constexpr</span> <span class="dt">int</span> f() { <span class="cf">return</span> <span class="dv">1</span> ; }</a>
+<a class="sourceLine" id="cb1298-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1298-3" data-line-number="3"><span class="pp">#if f()</span></a>
+<a class="sourceLine" id="cb1298-4" data-line-number="4"><span class="pp">#endif</span></a></code></pre></div>
 <p>なぜならば、<code>0()</code>は整数定数式として合法なコードではないからだ。何度も言うように、プリプロセッサーはC++の文法と意味を理解しない。</p>
 <p>プリプロセッサーの定数式では、特殊なマクロ風の式を使うことができる。<code>defined</code>と<code>__has_include</code>だ。</p>
 <p><code>defined</code>は以下の文法を持つ</p>
 <pre><code>defined 識別子
 defined ( 識別子 )</code></pre>
 <p><code>defined</code>は識別子がそれ以前の行で<code>#define</code>でマクロとして定義されていて<code>#undef</code>で取り消されていない場合<code>1</code>になり、それ以外の場合0になる。</p>
-<div class="sourceCode" id="cb1240"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1240-1" data-line-number="1"><span class="co">// #if 0</span></a>
-<a class="sourceLine" id="cb1240-2" data-line-number="2"><span class="pp">#if defined MACRO</span></a>
-<a class="sourceLine" id="cb1240-3" data-line-number="3"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1240-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1240-5" data-line-number="5"><span class="pp">#define MACRO</span></a>
-<a class="sourceLine" id="cb1240-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb1240-7" data-line-number="7"><span class="co">// #if 1</span></a>
-<a class="sourceLine" id="cb1240-8" data-line-number="8"><span class="pp">#if defined MACRO</span></a>
-<a class="sourceLine" id="cb1240-9" data-line-number="9"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1240-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb1240-11" data-line-number="11"><span class="pp">#undef MACRO</span></a>
-<a class="sourceLine" id="cb1240-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb1240-13" data-line-number="13"><span class="co">// #if 0</span></a>
-<a class="sourceLine" id="cb1240-14" data-line-number="14"><span class="pp">#if defined MACRO</span></a>
-<a class="sourceLine" id="cb1240-15" data-line-number="15"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1300"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1300-1" data-line-number="1"><span class="co">// #if 0</span></a>
+<a class="sourceLine" id="cb1300-2" data-line-number="2"><span class="pp">#if defined MACRO</span></a>
+<a class="sourceLine" id="cb1300-3" data-line-number="3"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1300-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1300-5" data-line-number="5"><span class="pp">#define MACRO</span></a>
+<a class="sourceLine" id="cb1300-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1300-7" data-line-number="7"><span class="co">// #if 1</span></a>
+<a class="sourceLine" id="cb1300-8" data-line-number="8"><span class="pp">#if defined MACRO</span></a>
+<a class="sourceLine" id="cb1300-9" data-line-number="9"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1300-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb1300-11" data-line-number="11"><span class="pp">#undef MACRO</span></a>
+<a class="sourceLine" id="cb1300-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb1300-13" data-line-number="13"><span class="co">// #if 0</span></a>
+<a class="sourceLine" id="cb1300-14" data-line-number="14"><span class="pp">#if defined MACRO</span></a>
+<a class="sourceLine" id="cb1300-15" data-line-number="15"><span class="pp">#endif</span></a></code></pre></div>
 <p><code>__has_include</code>は以下の文法を持つ。</p>
-<div class="sourceCode" id="cb1241"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1241-1" data-line-number="1">__has_include ( &lt; ヘッダーファイル名 &gt; )</a>
-<a class="sourceLine" id="cb1241-2" data-line-number="2">__has_include ( <span class="st">&quot; ヘッダーファイル名 &quot;</span> )</a>
-<a class="sourceLine" id="cb1241-3" data-line-number="3">__has_include ( 文字列リテラル )</a>
-<a class="sourceLine" id="cb1241-4" data-line-number="4">__has_include ( &lt; マクロ &gt; )</a></code></pre></div>
+<div class="sourceCode" id="cb1301"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1301-1" data-line-number="1">__has_include ( &lt; ヘッダーファイル名 &gt; )</a>
+<a class="sourceLine" id="cb1301-2" data-line-number="2">__has_include ( <span class="st">&quot; ヘッダーファイル名 &quot;</span> )</a>
+<a class="sourceLine" id="cb1301-3" data-line-number="3">__has_include ( 文字列リテラル )</a>
+<a class="sourceLine" id="cb1301-4" data-line-number="4">__has_include ( &lt; マクロ &gt; )</a></code></pre></div>
 <p>1番目と2番目は、指定されたヘッダーファイル名がシステムに存在する場合<code>1</code>に、そうでない場合0になる。</p>
-<div class="sourceCode" id="cb1242"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1242-1" data-line-number="1"><span class="co">// &lt;filesystem&gt;の存在を確認してから#includeする</span></a>
-<a class="sourceLine" id="cb1242-2" data-line-number="2"><span class="pp">#if __has_include(&lt;filesystem&gt;)</span></a>
-<a class="sourceLine" id="cb1242-3" data-line-number="3"><span class="pp">#   include </span><span class="im">&lt;filesystem&gt;</span></a>
-<a class="sourceLine" id="cb1242-4" data-line-number="4"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1242-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1242-6" data-line-number="6"><span class="co">// &quot;mylibrary.h&quot;の存在を確認してから#includeする</span></a>
-<a class="sourceLine" id="cb1242-7" data-line-number="7"><span class="pp">#if __has_include(&quot;mylibrary.h&quot;)</span></a>
-<a class="sourceLine" id="cb1242-8" data-line-number="8"><span class="pp">#   include </span><span class="im">&quot;mylibrary.h&quot;</span></a>
-<a class="sourceLine" id="cb1242-9" data-line-number="9"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1302"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1302-1" data-line-number="1"><span class="co">// &lt;filesystem&gt;の存在を確認してから#includeする</span></a>
+<a class="sourceLine" id="cb1302-2" data-line-number="2"><span class="pp">#if __has_include(&lt;filesystem&gt;)</span></a>
+<a class="sourceLine" id="cb1302-3" data-line-number="3"><span class="pp">#   include </span><span class="im">&lt;filesystem&gt;</span></a>
+<a class="sourceLine" id="cb1302-4" data-line-number="4"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1302-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1302-6" data-line-number="6"><span class="co">// &quot;mylibrary.h&quot;の存在を確認してから#includeする</span></a>
+<a class="sourceLine" id="cb1302-7" data-line-number="7"><span class="pp">#if __has_include(&quot;mylibrary.h&quot;)</span></a>
+<a class="sourceLine" id="cb1302-8" data-line-number="8"><span class="pp">#   include </span><span class="im">&quot;mylibrary.h&quot;</span></a>
+<a class="sourceLine" id="cb1302-9" data-line-number="9"><span class="pp">#endif</span></a></code></pre></div>
 <p>3番目と4番目は、1番目と2番目が適用できない場合に初めて考慮される。その場合、まず通常通りにプリプロセッサーのマクロ置換が行われる。</p>
-<div class="sourceCode" id="cb1243"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1243-1" data-line-number="1"><span class="pp">#define STDIO &quot;stdio.h&quot;</span></a>
-<a class="sourceLine" id="cb1243-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1243-3" data-line-number="3"><span class="pp">#if __has_include( STDIO )</span></a>
-<a class="sourceLine" id="cb1243-4" data-line-number="4"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1243-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1243-6" data-line-number="6"><span class="pp">#define STDLIB stdlib.h</span></a>
-<a class="sourceLine" id="cb1243-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1243-8" data-line-number="8"><span class="pp">#if __has_include( &lt;STDLIB&gt; )</span></a>
-<a class="sourceLine" id="cb1243-9" data-line-number="9"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1303"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1303-1" data-line-number="1"><span class="pp">#define STDIO &quot;stdio.h&quot;</span></a>
+<a class="sourceLine" id="cb1303-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1303-3" data-line-number="3"><span class="pp">#if __has_include( STDIO )</span></a>
+<a class="sourceLine" id="cb1303-4" data-line-number="4"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1303-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1303-6" data-line-number="6"><span class="pp">#define STDLIB stdlib.h</span></a>
+<a class="sourceLine" id="cb1303-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1303-8" data-line-number="8"><span class="pp">#if __has_include( &lt;STDLIB&gt; )</span></a>
+<a class="sourceLine" id="cb1303-9" data-line-number="9"><span class="pp">#endif</span></a></code></pre></div>
 <h3 id="ifディレクティブ">#ifディレクティブ</h3>
 <p><code>#if</code>ディレクティブは以下の文法を持つ。</p>
 <pre><code>#if 定数式 改行文字
 
 #endif</code></pre>
 <p>もし定数式がゼロの場合、<code>#if</code>と<code>#endif</code>で囲まれたトークン列は処理されない。定数式が非ゼロの場合、処理される。</p>
-<div class="sourceCode" id="cb1245"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1245-1" data-line-number="1"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1245-2" data-line-number="2"><span class="co">This line will be skipped.</span></a>
-<a class="sourceLine" id="cb1245-3" data-line-number="3"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1245-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1245-5" data-line-number="5"><span class="pp">#if 1</span></a>
-<a class="sourceLine" id="cb1245-6" data-line-number="6">This line will be processed.</a>
-<a class="sourceLine" id="cb1245-7" data-line-number="7"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1305"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1305-1" data-line-number="1"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1305-2" data-line-number="2"><span class="co">This line will be skipped.</span></a>
+<a class="sourceLine" id="cb1305-3" data-line-number="3"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1305-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1305-5" data-line-number="5"><span class="pp">#if 1</span></a>
+<a class="sourceLine" id="cb1305-6" data-line-number="6">This line will be processed.</a>
+<a class="sourceLine" id="cb1305-7" data-line-number="7"><span class="pp">#endif</span></a></code></pre></div>
 <p>これをプリプロセスすると以下のようになる。</p>
-<div class="sourceCode" id="cb1246"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1246-1" data-line-number="1">This line will be processed.</a></code></pre></div>
+<div class="sourceCode" id="cb1306"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1306-1" data-line-number="1">This line will be processed.</a></code></pre></div>
 <p><code>#if 0</code>は処理されないので、<code>#endif</code>までのトークン列は消える。</p>
 <h3 id="elifディレクティブ">#elifディレクティブ</h3>
 <p><code>#elif</code>ディレクティブは、C++でいう<code>else if</code>に相当する。</p>
-<div class="sourceCode" id="cb1247"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1247-1" data-line-number="1"></a>
-<a class="sourceLine" id="cb1247-2" data-line-number="2"><span class="pp">#elif 定数式 改行文字</span></a></code></pre></div>
+<div class="sourceCode" id="cb1307"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1307-1" data-line-number="1"></a>
+<a class="sourceLine" id="cb1307-2" data-line-number="2"><span class="pp">#elif 定数式 改行文字</span></a></code></pre></div>
 <p><code>#elif</code>ディレクティブは<code>#if</code>ディレクティブと<code>#endif</code>ディレクティブの間に複数書くことができる。<code>#elif</code>のある<code>#if</code>が処理される場合、<code>#if</code>から<code>#elif</code>の間のトークン列が処理される、<code>#if</code>が処理されない場合、<code>#elif</code>が<code>#if</code>と同じように定数式を評価して処理されるかどうかが判断される。<code>#elif</code>が処理される場合、処理されるトークン列は次の<code>#elif</code>もしくは<code>#endif</code>までの間のトークン列になる。</p>
 <p>以下の例は、すべてYESのトークンがある行のみ処理される。</p>
-<div class="sourceCode" id="cb1248"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1248-1" data-line-number="1"><span class="pp">#if 1</span></a>
-<a class="sourceLine" id="cb1248-2" data-line-number="2">YES</a>
-<a class="sourceLine" id="cb1248-3" data-line-number="3"><span class="pp">#elif</span><span class="co"> 1</span></a>
-<a class="sourceLine" id="cb1248-4" data-line-number="4"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1248-5" data-line-number="5"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1248-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb1248-7" data-line-number="7"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1248-8" data-line-number="8"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1248-9" data-line-number="9"><span class="pp">#elif</span> <span class="dv">1</span></a>
-<a class="sourceLine" id="cb1248-10" data-line-number="10">YES</a>
-<a class="sourceLine" id="cb1248-11" data-line-number="11"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1248-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb1248-13" data-line-number="13"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1248-14" data-line-number="14"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1248-15" data-line-number="15"><span class="pp">#elif</span> <span class="dv">1</span></a>
-<a class="sourceLine" id="cb1248-16" data-line-number="16">YES</a>
-<a class="sourceLine" id="cb1248-17" data-line-number="17"><span class="pp">#elif 1</span></a>
-<a class="sourceLine" id="cb1248-18" data-line-number="18">NO</a>
-<a class="sourceLine" id="cb1248-19" data-line-number="19"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1248-20" data-line-number="20"></a>
-<a class="sourceLine" id="cb1248-21" data-line-number="21"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1248-22" data-line-number="22"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1248-23" data-line-number="23"><span class="pp">#elif</span> <span class="dv">0</span></a>
-<a class="sourceLine" id="cb1248-24" data-line-number="24">NO</a>
-<a class="sourceLine" id="cb1248-25" data-line-number="25"><span class="pp">#elif 1</span></a>
-<a class="sourceLine" id="cb1248-26" data-line-number="26">YES</a>
-<a class="sourceLine" id="cb1248-27" data-line-number="27"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1308"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1308-1" data-line-number="1"><span class="pp">#if 1</span></a>
+<a class="sourceLine" id="cb1308-2" data-line-number="2">YES</a>
+<a class="sourceLine" id="cb1308-3" data-line-number="3"><span class="pp">#elif</span><span class="co"> 1</span></a>
+<a class="sourceLine" id="cb1308-4" data-line-number="4"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1308-5" data-line-number="5"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1308-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1308-7" data-line-number="7"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1308-8" data-line-number="8"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1308-9" data-line-number="9"><span class="pp">#elif</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb1308-10" data-line-number="10">YES</a>
+<a class="sourceLine" id="cb1308-11" data-line-number="11"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1308-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb1308-13" data-line-number="13"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1308-14" data-line-number="14"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1308-15" data-line-number="15"><span class="pp">#elif</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb1308-16" data-line-number="16">YES</a>
+<a class="sourceLine" id="cb1308-17" data-line-number="17"><span class="pp">#elif 1</span></a>
+<a class="sourceLine" id="cb1308-18" data-line-number="18">NO</a>
+<a class="sourceLine" id="cb1308-19" data-line-number="19"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1308-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb1308-21" data-line-number="21"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1308-22" data-line-number="22"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1308-23" data-line-number="23"><span class="pp">#elif</span> <span class="dv">0</span></a>
+<a class="sourceLine" id="cb1308-24" data-line-number="24">NO</a>
+<a class="sourceLine" id="cb1308-25" data-line-number="25"><span class="pp">#elif 1</span></a>
+<a class="sourceLine" id="cb1308-26" data-line-number="26">YES</a>
+<a class="sourceLine" id="cb1308-27" data-line-number="27"><span class="pp">#endif</span></a></code></pre></div>
 <p>プリプロセスした結果は以下の通り、</p>
 <pre><code>YES
 YES
@@ -13262,25 +13861,25 @@ YES</code></pre>
 <p><code>#else</code>ディレクティブはC++でいう<code>else</code>に相当する。</p>
 <p><code>#else</code>ディレクティブは<code>#if</code>ディレクティブと<code>#endif</code>ディレクティブの間に書くことができる。もし<code>#if</code>と<code>#elif</code>ディレクティブが処理されない場合で<code>#else</code>ディレクティブがある場合、<code>#else</code>から<code>#endif</code>までのトークン列が処理される。</p>
 <p>以下の例は、YESのトークンがある行のみ処理される。</p>
-<div class="sourceCode" id="cb1250"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1250-1" data-line-number="1"><span class="pp">#if 1</span></a>
-<a class="sourceLine" id="cb1250-2" data-line-number="2">YES</a>
-<a class="sourceLine" id="cb1250-3" data-line-number="3"><span class="pp">#else</span></a>
-<a class="sourceLine" id="cb1250-4" data-line-number="4"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1250-5" data-line-number="5"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1250-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb1250-7" data-line-number="7"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1250-8" data-line-number="8"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1250-9" data-line-number="9"><span class="pp">#else</span></a>
-<a class="sourceLine" id="cb1250-10" data-line-number="10">YES</a>
-<a class="sourceLine" id="cb1250-11" data-line-number="11"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1250-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb1250-13" data-line-number="13"><span class="pp">#if 0</span></a>
-<a class="sourceLine" id="cb1250-14" data-line-number="14"><span class="co">NO</span></a>
-<a class="sourceLine" id="cb1250-15" data-line-number="15"><span class="pp">#elif</span> <span class="dv">1</span></a>
-<a class="sourceLine" id="cb1250-16" data-line-number="16">YES</a>
-<a class="sourceLine" id="cb1250-17" data-line-number="17"><span class="pp">#else</span></a>
-<a class="sourceLine" id="cb1250-18" data-line-number="18">NO</a>
-<a class="sourceLine" id="cb1250-19" data-line-number="19"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1310"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1310-1" data-line-number="1"><span class="pp">#if 1</span></a>
+<a class="sourceLine" id="cb1310-2" data-line-number="2">YES</a>
+<a class="sourceLine" id="cb1310-3" data-line-number="3"><span class="pp">#else</span></a>
+<a class="sourceLine" id="cb1310-4" data-line-number="4"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1310-5" data-line-number="5"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1310-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb1310-7" data-line-number="7"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1310-8" data-line-number="8"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1310-9" data-line-number="9"><span class="pp">#else</span></a>
+<a class="sourceLine" id="cb1310-10" data-line-number="10">YES</a>
+<a class="sourceLine" id="cb1310-11" data-line-number="11"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1310-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb1310-13" data-line-number="13"><span class="pp">#if 0</span></a>
+<a class="sourceLine" id="cb1310-14" data-line-number="14"><span class="co">NO</span></a>
+<a class="sourceLine" id="cb1310-15" data-line-number="15"><span class="pp">#elif</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb1310-16" data-line-number="16">YES</a>
+<a class="sourceLine" id="cb1310-17" data-line-number="17"><span class="pp">#else</span></a>
+<a class="sourceLine" id="cb1310-18" data-line-number="18">NO</a>
+<a class="sourceLine" id="cb1310-19" data-line-number="19"><span class="pp">#endif</span></a></code></pre></div>
 <h3 id="ifdef-ifndefディレクティブ">#ifdef, #ifndefディレクティブ</h3>
 <pre><code>#ifdef 識別子
 #ifndef 識別子</code></pre>
@@ -13288,59 +13887,59 @@ YES</code></pre>
 <pre><code>#if defined 識別子
 #if !defined 識別子</code></pre>
 <p>例、</p>
-<div class="sourceCode" id="cb1253"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1253-1" data-line-number="1"><span class="pp">#ifdef MACRO</span></a>
-<a class="sourceLine" id="cb1253-2" data-line-number="2"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1253-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1253-4" data-line-number="4"><span class="co">// 上と同じ</span></a>
-<a class="sourceLine" id="cb1253-5" data-line-number="5"><span class="pp">#if defined MACRO</span></a>
-<a class="sourceLine" id="cb1253-6" data-line-number="6"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1253-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1253-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb1253-9" data-line-number="9"><span class="pp">#ifndef MACRO</span></a>
-<a class="sourceLine" id="cb1253-10" data-line-number="10"><span class="pp">#endif</span></a>
-<a class="sourceLine" id="cb1253-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb1253-12" data-line-number="12"><span class="co">// 上と同じ</span></a>
-<a class="sourceLine" id="cb1253-13" data-line-number="13"><span class="pp">#if !defined MACRO</span></a>
-<a class="sourceLine" id="cb1253-14" data-line-number="14"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1313"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1313-1" data-line-number="1"><span class="pp">#ifdef MACRO</span></a>
+<a class="sourceLine" id="cb1313-2" data-line-number="2"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1313-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1313-4" data-line-number="4"><span class="co">// 上と同じ</span></a>
+<a class="sourceLine" id="cb1313-5" data-line-number="5"><span class="pp">#if defined MACRO</span></a>
+<a class="sourceLine" id="cb1313-6" data-line-number="6"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1313-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1313-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb1313-9" data-line-number="9"><span class="pp">#ifndef MACRO</span></a>
+<a class="sourceLine" id="cb1313-10" data-line-number="10"><span class="pp">#endif</span></a>
+<a class="sourceLine" id="cb1313-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1313-12" data-line-number="12"><span class="co">// 上と同じ</span></a>
+<a class="sourceLine" id="cb1313-13" data-line-number="13"><span class="pp">#if !defined MACRO</span></a>
+<a class="sourceLine" id="cb1313-14" data-line-number="14"><span class="pp">#endif</span></a></code></pre></div>
 <h2 id="lineディレクティブ">#lineディレクティブ</h2>
 <p><code>#line</code>ディレクティブはディレクティブの次の行の行番号と、ソースファイル名を変更する。これは人間が使うのではなく、ツールによって生成されることを想定した機能だ。</p>
 <p>以下の文法の<code>#line</code>ディレクティブは、<code>#line</code>ディレクティブの次の行の行番号をあたかも数値で指定した行番号であるかのように振る舞わせる。</p>
 <pre><code>#line 数値 改行文字</code></pre>
 <p>数値として0もしくは2147483647より大きい数を指定した場合の挙動は未定義となる。</p>
 <p>以下の例はコンパイルエラーになるが、コンパイルエラーメッセージはあたかも102行目に問題があるかのように表示される。</p>
-<div class="sourceCode" id="cb1255"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1255-1" data-line-number="1"><span class="co">// 1行目</span></a>
-<a class="sourceLine" id="cb1255-2" data-line-number="2"><span class="co">// 2行目</span></a>
-<a class="sourceLine" id="cb1255-3" data-line-number="3"><span class="pp">#line 100 </span><span class="co">// 3行目</span></a>
-<a class="sourceLine" id="cb1255-4" data-line-number="4"><span class="co">// 100行目</span></a>
-<a class="sourceLine" id="cb1255-5" data-line-number="5"><span class="co">// 101行目</span></a>
-<a class="sourceLine" id="cb1255-6" data-line-number="6">ill-formed line <span class="co">// 102行目</span></a></code></pre></div>
+<div class="sourceCode" id="cb1315"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1315-1" data-line-number="1"><span class="co">// 1行目</span></a>
+<a class="sourceLine" id="cb1315-2" data-line-number="2"><span class="co">// 2行目</span></a>
+<a class="sourceLine" id="cb1315-3" data-line-number="3"><span class="pp">#line 100 </span><span class="co">// 3行目</span></a>
+<a class="sourceLine" id="cb1315-4" data-line-number="4"><span class="co">// 100行目</span></a>
+<a class="sourceLine" id="cb1315-5" data-line-number="5"><span class="co">// 101行目</span></a>
+<a class="sourceLine" id="cb1315-6" data-line-number="6">ill-formed line <span class="co">// 102行目</span></a></code></pre></div>
 <p>以下の例は999を出力するコードだ。</p>
-<div class="sourceCode" id="cb1256"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1256-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
-<a class="sourceLine" id="cb1256-2" data-line-number="2"><span class="dt">int</span> main()</a>
-<a class="sourceLine" id="cb1256-3" data-line-number="3">{</a>
-<a class="sourceLine" id="cb1256-4" data-line-number="4"><span class="pp">#line 999</span></a>
-<a class="sourceLine" id="cb1256-5" data-line-number="5">    <span class="bu">std::</span>cout &lt;&lt; <span class="ot">__LINE__</span> ;</a>
-<a class="sourceLine" id="cb1256-6" data-line-number="6">}</a></code></pre></div>
+<div class="sourceCode" id="cb1316"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1316-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb1316-2" data-line-number="2"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1316-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb1316-4" data-line-number="4"><span class="pp">#line 999</span></a>
+<a class="sourceLine" id="cb1316-5" data-line-number="5">    <span class="bu">std::</span>cout &lt;&lt; <span class="ot">__LINE__</span> ;</a>
+<a class="sourceLine" id="cb1316-6" data-line-number="6">}</a></code></pre></div>
 <p>以下の文法の<code>#line</code>ディレクティブは、次の行の行番号を数値にした上で、ソースファイル名をソースファイル名にする。</p>
 <pre class="v++"><code>#line 数値 &quot;ソースファイル名&quot; 改行文字</code></pre>
 <p>例、</p>
-<div class="sourceCode" id="cb1258"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1258-1" data-line-number="1"><span class="pp">#line 42 &quot;answer.cpp&quot;</span></a></code></pre></div>
+<div class="sourceCode" id="cb1318"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1318-1" data-line-number="1"><span class="pp">#line 42 &quot;answer.cpp&quot;</span></a></code></pre></div>
 <p>以下の文法の<code>#line</code>ディレクティブは、プリプロセッサートークン列をプリプロセスし、上の2つの文法のいずれかに合致させる。</p>
-<div class="sourceCode" id="cb1259"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1259-1" data-line-number="1"><span class="pp">#line プリプロセッサートークン列 改行文字</span></a></code></pre></div>
+<div class="sourceCode" id="cb1319"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1319-1" data-line-number="1"><span class="pp">#line プリプロセッサートークン列 改行文字</span></a></code></pre></div>
 <p>例、</p>
-<div class="sourceCode" id="cb1260"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1260-1" data-line-number="1"><span class="pp">#define LINE_NUMBER 123</span></a>
-<a class="sourceLine" id="cb1260-2" data-line-number="2"><span class="pp">#line LINE_NUMBER</span></a></code></pre></div>
+<div class="sourceCode" id="cb1320"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1320-1" data-line-number="1"><span class="pp">#define LINE_NUMBER 123</span></a>
+<a class="sourceLine" id="cb1320-2" data-line-number="2"><span class="pp">#line LINE_NUMBER</span></a></code></pre></div>
 <h2 id="errorディレクティブ">#errorディレクティブ</h2>
 <p><code>#error</code>ディレクティブはコンパイルエラーを引き起こす。</p>
 <pre><code>#error 改行文字
 #error トークン列 改行文字</code></pre>
 <p><code>#error</code>によるコンパイラーのエラーメッセージには<code>#error</code>のトークン列を含む。</p>
 <p><code>#error</code>の利用例としては、<code>#if</code>と組み合わせるものがある。以下の例はCHAR_BITが8でなければコンパイルエラーになるソースファイルだ。</p>
-<div class="sourceCode" id="cb1262"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1262-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;climits&gt;</span></a>
-<a class="sourceLine" id="cb1262-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1262-3" data-line-number="3"><span class="pp">#if CHAR_BIT != 8</span></a>
-<a class="sourceLine" id="cb1262-4" data-line-number="4"><span class="pp">#error CHAR_BIT != 8 implementation is not supported.</span></a>
-<a class="sourceLine" id="cb1262-5" data-line-number="5"><span class="pp">#endif</span></a></code></pre></div>
+<div class="sourceCode" id="cb1322"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1322-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;climits&gt;</span></a>
+<a class="sourceLine" id="cb1322-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1322-3" data-line-number="3"><span class="pp">#if CHAR_BIT != 8</span></a>
+<a class="sourceLine" id="cb1322-4" data-line-number="4"><span class="pp">#error CHAR_BIT != 8 implementation is not supported.</span></a>
+<a class="sourceLine" id="cb1322-5" data-line-number="5"><span class="pp">#endif</span></a></code></pre></div>
 <p><code>#if</code>が処理されなければ、その中にある<code>#error</code>も処理されないので、コンパイルエラーにはならない。</p>
 <h2 id="pragmra">#pragmra</h2>
 <p><code>#pragmra</code>ディレクティブは実装依存の処理を行う。<code>#pragma</code>はコンパイラー独自の拡張機能を追加する文法として使われている。</p>
