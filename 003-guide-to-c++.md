@@ -441,7 +441,7 @@ int main()
     std::cout << a << "\n"s ;
 
     // 整数型を浮動小数点数型に変換
-    double d = 1 ;
+    double d = 123 ;
     // 123
     std::cout << d ;
 }
