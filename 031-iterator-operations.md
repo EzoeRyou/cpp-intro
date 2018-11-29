@@ -1490,3 +1490,70 @@ void f( Iterator i )
 ~~~
 
 
+## リバースイテレーター
+
+イテレーターは要素を順番通りにたどる。例えば以下は要素を順番に出力する関数テンプレート`print`だ。
+
+~~~cpp
+template < typename Iterator >
+void print( Iterator first, Iterator last )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+        std::cout << *iter ;
+}
+~~~
+
+逆順に出力するにはどうすればいいのだろうか。
+
+双方向イテレーター以上ならば逆順にたどることはできる。すると逆順に出力する関数テンプレート'reverse_print'は以下のように書ける。
+
+~~~cpp
+template < typename T >
+void reverse_print( Iterator first, Iterator last )
+{
+    for ( auto iter = std::prev(last) ; iter != first ; --iter )
+    {
+        std::cout << *iter ;
+    }
+    // 最初の要素の出力
+    std::cout << *iter ;
+}
+~~~
+
+しかしイテレーターを正順にたどるか逆順にたどるかという違いだけで、本質的に同じアルゴリズム、同じコードを二度も書きたくはない。そういうときに役立つのがリバースイテレーターだ。
+
+
+`std::reverse_iterator<Iterator>`はイテレーター`Iterator`に対するリバースイテレーターを提供する。リバースイテレーターはイテレーターのペア `[first,last)`を受け取り、lastの1つ前の要素が先頭でfirstの要素が末尾になるような順番のイテレーターにしてくれる。
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // std::reverse_iterator< std::vector<int>::iterator >
+    std::reverse_iterator first{ std::end(v) } ;
+    std::reverse_iterator last{ std::begin(v) } ;
+
+    // 54321
+    std::for_each( first, last,
+        [](auto x ){ std::cout << x ; } ) ;
+}
+~~~
+
+これで、`print`と`reverse_print`のような本質的に同じコードを重複して書かずに済む。
+
+リバースイテレーターはとても便利なので、`std::vector`のような標準ライブラリのコンテナーには最初からネストされた型名としてリバースイテレーター`::reverse_iterator`がある。リバースイテレーターを返す`rbegin/rend`もある。
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // std::vector<int>::reverse_iterator
+    auto first = std::rbegin(v) ;
+    auto last = std::rend(v) ;
+
+    std::for_each( first, last,
+        [](auto x ){ std::cout << x ; } ) ;
+}
+~~~
