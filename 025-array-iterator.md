@@ -569,7 +569,7 @@ IntLike IntLike::operator ++(int)
     // コピーを作る
     IntLike copy = *this ;
     // 演算子が呼ばれたオブジェクトをインクリメントする
-    // 前置インクリメント演算子を読んでいる
+    // 前置インクリメント演算子を呼んでいる
     ++*this ;
     // 値が変更されていないコピーを返す
     return copy ;
