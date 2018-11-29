@@ -395,6 +395,7 @@ int main()
 ~~~
 
 実行結果
+
 ~~~
 obj is constructed.
 obj is destructed.

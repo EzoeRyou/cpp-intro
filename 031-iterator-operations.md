@@ -153,7 +153,7 @@ void f( RandomAccessIterator a )
 {
     auto b = a ;
     // bはaより3進んでいる
-    ++b ; ++b ; ++ b ;
+    ++b ; ++b ; ++b ;
     b - a ; // 3
     a - b ; // -3
 }
@@ -1124,8 +1124,7 @@ struct iota_iterator
 } ;
 ~~~
 
-イテレーターカテゴリーは双方向イテレーターを表現する`std::bidirectional_iterator_tag`を指定するo
-。
+イテレーターカテゴリーは双方向イテレーターを表現する`std::bidirectional_iterator_tag`を指定する。
 
 `operator --`の実装は`operator ++`の実装と要領は同じだ。
 

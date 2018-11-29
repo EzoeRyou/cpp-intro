@@ -97,7 +97,7 @@ double twice( double n )
 
 整数型にはintの他にも、short, long, long longといった型がある。浮動小数点数型にはfloatとlong doubleもある。ということは以下のような関数も必要だ。
 
-~~cpp
+~~~cpp
 short twice( short n )
 {
     return n * 2 ;

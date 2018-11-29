@@ -61,7 +61,7 @@ int main()
         if ( bmi < 18.5 )
             return "Underweight.\n"s ;
         else if ( bmi < 25.0 )
-            return "Nomarl.\n"s ;
+            return "Normal.\n"s ;
         else if ( bmi < 30.0 )
             return "Overweight.\n"s ;
         else

@@ -192,7 +192,7 @@ struct array
 }
 ~~~
 
-黒魔術1は'array_iterator_begin<array>`の中にある。この`array`は`array<T,N>`と同じ意味になる。つまり全体としては、`array_iterator_begin<array<T,N>>`と書いたものと同じだ。クラステンプレートの中でクラス名を使うと、テンプレート実引数をそれぞれ指定したものと同じになる。
+黒魔術1は`array_iterator_begin<array>`の中にある。この`array`は`array<T,N>`と同じ意味になる。つまり全体としては、`array_iterator_begin<array<T,N>>`と書いたものと同じだ。クラステンプレートの中でクラス名を使うと、テンプレート実引数をそれぞれ指定したものと同じになる。
 
 ~~~cpp
 template < typename A, typename B, typename C >
@@ -206,7 +206,7 @@ struct S
 } ;
 ~~~
 
-黒魔術2は`*this`だ。`*this`はメンバー関数を読んだクラスのオブジェクトへのリファレンスだ。
+黒魔術2は`*this`だ。`*this`はメンバー関数を呼んだクラスのオブジェクトへのリファレンスだ。
 
 ~~~cpp
 struct S
@@ -525,7 +525,7 @@ int main()
 }
 ~~~
 
-もちろん、リファレンスを返さなない実装は可能だ。そもそも何も値を返さないvoidを使うことも可能だ。
+もちろん、リファレンスを返さない実装は可能だ。そもそも何も値を返さないvoidを使うことも可能だ。
 
 ~~~cpp
 struct S
@@ -833,7 +833,7 @@ int main()
 }
 ~~~
 
-自作の`array'の場合、単にデータメンバー`i`を比較する。
+自作の`array`の場合、単にデータメンバー`i`を比較する。
 
 ~~~cpp
 template < typename Array >
