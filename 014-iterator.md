@@ -309,7 +309,7 @@ auto output_all = []( auto first, auto last, auto output_iter )
 } ;
 ~~~
 
-書き換えた`関数output_iter`は新しく`output_iter`という引数を取る。これはイテレーターだ。`std::cout`に出力する代わりに、このイテレーターに書き込むように変更している。
+書き換えた`関数output_all`は新しく`output_iter`という引数を取る。これはイテレーターだ。`std::cout`に出力する代わりに、このイテレーターに書き込むように変更している。
 
 こうすることによって、出力にも様々なイテレーターが使える。
 

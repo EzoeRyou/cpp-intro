@@ -1041,6 +1041,7 @@ int main()
     std::generate( std::begin(v), std::end(v), gen_zero ) ;
     // vは{0,0,0,0,0}
 }
+~~~
 
 `generate_n(first, n, gen)`は`fill_n`の`generate`版だ。
 
