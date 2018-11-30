@@ -487,6 +487,7 @@ using type = int (*)(int) ;
 としなければならない。
 
 変数の名前を入れる場所は以下の通り
+
 ~~~cpp
 using type =
 int
@@ -497,7 +498,7 @@ int
 
 なので、
 
-~~~
+~~~cpp
 int (*ptr)(int) = nullptr ;
 ~~~
 

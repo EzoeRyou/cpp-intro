@@ -197,7 +197,7 @@ auto max  = 0b11111111 ;
    11111110
 +) 11111101
 -----------
- 1`11111011
+ 1'11111011
 ~~~
 
 この結果は9ビットになる。この整数は8ビットなので、9ビット目を表現することはできない。ただし1の補数表現の計算では、もし9ビット目が繰り上がった場合は、演算結果に1を足す取り決めがある。
@@ -205,7 +205,7 @@ auto max  = 0b11111111 ;
 ~~~
    11111011
 +)        1
-~~~~~~~~~~~
+-----------
    11111100
 ~~~
 
@@ -217,7 +217,7 @@ auto max  = 0b11111111 ;
    00000101
 +) 11111101
 -----------
- 1`00000010
+ 1'00000010
 ~~~
 
 繰り上がりが発生したので1を足すと
@@ -280,7 +280,7 @@ C++には様々な整数型が存在する。C++はCから引き継いだ歴史�
 
 符号付き整数型としては、`signed char`, `short int`, `int`, `long int`, `long long int`が存在する。符号付き整数型は負数を表現できる。
 
-符号なし整数型としては、`unsigned char`, `unsigned short int`, `unsigned int`, `unsigned long int`, `unsigned long long int`が存在する。符号なし整数型はふ数を表現できない。
+符号なし整数型としては、`unsigned char`, `unsigned short int`, `unsigned int`, `unsigned long int`, `unsigned long long int`が存在する。符号なし整数型は負数を表現できない。
 
 ### int型
 
@@ -341,7 +341,7 @@ unsigned long int b = 123 ;
 // long int
 long a = 1 ;
 // unsigned long int
-unsigned long int b = 1 ;
+unsigned long b = 1 ;
 ~~~
 
 通常、intを省略して単に`long`と書くことが多い。
@@ -528,8 +528,8 @@ int main()
 ~~~cpp
 int main()
 {
-     int min = std::numeric_limits< int>::min() ;
-     int max = std::numeric_limits< int>::max() ;
+     int min = std::numeric_limits<int>::min() ;
+     int max = std::numeric_limits<int>::max() ;
 
      int min_minus_one = min - 1 ;
      int max_plus_one = max + 1 ;

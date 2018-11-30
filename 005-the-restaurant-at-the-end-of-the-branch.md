@@ -148,7 +148,8 @@ int main()
     {
         // bが大きい
         std::cout << b ;
-    } else
+    }
+    else
     {
         // aが大きい
         std::cout << a ;
@@ -528,7 +529,7 @@ int main()
 
     // 出力されない。
     if ( false )
-        std::cout << "false`n"s ; 
+        std::cout << "false\n"s ; 
 }
 ~~~
 

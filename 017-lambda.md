@@ -85,7 +85,7 @@ void f( std::string x
 int main()
 {
     f( "hello"s ) ;
-    [](auto x ){ std::cout << x ; }( "hello"s ) ;
+    []( auto x ){ std::cout << x ; }( "hello"s ) ;
 }
 ~~~
 
@@ -96,7 +96,7 @@ f               // 関数
 ( "hello"s ) ;  // 関数呼び出し
 
 // ラムダ式
-[](auto x ){ std::cout << x ; }
+[]( auto x ){ std::cout << x ; }
 ( "hello"s ) ;  // 関数呼び出し
 ~~~
 
