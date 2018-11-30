@@ -1504,7 +1504,7 @@ void print( Iterator first, Iterator last )
 
 逆順に出力するにはどうすればいいのだろうか。
 
-双方向イテレーター以上ならば逆順にたどることはできる。すると逆順に出力する関数テンプレート'reverse_print'は以下のように書ける。
+双方向イテレーター以上ならば逆順にたどることはできる。すると逆順に出力する関数テンプレート`reverse_print`は以下のように書ける。
 
 ~~~cpp
 template < typename T >
