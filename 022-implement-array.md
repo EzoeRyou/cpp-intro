@@ -24,7 +24,7 @@ struct array_int_3
 {
     int m0 ; int m1 ; int m2 ;
 
-    int & opeartor []( std::size_t i )
+    int & operator []( std::size_t i )
     {
         switch(i)
         {

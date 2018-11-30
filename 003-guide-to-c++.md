@@ -111,7 +111,7 @@ one two three
 
 "three two one "や"two one three "のような出力結果にはならない。
 
-C++を含む多くの言語で`a + b + c`と書けるように、`opeartor <<`も`a << b << c`と書ける。`operator <<`で標準出力をするには、左端は`std::cout`でなければならない。
+C++を含む多くの言語で`a + b + c`と書けるように、`operator <<`も`a << b << c`と書ける。`operator <<`で標準出力をするには、左端は`std::cout`でなければならない。
 
 ~~~cpp
 int main()

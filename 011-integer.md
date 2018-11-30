@@ -405,7 +405,7 @@ auto c = 123ull ;
 
 `short int型`は`int型`より小さい範囲の値を扱う整数型だ。`long`, `long long`と同様に、`unsigned short int`型もある。単に`short`と書くと、`short int`と同じ意味になる。
 
-整数リテラルで`short int`型を表現する方法はない。z2
+整数リテラルで`short int`型を表現する方法はない。
 
 ### char型
 

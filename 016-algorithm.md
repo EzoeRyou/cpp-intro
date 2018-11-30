@@ -753,7 +753,7 @@ auto equal = []( auto first1, auto last1, auto first2, auto last2)
 
 for文の終了条件では`i != last1`だけを見ていて、`j != last2`は見ていないが、これは問題がない。なぜならば、このfor文が実行されるのは、要素数が等しい場合だけだからだ。
 
-関数`pred`を取る`equal(first1, last1, first2, last2, pred)`もある。この`pred`は`pread(a, b)`で、`a`と`b`が等しい場合に`true`、そうでない場合に`false`を返す関数だ。つまり`a == b`のoperator ==の代わりに使う関数を指定する。
+関数`pred`を取る`equal(first1, last1, first2, last2, pred)`もある。この`pred`は`pred(a, b)`で、`a`と`b`が等しい場合に`true`、そうでない場合に`false`を返す関数だ。つまり`a == b`のoperator ==の代わりに使う関数を指定する。
 
 `equal`に関数を渡すことにより、例えば小数点以下の値を誤差として切り捨てるような処理が書ける。
 
@@ -1042,7 +1042,7 @@ int main()
     // vは{0,0,0,0,0}
 }
 
-`generate_n(first, n, gen)`は`fill_n`の`generete`版だ。
+`generate_n(first, n, gen)`は`fill_n`の`generate`版だ。
 
 ~~~cpp
 int main()

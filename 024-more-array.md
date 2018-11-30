@@ -3,7 +3,7 @@
 'std::array'をもっと実装していこう。前回、以下のような簡単な'array'を実装した。
 
 ~~~cpp
-template < typename T, std::size__t N >
+template < typename T, std::size_t N >
 struct array
 {
     T storage[N] ;
@@ -348,7 +348,7 @@ struct S
 
 ~~~
 
-自作の'array'の`opeartor []`をconstに対応させよう。'std::array'はconstなリファレンスを`const_reference`というネストされた型名にしている。
+自作の'array'の`operator []`をconstに対応させよう。'std::array'はconstなリファレンスを`const_reference`というネストされた型名にしている。
 
 ~~~cpp
 template < typename T, std::size_t N >

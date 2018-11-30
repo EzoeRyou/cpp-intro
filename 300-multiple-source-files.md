@@ -35,7 +35,7 @@ program: source.cpp
 ++i ;
 ~~~
 
-`soruce.cpp`が以下のようであるとき、
+`source.cpp`が以下のようであるとき、
 
 ~~~c++
 int main()
@@ -98,7 +98,7 @@ GCCではC++コンパイラーの名前は`g++`で、リンカーの名前は`ld
 $ g++ -c source.cpp
 ~~~
 
-生成されるオブジェクトファイルの名前はソースファイルの名前の拡張子を`.o`に置き換えたものになる。上のコマンドをじっこうした結果、オブジェクトファイル`souce.o`が生成される。
+生成されるオブジェクトファイルの名前はソースファイルの名前の拡張子を`.o`に置き換えたものになる。上のコマンドを実行した結果、オブジェクトファイル`source.o`が生成される。
 
 
 生成したオブジェクトファイルは、`g++`の入力として使うことで、リンクしてプログラムにすることができる。`g++`は裏でリンカー`ld`を適切に呼び出してくれる。
@@ -609,7 +609,7 @@ struct S
 
     // staticメンバー
     inline static int static_data_member ;
-    static void static_member_funciton() ;
+    static void static_member_function() ;
 } ;
 ~~~
 
@@ -622,7 +622,7 @@ struct S
     void member_function() { }
 
     // staticメンバー
-    static void static_member_funciton() { }
+    static void static_member_function() { }
 } ;
 
 int main()
@@ -632,9 +632,9 @@ int main()
     s.member_function() ;
 
     // オブジェクトは不要
-    S::static_member_funciton() ;
+    S::static_member_function() ;
     // このように呼び出すこともできる
-    s.static_member_funciton() ;
+    s.static_member_function() ;
 }
 ~~~
 

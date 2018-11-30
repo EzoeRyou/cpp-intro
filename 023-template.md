@@ -25,7 +25,7 @@ array_int_1
     { return storage[i] ; }
 } ;
 
-// array_int_2, array_int3, ...
+// array_int_2, array_int_3, ...
 
 array_int_10000
 {
@@ -41,7 +41,7 @@ array_double_1
     { return storage[i] ; }
 }
 
-// array_double_2, array_dobule_3, ...
+// array_double_2, array_double_3, ...
 ~~~
 
 これは怠惰で短気なプログラマーには耐えられない作業だ。C++にはこのような退屈なコードを書かなくてもすむ機能がある。しかしその前に、引数について考えてみよう。
