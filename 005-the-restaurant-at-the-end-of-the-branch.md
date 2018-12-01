@@ -471,7 +471,7 @@ bool型の値を正しく出力するには、std::boolalphaを出力する。
 int main()
 {
     std::cout << std::boolalpha ;
-    std::cout << true << "\n"s <<false ;
+    std::cout << true << "\n"s << false ;
 }
 ~~~
 
@@ -625,7 +625,7 @@ int main()
 }
 ~~~
 
-比較演算子の結果はbool値になるということを覚えてるだろうか。"1 \< 2"は`true`になり、"1 \> 2"はfalseになる。
+比較演算子の結果はbool値になるということを覚えてるだろうか。"1 \< 2"は`true`になり、"1 \> 2"は`false`になる。
 
 bool値同士も同値比較ができるということは、"(1 \< 2) == true"のように書くことも可能だということだ。
 
@@ -724,8 +724,8 @@ int main()
     { std::cout << b << "\n"s ; } ;
 
     print( false || false ) ; // false
-    print( false || true  ) ; // false
-    print( true  || false ) ; // false
+    print( false || true  ) ; // true
+    print( true  || false ) ; // true
     print( true  || true  ) ; // true
 }
 ~~~
