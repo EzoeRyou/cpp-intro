@@ -18,7 +18,7 @@ $$
 int main()
 {
     // 身長1.63m
-    double height = 1.63 ; 
+    double height = 1.63 ;
     // 体重73kg
     double mass = 73.0 ;
 
@@ -45,7 +45,7 @@ BMI                         状態
 int main()
 {
     // 身長1.6m
-    double height = 1.63 ; 
+    double height = 1.63 ;
     // 体重73kg
     double mass = 73.0 ;
 
@@ -85,7 +85,7 @@ int main()
 int main()
 {
     // 身長1.63m
-    double height = 1.80 ; 
+    double height = 1.80 ;
     // 体重73kg
     double mass = 80.0 ;
 
@@ -213,7 +213,7 @@ true
 ~~~cpp
 int main()
 {
-    // 整数
+    // bool型
     bool b{} ;
     std::cin >> std::boolalpha >> b ;
 

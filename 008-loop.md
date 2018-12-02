@@ -108,7 +108,7 @@ int main()
     std::cout << 1 ;
 
     // ラベルskipまで飛ぶ
-    goto skip ; 
+    goto skip ;
 
     std::cout << 2 ;
 
