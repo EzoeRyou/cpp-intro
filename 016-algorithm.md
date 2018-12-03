@@ -315,7 +315,7 @@ auto all_of = []( auto first, auto last, auto pred )
 {
     for ( auto iter = first ; iter != last ; ++iter )
     {
-        if ( pref( *iter ) == false )
+        if ( pred( *iter ) == false )
             return false ;
     }
 
