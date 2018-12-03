@@ -327,7 +327,7 @@ delete ポインター
 `new式`は生のメモリを確保し、型のオブジェクトを構築し、型へのポインターを返す。
 
 ~~~cpp
-int * int_ptr = new int(123) ;
+int * int_ptr = new int{123} ;
 std::vector<int> * vector_ptr = new std::vector<int>{} ;
 ~~~
 
