@@ -685,6 +685,8 @@ int main()
         { std::cout << "Good.\n"s ; }
         else
         { std::cout << "Bad.\n"s ; }
+    else
+    { std::cout << "Bad.\n"s ; }
 }
 ~~~
 
