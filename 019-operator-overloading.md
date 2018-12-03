@@ -525,7 +525,7 @@ int main()
 auto c = a + b ;
 ~~~
 
-C++では演算子は関数として扱うことができる。演算子の名前は`opeartor op`で、例えば`+演算子`の名前は`operator +`になる。
+C++では演算子は関数として扱うことができる。演算子の名前は`operator op`で、例えば`+演算子`の名前は`operator +`になる。
 
 関数`operator +`は引数を2つ取り、戻り値を返す関数だ。
 
@@ -554,15 +554,15 @@ auto c = a + b ;
 以下に関数の宣言を示すので実際に分数の計算を実装してみよう。
 
 ~~~c++
-fractional opearotor -( fractional & l, fractional & r ) ;
-fractional opearotor *( fractional & l, fractional & r ) ;
-fractional opearotor /( fractional & l, fractional & r ) ;
+fractional operator -( fractional & l, fractional & r ) ;
+fractional operator *( fractional & l, fractional & r ) ;
+fractional operator /( fractional & l, fractional & r ) ;
 ~~~
 
 引き算は足し算とほぼ同じだ。
 
 ~~~c++
-fractional opearotor -( fractional & l, fractional & r )
+fractional operator -( fractional & l, fractional & r )
 {
     // 分母が同じ
     if ( l.denom == r.denom )
@@ -575,12 +575,12 @@ fractional opearotor -( fractional & l, fractional & r )
 掛け算と割り算は楽だ。
 
 ~~~c++
-fractional opearotor *( fractional & l, fractional & r )
+fractional operator *( fractional & l, fractional & r )
 {
     return fractional{ l.num * r.num, l.denom * r.denom } ;
 }
 
-fractional opearotor /( fractional & l, fractional & r )
+fractional operator /( fractional & l, fractional & r )
 {
     return fractional{ l.num * r.denom, l.denom * r.num } ;
 }

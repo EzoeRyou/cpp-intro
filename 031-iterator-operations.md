@@ -266,7 +266,7 @@ nth_next( BidirectionalIterator iter, std::size_t n )
 
 ### 前方イテレーター
 
-前方イテレーターは前方にしか移動できない。イテレーターが0番目の要素を指しているならば1番目、1番目の要素を指しているならば2番めに移動できる。
+前方イテレーターは前方にしか移動できない。イテレーターが0番目の要素を指しているならば1番目、1番目の要素を指しているならば2番目に移動できる。
 
 ~~~cpp
 template < typename ForwardIterator >
@@ -1504,7 +1504,7 @@ void print( Iterator first, Iterator last )
 
 逆順に出力するにはどうすればいいのだろうか。
 
-双方向イテレーター以上ならば逆順にたどることはできる。すると逆順に出力する関数テンプレート'reverse_print'は以下のように書ける。
+双方向イテレーター以上ならば逆順にたどることはできる。すると逆順に出力する関数テンプレート`reverse_print`は以下のように書ける。
 
 ~~~cpp
 template < typename T >

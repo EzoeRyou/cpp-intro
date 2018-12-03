@@ -433,7 +433,7 @@ struct array
 
 何度も書くように、インデックスは0から始まる。要素がN個ある場合、最初の要素は0番目で、最後の要素はN-1番目だ。
 
-インクリメント演算子`opeartor ++`にも対応しよう。
+インクリメント演算子`operator ++`にも対応しよう。
 
 ~~~c++
 array_iterator & array_iterator::operator ++()
@@ -901,7 +901,7 @@ template < typename T, std::size_t N >
 struct array
 {
     using iterator          = array_iterator<array> ;
-    using conste_iterator   = array_const_iterator<array> ;
+    using const_iterator   = array_const_iterator<array> ;
 } ;
 ~~~
 

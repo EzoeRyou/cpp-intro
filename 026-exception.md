@@ -424,7 +424,7 @@ int main()
         g() ;
     } catch( int e )
     {
-        std::cout << "catched.\n"s ;
+        std::cout << "caught.\n"s ;
     }
 
 }
@@ -438,7 +438,7 @@ g is constructed.
 f is constructed.
 f is destructed.
 g is destructed.
-catched.
+caught.
 main is destructed.
 ~~~
 
@@ -450,7 +450,7 @@ main is destructed.
 4. 関数fは例外を投げるので、fは破棄される。
 5. 関数gに巻き戻ったがcatchがないのでさらに巻き戻る。gが破棄される。
 6. 関数mainに巻き戻ったところ対応するcatchがあるのでスタックアンワインディングは停止する。
-7. `catched.`が出力される。
+7. `caught.`が出力される。
 8. mainが破棄される。
 
 例外が投げられると通常の実行は飛ばされるので、例外が投げられるかもしれない処理のあとに、例外の有無にかかわらず絶対に実行したい処理がある場合は、クラスのデストラクターに書くとよい。

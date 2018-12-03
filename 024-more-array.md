@@ -3,7 +3,7 @@
 'std::array'をもっと実装していこう。前回、以下のような簡単な'array'を実装した。
 
 ~~~cpp
-template < typename T, std::size__t N >
+template < typename T, std::size_t N >
 struct array
 {
     T storage[N] ;
@@ -46,7 +46,7 @@ int main()
 }
 ~~~
 
-クラスの中で宣言されたエイリアス宣言による型名を、'ネストされた型名'という。`std::array`ではテンプレート引数を直接使う代わりに、`ネストされた型名`が使われている。
+クラスの中で宣言されたエイリアス宣言による型名を、`ネストされた型名`という。`std::array`ではテンプレート引数を直接使う代わりに、`ネストされた型名`が使われている。
 
 ~~~cpp
 template < typename T, std::size__t N >
@@ -348,7 +348,7 @@ struct S
 
 ~~~
 
-自作の'array'の`opeartor []`をconstに対応させよう。'std::array'はconstなリファレンスを`const_reference`というネストされた型名にしている。
+自作の'array'の`operator []`をconstに対応させよう。'std::array'はconstなリファレンスを`const_reference`というネストされた型名にしている。
 
 ~~~cpp
 template < typename T, std::size_t N >

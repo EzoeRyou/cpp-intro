@@ -18,30 +18,30 @@ array_int_10 a ;
 しかし、そのようなクラスはほとんど同じような退屈な記述の羅列になる。
 
 ~~~cpp
-array_int_1
+struct array_int_1
 {
     int storage[1] ;
     int & operator []( std::size_t i )
     { return storage[i] ; }
 } ;
 
-// array_int_2, array_int3, ...
+// array_int_2, array_int_3, ...
 
-array_int_10000
+struct array_int_10000
 {
     int storage[10000] ;
     int & operator []( std::size_t i )
     { return storage[i] ; }
 } ;
 
-array_double_1
+struct array_double_1
 {
     double storage[1] ;
     double & operator []( std::size_t i )
     { return storage[i] ; }
 }
 
-// array_double_2, array_dobule_3, ...
+// array_double_2, array_double_3, ...
 ~~~
 
 これは怠惰で短気なプログラマーには耐えられない作業だ。C++にはこのような退屈なコードを書かなくてもすむ機能がある。しかしその前に、引数について考えてみよう。
@@ -368,7 +368,7 @@ void f( ) ; // 関数
 
 ~~~cpp
 template < typename T > // テンプレート
-class S { } ; // クラス
+struct S { } ; // クラス
 ~~~
 
 関数の中でテンプレート引数名を型や値として使えるように。

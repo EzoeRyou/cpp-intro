@@ -24,7 +24,7 @@ struct array_int_3
 {
     int m0 ; int m1 ; int m2 ;
 
-    int & opeartor []( std::size_t i )
+    int & operator []( std::size_t i )
     {
         switch(i)
         {
@@ -171,7 +171,7 @@ int main()
 まずクラスのデータメンバーとして配列を宣言する。
 
 ~~~cpp
-class array_int_10
+struct array_int_10
 {
     int storage[10] ;
 } ;
@@ -180,7 +180,7 @@ class array_int_10
 配列はコピーできないが、クラスのデータメンバーとして宣言した配列は、クラスのコピーの際に、その対応する順番の要素がそれぞれコピーされる。
 
 ~~~cpp
-class array_int_3 { int storage [3] ; } ;
+struct array_int_3 { int storage [3] ; } ;
 
 int main()
 {
@@ -196,7 +196,7 @@ int main()
 これはあたかも以下のように書いたかのように動く。
 
 ~~~cpp
-class array_int_3
+struct array_int_3
 {
     int storage[3] ;
 
@@ -215,7 +215,7 @@ class array_int_3
 `operator []`も実装しよう。
 
 ~~~cpp
-class array_int_10
+struct array_int_10
 {
     int storage[10] ;
 

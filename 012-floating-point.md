@@ -287,7 +287,7 @@ int main()
 }
 ~~~
 
-異なる浮動小数点数同士を演算すると、`float<double<long doube`の順で大きい浮動小数点数型に合わせて変換される。
+異なる浮動小数点数同士を演算すると、`float<double<long double`の順で大きい浮動小数点数型に合わせて変換される。
 
 ~~~cpp
 int main()
