@@ -191,7 +191,7 @@ void dynamic_allocate()
     // 1. その型のサイズ分のメモリを確保
     void * ptr = ::operator new( sizeof(T) ) ;
     // 2. ポインターを型変換
-    int * T_ptr = static_cast<T * >( ptr ) ;
+    T * T_ptr = static_cast<T * >( ptr ) ;
     // 3. 適切な値を代入
     *T_ptr = T{} ;
     ::operator delete( ptr ) ;
@@ -251,7 +251,7 @@ new ( 生のポインター ) 型 new初期化子
 // 生のメモリを動的確保
 void * ptr = ::operator new ( sizeof( std::vector<int> ) ) ;
 // 生のメモリ上に型を構築
-std::vector<int> * vector_ptr = new (ptr) std::vector<int> ;
+std::vector<int> * vector_ptr = new (ptr) std::vector<int>{} ;
 ~~~
 
 こうすればクラスが適切にメモリ上に構築され、コンストラクターも呼ばれる。コンストラクターが呼ばれることを確かめてみよう。
@@ -327,8 +327,8 @@ delete ポインター
 `new式`は生のメモリを確保し、型のオブジェクトを構築し、型へのポインターを返す。
 
 ~~~cpp
-int * int_ptr = new int(123) ;
-std::vector<int> * vector_ptr = new std::vector<int> ;
+int * int_ptr = new int{123} ;
+std::vector<int> * vector_ptr = new std::vector<int>{} ;
 ~~~
 
 `delete式`は`new式`で返されたポインターの指し示すオブジェクトを破棄し、生のメモリを解放する。
