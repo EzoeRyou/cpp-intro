@@ -217,7 +217,7 @@ a >= b          aはbより大きい、もしくは等しい
 
 整数や浮動小数点数の場合、話は簡単だ。
 
-~~~
+~~~cpp
 int main()
 {
     // 1は2より小さいか？
@@ -228,7 +228,7 @@ int main()
     else
     {
         // 偽、お使いのコンピューターには深刻な問題があります
-        std::cout << "Your computer has serious issues."
+        std::cout << "Your computer has serious issues.\n"s ;
     }
 }
 ~~~
