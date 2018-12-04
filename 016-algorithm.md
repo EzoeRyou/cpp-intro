@@ -81,7 +81,7 @@ auto print_if_le_100 = []( auto first, auto last )
         if ( *iter <= 100 )
             std::cout << *iter ;
     }
-} ; 
+} ;
 
 
 // 値を2倍して出力
@@ -91,7 +91,7 @@ auto print_twice = []( auto first, auto last )
     { // 特別な処理
         std::cout << 2 * (*iter) ;
     }
-} ; 
+} ;
 
 
 // 値を出力するたびに改行を出力
@@ -101,7 +101,7 @@ auto print_with_newline = []( auto first, auto last )
     { // 特別な処理
         std::cout << *iter << "\n"s ;
     }
-} ; 
+} ;
 ~~~
 
 これを見ると、for文によるイテレーターのループは全く同じコードだとわかる。
@@ -1115,7 +1115,7 @@ auto generate_n = []( first, n, gen )
 auto last2 = remove( first, last, value ) ;
 ~~~
 
-この例では、`remove`は`[first,last)`から値`value`に等しい要素を取り除いたイテレーターの範囲を戻り地として返す。その戻り値が`last2`だ。`[first,last2)`が値を取り除いた後の新しいイテレーターの範囲だ。
+この例では、`remove`は`[first,last)`から値`value`に等しい要素を取り除いたイテレーターの範囲を戻り値として返す。その戻り値が`last2`だ。`[first,last2)`が値を取り除いた後の新しいイテレーターの範囲だ。
 
 `remove`を呼び出しても元のvectorの要素数が変わることはない。`remove`はvectorの要素の値を変更するだけだ。
 
@@ -1162,7 +1162,7 @@ int main()
 
 `remove`は現在知っている知識だけではまだ完全に実装できない。以下は不完全な実装の例だ。`remove`を完全に理解するためには`ムーブセマンティクス`の理解が必要だ。
 
-~~~
+~~~cpp
 auto remove_if = []( auto first, auto last, auto pred )
 {
     // removeする最初の要素
@@ -1184,7 +1184,7 @@ auto remove_if = []( auto first, auto last, auto pred )
             *removing = *remaining ;
             ++removing ;
         }
- 
+
     }
     // 新しい終端イテレーター
     return removing ;

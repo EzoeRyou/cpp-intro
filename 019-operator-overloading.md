@@ -373,8 +373,8 @@ struct fractional
     // デリゲートコンストラクター
     fractional( int num )
         : fractional( num, 1 )
-    { } 
-}
+    { }
+} ;
 ~~~
 
 `デリゲートコンストラクター`は初期化処理を別のコンストラクターにデリゲート(丸投げ)する。丸投げ先のコンストラクターの初期化処理が終わり次第、デリゲートコンストラクターの関数の本体が実行される。
@@ -392,7 +392,7 @@ struct S
     {
         std::cout << "constructor\n" ;
     }
-}
+} ;
 
 int main()
 {
@@ -669,7 +669,7 @@ int main()
 {
     X x ;
     Y y ;
-    
+
     // OK
     x + y ;
 
@@ -906,7 +906,7 @@ s + s ;
 を可能にするクラスSに対する`operator +`は、
 
 ~~~cpp
-struct S { } 
+struct S { }
 S operator + ( S const &, S const & ) ;
 ~~~
 
