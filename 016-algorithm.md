@@ -81,7 +81,7 @@ auto print_if_le_100 = []( auto first, auto last )
         if ( *iter <= 100 )
             std::cout << *iter ;
     }
-} ; 
+} ;
 
 
 // 値を2倍して出力
@@ -91,7 +91,7 @@ auto print_twice = []( auto first, auto last )
     { // 特別な処理
         std::cout << 2 * (*iter) ;
     }
-} ; 
+} ;
 
 
 // 値を出力するたびに改行を出力
@@ -101,7 +101,7 @@ auto print_with_newline = []( auto first, auto last )
     { // 特別な処理
         std::cout << *iter << "\n"s ;
     }
-} ; 
+} ;
 ~~~
 
 これを見ると、for文によるイテレーターのループは全く同じコードだとわかる。
