@@ -392,7 +392,7 @@ struct S
     {
         std::cout << "constructor\n" ;
     }
-}
+} ;
 
 int main()
 {
@@ -906,7 +906,7 @@ s + s ;
 を可能にするクラスSに対する`operator +`は、
 
 ~~~cpp
-struct S { } 
+struct S { }
 S operator + ( S const &, S const & ) ;
 ~~~
 

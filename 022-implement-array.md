@@ -203,11 +203,11 @@ class array_int_3
     array_int_3( array_int_3 const & other )
     {
         std::copy(
-            std::begin(other.storage), std::end(otherstorage),
+            std::begin(other.storage), std::end(other.storage),
             std::begin(storage)
         ) ;
 
-        
+
     }
 }
 ~~~

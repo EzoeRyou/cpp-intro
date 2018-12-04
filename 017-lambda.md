@@ -3,7 +3,7 @@
 実は以下の形の関数は、「関数」ではない。
 
 ~~~cpp
-auto function = [](auto value ) { return value } ;
+auto function = []( auto value ) { return value } ;
 ~~~
 
 これは`ラムダ式`と呼ばれるC++の機能で、関数のように振る舞うオブジェクトを作るための式だ。
@@ -77,7 +77,7 @@ int main()
 `ラムダ式`は`式`なので、そのまま`関数呼び出し`することもできる。
 
 ~~~cpp
-void f( std::string x 
+void f( std::string x )
 {
     std::cout << x ;
 }
