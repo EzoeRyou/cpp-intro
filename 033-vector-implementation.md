@@ -790,10 +790,12 @@ int main()
 }
 ~~~
 
-`begin`に対する`rbegin`の実装は以下のようになる。残りは自分で実装してみよう。
+`begin`に対する`rbegin/rend`の実装は以下のようになる。`crbegin/crend`は自分で実装してみよう。
 
 ~~~c++
 reverse_iterator rbegin() noexcept
+{ return reverse_iterator{ last } ; }
+reverse_iterator rend() noexcept
 { return reverse_iterator{ first } ; }
 ~~~
 
@@ -945,6 +947,115 @@ size_type capacity() const noexcept
 }
 ~~~
 
-## researve
+### 要素アクセス
 
+#### operator []
 
+`std::vector`の`operator []`相当のものを簡易vectorにも実装しよう。
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    v[1] ; // 2
+    v[3] ; // 4
+}
+~~~
+
+`operator []`は非const版とconst版の2種類がある。
+
+~~~c++
+reference operator []( size_type i )
+{ return first[i] ; }
+const_reference operator []( size_type i ) const
+{ return first[i] ; }
+~~~
+
+#### at
+
+メンバー関数`at(i)`は`operator [](i)`と同じだが、範囲外のインデックスを指定した場合、`std::out_of_range`が例外として投げられる。
+
+~~~cpp
+int main()
+{
+    try {
+        // 有効なインデックスはv[0]からv[4]まで
+        std::vector<int> v = {1,2,3,4,5} ;
+        v[0] = 0 ; // OK
+        v[3] = 0 ; // OK
+        v[5] = 0 ; // エラー
+    } catch( std::out_of_range e )
+    {
+        std::cout << e.what() ;
+    }
+}
+~~~
+
+実装はインデックスを`size()`と比較して、範囲外であれば`std::out_of_range`をthrowする。`operator []`と同じく、非const版とconst版がある。
+
+~~~c++
+reference at( size_type i )
+{
+    if ( i >= size() )
+        throw std::out_of_range( "index is out of range." ) ;
+
+    return first[i] ;
+}
+const_reference at( size_type i ) const
+{
+    if ( i >= size() )
+        throw std::out_of_range( "index is out of range." ) ;
+
+    return first[i] ;
+}
+~~~
+
+#### front/back
+
+`front()`は先頭要素へのリファレンスを返す。
+
+`back()`は末尾の要素へのリファレンスを返す
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    v.front() ; // 1
+    v.back() ; // 5
+}
+~~~
+
+これにもconst版と非const版がある。`vector`の`last`が最後の要素の次のポインターを指していることに注意。
+
+~~~c++
+reference front()
+{ return first ; }
+const_reference front() const
+{ return first ; }
+reference back()
+{ return last - 1 ; }
+const_reference back() const
+{ return last - 1 ; }
+~~~
+
+#### data
+
+`data()`は先頭の要素へのポインターを返す。
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+    int * ptr = v.data() ;
+    *ptr ; // 1
+}
+~~~
+
+実装は`first`を返すだけだ。
+
+~~~c++
+pointer data() noexcept
+{ return first ; }
+const_pointer data() const noexcept
+{ return first ; }
+~~~
