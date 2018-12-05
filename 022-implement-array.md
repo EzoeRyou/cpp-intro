@@ -117,7 +117,7 @@ int main()
 `sizeof`は型やオブジェクトのバイト数を取得するのに対し、`vector`や`array`のメンバー関数`size()`は要素数を取得する。この違いに注意すること。
 
 ~~~cpp
-int main()]
+int main()
 {
     auto print = [](auto s){ std::cout << s << "\n"s ; } ;
     std::array<int, 5> a ;
@@ -126,7 +126,7 @@ int main()]
     print( sizeof(a) ) ;
     // 要素数: 5
     print( a.size() ) ;
-     
+
 }
 ~~~
 
