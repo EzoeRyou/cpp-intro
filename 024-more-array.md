@@ -49,7 +49,7 @@ int main()
 クラスの中で宣言されたエイリアス宣言による型名を、`ネストされた型名`という。`std::array`ではテンプレート引数を直接使う代わりに、`ネストされた型名`が使われている。
 
 ~~~cpp
-template < typename T, std::size__t N >
+template < typename T, std::size_t N >
 struct array
 {
     using value_type = T ;
@@ -171,7 +171,7 @@ int main()
 `std::array<T,N>`を受け取って要素をすべて出力する関数を書いてみよう。
 
 ~~~cpp
-template < typename Array > 
+template < typename Array >
 void print( Array & c )
 {
     for ( std::size_t i = 0 ; i != c.size() ; ++i )
@@ -192,7 +192,7 @@ int main()
 関数のリファレンスを引数として渡すと、関数の中で変更できてしまう。しかし、上の例のような関数`print`では、引数を書き換える必要はない。この関数を使う人間も、引数を勝手に書き換えないことを期待している。この場合、`const`をつけることで値の変更を防ぐことができる。
 
 ~~~cpp
-template < typename Container > 
+template < typename Container >
 void print( Container const & c )
 {
     for ( std::size_t i = 0 ; i != c.size() ; ++i )
@@ -244,8 +244,8 @@ int main()
     S s ;
     S const & ref = s ;
 
-    ++s.data ;  // エラー
-    s.f() ;     // エラー
+    ++ref.data ;  // エラー
+    ref.f() ;     // エラー
 }
 ~~~
 
@@ -288,7 +288,7 @@ int main()
 
     S const cs ;
     cs.f() ; // OK
-    
+
 }
 ~~~
 
@@ -402,7 +402,7 @@ struct array
 
     reference front()
     { return storage[0] ; }
-    const_reference front() const 
+    const_reference front() const
     { return storage[0] ; }
 
     reference back()

@@ -84,7 +84,7 @@ int twice( int n )
 twiceを様々な型に対応させるにはどうすればいいだろう。例えばint型とdouble型に対応させてみよう。
 
 ~~~cpp
-int twice( int n ) 
+int twice( int n )
 {
     return n * 2 ;
 }
@@ -340,7 +340,7 @@ int main()
     std::vector<double> b ;
     // OK
     // intからdoubleへの変換
-    f( b ) ; 
+    f( b ) ;
 
     std::vector<std::string> c ;
     // エラー
