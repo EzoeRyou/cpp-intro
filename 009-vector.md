@@ -145,7 +145,7 @@ int main()
     // 0, 0番目の最初の要素
     std::cout << v.at(0) ;
     // 4, 5番目の要素
-    std::cout << v.at(5) ;
+    std::cout << v.at(4) ;
     // 9, 10番目の最後の要素
     std::cout << v.at(9) ;
 }
