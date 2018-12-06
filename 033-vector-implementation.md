@@ -321,7 +321,7 @@ public :
 
     // イテレーターアクセス
     iterator begin() noexcept ;
-    iteratoe end() noexcept ;
+    iterator end() noexcept ;
 } ;
 ~~~
 
@@ -923,7 +923,7 @@ size_type size() const noexcept
 `empty`は空であればtrue、そうでなければfalseを返す。「空」というのは要素数がゼロという意味だ。
 
 ~~~c++
-size_type empty() const noexcept
+bool empty() const noexcept
 {
     return size() == 0 ;
 }
@@ -932,7 +932,7 @@ size_type empty() const noexcept
 しかし`size() == 0`というのは、`begin() == end()`ということだ。なぜならば要素数が0であれば、イテレーターのペアはどちらも終端のイテレーターを差しているからだ。本物の`std::vector`では以下のように実装されている。
 
 ~~~c++
-size_type empty() const noexcept
+bool empty() const noexcept
 {
     return begin() == end() ;
 }
