@@ -112,7 +112,7 @@ int main()
 int main()
 {
     std::allocator<int> a ;
-    // 警告、戻り地が無視されている
+    // 警告、戻り値が無視されている
     a.allocate(1) ;
 
     // OK
@@ -354,7 +354,7 @@ std::copy(
 
 簡易vectorの概要では、まだ学んでいない機能が使われていた。`class`と`public`と`private`だ。
 
-C++のクラスにはアクセス指定がある。`public:`と`private:`だ。アクセス指定書かれた後、別のアクセス指定が現れるまでの間のメンバーは、アクセス指定の影響を受ける。
+C++のクラスにはアクセス指定がある。`public:`と`private:`だ。アクセス指定が書かれた後、別のアクセス指定が現れるまでの間のメンバーは、アクセス指定の影響を受ける。
 
 ~~~cpp
 struct C
@@ -569,7 +569,7 @@ public :
 ~~~cpp
 void f( std::vector<int> & v )
 {
-    std::vector<int>::size_type = v.size() ;
+    std::vector<int>::size_type s = v.size() ;
 }
 ~~~
 
@@ -584,11 +584,11 @@ size_type = std::size_t ;
 ~~~cpp
 void f( std::vector<int> & v )
 {
-    auto i = v ;
+    auto i = v.begin() ;
     auto j = i + 3 ;
 
     // iとjの距離
-    std::vector<int>::difference_type = j - i ;
+    std::vector<int>::difference_type d = j - i ;
 }
 ~~~
 
@@ -744,7 +744,7 @@ int main()
 
 すでに学んだようにconst修飾はthisポインターを修飾する。オブジェクトのconst性によって、適切な方のメンバー関数が呼ばれてくれる。
 
-簡易vectorでの実装は単にconst就職するだけだ。
+簡易vectorでの実装は単にconst修飾するだけだ。
 
 ~~~c++
 iterator begin() const noexcept
@@ -857,7 +857,7 @@ Number zero()
 
 class Number
 {
-    explict Number( int i ) ;
+    explicit Number( int i ) ;
     explicit Number( double d ) ;
     explicit Number( std::string s ) ;
 } ;
