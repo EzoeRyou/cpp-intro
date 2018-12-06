@@ -396,9 +396,9 @@ struct array_iterator
     Array & a ;
     std::size_t i ;
 
-    array_iterator_begin( Array & a, std::size_t i )
+    array_iterator( Array & a, std::size_t i )
         : a( a ), i(i) { }
-    
+
     //いま参照している要素へのリファレンスを返す
     Array::reference operator *()
     {
@@ -420,13 +420,13 @@ struct array
     // 先頭要素のイテレーター
     iterator begin()
     {
-        return array( *this, 0 ) ;
+        return array_iterator( *this, 0 ) ;
     }
 
     // 末尾要素へのイテレーター
     iterator end()
     {
-        return array( *this, N-1 ) ;
+        return array_iterator( *this, N-1 ) ;
     }
 } ;
 ~~~
