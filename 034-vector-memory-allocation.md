@@ -285,7 +285,7 @@ private :
 struct X
 {
     X() { }
-    ~X)() { }
+    ~X() { }
 } ;
 
 int main()
@@ -337,7 +337,7 @@ private :
 ~vector()
 {
     // 1. 要素を末尾から先頭に向かう順番で破棄
-    destroy_all( ) ;
+    destroy_all() ;
     // 2. 生のメモリを解放する
     deallocate() ;    
 }         
@@ -685,7 +685,7 @@ int main()
     // 要素数は実行時にしかわからない
     // 10万個の入力が行われるかも知れない
     std::copy(
-        std::ostream_iterator<int>(std::cin>),
+        std::ostream_iterator<int>(std::cin),
         std::ostream_iterator<int>(),
         std::back_inserter(inputs) ) ;
 }
@@ -727,7 +727,7 @@ void push_back( const_reference value )
 int main()
 {
     vector<int> v ;
-    std::copy( std::istream_iterator<int>(std::cin). std::istream_iterator<int>(),
+    std::copy( std::istream_iterator<int>(std::cin), std::istream_iterator<int>(),
         std::back_inserter(v) ) ;
 }
 ~~~
@@ -752,7 +752,7 @@ v.size() == v.capacity() ; // trueにする
 
 `shrink_to_fit()`を呼んだとき、すでに`size() == capacity()`が`true`である場合は、何もしなくてもよい。
 
-それ以外の場合は、現在の有効な要素数文の新しいストレージを確保し、現在の値を新しいストレージにコピーし、古いメモリは破棄する。
+それ以外の場合は、現在の有効な要素数分の新しいストレージを確保し、現在の値を新しいストレージにコピーし、古いメモリは破棄する。
 
 ~~~c++
 void shrink_to_fit()
