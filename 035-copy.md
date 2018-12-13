@@ -304,21 +304,24 @@ int main()
 問題を簡単にするために、以下のようなクラスを考えよう。
 
 ~~~
+template < typename T >
 class own
 {
 private :
-    int * ptr ;
+    T * ptr ;
 public :
-    own( int value = 0 )
-        : ptr( new int( value ) )
+    own( )
+        : ptr( new T )
     { }
     ~own()
     { delete ptr ; }
 
+    T * get() { return ptr ; }
+
 } ;
 ~~~
 
-このクラスはコンストラクターで動的メモリ確保をし、デストラクターでメモリの解放をする。
+このクラスはコンストラクターでテンプレートパラメーター`T`型のオブジェクトを動的メモリ確保をし、デストラクターでメモリの解放をする。
 
 コピーコンストラクターとコピー代入演算子は定義していないので、デフォルトのコピーが使われる。
 
@@ -345,7 +348,7 @@ public :
 
 ~~~c++
 own( const own & r )
-    : ptr( new int( *r.ptr ) )
+    : ptr( new T( *r.ptr ) )
 { }
 ~~~
 
@@ -359,7 +362,143 @@ own & operator = ( const own & r )
 }
 ~~~
 
-このコードには少し問題がある。
+このコードには少し問題がある。変数は自分自身に代入ができるのだ。
+
+~~~c++
+// 1GBもの巨大なサイズのクラス
+struct one_giga_byte { std::byte storage[1'000'000'000] ; }
+
+int main()
+{
+    own<one_giga_byte> x ;
+    // 1GBのコピーが発生
+    x = x ;
+}
+~~~
+
+自分自身に代入というのは少し奇妙だが、これはC++では普通のことだ。クラス型はできるだけ普通に振る舞うべきだ。
+
+普通のクラスは、自分自身への代入で特に何かをする必要はない。したがって、単に自分自身への代入が行われたことを判定したならば、コピーを行わないという処理でいい。
+
+自分自身への代入を判定するには、コピー代入演算子の引数のリファレンスが指すオブジェクトのポインターが`this`ポインターと等しいかどうかを調べればよい。
+
+~~~cpp
+own & operator = ( const own & r )
+{
+    // 自分自身への代入でなければ
+    if ( this != &r )
+    {
+        // コピー処理
+        *ptr = *r.ptr ;
+    }
+    return *this ;
+}
+~~~
+
+## `own<U>`から`own<T>`への変換
+
+C++では、`int`型から`long`型に、変換することができる。
+
+~~~cpp
+int main()
+{
+    int a = 123 ;
+    // 変換してコピー
+    long b = a ;
+}
+~~~
+
+これは厳密には変換であってコピーではないのだが、コピーによく似ている。
+
+これと同じことを、`own<T>`でやるにはどうすればいいのだろうか。つまり`own<int>`から`own<long>`への変換だ。
+
+~~~c++
+int main()
+{
+    own<int> a ;
+    *a.get() = 123 ;
+    own<long> b = a ;
+    *b.get() ; // long型の123
+}
+~~~
+
+単に`own<int>`からの変換だけであれば、`own<int>`型から変換するコンストラクターを書けばよい。
+
+~~~c++
+template < typename T >
+class own
+{
+private :
+    T * ptr ;
+public :
+    // 変換コンストラクター
+    own( const own<int> & r )
+        : ptr( new T(*r.get()) )
+    { }
+    // ...
+}
+~~~
+
+このような自分自身以外の型の引数をひとつだけ取るコンストラクターのことを、`変換コンストラクター`
+という。
+
+しかしこれでは`own<int>`からの変換にしか対応できない。しかも`int`型から変換できない型を使うとエラーとなる。
+
+~~~c++
+// int型から変換できない型
+struct I_hate_int
+{
+    // デフォルトのデフォルトコンストラクター
+    I_hate_int() = default ;
+    // intからの変換コンストラクター
+    I_hate_int(int) = delete ;
+}
+
+int main()
+{
+    // エラー
+    own<I_hate_int> a ;
+}
+~~~
+
+関数の宣言に`=delete`を書くと、その関数を消すことができる。「消す」というのは、その関数を使った時点でプログラムがコンパイルエラーになるという意味だ。
+
+この問題を解決するにはテンプレートを使う。
+
+
+~~~c++
+template < typename T >
+class own
+{
+private :
+    T * ptr ;
+public :
+    template < typename U >
+    own( const own<U> & r )
+        : ptr( new T(*r.get()) )
+    { }
+    // ...
+}
+~~~
+
+こうすると任意の型`T, U`について、`own<U>`から`own<T>`への変換ができる。
+
+しかし、上のクラス`I_hate_int`型は任意の型から変換できないので、この変換コンストラクターテンプレートの存在は問題にならならないのだろうか。心配御無用。テンプレートは具体的なテンプレート実引数が与えられて初めてコードが生成される。実際に使わない限りは問題にならない。
+
+~~~c++
+int main()
+{
+    // 問題なし
+    own<I_hate_int> a ;
+    // 問題なし
+    own<int> b ;
+
+    // エラー
+    // 実際に使われた
+    a = b ;
+}
+~~~
+
 
 ## もう少し複雑な所有するクラス
 
@@ -423,13 +562,15 @@ int main()
 }
 ~~~
 
-コピー元よりコピー先のほうがメモリが多い場合、つまり`b = a`の場合は動的メモリ確保をしないという実装もできるが、今回はサイズが違う場合は必ず動的メモリ確保をすることにしよう。
+コピー元よりコピー先のほうがメモリが多い場合、つまり`b = a`の場合は動的メモリ確保をしないという実装もできるが、その場合実際に確保したメモリサイズと、クラスが認識しているメモリサイズが異なることになる。今回はサイズが違う場合は必ず動的メモリ確保をすることにしよう。
 
 ~~~c++
 dynamic_array & operator == ( const dynamic_array & r )
 {
+    // 自分自身への代入ではない場合
+    // かつ
     // サイズが違う場合
-    if ( size() != r.size() )
+    if ( this != &r && size() != r.size() )
     {
         // コピー処理
     }
@@ -442,7 +583,7 @@ dynamic_array & operator == ( const dynamic_array & r )
 ~~~c++
 dynamic_array & operator == ( const dynamic_array & r )
 {
-    if ( size() != r.size() )
+    if ( this != &r && size() != r.size() )
     {
         // コピー先が所有しているメモリの解放
         delete first ;
@@ -455,3 +596,7 @@ dynamic_array & operator == ( const dynamic_array & r )
     return *this ;
 }
 ~~~
+
+## vectorのコピー
+
+
