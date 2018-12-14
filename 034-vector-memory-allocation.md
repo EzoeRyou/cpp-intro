@@ -50,7 +50,7 @@ int main()
     v.size() ; // 10
     // 減らす
     v.resize(5) ;
-    v.size() ;
+    v.size() ; // 5
 }
 ~~~
 
