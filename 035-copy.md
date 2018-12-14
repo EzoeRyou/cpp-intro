@@ -481,7 +481,7 @@ public :
 }
 ~~~
 
-こうすると任意の型`T, U`について、`own<U>`から`own<T>`への変換ができる。
+こうすると任意の型`T, U`について、`U`型から`T`型に変換構築できるのであれば、`own<U>`から`own<T>`への変換構築ができる。
 
 しかし、上のクラス`I_hate_int`型は任意の型から変換できないので、この変換コンストラクターテンプレートの存在は問題にならならないのだろうか。心配御無用。テンプレートは具体的なテンプレート実引数が与えられて初めてコードが生成される。実際に使わない限りは問題にならない。
 
@@ -603,7 +603,7 @@ dynamic_array & operator == ( const dynamic_array & r )
 
 ### コピーコンストラクター
 
-`std::vector`では、アロケーターのコピーだけがちょっと特殊になっている。コンテナーのコピーにあたってアロケーターをコピーすべきかどうかということを、アロケーターの実装が選べるようになっている。このために、`std::allocator_traits<allocator_type>::select_on_container_copy_construction(alloc)`を呼び出し、その戻り値でアロケーターを初期化する。`std::allocator_traits<allocator_type>`という型については、すでに`traits`というエイリアスを宣言しているので、以下のようにする。
+`std::vector`では、アロケーターのコピーだけがちょっと特殊になっている。コンテナーのコピーにあたってアロケーターをコピーすべきかどうかは、アロケーターの実装が選べるようになっている。このために、`std::allocator_traits<allocator_type>::select_on_container_copy_construction(alloc)`を呼び出し、その戻り値でアロケーターを初期化する。`std::allocator_traits<allocator_type>`という型については、すでに`traits`というエイリアスを宣言しているので、以下のようにする。
 
 ~~~c++
 vector( const vector & r )
@@ -614,4 +614,32 @@ vector( const vector & r )
 }
 ~~~
 
+残りのコピー処理を実装していこう。
+
+1. コピー元の要素数を保持できるだけのストレージを確保
+2. コピー元の要素をコピー構築
+
+~~~c++
+vector( const vector & r )
+    : alloc( traits::select_on_container_copy_construction( r.alloc ) )
+{
+    // コピー元の要素数を保持できるだけのストレージを確保
+    reserve( r.size() ) ;
+    // コピー元の要素をコピー構築
+    // destはコピー先
+    // [src, last)はコピー元
+    for (   auto dest = first, src = r.begin(), last = r.end() ;
+            src != last ; ++dest, ++src )
+    {
+        construct( dest, *src ) ;
+    }
+    last = first + r.size() ;
+}
+~~~
+
+### コピー代入演算子
+
+コピー代入演算子ではアロケーターのコピーをする必要はない。ただし自分自身への代入への対応が必要だ。そして、コピー代入のコピー先とコピー元の要素数が同じであるとは限らない。
+
+コピー先とコピー元の要素数が同じである場合、単に要素にコピー代入をすればよい。
 
