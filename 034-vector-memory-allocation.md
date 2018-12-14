@@ -10,7 +10,7 @@
 int main()
 {
     std::vector<int> v ;
-    v.empty() ; // bool
+    v.empty() ; // true
 }
 ~~~
 
@@ -50,7 +50,7 @@ int main()
     v.size() ; // 10
     // 減らす
     v.resize(5) ;
-    v.size(5) ;
+    v.size() ; // 5
 }
 ~~~
 
@@ -306,7 +306,7 @@ private :
     }
 ~~~
 
-`destroy_until(rend)`は、`vector`が保持する`rbegin()`からリバースイテレーター`rend`までの要素を破棄する。リーバスイテレーターを使うので、要素の末尾から先頭に向けて順番に破棄される。
+`destroy_until(rend)`は、`vector`が保持する`rbegin()`からリバースイテレーター`rend`までの要素を破棄する。リバースイテレーターを使うので、要素の末尾から先頭に向けて順番に破棄される。
 
 
 ~~~c++
