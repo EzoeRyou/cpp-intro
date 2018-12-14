@@ -599,4 +599,19 @@ dynamic_array & operator == ( const dynamic_array & r )
 
 ## vectorのコピー
 
+自作の`vector`のコピーを実装していこう。
+
+### コピーコンストラクター
+
+`std::vector`では、アロケーターのコピーだけがちょっと特殊になっている。コンテナーのコピーにあたってアロケーターをコピーすべきかどうかということを、アロケーターの実装が選べるようになっている。このために、`std::allocator_traits<allocator_type>::select_on_container_copy_construction(alloc)`を呼び出し、その戻り値でアロケーターを初期化する。`std::allocator_traits<allocator_type>`という型については、すでに`traits`というエイリアスを宣言しているので、以下のようにする。
+
+~~~c++
+vector( const vector & r )
+    // アロケーターのコピー
+    : alloc( traits::select_on_container_copy_construction(r.alloc) )
+{
+    // コピー処理
+}
+~~~
+
 
