@@ -58,7 +58,7 @@ using error = int & * ;
 
 ~~~cpp
 int data { } ;
-int ref = data ;
+int & ref = data ;
 // &dataと同じ
 int * ptr = &ref ;
 ~~~
@@ -93,7 +93,7 @@ using T = int ;
 using T_pointer = T * ;
 ~~~
 
-これを組みわせると、以下のようになる。
+これを組み合わせると、以下のようになる。
 
 ~~~cpp
 // 型T
@@ -1086,7 +1086,7 @@ object.*int_ptr = 123 ;
 あるクラス名Cの型名Tのメンバーへのポインター型は以下のようになる。
 
 ~~~c++
-型名 クラス名:::*
+型名 クラス名::*
 T C::*
 ~~~
 
@@ -1271,10 +1271,10 @@ int main()
 
 実は演算子`operator .*`の他に、`operator ->*`という演算子がある。
 
-`.*`はクラスのオブジェクトがリファレンスの場合の演算子だが、`->*はクラスのオブジェクトがポインターの場合の演算子だ。
+`.*`はクラスのオブジェクトがリファレンスの場合の演算子だが、`->*`はクラスのオブジェクトがポインターの場合の演算子だ。
 
 ~~~cpp
-struct C{ int data { } : } ;
+struct C{ int data { } ; } ;
 
 int main()
 {
@@ -1283,7 +1283,7 @@ int main()
     C object ;
     auto c_ptr = &object ;
 
-    c_ptr->*object = 123 ;
+    c_ptr->*data_ptr = 123 ;
 }
 ~~~
 
