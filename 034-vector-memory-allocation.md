@@ -260,12 +260,16 @@ private:
 `construct(ptr, value)`は生のメモリへのポインター`ptr`に値`value`のオブジェクトを構築する。
 
 ~~~c++
-
     void construct( pointer ptr )
     { traits::construct( alloc, ptr ) ; }
     void construct( pointer ptr, const_reference value )
     { traits::construct( alloc, ptr, value ) ; }
+    // ムーブ用
+    void construct( pointer ptr, value_type && value )
+    { traits::construct( alloc, ptr, std::move(value) ) ; }
 ~~~
+
+ムーブ用の`construct`についてはまだ気にする必要はない。この理解には、まずムーブセマンティクスを学ぶ必要がある。
 
 `destroy(ptr)`は`ptr`の指すオブジェクトを破棄する。
 
@@ -313,7 +317,7 @@ private :
 private :
     void destroy_until( reverse_iterator rend )
     {
-        for ( auto riter = rbegin() ; riter != rend ; ++riter )
+        for ( auto riter = rbegin() ; riter != rend ; ++riter, --last )
         {
             destroy( &*riter ) ;
         }
@@ -321,6 +325,8 @@ private :
 ~~~
 
 `&*riter`はやや泥臭い方法だ。簡易`vector<T>`の`iterator`は単なる`T *`だが、`riter`はリバースイテレーターなのでポインターではない。ポインターを取るために`*riter`でまず`T &`を得て、そこに`&`を適用することで`T *`を得ている。
+
+破棄できたら有効な要素数を減らすために`--last`する。
 
 ## デストラクター
 
@@ -401,6 +407,51 @@ int main()
 2. まだ動的メモリ確保が行われていなければ動的メモリ確保をする
 3. 有効な要素がある場合は新しいストレージにコピーする。
 
+古いストレージから新しいストレージに要素をコピーするとき、古いストレージと新しいストレージが一時的に同時に存在しなければならない。
+
+疑似コード風に記述すると以下のようになる。
+
+~~~c++
+template < typename T >
+void f()
+{
+    // すでに動的確保した古いストレージ
+    auto old_ptr = new T ;
+
+    // いま構築した新しいストレージ
+    auto new_ptr = new T ;
+    // 古いストレージから新しいストレージにコピー
+    // *new_ptr = *old_ptr ;
+    // 古いストレージを解放
+    delete old_value ;
+}
+~~~
+
+このとき、`T`型がコピーの最中に例外を投げると、後続の`delete`が実行されなくなる。この問題に対処して例外安全にするために、C++20に入る見込みの標準ライブラリ、`std::scope_exit`を使う。
+
+　
+~~~c++
+template < typename T >
+void f()
+{
+    // すでに動的確保した古いストレージ
+    auto old_ptr = new T ;
+
+    // いま構築した新しいストレージ
+    auto new_ptr = new T ;
+
+    // 関数fを抜けるときに古いストレージを解放する。
+    std::scope_exit e( [&]{ delete old_ptr ; } ) ;
+
+    // 古いストレージから新しいストレージにコピー
+    // *new_ptr = *old_ptr ;
+
+    // 変数eの破棄に伴って古いストレージが開放される
+}
+~~~
+
+これを踏まえて`reserve`を実装する。
+
 ~~~c++
 void reserve( size_type sz )
 {
@@ -410,24 +461,27 @@ void reserve( size_type sz )
 
     // 動的メモリ確保をする
     auto ptr = allocate( sz ) ;
-    // 現在の要素数を保存しておく。
-    auto current_size = size() ;
-    // 有効な要素があれば
-    if ( begin() != end() )
-    {
-        // 新しいストレージにコピーする
-        std::copy( begin(), end(), ptr ) ;
-        // 古いストレージ上の要素を破棄する
-        destroy_all() ;
-        // 古いストレージを解放する
-        deallocate() ;
-    }
-    // 新しいストレージを使う
+
+    // 古いストレージの情報を保存
+    auto old_first = first ;
+    auto old_last = last ;
+    auto old_capacity = capacity() ;
+
+    // 新しいストレージに差し替え
     first = ptr ;
-    // 有効な要素の次のポインター
-    last = ptr + current_size ;
-    // 予約したストレージの末尾の次のポインター
-    reserved_last = ptr + sz ;
+    last = first ;
+    reserved_last = first + sz ;
+
+    // 例外安全のため
+    // 関数を抜けるときに古いストレージを破棄する
+    scope_exit e( [&]{ traits::deallocate( alloc, old_first, old_capacity  ) ; } ) ;
+
+    // 古いストレージから新しいストレージに要素をコピー構築
+    for ( auto old_iter = old_first ; old_iter != old_last ; ++old_iter, ++last )
+    {
+        // このコピーの理解にはムーブセマンティクスの理解が必要
+        construct( last, std::move(*old_iter) ) ;
+    }
 }
 ~~~
 
@@ -530,32 +584,25 @@ int main()
 実装しよう。
 
 ~~~c++
-void resize( size_type sz )
-{
-    // 現在の要素数より少ない
-    if ( sz < size() )
+    void resize( size_type sz )
     {
-        // 破棄する要素数を求める
-        auto diff = size() - sz ;
-        // 末尾から順番に破棄する
-        destroy_until( rbegin() + diff ) ;
-        // 新しいサイズを設定
-        last = first + sz ;
-    }
-    // 現在の要素数より大きい
-    else if ( sz > size() )
-    {
-        // 少なくとも指定された要素数を保持できるだけのメモリを予約する 
-        reserve( sz ) ;
-        // 追加の要素を構築する。
-        for ( auto iter = last ; iter != reserved_last ; ++iter )
+        // 現在の要素数より少ない
+        if ( sz < size() )
         {
-            construct( iter ) ;
+            auto diff = size() - sz ;
+            destroy_until( rbegin() + diff ) ;
+            last = first + sz ;
         }
-        // 新しいサイズを設定
-        last = first + sz ;
+        // 現在の要素数より大きい
+        else if ( sz > size() )
+        {
+            reserve( sz ) ;
+            for ( ; last != reserved_last ; ++last )
+            {
+                construct( last ) ;
+            }
+        }
     }
-}
 ~~~
 
 要素を破棄する場合、破棄する要素数だけ末尾から順番に破棄する。
