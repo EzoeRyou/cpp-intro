@@ -474,7 +474,7 @@ void reserve( size_type sz )
 
     // 例外安全のため
     // 関数を抜けるときに古いストレージを破棄する
-    scope_exit e( [&]{ traits::deallocate( alloc, old_first, old_capacity  ) ; } ) ;
+    std::scope_exit e( [&]{ traits::deallocate( alloc, old_first, old_capacity  ) ; } ) ;
 
     // 古いストレージから新しいストレージに要素をコピー構築
     for ( auto old_iter = old_first ; old_iter != old_last ; ++old_iter, ++last )
