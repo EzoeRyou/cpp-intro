@@ -474,16 +474,30 @@ void reserve( size_type sz )
 
     // 例外安全のため
     // 関数を抜けるときに古いストレージを破棄する
-    std::scope_exit e( [&]{ traits::deallocate( alloc, old_first, old_capacity  ) ; } ) ;
+    std::scope_exit e( [&]{
+        traits::deallocate( alloc, old_first, old_capacity  ) ;
+    } ) ;
 
     // 古いストレージから新しいストレージに要素をコピー構築
+    // 実際にはムーブ構築
     for ( auto old_iter = old_first ; old_iter != old_last ; ++old_iter, ++last )
     {
         // このコピーの理解にはムーブセマンティクスの理解が必要
         construct( last, std::move(*old_iter) ) ;
     }
+
+    // 新しいストレージにコピーし終えたので
+    // 古いストレージの値は破棄
+    for (   auto riter = reverse_iterator(old_last), rend = reverse_iterator(old_first) ;
+            riter != rend ; ++riter )
+    {
+        destroy( &*riter ) ;
+    }
+    // scope_exitによって自動的にストレージが破棄される。
 }
 ~~~
+
+ここではまだ学んでいないムーブの概念が出てくる。これはムーブセマンティクスの章で詳しく学ぶ。
 
 
 ## resize
