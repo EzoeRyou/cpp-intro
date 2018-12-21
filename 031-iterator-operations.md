@@ -916,7 +916,7 @@ int main()
     // i(0)
     iota_iterator<int> i ;
     // iota_iterator<int>
-    iota_iterator first(0), last(10)
+    iota_iterator first(0), last(10) ;
 
     // lastをiにコピー
     i = last ;
@@ -965,7 +965,7 @@ iota_iterator & operator ++() noexcept
 {
     ++value ;
     return *this ;
-!}
+}
 // 後置
 iota_iterator   operator ++(int) noexcept
 {
@@ -1001,7 +1001,7 @@ bool operator != ( iota_iterator const & i ) const noexcept
 }
 ~~~
 
-前方イテレーターがサポートする比較演算子は2つ、`operator ==`と`operator !=`だ。`!=`は`==`で実装してしまうとして、==は単にvalueを比較する。通常、イテレーターの比較は要素の値の比較ではなく、同じ要素を参照するイテレーターかどうかの比較になるが、iota_iteratorの場合、`vector`や`array`のようなメモリ上に構築された要素は存在しないので、valueの比較でよい。
+前方イテレーターがサポートする比較演算子は2つ、`operator ==`と`operator !=`だ。`!=`は`==`で実装してしまうとして、`==`は単にvalueを比較する。通常、イテレーターの比較は要素の値の比較ではなく、同じ要素を参照するイテレーターかどうかの比較になるが、iota_iteratorの場合、`vector`や`array`のようなメモリ上に構築された要素は存在しないので、valueの比較でよい。
 
 前方イテレーターが提供される実例としては、前方リンクリストがある。
 
