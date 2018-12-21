@@ -407,7 +407,7 @@ int main()
 {
     C c ;
     // エラー
-    v.data_member = 0 ;
+    c.data_member = 0 ;
     // エラー
     c.member_function() ;
 }
@@ -905,7 +905,7 @@ int main()
 size_type size() const noexcept
 {
     return end() - begin() ;
-} ;
+}
 ~~~
 
 イテレーターライブラリを使ってもよい。本物の`std::vector`では以下のように実装されている。
@@ -915,7 +915,7 @@ size_type size() const noexcept
 size_type size() const noexcept
 {
     return std::distance( begin(), end() ) ;
-} ;
+}
 ~~~
 
 `empty`は空であればtrue、そうでなければfalseを返す。「空」というのは要素数がゼロという意味だ。
