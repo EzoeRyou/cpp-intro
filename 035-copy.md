@@ -21,14 +21,14 @@ int destination = source ;
 我々が普通にコピーと認識しているものは、C++の文法的にはコピー構築とコピー代入に分けることができる。
 
 ~~~c++
-int source = 42 ;
+T source ;
 // コピー構築
-int b = source ;
-int c(source) ;
-int d{source}
+T b = source ;
+T c(source) ;
+T d{source}
 
 // 変数e
-int e ;
+T e ;
 // コピー代入
 e = source ;
 ~~~
