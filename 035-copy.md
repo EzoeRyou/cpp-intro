@@ -23,14 +23,13 @@ int destination = source ;
 ~~~c++
 T source ;
 // コピー構築
-T b = source ;
-T c(source) ;
-T d{source}
+T a = source ;
+T b(source) ;
+T c{source}
 
-// 変数e
-T e ;
+T d ;
 // コピー代入
-e = source ;
+d = source ;
 ~~~
 
 ユーザーは普通、コピー構築とコピー代入のコピーが両方とも同じ挙動をすると期待している。コピー構築とコピー代入のどちらか片方が使えるならば、もう片方も使えるべきで、そのコピーの挙動は同じであるべきだ。
