@@ -1,8 +1,8 @@
 # vectorの実装 : メモリ確保
 
-## メモリ確保の起こるタイミング
+## メモリ確保と解放の起こるタイミング
 
-`std::vector`はどこでメモリを確保しているのだろうか。
+`std::vector`はどこでメモリを確保と解放しているのだろうか。
 
 デフォルト構築すると空になる。
 
@@ -109,6 +109,17 @@ int main()
     v.push_back(3) ;
     // 動的メモリ確保が発生する可能性がある。
     v.push_back(3) ;
+}
+~~~
+
+`clear()`は要素数を0にする。
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+    v.clear() ;
+    v.size() ; // 0
 }
 ~~~
 
@@ -279,39 +290,9 @@ private :
     { traits::destroy( alloc, ptr ) ; }
 ~~~
 
-### `destroy_all/destroy_until`
+### `destroy_until`
 
-`destroy_all()`は`vector`の要素を末尾から先頭に向けて順番に破棄する。
-
-`std::vector`の初期化では、要素は先頭から末尾に向けて順番に構築される。C++では破棄は構築の逆順に行われるので、`std::vector`の破棄にあたっては、要素は末尾から先頭に向けて順番に破棄される。
-
-~~~cpp
-struct X
-{
-    X() { }
-    ~X() { }
-} ;
-
-int main()
-{
-    std::vector<X> v(3) ;
-}
-~~~
-
-このコードでは、`v[0], v[1], v[2]`の順番に要素が構築され、`v[2], v[1], v[0]`の順番で破棄される。
-
-`destroy_all`の実装は、この次に説明する`destroy_until`を使う。
-
-~~~c++
-private :
-    void destroy_all()
-    {
-        destroy_until( rend() ) ;
-    }
-~~~
-
-`destroy_until(rend)`は、`vector`が保持する`rbegin()`からリバースイテレーター`rend`までの要素を破棄する。リバースイテレーターを使うので、要素の末尾から先頭に向けて順番に破棄される。
-
+`destroy_until(rend)`は、`vector`が保持する`rbegin()`からリバースイテレーター`rend`までの要素を破棄する。リバースイテレーターを使うので、要素の末尾から先頭に向けて順番に破棄される。なぜ末尾から先頭に向けて要素を破棄するかというと、C++では値の破棄は構築の逆順で行われるという原則があるからだ。
 
 ~~~c++
 private :
@@ -328,6 +309,19 @@ private :
 
 破棄できたら有効な要素数を減らすために`--last`する。
 
+## clear
+
+`clear()`はすべての要素を破棄する。
+
+~~~c++
+void clear() noexcept
+{
+    destroy_until( rend() ) ;
+}
+~~~
+
+先程実装した`destroy_until(rend)`にリバースイテレーターの終端を渡せばすべての要素が破棄される。
+
 ## デストラクター
 
 ヘルパー関数を組み合わせることでデストラクターが実装できるようになった。
@@ -343,7 +337,7 @@ private :
 ~vector()
 {
     // 1. 要素を末尾から先頭に向かう順番で破棄
-    destroy_all() ;
+    clear() ;
     // 2. 生のメモリを解放する
     deallocate() ;    
 }         
@@ -832,7 +826,7 @@ void shrink_to_fit()
         construct( raw_ptr, *iter ) ;
     }
     // 破棄
-    destroy_all() ;
+    clear() ;
     deallocate() ;
     // 新しいストレージを使う
     first = ptr ;

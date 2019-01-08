@@ -8,7 +8,42 @@
 
 まだこの2つの章を読んでいない読者はこの章を理解する準備ができていない。一度だけしか読んでいない読者は完全に理解はできないだろうから、この章を読んだ後にもう一度立ち返って読み直すべきだ。
 
+この章ではサンプルコードの簡略化のために、メンバー関数の定義をあたかもクラスの中で書いたかのように扱う。
+
+例えば、
+
+~~~c++
+template < typename T >
+struct S { T x ; } ;
+~~~
+
+があり、このクラス`S<T>`のコンストラクターを続いて
+
+~~~c++
+S( T const & x ) : x(x) { }
+~~~
+
+と書くことがある。これは実際には間違いで、正しくは以下のように書かなければならない。
+
+~~~c++
+template < typename T >
+struct S
+{
+    T x ;
+    // 宣言
+    S( T const & ) ;
+} ;
+// 定義
+template < typename T >
+S<T>::S( T const & x ) : x(x) { }
+~~~
+
+この章では煩わしいので簡略した書き方を使う。
+
+
 ## コピーとムーブの判別
+
+ムーブはムーブ元のオブジェクトを無効にする可能性がある。そのためムーブはムーブをしても安全な場合にしか行われない。
 
 コピーはコピーコンストラクターとコピー代入演算子で実装する。
 
@@ -61,7 +96,7 @@ int main()
 
     f( object ) ; // lvalue
     f( object + object ) ; // rvalue
-    f( []{ return 0 ; }() ) ; // rvalue
+    f( []{ return object ; }() ) ; // rvalue
     f( std::move(object) ) ; // rvalue
 }
 ~~~
@@ -77,6 +112,42 @@ int main()
 prvalueは無名の一時オブジェクトなので、その値はすぐに破棄される。どうせ破棄されるのであれば、所有権を横取りしてもよい。
 
 xvalueはユーザーが明示的にrvalueリファレンスにキャストした値だ。明示的にrvalueリファレンスにキャストしたということは、ユーザーはその値について、それ以降興味がないという意思を示したことになる。なので、そのような値からは所有権を横取りしてもよい。
+
+特殊なルールとして、関数のローカル変数をオペランドに指定したreturn文はムーブをする可能性がある。
+
+~~~c++
+std::vector<int> f()
+{
+    std::vector<int> v ;
+    v.push_back(1) ;
+    v.push_back(2) ;
+    v.push_back(3) ;
+    // ムーブをする可能性がある
+    return v ;
+}
+~~~
+
+これは関数のローカル変数はreturn文が実行されたときには無効になるので、特別に存在するルールだ。そもそも、関数のreturn文はコピーもムーブもしない可能性がある。
+
+~~~c++
+int main()
+{
+    // さきほどの関数f
+    auto v = f() ;
+}
+~~~
+
+C++コンパイラーは以下のようにコードを変形することも許されているからだ。
+
+~~~c++
+int main()
+{
+    std::vector<int> v ;
+    v.push_back(1) ;
+    v.push_back(2) ;
+    v.push_back(3) ;
+}
+~~~
 
 ## ムーブの実装
 
@@ -97,3 +168,97 @@ public :
     { delete[] first ; }
 } ;
 ~~~
+
+ムーブは所有権の移動だ。所有権の移動は、単にポインターをコピーするだけで済む。
+
+~~~c++
+dynamic_array<int> source(10) ;
+// ムーブ
+dynamic_array<int> destination = std::move(source) ;
+~~~
+
+具体的な処理としては、
+
+1. ムーブ先へ所有権の移動
+2. ムーブ元の所有権の放棄
+
+となる。
+
+~~~c++
+// ムーブ先へ所有権の移動
+destination.first = source.first ;
+destination.last = source.last ;
+// ムーブ元の所有権の放棄
+source.first = nullptr ;
+source.last = nullptr ;
+~~~
+
+とするのと同じだ。ストレージの所有権を`source`から`destination`に移動している。移動後、`source`の破棄に伴ってストレージが`delete`されないために、`source`のポインターの値は`nullptr`にする。移動後の`source`はもうストレージを所有していない。
+
+### ムーブコンストラクター
+
+ムーブコンストラクターは以下のように実装できる。
+
+~~~c++
+dynamic_array( dynamic_array && r )
+    // ムーブ先へ所有権の移動
+    : first( r.first ), last( r.last )
+{
+    // ムーブ元の所有権の放棄
+    r.first = nullptr ;
+    r.last = nullptr ;
+}
+~~~
+
+### ムーブ代入演算子
+
+ムーブ代入の場合、すでにクラスのオブジェクトは構築されている。つまりムーブ先のクラスのオブジェクトはすでにストレージを所有しているかもしれない。
+
+~~~c++
+dynamic_array<int> source(10) ;
+dynamic_array<int> destination(10) ;
+// destinationはすでにストレージを所有
+destination = std::move(source) ;
+~~~
+
+そのため、ムーブ代入演算子はまず自身が所有しているストレージを解放する必要がある。
+
+~~~c++
+// ストレージの解放
+delete destination.first ;
+// ムーブ処理
+destination.first = source.first ;
+destination.last = source.last ;
+source.first = nullptr ;
+source.last = nullptr ;
+~~~
+
+ただし、自分自身へのムーブ代入に注意しなければならない。
+
+~~~c++
+destination = std::move( destination ) ;
+~~~
+
+ムーブ代入演算子は以下のように実装できる。
+
+~~~c++
+dynamic_array & operator = ( dynamic_array && r )
+{
+    // 自分自身への代入ならば、なにもしない
+    if ( this == &r )
+        return *this ;
+
+    // ストレージの解放
+    delete first ;
+
+    // ムーブ処理
+    first = r.first ;
+    last = r.last ;
+    r.first = nullptr ;
+    r.last = nullptr ;
+
+    return *this ;
+}
+~~~
+
+
