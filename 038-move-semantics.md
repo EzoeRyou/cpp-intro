@@ -346,4 +346,30 @@ dynamic_array & operator = ( dynamic_array && r )
 }
 ~~~
 
+## デフォルトのムーブ
 
+クラスがムーブを実装しない場合、デフォルトのムーブが暗黙に定義される。
+
+~~~cpp
+struct X
+{
+    int i {} ;
+    std::vector<int> v ;
+} ;
+
+int main()
+{
+    X a ;
+    X b ;
+    b = std::move(a) ;
+}
+~~~
+
+デフォルトのムーブはクラスのメンバーをそれぞれムーブする。
+
+~~~c++
+b.i = std::move(a.i) ;
+b.v = std::move(a.v) ;
+~~~
+
+デフォルトのコピーと似ている。
