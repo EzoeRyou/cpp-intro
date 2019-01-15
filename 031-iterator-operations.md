@@ -443,7 +443,7 @@ int main()
 {
     using iterator = std::vector<int>::iterator ;
     bool b = is_category_of< std::forward_iterator_tag, iterator >() ;
-    // vecotrのイテレーターはランダムアクセスイテレーターなので前方イテレーターでもある
+    // vectorのイテレーターはランダムアクセスイテレーターなので前方イテレーターでもある
     std::cout << b ;
 }
 ~~~

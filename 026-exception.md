@@ -103,7 +103,7 @@ int main()
         throw 0 ;
 
     // 通常の処理
-    std::cout << "Succcess!\n"s ;
+    std::cout << "Success!\n"s ;
 }
 ~~~
 
