@@ -360,7 +360,7 @@ auto any_of = []( auto first, auto last, auto pred )
 } ;
 ~~~
 
-`none_of(first, last, pred)`は`[first,last)`の間のイテレーター`iter`それぞれに対して、`pred(*iter)`がすべて`false`ならば`true`を返す。空の場合の`true`を返す。それ以外は`false`を返す。
+`none_of(first, last, pred)`は`[first,last)`の間のイテレーター`iter`それぞれに対して、`pred(*iter)`がすべて`false`ならば`true`を返す。空の場合は`true`を返す。それ以外は`false`を返す。
 
 `none_of`はすべての要素が条件を満たさない判定に使える。
 
