@@ -151,10 +151,24 @@ auto b = -a ;
 ~~~c++
 Integer a ;
 auto b = a ;
-b -= b ; 
+b.make_it_negative() ; 
 ~~~
 
-と書いたほうが効率がよくなる。幸い、クラス`Integer`はムーブコンストラクターを実装しているので、
+のような現在の値をそのまま負数にするメンバー関数`make_it_negative`を実装して使ったほうが効率がよくなる。
+
+~~~c++
+class Integer 
+{
+    int * ptr ;
+public :
+    void make_it_negative()
+    {
+        *ptr = -*ptr ;
+    }
+}
+~~~
+
+幸い、クラス`Integer`はムーブコンストラクターを実装しているので、
 
 ~~~c++
 auto b = -a ;
