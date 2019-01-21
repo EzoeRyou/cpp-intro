@@ -180,7 +180,8 @@ auto c = temp2 ;
 
 ~~~c++
 Integer a ;
-auto c = a + a ;
+auto c = a ;
+c += a ;
 c -= c ;
 ~~~
 
