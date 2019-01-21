@@ -540,11 +540,12 @@ auto result = a + b - c * d / e ;
 のようなコードも書きたい。これを効率化のために、
 
 ~~~c++
-auto result = a ;
-result += b ;
-result -= c ;
-result *= d ;
-result /= e ;
+auto result = a;
+a += b ;
+auto temp = c ;
+temp *= d ;
+temp /= e ;
+result -= temp ;
 ~~~
 
 のように書かなければならないとしたら悲惨だ。
