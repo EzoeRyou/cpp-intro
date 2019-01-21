@@ -17,6 +17,7 @@
 #include <string>
 #include <utility>
 #include <functional>
+#include <memory>
 
 #if __has_include(<string_view>)
 #   include <string_view>
