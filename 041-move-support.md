@@ -132,6 +132,8 @@ Integer operator -() const
 // operator +()の実装は省略
 ~~~
 
+単行演算子`operaotr -`は`*this`を書き換えない。負数にした値のコピーを返す。
+
 
 変数`result`は`return文`の後は使われないので、`return std::move(result)` と書くこともできる。しかし、そのように書く必要はない。というのも`return文`は特別な扱いを受けているので、関数の中の変数を`return`した場合、自動でムーブが行われるからだ。もちろん、`std::move`を明示的に書いてもよい。
 
