@@ -509,6 +509,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="#shared_ptr">shared_ptr</a></li>
 </ul></li>
 <li><a href="#自作の数値クラスで演算をムーブに対応する方法">自作の数値クラスで演算をムーブに対応する方法</a><ul>
+<li><a href="#基本の実装">基本の実装</a></li>
 <li><a href="#複合代入演算子">複合代入演算子</a></li>
 <li><a href="#単行演算子">単行演算子</a></li>
 <li><a href="#二項演算子-1">二項演算子</a><ul>
@@ -16388,7 +16389,7 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1513-2" data-line-number="2">{</a>
 <a class="sourceLine" id="cb1513-3" data-line-number="3">    <span class="dt">int</span> * ptr ;</a>
 <a class="sourceLine" id="cb1513-4" data-line-number="4">} ;</a></code></pre></div>
-<p>!## 基本の実装</p>
+<h2 id="基本の実装">基本の実装</h2>
 <p>まずは基本となるコンストラクターとデストラクター、コピー、ムーブを実装しよう。</p>
 <div class="sourceCode" id="cb1514"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1514-1" data-line-number="1"><span class="kw">struct</span> Integer</a>
 <a class="sourceLine" id="cb1514-2" data-line-number="2">{</a>
