@@ -385,7 +385,7 @@ auto b = 123lu ;
 // long long int
 long long a = 1 ;
 // unsigned long long int
-unsinged long long b = 1 ;
+unsigned long long b = 1 ;
 ~~~
 
 整数リテラルの値が`long型`でも表現できないときは、`long long`が使われる。`long long`でも表現できない場合は`unsigned long long`が使われる。

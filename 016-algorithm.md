@@ -641,7 +641,7 @@ auto count = []( auto first, auto last, auto pred )
 
 これまでのアルゴリズムは一つのイテレーターの範囲だけを扱ってきた。アルゴリズムの中には複数の範囲を取るものもある。
 
-`equal(first1, last1, first2, last2)`は`[first1,last1)`と`[first2, last2)`が等しい場合にtrueを返す。「等しい」というのは、要素の数が同じで、各要素がそれぞれ等しい場合を指す。
+`equal(first1, last1, first2, last2)`は`[first1, last1)`と`[first2, last2)`が等しい場合にtrueを返す。「等しい」というのは、要素の数が同じで、各要素がそれぞれ等しい場合を指す。
 
 ~~~cpp
 int main()
@@ -673,7 +673,7 @@ int main()
 
 実装は、まず要素数を比較し、等しくなければ`false`を返す。次に各要素を一つずつ比較し、途中で等しくない要素が見つかれば`false`を、最後まで各要素が等しければ`true`を返す。
 
-イテレーターの範囲`[first,last)`の要素数は`last-first`で取得できる。
+イテレーターの範囲`[first, last)`の要素数は`last-first`で取得できる。
 
 ~~~cpp
 int main()
@@ -1115,7 +1115,7 @@ auto generate_n = []( first, n, gen )
 auto last2 = remove( first, last, value ) ;
 ~~~
 
-この例では、`remove`は`[first,last)`から値`value`に等しい要素を取り除いたイテレーターの範囲を戻り値として返す。その戻り値が`last2`だ。`[first,last2)`が値を取り除いた後の新しいイテレーターの範囲だ。
+この例では、`remove`は`[first, last)`から値`value`に等しい要素を取り除いたイテレーターの範囲を戻り値として返す。その戻り値が`last2`だ。`[first, last2)`が値を取り除いた後の新しいイテレーターの範囲だ。
 
 `remove`を呼び出しても元のvectorの要素数が変わることはない。`remove`はvectorの要素の値を変更するだけだ。
 
@@ -1143,7 +1143,7 @@ int main()
 }
 ~~~
 
-`remove_if(first, last, pred)`は、`[first,last]`の範囲の要素を指すイテレーター`i`のうち、関数`pred`に渡した結果`pred(*i)`が`true`になる要素を取り除くアルゴリズムだ。
+`remove_if(first, last, pred)`は、`[first, last]`の範囲の要素を指すイテレーター`i`のうち、関数`pred`に渡した結果`pred(*i)`が`true`になる要素を取り除くアルゴリズムだ。
 
 ~~~cpp
 int main()

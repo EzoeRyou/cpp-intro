@@ -9,9 +9,9 @@
 ~~~c++
 T source ;
 // コピー構築
-T a = soruce ;
+T a = source ;
 T b( source ) ;
-T c{ soruce ) ;
+T c{ source ) ;
 
 T e ;
 // コピー代入
@@ -33,9 +33,9 @@ std::vector<int> destination = source ;
 ~~~c++
 T source ;
 // ムーブ構築
-T a = std::move(soruce) ;
+T a = std::move(source) ;
 T b( std::move(source) ) ;
-T c{ std::move(soruce) ) ;
+T c{ std::move(source) ) ;
 
 T e ;
 // ムーブ代入
@@ -89,7 +89,7 @@ int main()
 {
     std::vector<int> v ;
     std::vector<int> w = {1,2,3,4,5} ;
-    v = std::mvoe(w) ;
+    v = std::move(w) ;
     // 要素数5
     w.resize(5) ;
     // 妥当に使える

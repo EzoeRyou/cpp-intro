@@ -192,7 +192,7 @@ int main()
 
     v.push_back(0) ;
 
-    // std::siz_t型
+    // std::size_t型
     std::size_t index = 0 ;
     v.at( index ) ;
 }
@@ -334,7 +334,7 @@ vectorの変数をv、要素数をsizeとする。変数minには現在わかっ
 ~~~cpp
 int main()
 {
-    // vecotrの変数をv
+    // vectorの変数をv
     std::vector<int> v = { 8, 3, 7, 4, 2, 9, 3 } ;
     // 要素数をsizeとする
     std::size_t size = v.size() ;

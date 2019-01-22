@@ -255,7 +255,7 @@ int main()
     // 構築
     std::string * s = traits::construct( a, p, "hello") ;
     // 破棄
-    traits::destory( a, s ) ;
+    traits::destroy( a, s ) ;
     // メモリ解放
     traits::deallocate( a, p, 1 ) ;
 }
@@ -379,7 +379,7 @@ publicメンバーはクラスの外から使うことができる。
 ~~~cpp
 struct C
 {
-pubilc :
+public :
     int data_member ;
     void member_function() { }
 } ;
@@ -465,7 +465,7 @@ public :
     dynamic_int( int value = 0  )
         : ptr( new int(value) )
     { }
-    ~dyamic_int()
+    ~dynamic_int()
     {
         delete ptr ;
     }
