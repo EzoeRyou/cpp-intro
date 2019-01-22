@@ -116,7 +116,8 @@ Integer & operator -=( const Integer & r )
 ~~~c++
 Integer a(10) ;
 auto b = -a ;
-// これは二項演算子 operator +
+// これは二項演算子 operator +の結果に
+// 単行演算子operator -を適用
 auto c = -(a + a) ;
 ~~~
 
@@ -196,7 +197,7 @@ auto c = temp2 ;
 Integer a ;
 auto c = a ;
 c += a ;
-c -= c ;
+c.make_it_negative() ;
 ~~~
 
 こんなコードを書くのは面倒だ。単に`-(a+a)`と書いて効率的に動いてほしい。そのために単行演算子`operator -`をムーブに対応させる。
@@ -286,7 +287,7 @@ int main()
 }
 ~~~
 
-C++にはconst修飾と同様に、「リファレンス修飾」という機能がある。これを使えば隠し引数THISにlvalue/rvalueリファレンスの修飾ができる。
+C++にはconst修飾と同様に、「リファレンス修飾」という機能がある。これを使えば隠し引数にlvalue/rvalueリファレンスの修飾ができる。
 
 ~~~cpp
 struct X
@@ -392,7 +393,19 @@ public :
 } ;
 ~~~
 
-rvalueリファレンス修飾子を使った単行演算子`operator -`の実装は、`*this`自身がrvalueであるので、自分自身をムーブしている。ムーブ以降、`this->ptr`は`nullptr`になる。
+rvalueリファレンス修飾子を使った単行演算子`operator -`の実装は、`*this`自身がrvalueであるので、自分自身をムーブしている。ムーブ以降、`this->ptr`は`nullptr`になる。なぜならば、`Integer`のムーブ代入演算子がそのような実装になっているからだ。
+
+~~~c++
+/// 上で示したのと同じムーブ代入演算子の抜粋
+Integer operator =( Integer && r )
+{
+    delete ptr ;
+    ptr = r.ptr ;
+    // ムーブ元のポインターをnullptrにする
+    r.ptr = nullptr ;
+    return *this ;
+}
+~~~
 
 
 
