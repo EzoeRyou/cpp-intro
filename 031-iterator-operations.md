@@ -249,7 +249,7 @@ void f( BidirectionalIterator i )
 と書ける。この操作は前方イテレーターにはできない。
 
 
-1個づつ移動できるのであれば、イテレーターをn個進めることもできそうなものだ。実際、双方向イテレーターを以下のようにしてn個進めることができる。
+1個ずつ移動できるのであれば、イテレーターをn個進めることもできそうなものだ。実際、双方向イテレーターを以下のようにしてn個進めることができる。
 
 ~~~cpp
 template < typename BidirectionalIterator >
@@ -443,7 +443,7 @@ int main()
 {
     using iterator = std::vector<int>::iterator ;
     bool b = is_category_of< std::forward_iterator_tag, iterator >() ;
-    // vecotrのイテレーターはランダムアクセスイテレーターなので前方イテレーターでもある
+    // vectorのイテレーターはランダムアクセスイテレーターなので前方イテレーターでもある
     std::cout << b ;
 }
 ~~~

@@ -711,9 +711,9 @@ vector & operator = ( const vector & r )
 
     // 2. 要素数が同じならば
     if ( size() == r.size() )
-        {   // 要素ごとにコピー代入
-            std::copy( r.begin(), r.end(), begin() ) ;
-        }
+    {   // 要素ごとにコピー代入
+        std::copy( r.begin(), r.end(), begin() ) ;
+    }
     // 3. それ以外の場合で
     else 
         // 予約数が十分ならば、

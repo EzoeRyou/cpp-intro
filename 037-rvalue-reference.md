@@ -158,7 +158,7 @@ lvalue     xvalue   prvalue
 
 lvalueはすでに説明したとおり名前付きのオブジェクトのことだ。
 
-~~c++
+~~~c++
 // lvalue
 int object ;
 int & ref = object ;
@@ -168,7 +168,7 @@ int & ref = object ;
 
 ### prvalue
 
-pvalueは純粋なrvalue(pure rvalue)のことだ。名前無しのオブジェクト、計算結果の一時オブジェクトのことだ。
+prvalueは純粋なrvalue(pure rvalue)のことだ。名前無しのオブジェクト、計算結果の一時オブジェクトのことだ。
 
 ~~~c++
 int f() { return 0 ; }
@@ -209,7 +209,7 @@ xvalueとなる値は以下のような場合だ。
 + 戻り値の型がオブジェクトの型へのrvalueリファレンスである関数の呼び出しの結果。
 
 ~~~cpp
-int && f() { retgurn 0 ; }
+int && f() { return 0 ; }
 
 int main()
 {
@@ -298,7 +298,7 @@ prvalueはもともとrvalueである。
 
 ### glvalue
 
-glvalueは一般的なlvalue(generalizd lvalue)という意味だ。glvalueとは、lvalueかxvalueのことだ。
+glvalueは一般的なlvalue(generalized lvalue)という意味だ。glvalueとは、lvalueかxvalueのことだ。
 
 lvalueから変換したxvalueはもともとlvalueだったのだから、glvalueとなるのも自然だ。xvalueに変換したprvalueはglvalueになれる。
 
@@ -425,7 +425,7 @@ int main()
 }
 ~~~
 
-`f(0)`はprvalueを渡している。この場合、`T`の型は`int`となる。`A`は`int &`、`B`は`init &&`となる。
+`f(0)`はprvalueを渡している。この場合、`T`の型は`int`となる。`A`は`int &`、`B`は`int &&`となる。
 
 `f(lvalue)`はlvalueを渡している。この場合、`T`の型は`int &`となる。この場合の`T`に`&`や`&&`をつけても無視される。なので、`A`, 'B'の型はどちらも`int &`になる。
 
@@ -462,7 +462,7 @@ int & move( int & t ) noexcept
 この問題は別のライブラリによって解決できる。
 
 
-### std::removereference_t<T>
+### std::remove_reference_t<T>
 
 `std::remove_reference_t<T>`は`T`型からリファレンス型を除去してくれるライブラリだ。
 
@@ -488,13 +488,13 @@ void f()
 }
 ~~~
 
-`add_pointer_t/remove_pointer_t`があるように、`remove_reference_t`にも対となるリファレンスを追加するライブラリが存在する。ただしリファレンスにはlvalueリファレンスとrvalueリファレンスがあるので、それぞれ`std::add_lvalue_refrence_t<T>`、`std::add_rvalue_reference_t<T>`となっている。
+`add_pointer_t/remove_pointer_t`があるように、`remove_reference_t`にも対となるリファレンスを追加するライブラリが存在する。ただしリファレンスにはlvalueリファレンスとrvalueリファレンスがあるので、それぞれ`std::add_lvalue_reference_t<T>`、`std::add_rvalue_reference_t<T>`となっている。
 
 ~~~cpp
 int main()
 {
     // int &
-    using A = std::add_lvalue_refrence_t<int> ;
+    using A = std::add_lvalue_reference_t<int> ;
     // int &&
     using B = std::add_rvalue_reference_t<int> ;
 }

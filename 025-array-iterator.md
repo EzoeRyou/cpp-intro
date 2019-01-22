@@ -178,7 +178,7 @@ array_iterator_begin::operator * ()
 
 array側の実装にはまだ現時点では完全に理解できない黒魔術が必要だ。
 
-~~~cp
+~~~cpp
 template < typename T, std::size_t N >
 struct array
 {
@@ -1012,7 +1012,7 @@ int main()
     // constなオブジェクトは変更できない
     ++iter ;
 
-    // Ok
+    // OK
     // iterは変更していない
     auto next_iter = iter + 1 ;
 }
