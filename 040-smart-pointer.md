@@ -240,7 +240,7 @@ bool is_equal_to_last_ptr( std::shared_ptr<int> ptr )
 int main()
 {
     auto p1 = std::make_shared<int>(1) ;
-    autp p2 = std::make_shared<int>(2) ;
+    auto p2 = std::make_shared<int>(2) ;
 
     // true
     is_equal_to_last_ptr( p1 ) ;
