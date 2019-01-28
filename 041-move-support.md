@@ -133,12 +133,12 @@ Integer operator -() const
 // operator +()の実装は省略
 ~~~
 
-単行演算子`operaotr -`は`*this`を書き換えない。負数にした値のコピーを返す。
+単項演算子`operator -`は`*this`を書き換えない。負数にした値のコピーを返す。
 
 
 変数`result`は`return文`の後は使われないので、`return std::move(result)` と書くこともできる。しかし、そのように書く必要はない。というのも`return文`は特別な扱いを受けているので、関数の中の変数を`return`した場合、自動でムーブが行われるからだ。もちろん、`std::move`を明示的に書いてもよい。
 
-単行演算子`operator -`は`*this`がlvalueのときには上のように実装するしかない。しかしこの実装は非効率的だ。なぜならば、コードを読めばわかるように、追加の一時変数が生成され、追加の動的メモリ確保が行われるからだ。
+単項演算子`operator -`は`*this`がlvalueのときには上のように実装するしかない。しかしこの実装は非効率的だ。なぜならば、コードを読めばわかるように、追加の一時変数が生成され、追加の動的メモリ確保が行われるからだ。
 
 そのため、もしクラス`Integer`がコピーしか実装していない場合、
 
@@ -596,7 +596,7 @@ class Integer
 Integer operator + ( const Integer & l, const Integer & r ) ;
 // rvalue + lvalue
 Integer operator + ( Integer && l, const Integer & r ) ;
-// lvaue + rvalue
+// lvalue + rvalue
 Integer operator + ( const Integer & l, Integer && r ) ;
 // rvalue + rvalue
 Integer operator + ( Integer && l, Integer && r ) ;
