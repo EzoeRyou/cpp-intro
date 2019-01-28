@@ -107,7 +107,7 @@ int main()
 
 戻り値の型がint型のラムダ式を呼び出す式`[]{ return 0 ; }()`を評価した結果はprvalueなのでrvalueと表示される。
 
-`std::move(object)`を評価したけかはxvalueなのでrvalueと表示される。
+`std::move(object)`を評価した結果はxvalueなのでrvalueと表示される。
 
 prvalueは無名の一時オブジェクトなので、その値はすぐに破棄される。どうせ破棄されるのであれば、所有権を横取りしてもよい。
 
@@ -230,7 +230,7 @@ destination = std::move(source) ;
 ~~~c++
 // 1. ムーブ先の所有権の解放
 delete destination.first ;
-// ムーブ先へ所有権の移動
+// 2. ムーブ先へ所有権の移動
 destination.first = source.first ;
 destination.last = source.last ;
 // 3. ムーブ元の所有権の放棄
