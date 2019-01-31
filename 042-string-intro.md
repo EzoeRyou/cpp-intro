@@ -239,7 +239,7 @@ char hex = "\x41" ;
 \UNNNNNNNNN
 ~~~
 
-文法は`\u`に続いて16進数を4文字かくとこれはUnicodeコードポイントにおける`U+0000NNN`になる。`\U`に続いて16進数を8文字書くと、これはUnicodeコードポイントにおける`U+NNNNNNNN`になる。
+文法は`\u`に続いて16進数を4文字書くとこれはUnicodeコードポイントにおける`U+0000NNN`になる。`\U`に続いて16進数を8文字書くと、これはUnicodeコードポイントにおける`U+NNNNNNNN`になる。
 
 
 
@@ -362,7 +362,7 @@ UTF-32の文字型は`char32_t`でエンコードプレフィクスは`U`。
 ~~~c++
 char8_t  utf8   = u8'a' ;
 char16_t utf16  = u'あ' ;
-char32_t utf32  = I'あ' ;
+char32_t utf32  = U'あ' ;
 ~~~
 
 UTF-8文字型である`char8_t`はUTF-8の1単位なので、UTF-8の1単位で表現できる文字しか表現できない。
@@ -433,7 +433,7 @@ char8_t ga2[7] = { 0xe3, 0x81, 0x8b, 0xe3, 0x82, 0x99, 0x0 } ;
 
 変数`ga1, ga2`はどちらもUnicodeとして正しい「が」という1文字の表現だ。Unicodeでは複数のコードポイントで1文字を表現することもあるし、意味的に表示的に同じ文字に対して複数の表現方法がある。
 
-Apple macOSはUnicodeの正規化として一般的なNFC(Canonical Compoosition)ではなくNormalization Form D(NFD)を使っているので、濁点や半濁点は必ず分解される。Apple macOSでは変数`ga2`が一般的な表現で、それ以外の環境では`ga1`が一般的な表現だ。
+Apple macOSはUnicodeの正規化として一般的なNFC(Canonical Composition)ではなくNormalization Form D(NFD)を使っているので、濁点や半濁点は必ず分解される。Apple macOSでは変数`ga2`が一般的な表現で、それ以外の環境では`ga1`が一般的な表現だ。
 
 Unicodeにはこれ以外にも様々な機能がある。ここでは日本語を扱う際によくある注意点を説明したが、他にも絵文字、デーヴァナーガリー（ヒンディー語、マラーティー語、ネパール語）、アラビア文字、ヘブライ文字など扱いの難しい文字がたくさんある。
 
