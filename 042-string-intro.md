@@ -439,6 +439,11 @@ Apple macOSはUnicodeの正規化として一般的なNFC(Canonical Compoosition
 
 Unicodeの奇妙で面白い例は枚挙に暇がない。ここでは日本語を扱う際によくある注意点を説明したが、他にも絵文字、デーヴァナーガリー（ヒンディー語、マラーティー語、ネパール語）、モンゴル文字、アラビア文字、ヘブライ文字など扱いの難しい文字がたくさんある。
 
+重要な点をまとめると、
+
++ 文字型の1つのオブジェクトは1文字ではない
++ 1コードポイントは1文字ではない
+
 ## 生文字列リテラル
 
 エスケープシーケンスは文法上の理由で直接ソースコード上に記述することができない文字を文字りてらると文字列リテラルに記述できる機能だ。
@@ -512,4 +517,102 @@ R"(
 "\n\'は単一引用符\n\"は二重引用符\n\\nは改行文字\n"
 ~~~
 
+## 文字列の表現方法
 
+文字列というのは文字型の配列で表現される。文字列を表現するには、配列の先頭へのポインターと配列のサイズが必要になる。
+
+### null終端文字列
+
+C++の文字列リテラルは、末尾にnull文字が付与されたconstな文字型への配列だ。
+
+~~~c++
+"abc" ;
+~~~
+
+という文字列リテラルは型とその値としては
+
+~~~c++
+const char st[4] = { 'a', 'b', 'c', '\0' } ;
+~~~
+
+になる。
+
+null終端文字列とはC言語から使われている文字列の表現方法だ。文字型の配列の末尾にnull文字を番兵として配置することで文字列の終端を表現している。C言語では文字列は文字型へのポインターとして表現される。ポインターが指す配列のサイズはわからないが、妥当な文字列はnull終端されているので、ポインターをインクリメントしていけばいずれnull文字が現れる。底が文字列の終わりだ。これによって文字列のサイズもわかる。
+
+例えば、以下はC言語でよく書かれる典型的文字列を処理する関数だ。
+
+~~~cpp
+void process_string( const char * str )
+{
+    // strが指す配列のサイズを取得
+    auto str_size = std:strlen( str ) ;
+    // 残りの処理
+}
+~~~
+
+`std::strlen`はポインターが指し示すnull終端された配列のnull文字を除くサイズを返す。以下のような実装だ。
+
+~~~c++
+std::size_t strlen( const char * s )
+{
+    auto i = s ;
+    while ( *i != '\0' )
+    { ++i ; }
+    return i - s ;
+} 
+~~~
+
+ここで言う「文字列のサイズ」とは、ポインターが指し示す文字型の配列の要素数であって、文字数ではない。
+
+null終端文字列は文字型へのポインター1つだけなので取り回しがよい。ただし、文字列のサイズは実行時に文字列の先頭から末尾までイテレートして計算しなければならない。これは文字列の長さに比例したオーダー`O(N)`の処理量がかかる。
+
+### std::basic_string<CharT>
+
+今まで文字列の方として使ってきた`std::string`は、実はクラステンプレートで実装されている。
+
+~~~c++
+namespace std {
+    template<
+        typename charT,
+        typename traits = char_traits<charT>,
+        typename Allocator = allocator<charT>
+    >
+    class basic_string
+    {
+    } ;
+
+}
+~~~
+
+テンプレートパラメーターのうち、`charT`が文字型、`traits`は文字を処理するための補助的なライブラリ、`Allocator`がアロケーターだ。
+
+これに対し、以下のようなエイリアスが存在する。
+
+~~~c++
+namespace std {
+    using string    = basic_string<char> ;
+    using u8string  = basic_string<char8_t> ;
+    using u16string = basic_string<char16_t> ;
+    using u32string = basic_string<char32_t> ;  
+    using wstring   = basic_string<wchar_t> ;
+}
+~~~
+
+それぞれの文字型に対応した`basic_string`のクラスだ。
+
+これに対して、ユーザー定義リテラルという機能を使い、文字列リテラルのサフィックスに`s`をつけることで、文字列リテラルを対応する`basic_string`のクラス型に変換できる。
+
+~~~cpp
+// string
+auto str    = "hello"s ;
+// u8string
+auto u8str  = u8"hello"s ;
+// u16string
+auto u16str = u"hello"s ;
+// u32string
+auto u32str = U"hello"s ;
+// wstring
+auto wstr   = L"hello"s ;
+~~~
+
+`basic_string`は
