@@ -577,10 +577,7 @@ namespace std {
         typename traits = char_traits<charT>,
         typename Allocator = allocator<charT>
     >
-    class basic_string
-    {
-    } ;
-
+    class basic_string ;
 }
 ~~~
 
@@ -615,4 +612,195 @@ auto u32str = U"hello"s ;
 auto wstr   = L"hello"s ;
 ~~~
 
-`basic_string`は
+ユーザー定義リテラルの詳細については本書では詳しく説明しないが、演算子のオーバーロードと同じだ。演算子をオーバーロードするようにリテラル演算子をオーバーロードする。
+
+~~~c++
+std::string operator ""s( const char * ptr, std::size_t n )
+{ return std::string( ptr, n ) ; }
+std::u8string operator ""s( const char8_t * ptr, std::size_t n )
+{ return std::u8string( ptr, n ) ; }
+std::u16string operator ""s( const char16_t * ptr, std::size_t n )
+{ return std::u16string( ptr, n ) ; }
+std::u32string operator ""s( const char32_t * ptr, std::size_t n )
+{ return std::u32string( ptr, n ) ; }
+std::wstring operator ""s( const wchar_t * ptr, std::size_t n )
+{ return std::wstring( ptr, n ) ; }
+~~~
+
+ユーザー定義リテラルを正しく実装するには複雑なルールがある。例えばユーザー定義のサフィックス名はアンダースコア1つから始まっていなければならないなどだ。
+
+~~~c++
+// OK
+int operator "" _abc( unsigned long long int ) ;
+// エラー、アンダースコア1つから始まっていない
+int operator ""abc( unsigned long long int ) ;
+~~~
+
+これは将来の拡張のためにアンダースコアから始まらないサフィックス名をC++規格が予約しているためだ。
+
+`basic_string`による文字列の表現方法は、文字型配列の先頭要素へのポインター、文字型配列のサイズ、アロケーターだ。
+
+
+~~~c++
+template <
+    typename charT,
+    typename traits = char_traits<charT>,
+    typename Allocator = allocator<charT>
+>
+class basic_string
+{
+    charT * ptr ;
+    std::size_t size ;
+    Allocator alloc ;
+} ;
+~~~
+
+あるいは、配列のサイズを表現するために、配列の最後の要素の1つ次のポインターを使っているかもしれない。
+
+~~~c++
+    CharT * ptr ;
+    CharT * last ;
+    Allocator alloc ;
+~~~
+
+`std::vector`と同じで、どちらのほうが効率がいいかはアーキテクチャにより異なる。
+
+`basic_string`は文字列を表現するためのストレージを所有するクラスだ。コンストラクターでストレージを動的確保し、デストラクターで解放する。
+
+~~~cpp
+int main()
+{
+    // 少なくともchar [5]を格納できるだけのストレージを動的確保する
+    std::string hello("hello") ;
+    // helloが破棄される
+    // デストラクターはストレージを解放する。
+}
+~~~
+
+コピーはストレージの動的確保、ムーブはストレージの所有権の移動になる。
+
+~~~cpp
+int main()
+{
+    std::string s1 = "hello" ;
+    // コピー、動的確保
+    std::string s2 = s1 ;
+    // ムーブ、所有権の移動
+    std::string s3 = std::move(s1) ;
+}
+~~~
+
+### std::basic_string_view<CharT>
+
+`basic_string_view`はストレージを所有しないクラスだ。以下のような宣言になる。
+
+~~~c++
+namespace std {
+    template <
+        typename charT,
+        typename traits = char_traits<charT>
+    >
+    class basic_string_view ;
+}
+~~~
+
+その実装は文字型へのポインター2つか、文字型へのポインターひとつと配列のサイズを保持する整数型になる。
+
+~~~c++
+    charT * first ;
+    charT * last ;
+~~~
+
+もしくは、
+
+~~~c++
+    charT * first ;
+    std::size_t size ;
+~~~
+
+`basic_string_view`には`basic_string`と対になる各文字型に対する特殊化がある。
+
+
+~~~c++
+namespace std {
+    using string_view    = basic_string_view<char> ;
+    using u8string_view  = basic_string_view<char8_t> ;
+    using u16string_view = basic_string_view<char16_t> ;
+    using u32string_view = basic_string_view<char32_t> ;  
+    using wstring_view   = basic_string_view<wchar_t> ;
+}
+~~~
+
+さらに、各`basic_string`に対するユーザー定義リテラルサフィックス`sv`がある。
+
+~~~cpp
+// string_view
+auto str    = "hello"sv ;
+// u8string_view
+auto u8str  = u8"hello"sv ;
+// u16string_view
+auto u16str = u"hello"sv ;
+// u32string_view
+auto u32str = U"hello"sv ;
+// wstring_view
+auto wstr   = L"hello"sv ;
+~~~
+
+`basic_string_view`は文字列がnull終端文字列と`basic_string`のどちらで表現されていても問題なく受け取るためのクラスだ。この2つの文字列の表現を別々に使う場合、文字列を受け取る関数は、
+
+~~~cpp
+void process_string( const char * s )
+{
+    // 文字列に対する処理
+}
+
+void process_string( const std::string & s )
+{
+    // 文字列に対する上と同じ処理
+}
+
+int main()
+{
+    auto null_terminated_string = "hello" ;
+    auto basic_string = "hello"s ;
+
+    // const char *
+    process_string( null_terminated_string ) ;
+    // const std::string &
+    process_string( basic_string ) ;
+}
+~~~
+
+のようにほとんど同じ関数を2つ書かなければならない。`basic_string_view`を使えば、
+
+~~~cpp
+void process_string( std::string_view s )
+{
+    // 文字列に対する処理
+}
+
+int main()
+{
+    auto null_terminated_string = "hello" ;
+    auto basic_string = "hello"s ;
+
+    // どちらも同じ関数を呼ぶ
+    process_string( null_terminated_string ) ;
+    process_string( basic_string ) ;
+}
+~~~
+
+のように、どちらの文字列表現を使っても1つの関数を書くだけですむ。
+
+`basic_string_view`はストレージを所有しないので関数の引数として使うときはリファレンスで取る必要はない。
+
+~~~cpp
+// リファレンスで取る必要はない
+void f( const std::string_view & ref ) 
+// これでいい
+void g( std::string_view obj ) ;
+~~~
+
+## 文字列の操作
+
+
