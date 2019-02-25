@@ -803,4 +803,321 @@ void g( std::string_view obj ) ;
 
 ## 文字列の操作
 
+### null終端文字列の操作。
+
+null終端文字列は文字列の先頭となる文字型へのポインター型のオブジェクトひとつで表現されるので、文字型の配列のサイズを取得するにも、いちいちnull文字が見つかるまでポインターをインクリメントしていく必要がある。この処理をやってくれるのが`std::strlen`だ。
+
+~~~cpp
+void f( const char * ptr )
+{
+    auto size = std::strlen( ptr ) ;
+}
+~~~
+
+文字列リテラルの型はconstな文字型の配列なので、文字列を変更することができない。
+
+~~~c++
+const char * ptr = "abc" ;
+// エラー
+ptr[0] = 'x' ;
+~~~
+
+文字型への配列ならば変更できる。
+
+~~~cpp
+int main()
+{
+    char s[] = "abc" ;
+    s[0] = 'x' ;
+    // sは{'x','b','c','\0'}
+}
+~~~
+
+文字の長さを短くしたい場合は、終端をnull文字にする。
+
+~~~cpp
+int main()
+{
+    char s[] = "abc" ;
+    s[1] = '\0' ;
+    // sは{'a','\0', 'c','\0'}
+}
+~~~
+
+この変数`s`の型は`char [4]`だが、null終端文字列としてのサイズは1だ。
+
+文字列のサイズを長くするには、当然大きな配列が必要になる。
+
+~~~cpp
+int main()
+{
+    char s[10] = "abc" ;
+    s[3] = 'd' ;
+    s[4] = 'e' ;
+    s[5] = 'f' ;
+    s[6] = '\0' ;
+}
+~~~
+
+このコードで、変数`s`は最終的に`"abcdef"`という文字列になる。最後のnull文字による終端を忘れてはならない。
+
+ここで、配列`s`の要素数は7以上でなければならない。最終的なnull終端文字列を表現するには最低でも`char [7]`が必要だからだ。
+
+例えば2つのnull終端文字列を結合する場合で、どちらもconstであったり、十分なサイズがなかった場合、2つの文字列を保持できるサイズのメモリを確保して、コピーしなければならない。
+
+~~~cpp
+// s1, s2を結合して使う関数
+void concat_str( const char *  s1, const char * s2 )
+{
+    // 2つの文字列のサイズの合計 + null文字
+    auto size = std::strlen( s1 ) + std::strlen( s2 ) + 1 ;
+    // 文字列を保持するメモリを確保する
+    char * ptr = new char[size] ;
+
+    char * i = ptr ;
+    // s1をコピー
+    while ( *s1 != '\0' )
+    {
+        *i = *s1 ;
+        ++i ; ++s1 ;
+    }
+    // s2をコピー
+    while ( *s2 != '\0' )
+    {
+        *i = *s2 ;
+        ++i ; ++s2 ;
+    }
+    // null終端する
+    *i = '\0' ;
+
+    // 結合した文字列を使う
+
+    // 使い終わったのでメモリを解放する
+    delete[] ptr ;
+}
+~~~
+
+C言語の標準ライブラリにはnull終端文字列を扱うためのライブラリが多数ある。C言語の標準ライブラリを使えば、上のコードは以下のように書ける。
+
+~~~cpp
+void concat_str( const char *  s1, const char * s2 )
+{
+    auto size = std::strlen( s1 ) + std::strlen( s2 ) + 1 ;
+    char * ptr = new char[size] ;
+
+    // s1をptrにコピー
+    std::strcpy( ptr, s1 ) ;
+    // ptrとs2を結合
+    std::strcat( ptr, s2 ) ;
+
+    delete[] ptr ;
+}
+~~~
+
+
+
+### basic_stringの操作
+
+`basic_string`はストレージを所有するクラスだ。ストレージの解放と確保を自動でやってくれる上に、便利な操作がたくさんある。
+
+例えば上の`concat_str`を`basic_string`で実装すると以下のようになる。
+
+~~~cpp
+void concat_str( const char *  s1, const char * s2 )
+{
+    std::string s = s1 ;
+    s += s2 ;
+
+    // sを使う
+    // sは自動的に破棄される
+}
+~~~
+
+C++の作法に従って、引数`s1, s2`をnull終端文字列文字型ではなく、`basic_string_view`にすると以下のようになる。
+
+~~~cpp
+void concat_str( std::string_view s1, std::string_view s2 )
+{
+    std::string s = s1 ;
+    s += s2 ;
+
+    // sを使う
+    // sは自動的に破棄される
+}
+~~~
+
+`basic_string`はnull終端文字列、`basic_string_view`、`basic_string`で初期化、代入できる。
+
+~~~cpp
+// null終端文字列
+std::string s1("hello") ;
+// basic_string_view
+std::string s2("hello"sv) ;
+// basic_string
+std::string s3("hello"s) ;
+~~~
+
+`basic_string`は`operator +`で文字列を結合できる。
+
+~~~c++
+// "foobar"
+auto s = "foo"s + "bar"s ;
+~~~
+
+`operator +=`は第一オペランドを書き換える。
+
+~~~cpp
+auto s = "foo"s ;
+s += "bar"s ;
+// sは"foobar"
+~~~
+
+`basic_string`にはイテレーターがある。イテレーターの取得方法は`std::vector`と同じだ。
+
+~~~cpp
+int main()
+{
+    auto s = "hello"s ;
+    for ( auto i = s.begin() ; i != s.end() ; ++i )
+    {
+        std::cout << *i ;
+    }
+}
+~~~
+
+これは以下のようにも書ける。
+
+~~~c++
+for ( auto i = std::begin(s) ; i != std::end(s) ; ++i )
+{
+    std::cout << *i ;
+}
+~~~
+
+イテレーターがあるので、`basic_string`は汎用的なアルゴリズムに渡すことができる。例えばある文字列がその一部の別の文字列を含むかどうかを調べる場合、以下のように書ける。
+
+~~~cpp
+int main()
+{
+    auto text = "quick brown fox jumps over the lazy dog."s ;
+    auto word = "fox"s ;
+
+    auto i = std::search( std::begin(text), std::end(text), std::begin(word), std::end(word) ) ;
+
+    if ( i != std::end(text) )
+        std::cout << "fox found!\n"sv ;
+    else
+        std::cout << "no fox...\n"sv ;
+}
+~~~
+
+イテレーターを使うのは煩わしいが、C++20ではRangeライブラリが追加され、以下のように書ける予定だ
+
+~~~c++
+auto r = std::ranges::search( text, word ) ;
+if ( !std::ranges::empty(r) )
+    // ...
+~~~
+
+名前空間を省くと、`!empty( search( text, word) )` になるが、これでもまだ分かりづらい。そこで`basic_string::find`がある。これは`<algorithm>`の`std::find`とは別物で、文字列から部分文字列を探し、その部分文字列に一致する文字へのインデックスを返す。
+
+~~~cpp
+int main()
+{
+    auto text = "quick brown fox jumps over the lazy dog."s ;
+
+    // 12
+    auto fox = text.find("fox"sv) ;
+    // 32
+    auto dog = text.find("dog"sv) ;
+}
+~~~
+
+文字列`"fox"`に一致する部分文字列の先頭`'f'`の文字型の値へのインデックスは12で、`"dog"`の`'d'`は36だ。この結果は、上のソースコードに使っている文字が1文字につき1文字型の値を使うためだ。通常は文字数と連続した文字型の要素へのインデックスは等しくならない。
+
+
+
+
+例えば以下のコードを実行すると、
+
+~~~cpp
+
+int main()
+{
+    auto text = u8"すばしっこい茶色の狐がノロマな犬を飛び越した。"s ;
+
+    auto fox = text.find(u8"狐"sv) ;
+    auto dog = text.find(u8"犬"sv) ;
+
+    std::cout << "fox: "sv << fox << "\n"sv
+            << "dog: "sv << dog ;
+}
+~~~
+
+以下のように出力される。
+
+~~~
+fox: 27
+dog: 45
+~~~
+
+もし部分文字列が見つからない場合、`basic_string::npos`が返る。`npos`は"no position"という意味で、`-1`と等しい。
+
+
+~~~cpp
+int main()
+{
+    auto text = "quick brown fox jumps over the lazy dog."s ;
+
+    // 見つからない場合はnposが返る。   
+    auto index = text.find("abc"sv) ;
+
+    // 見つからなかった判定
+    if ( index != std::string::npos )
+        // 見つかった
+        std::cout << "found." ;
+    else
+        // 見つからなかった
+        std::cout << "not found." ;
+}
+~~~
+
+この場合、変数`text`に文字列`"abc"`はないので、`npos`が返る。`npos`が返ったかどうかは`npos`と比較すればわかる。`npos`は`-1`と等しいので、以下のようにも書ける。
+
+~~~c++
+if ( index != -1 )
+    // ...
+~~~
+
+
+`find`の亜種として、`rfind`, `find_first_of`, `find_last_of`, `find_first_not_of`, `find_last_not_of`がある。
+
+`find`は最初の部分文字列を見つけるが、`rfind`は最後の部分文字列を見つける。
+
+~~~cpp
+int main()
+{
+    auto text = "word word word"s ;
+
+    // 0
+    auto first = text.find("word"sv) ;
+    // 10
+    auto last = text.rfind("word"sv) ;
+}
+~~~
+
+`find`は最初に一致した部分文字列の先頭へのインデックスを返すので、この場合`0`が返る。`rfind`は最後に見つかった部分文字列の先頭へのインデックスを返すので、この場合`10`になる。
+
+
+`size, resize, capacity, reserve, shrink_to_fit`といったおなじみのメンバー関数もある。
+
+~~~cpp
+int main()
+{
+    std::string s ;
+    s.size() ;
+    s.resize(10) ;
+}
+~~~
+
 
