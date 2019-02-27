@@ -187,7 +187,7 @@ void destroy_at( T * location )
 destroy_at( s ) ;
 ~~~
 
-このようなコードを書くのは面倒なので、標準ライブラリには`std::destory_at`がある。また、これらをひっくるめたあロケーターを使うためのライブラリである`allocator_traits`がある。
+このようなコードを書くのは面倒なので、標準ライブラリには`std::destory_at`がある。また、これらをひっくるめたアロケーターを使うためのライブラリである`allocator_traits`がある。
 
 ## `std::allocator_traits<Alloc>`
 
