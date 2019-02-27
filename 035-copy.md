@@ -315,7 +315,7 @@ public :
     ~own()
     { delete ptr ; }
 
-    T * get() { return ptr ; }
+    T * get() const { return ptr ; }
 
 } ;
 ~~~
