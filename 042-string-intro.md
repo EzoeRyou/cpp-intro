@@ -946,6 +946,8 @@ void concat_str( std::string_view s1, std::string_view s2 )
 }
 ~~~
 
+#### 初期化
+
 `basic_string`はnull終端文字列、`basic_string_view`、`basic_string`で初期化、代入できる。
 
 ~~~cpp
@@ -957,6 +959,8 @@ std::string s2("hello"sv) ;
 std::string s3("hello"s) ;
 ~~~
 
+#### 結合
+
 `basic_string`は`operator +`で文字列を結合できる。
 
 ~~~c++
@@ -966,11 +970,21 @@ auto s = "foo"s + "bar"s ;
 
 `operator +=`は第一オペランドを書き換える。
 
-~~~cpp
+~~~c++
 auto s = "foo"s ;
 s += "bar"s ;
 // sは"foobar"
 ~~~
+
+`basic_string::append(s)`というメンバー関数もある。
+
+~~~c++
+auto s = "foo"s ;
+s.append("bar"sv) ;
+// sは"foobar" 
+~~~
+
+#### イテレーター
 
 `basic_string`にはイテレーターがある。イテレーターの取得方法は`std::vector`と同じだ。
 
@@ -993,6 +1007,8 @@ for ( auto i = std::begin(s) ; i != std::end(s) ; ++i )
     std::cout << *i ;
 }
 ~~~
+
+#### 部分文字列の検索
 
 イテレーターがあるので、`basic_string`は汎用的なアルゴリズムに渡すことができる。例えばある文字列がその一部の別の文字列を含むかどうかを調べる場合、以下のように書ける。
 
@@ -1090,7 +1106,7 @@ if ( index != -1 )
 ~~~
 
 
-`find`の亜種として、`rfind`, `find_first_of`, `find_last_of`, `find_first_not_of`, `find_last_not_of`がある。
+`find`の亜種として、`rfind`がある。
 
 `find`は最初の部分文字列を見つけるが、`rfind`は最後の部分文字列を見つける。
 
@@ -1108,8 +1124,47 @@ int main()
 
 `find`は最初に一致した部分文字列の先頭へのインデックスを返すので、この場合`0`が返る。`rfind`は最後に見つかった部分文字列の先頭へのインデックスを返すので、この場合`10`になる。
 
+C++20では、`starts_with/ends_with`という2つの便利なメンバー関数が追加される。
 
-`size, resize, capacity, reserve, shrink_to_fit`といったおなじみのメンバー関数もある。
+`starts_with(str)`は文字列が部分文字列`str`で始まっている場合に`true`を返す。そうでない場合は`false`を返す。
+
+~~~c++
+int main()
+{
+    auto text = "aa bb cc"s ;
+
+    // true
+    bool b1 = text.starts_with("a"sv) ;
+    bool b2 = text.starts_with("aa"sv) ;
+    bool b3 = text.starts_with("aa "sv) ;
+
+    // false
+    bool b4 = text.starts_with("b"sv) ;
+    bool b5 = text.starts_with("aaa"sv) ;
+}
+~~
+
+`ends_with(str)`は文字列が部分文字列`str`で終わっている場合に`true`を返す。そうでない場合は`false`を返す。
+
+~~~c++
+int main()
+{
+    auto text = "aa bb cc"s ;
+
+    // true
+    bool b1 = text.ends_with("c"sv) ;
+    bool b2 = text.ends_with("cc"sv) ;
+    bool b3 = text.ends_with(" cc "sv) ;
+
+    // false
+    bool b4 = text.ends_with("b"sv) ;
+    bool b5 = text.ends_with("ccc"sv) ;
+}
+~~~
+
+#### その他のメンバー関数
+
+`size, empty, resize, capacity, reserve, shrink_to_fit, clear`といったおなじみのメンバー関数もある。
 
 ~~~cpp
 int main()
@@ -1117,7 +1172,188 @@ int main()
     std::string s ;
     s.size() ;
     s.resize(10) ;
+    s.clar() ;
 }
 ~~~
 
+#### 文字列の挿入
 
+文字列の挿入は`insert( pos, str )` で行える。
+
+`pos`は挿入場所へのインデックスで、`str`は挿入する文字列だ。
+
+文字列の先頭や末尾への挿入は以下のようになる。
+
+~~~cpp
+int main()
+{
+    auto text = "cat"s ;
+    text.insert( 0, "long "sv ) ;
+    // textは"long cat"
+    text.insert( text.size(), " is loong."sv ) ;
+    // textは"long cat is loong."
+}
+~~~
+
+末尾への挿入は文字列の結合と同じ効果だ。
+
+インデックスで中間に挿入するのは以下の通り。
+
+~~~cpp
+int main()
+{
+    auto text = "big cat"s ;
+    text.insert( text.find("cat"sv), "fat "sv ) ;
+    // textは"big fat cat"
+}
+~~~
+
+これは`text.find("cat"sv)`でまず部分文字列`"cat"`の先頭へのインデックスを探し、そこに文字列`"fat "`を挿入している。結果として変数`text`は`"big fat cat"`となる。
+
+#### 部分文字列の削除
+
+文字列から部分文字列を削除するには`erase( pos, n )`を使う。`pos`は削除すべき先頭のインデックスで、`n`は削除すべきインデックス数だ。
+
+~~~cpp
+int main()
+{
+    auto text = "dirty cat"s ;
+    auto dirty = "dirty "sv ;
+    text.erase( 0, dirty.size() ) ;
+    // textは"cat"
+}
+~~~
+
+このプログラムは文字列`"dirty cat"`から`"dirty "`を削除し、`"cat"`にする。
+
+~~~cpp
+int main()
+{
+    auto text = "big fat cat"s ;
+    auto fat = "fat "sv ;
+    text.erase( text.find(fat), fat.size() ) ;
+    // textは"big cat"
+}
+~~~
+
+このプログラムは文字列`"big fat cat"`から部分文字列`"fat"`を検索し、その先頭から変数`fat`のサイズ文の部分文字列を削除する。結果として変数`text`は`"big cat"`になる。
+
+先頭から末尾までを削除すると、`clear()`と同じ意味になる。
+
+~~~cpp
+int main()
+{
+    auto text = "abc"s ;
+    text.erase( 0, text.size() ) ;
+    // text.empty() == true
+}
+~~~
+
+#### 部分文字列の置換
+
+`replace( pos, n1, str )`を使うと、文字列のインデックス`pos`から`n1`個までの文字型の値を、文字列`str`で置き換える。
+
+~~~cpp
+int main()
+{
+    auto text = "ugly cat"s ;
+    auto ugly = "ugly"sv ;
+    auto pretty = "pretty"sv ;
+    text.replace( text.find(ugly), ugly.size(), pretty ) ;
+    // textは"pretty cat"
+}
+~~~
+
+このコードは、文字列`text`から部分文字列`"ugly"`を探し、その先頭へのインデックスと文字列`"ugly"`のサイズを指定することで、部分文字列`"ugly"`を、文字列`pretty`の値である`"pretty"`に置換する。結果として`text`は`"pretty cat"`になる。
+
+#### その他の推奨できない操作
+
+`basic_string`にはこの他に様々な、現代では推奨できない操作がある。
+
+例えば`operator []`で文字列をインデックスでアクセスできる。これは基本実行文字セットに対しては動く。
+
+~~~cpp
+int main()
+{
+    auto text = "abc"s ;
+    // 'a'
+    std::cout << text[0] ;
+    // 'b'
+    std::cout << text[1] ;
+
+    text[0] = 'x' ;
+    // textは"xbc"
+}
+~~~
+
+これは、`basic_string`が設計された時代は、1文字型は1文字を表現できるという前提が合ったからだ。
+
+現代の文字列の表現方法であるUnicodeとUTFによるエンコードではこの前提が成り立たない。例えば、最もよく使われているUTF-8の場合、いかのようになる。
+
+~~~cpp
+int main()
+{
+    auto text = u8"いろは"s ;
+    // 0xe3
+    auto c = text[0] ;
+}
+~~~
+
+`text`のインデックス`0`に当たる文字型の値は`u8`い``ではない。UTF-8は文字「い」を文字型1つで表現できないからだ。`u8"いろは"`というUTF-8文字列リテラルはすでに学んだように、以下のように表現される。
+
+~~~cpp
+// u8"いろは"
+char8_t iroha[10] = { 0xe3, 0x81, 0x84, 0xe3, 0x82, 0x8d, 0xe3, 0x81, 0xaf, 0x0 } ;
+~~~
+
+文字「い」をUTF-8で表現するためには、`char8_t`型の値が3つ必要で、`0xe3, 0x81, 0x84`というシーケンスでなければならない。そのため、個々の文字型の値をインデックスでアクセスしても意味がない。また、`size()`は文字数を返すのではなく、インデックス数を返す。
+
+`basic_string`にはリバースイテレーターを返す`rbegin/rend`もあるが、Unicodeでエンコードされた文字列では、複数の値のシークエンスで1文字を表現しているため、単に値単位で逆順のイテレートすることは、技術的には可能だが、意味的には壊れてしまう。
+
+`basic_string`には最初に発見したいずれかの文字へのインデックスを返す`find_first_of`がある。
+
+~~~cpp
+int main()
+{
+    auto text = "quick brown fox jumps over the lazy dog."s ;
+    // 3
+    auto i = text.find_first_of("abc"sv) ;
+}
+~~~
+
+`i`は3になる。なぜならば、`find_first_of("abc"sv)`はa, b, cのうちいずれかの文字である最初のインデックスを返すからだ。
+
+この機能はUnicodeでは使えない。というのも1文字型で1文字を表現できないからだ。
+
+### basic_string_viewの操作
+
+`basic_string_view`は`basic_string`とほぼ同じ操作が行える。ただし、`basic_string_view`は書き換えることができないので、一部の操作が使えない。`append, insert, erase, replace`は使えない。`basic_string_view`同士の`operator +`もない。
+
+
+C++20では、文字列の先頭と末尾を指定したインデックス数分削ることはできる。
+
+先頭を削るには`remove_prefix(i)`を使う。
+
+~~~c++
+int main()
+{
+    auto text = "quick brown fox jumps over the lazy dog." ;
+    text.remove_prefix( "quick "sv.size() ) ;
+    // textは"brown fox jumps over the lazy dog."
+    text.remove_prefix( "brown"sv.size() ) ;
+    // textは"fox jumps over the lazy dog."
+}
+~~~
+
+末尾を削るには`remove_suffix(i)`を使う。
+
+~~~c++
+int main()
+{
+    auto text = "quick brown fox jumps over the lazy dog." ;
+    text.remove_suffix( " dog."sv.size() ) ;
+    // textは"quick brown fox jumps over the lazy"
+    text.remove_suffix( " lazy".sv ) ;
+    // textは"quick brown fox jumps over the"
+}
+~~~
