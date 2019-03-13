@@ -25,7 +25,7 @@ book : docs/index.html
 
 
 docs/index.html : *.md style.css
-	pandoc -s --toc --toc-depth=6 --mathjax -o $@ -H style.css  pandoc_title_block *-*.md
+	pandoc -s --toc --toc-depth=6 "--mathjax=https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML" -o $@ -H style.css  pandoc_title_block *-*.md
 
 filter.json : *.md style.css
 	pandoc -t json -s --toc --toc-depth=6 --mathjax -o $@ -H style.css  pandoc_title_block *-*.md
