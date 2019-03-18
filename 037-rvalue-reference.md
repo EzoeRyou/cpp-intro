@@ -138,7 +138,7 @@ lvalueとrvalueを理解するには、値カテゴリーを理解しなけれ�
 
 1. 式(expression)とはglvalueかrvalueである
 2. glvalueとはlvalueかxvalueである
-3. rvalueとはprvalueかxvalueである。
+3. rvalueとはprvalueかxvalueである
 
 この関係を図示すると以下のようになる。
 
