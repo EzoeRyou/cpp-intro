@@ -207,7 +207,6 @@ std::uniform_int_distribution<unsigned int> d( 1, 6 ) ;
 ただし、乱数の結果の型を`unsigned int`にすると、生成した乱数を使うときに負数が出てくるような計算で問題になる。例えば6面ダイスを2回振り、1回目の出目から2回目の出目を引き算するコードを書いてみよう。
 
 ~~~cpp
-
 int main()
 {
     std::mt19937 e ;
@@ -449,7 +448,7 @@ int dice( Engine & e )
 
 ~~~cpp
 template < typename Engine >
-int dice( Engine & e )
+auto dice( Engine & e )
 {
     // ループを実行する
     while (true)
@@ -567,7 +566,7 @@ template < typename Engine >
 void f( Engine & e )
 {
     std::uniform_real_distribution d(0.0, 1.0 ) ;
-    0.0から1.0までの範囲の乱数
+    // 0.0から1.0までの範囲の乱数
     auto r = d(e) ;
 }
 ~~~
@@ -745,7 +744,7 @@ std::binomial_distributuion<T> d( t, p ) ;
 
 ~~~cpp
 template < typename Engine >
-unsigned int coinflips100( Engine & e )
+auto coinflips100( Engine & e )
 {
     // t == 100, p == 0.5
     std::binomial_distribution d( 100, 0.5 ) ;
@@ -778,7 +777,7 @@ int main()
 
 ~~~cpp
 template < typename Engine >
-unsigned int roll_for_one( Engine & e )
+auto roll_for_one( Engine & e )
 {
     // t == 60, p == 1.0/ 6.0
     std::binomial_distribution d( 60, 1.0 / 6.0 ) ;
@@ -793,7 +792,7 @@ unsigned int roll_for_one( Engine & e )
 
 ~~~cpp
 template < typename Engine >
-unsigned int lootbox( Engine & e )
+auto lootbox( Engine & e )
 {
     // t == 100, p = 0.01
     std::binomial_distribution d( 100, 1.0 / 100.0 ) ;
@@ -841,7 +840,7 @@ std::geometric_distribution<T> d( p ) ;
 
 ~~~cpp
 template < typename Engine >
-unsigned int try_coinflips( Engine & e )
+auto try_coinflips( Engine & e )
 {
     std::geometric_distribution d( 0.5 ) ;
     return d(e) + 1;
@@ -862,7 +861,7 @@ unsigned int try_coinflips( Engine & e )
 
 ~~~cpp
 template < typename Engine >
-unsigned int try_rolls( Engine & e )
+auto try_rolls( Engine & e )
 {
     std::geometric_distribution d( 1.0 / 6.0 ) ;
     return d(e) + 1;
@@ -939,7 +938,7 @@ std::negative_binomial_distribution<T> d( k, p ) ;
 // 10回表が出るまでに行ったコイントスの数
 // 表が出たコイントスも含める
 template < typename Engine >
-unsigned int count_10_coinflips( Engine & e )
+auto count_10_coinflips( Engine & e )
 {
     std::negative_binomial_distribution d( 10, 0.5 ) ;
     return d(e) + 10 ;
@@ -952,7 +951,7 @@ unsigned int count_10_coinflips( Engine & e )
 // 10回表が出るまでに行った失敗したコイントスの数
 // 表が出たコイントスは含めない
 template < typename Engine >
-unsigned int count_failed_coinflips_until_10_heads( Engine & e )
+auto count_failed_coinflips_until_10_heads( Engine & e )
 {
     std::negative_binomial_distribution d( 10, 0.5 ) ;
     return d(e) ;
@@ -963,7 +962,7 @@ unsigned int count_failed_coinflips_until_10_heads( Engine & e )
 
 ~~~cpp
 template < typename Engine >
-unsigned int count_n_coinflips( unsigned int n, Engine & e )
+auto count_n_coinflips( unsigned int n, Engine & e )
 {
     std::negative_binomial_distribution d( n, 0.5 ) ;
     return d(e) + n ;
@@ -974,7 +973,7 @@ unsigned int count_n_coinflips( unsigned int n, Engine & e )
 
 ~~~cpp
 template < typename Engine >
-unsigned int count_10_rolls( Engine & e )
+auto count_10_rolls( Engine & e )
 {
     std::negative_binomial_distribution d( 10, 1.0/6.0 ) ;
     return d(e) + 10 ;
@@ -985,7 +984,7 @@ unsigned int count_10_rolls( Engine & e )
 
 ~~~cpp
 template < typename Engine >
-unsigned int count_10_lootboxes( Engine & e )
+auto count_10_lootboxes( Engine & e )
 {
     std::negative_binomial_distribution d( 10, 0.01 ) ;
     return d(e) + 10 ;
