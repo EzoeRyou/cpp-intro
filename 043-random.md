@@ -204,6 +204,26 @@ $ ./dice
 std::uniform_int_distribution<unsigned int> d( 1, 6 ) ;
 ~~~
 
+ただし、乱数の結果の型を`unsigned int`にすると、生成した乱数を使うときに負数が出てくるような計算で問題になる。例えば6面ダイスを2回振り、1回目の出目から2回目の出目を引き算するコードを書いてみよう。
+
+~~~cpp
+
+int main()
+{
+    std::mt19937 e ;
+    std::uniform_int_distribution<unsigned int> d( 1, 6 ) ;
+    auto a = d(e) ; // 1回目
+    auto b = d(e) ; // 2回め
+
+    auto reuslt = a - b ; // 結果
+    std::cout << result ;
+}
+~~~
+
+もし2回目の出目の方が1回目の出目より大きかった場合、結果は負数になってしまうが、`unsigned int`型は負数を表現できない。
+
+そのため、通常は符号付きの整数型を使ったほうが安全だ。
+
 また、分布クラスのテンプレートパラメーターにはデフォルトテンプレート実引数が指定されているので、デフォルトでよければ省略することもできる。
 
 ~~~c++
@@ -211,7 +231,7 @@ std::uniform_int_distribution<unsigned int> d( 1, 6 ) ;
 std:uniform_int_distribution d( 1, 6 ) ;
 ~~~
 
-確かに動く。しかし毎回同じ出力になる。これでは実用的な6面ダイスプログラムとは言えない。
+ところで、上のコードは動くのだが、別のプログラムを実行しても毎回同じ出力になる。これでは実用的な6面ダイスプログラムとは言えない。プログラムの実行ごとに結果を買えたい場合、シードを設定する。
 
 ## シード
 
@@ -499,7 +519,7 @@ $$
 std::uniform_int_distribution<T> d(a, b) ;
 ~~~
 
-`T`は整数型、`a`は最小値、`b`は最大値。
+`T`は整数型でデフォルトは`int`、`a`は最小値、`b`は最大値。
 
 エンジンも含めた使い方は以下の通り
 
@@ -507,7 +527,7 @@ std::uniform_int_distribution<T> d(a, b) ;
 template < typename Engine >
 void f( Engine & e )
 {
-    std::uniform_int_distribution<int> d(1, 10) ;
+    std::uniform_int_distribution d(1, 10) ;
     // 1から10までの範囲の乱数
     auto r = d(e) ;
 }
@@ -516,7 +536,7 @@ void f( Engine & e )
 値の範囲には負数も使える。
 
 ~~~c++
-std::uniform_int_distribution<int> d( -3, 3 ) ;
+std::uniform_int_distribution d( -3, 3 ) ;
 ~~~
 
 この分布は、-3,-2,-1,0,1,2,3のいずれかをそれぞれ$\frac{1}{7}$の等しい確率で返す。
@@ -538,7 +558,7 @@ $$
 std::uniform_real_distribution<T> d( a, b ) ;
 ~~~
 
-`T`は浮動小数点数型、`a`は最小値、`b`は最大値。
+`T`は浮動小数点数型でデフォルトは`double`、`a`は最小値、`b`は最大値。
 
 エンジンも含めた使い方は以下の通り。
 
@@ -546,7 +566,7 @@ std::uniform_real_distribution<T> d( a, b ) ;
 template < typename Engine >
 void f( Engine & e )
 {
-    std::uniform_real_distribution<double> d(0.0, 1.0 ) ;
+    std::uniform_real_distribution d(0.0, 1.0 ) ;
     0.0から1.0までの範囲の乱数
     auto r = d(e) ;
 }
@@ -593,7 +613,7 @@ template < typename Engine >
 bool open_chest( Engine & e )
 {
     // 1から100までの整数の乱数を生成する
-    std::uniform_int_distribution<int> d(1, 100) ;
+    std::uniform_int_distribution d(1, 100) ;
     // 32以下ならアイテムが入っている
     // 33以上ならば空っぽ
     return d(e) <= 32 ;
@@ -623,7 +643,7 @@ $$
 std::bernoulli_distribution d( p ) ;
 ~~~
 
-`p`は`double`型で確率$p$のことだ。
+`bernoulli_distribution`はテンプレートクラスではない。生成する乱数の型は`bool`だ。`p`は`double`型で確率$p$のことだ。
 
 例えば前述の32%の確率でアイテムが入っている宝箱を実装するには以下のようになる。
 
@@ -719,7 +739,7 @@ $$
 std::binomial_distributuion<T> d( t, p ) ;
 ~~~
 
-テンプレート実引数`T`には整数型を指定する。`t`は`T`型の整数値で、値の範囲は$0 \leq t$だ。`p`はdouble型の値で確率を指定する。`p`の値の範囲は$0 \leq p \leq 1$だ。
+テンプレート実引数`T`は整数型でデフォルトは`int`だ。`t`は`T`型の整数値で、値の範囲は$0 \leq t$だ。`p`はdouble型の値で確率を指定する。`p`の値の範囲は$0 \leq p \leq 1$だ。
 
 100回コイントスとした結果、表が出た回数を乱数で得る関数`coinflips100`は以下のように書ける。
 
@@ -728,7 +748,7 @@ template < typename Engine >
 unsigned int coinflips100( Engine & e )
 {
     // t == 100, p == 0.5
-    std::binomial_distribution<unsigned int> d( 100, 0.5 ) ;
+    std::binomial_distribution d( 100, 0.5 ) ;
     return d(e) ;
 }
 ~~~
@@ -761,7 +781,7 @@ template < typename Engine >
 unsigned int roll_for_one( Engine & e )
 {
     // t == 60, p == 1.0/ 6.0
-    std::binomial_distribution<unsigned int> d( 60, 1.0 / 6.0 ) ;
+    std::binomial_distribution d( 60, 1.0 / 6.0 ) ;
     return d(e) ;
 }
 ~~~
@@ -776,7 +796,7 @@ template < typename Engine >
 unsigned int lootbox( Engine & e )
 {
     // t == 100, p = 0.01
-    std::binomial_distribution<unsigned int> d( 100, 1.0 / 100.0 ) ;
+    std::binomial_distribution d( 100, 1.0 / 100.0 ) ;
     return d(e) ;
 }
 ~~~
@@ -813,7 +833,7 @@ $$
 std::geometric_distribution<T> d( p ) ;
 ~~~
 
-`T`は整数型、`p`は確率$0 < p < 1$だ。`p`の値の範囲に注意すること。0と1であってはならない。幾何分布は成功するまでベルヌーイ試行した回数をかえすので、$p=0$の場合、必ず失敗するベルヌーイ試行になり意味がない。$p=1$のときは必ず成功するベルヌーイ試行であり、やはり意味がない。
+`T`は整数型でデフォルトは`int`、`p`は確率$0 < p < 1$だ。`p`の値の範囲に注意すること。0と1であってはならない。幾何分布は成功するまでベルヌーイ試行した回数をかえすので、$p=0$の場合、必ず失敗するベルヌーイ試行になり意味がない。$p=1$のときは必ず成功するベルヌーイ試行であり、やはり意味がない。
 
 `geometric_distribution`の生成する乱数の範囲にも注意が必要だ。生成される乱数$i$の範囲は$i \geq 0$だ。0もあり得る。0ということは、最初のベルヌーイ試行が成功したということだ。1は2回めのベルヌーイ試行が成功したということだ。幾何分布はベルヌーイ試行が初めて成功するまでのベルヌーイ試行の回数を返すので、成功したベルヌーイ試行は回数に含めない。
 
@@ -823,7 +843,7 @@ std::geometric_distribution<T> d( p ) ;
 template < typename Engine >
 unsigned int try_coinflips( Engine & e )
 {
-    std::geometric_distribution<unsigned int> d( 0.5 ) ;
+    std::geometric_distribution d( 0.5 ) ;
     return d(e) + 1;
 }
 ~~~
@@ -844,7 +864,7 @@ unsigned int try_coinflips( Engine & e )
 template < typename Engine >
 unsigned int try_rolls( Engine & e )
 {
-    std::geometric_distribution<unsigned int> d( 1.0 / 6.0 ) ;
+    std::geometric_distribution d( 1.0 / 6.0 ) ;
     return d(e) + 1;
 }
 ~~~
@@ -863,7 +883,7 @@ unsigned int try_rolls( Engine & e )
 template < typename Engine >
 unsigned int try_lootboxes( Engine & e )
 {
-    std::geometric_distribution<unsigned int> d( 1.0 / 100.0 ) ;
+    std::geometric_distribution d( 1.0 / 100.0 ) ;
     return d(e) + 1;
 }
 ~~~
@@ -906,7 +926,7 @@ $p = 1$のときの$P(i\,|\,k,p)$は未定義だ。
 std::negative_binomial_distribution<T> d( k, p ) ;
 ~~~
 
-`T`は整数型、`k`は`T`型の値$0 < k$で成功させるベルヌーイ試行の回数、p`は確率$- < p \leq 1$だ。
+`T`は整数型でデフォルトは`int`、`k`は`T`型の値$0 < k$で成功させるベルヌーイ試行の回数、p`は確率$- < p \leq 1$だ。
 
 幾何分布と同じく、負の二項分布が生成する乱数`i`は`k`回のベルヌーイ試行を成功させるまでに失敗したベルヌーイ試行の数を返す。
 
@@ -921,7 +941,7 @@ std::negative_binomial_distribution<T> d( k, p ) ;
 template < typename Engine >
 unsigned int count_10_coinflips( Engine & e )
 {
-    std::negative_binomial_distribution<unsigned int> d( 10, 0.5 ) ;
+    std::negative_binomial_distribution d( 10, 0.5 ) ;
     return d(e) + 10 ;
 }
 ~~~
@@ -934,7 +954,7 @@ unsigned int count_10_coinflips( Engine & e )
 template < typename Engine >
 unsigned int count_failed_coinflips_until_10_heads( Engine & e )
 {
-    std::negative_binomial_distribution<unsigned int> d( 10, 0.5 ) ;
+    std::negative_binomial_distribution d( 10, 0.5 ) ;
     return d(e) ;
 }
 ~~~
@@ -945,7 +965,7 @@ unsigned int count_failed_coinflips_until_10_heads( Engine & e )
 template < typename Engine >
 unsigned int count_n_coinflips( unsigned int n, Engine & e )
 {
-    std::negative_binomial_distribution<unsigned int> d( n, 0.5 ) ;
+    std::negative_binomial_distribution d( n, 0.5 ) ;
     return d(e) + n ;
 }
 ~~~
@@ -956,7 +976,7 @@ unsigned int count_n_coinflips( unsigned int n, Engine & e )
 template < typename Engine >
 unsigned int count_10_rolls( Engine & e )
 {
-    std::negative_binomial_distribution<unsigned int> d( 10, 1.0/6.0 ) ;
+    std::negative_binomial_distribution d( 10, 1.0/6.0 ) ;
     return d(e) + 10 ;
 }
 ~~~
@@ -967,7 +987,7 @@ unsigned int count_10_rolls( Engine & e )
 template < typename Engine >
 unsigned int count_10_lootboxes( Engine & e )
 {
-    std::negative_binomial_distribution<unsigned int> d( 10, 0.01 ) ;
+    std::negative_binomial_distribution d( 10, 0.01 ) ;
     return d(e) + 10 ;
 }
 ~~~
