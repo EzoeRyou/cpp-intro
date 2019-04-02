@@ -212,9 +212,9 @@ int main()
     std::mt19937 e ;
     std::uniform_int_distribution<unsigned int> d( 1, 6 ) ;
     auto a = d(e) ; // 1回目
-    auto b = d(e) ; // 2回め
+    auto b = d(e) ; // 2回目
 
-    auto reuslt = a - b ; // 結果
+    auto result = a - b ; // 結果
     std::cout << result ;
 }
 ~~~
