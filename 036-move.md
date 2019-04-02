@@ -49,7 +49,7 @@ e = std::move(source) ;
 std::vector<int> v = {1,2,3} ;
 // destinationはムーブ先
 // sourceはムーブ元
-std::vector<int> destination = std::(source) ;
+std::vector<int> destination = std::move(source) ;
 // destinationの値は{1,2,3}
 // sourceの値はわからない
 ~~~
