@@ -59,7 +59,7 @@ auto traffic_accidents( Engine & e )
 
 これを合計すると113となり、10で割って平均を取ると、10.0に近い値になる。もっと多くの乱数を生成して平均を取るとより近くなる。
 
-### 指数分布(std::exponential_distribution<T>)
+### 指数分布(`std::exponential_distribution<RealType>`)
 
 指数分布(exponential distribution)とは、ポアソン分布に従う事象が起こる時間間隔の分布だ。
 
@@ -85,7 +85,7 @@ auto traffic_accidents( Engine & e )
 
 指数分布が扱うのはこの次の交通事故が発生するまでの時間間隔だ。抽象的にもう一度書くと、ポアソン分布に従う離散的な事象の平均回数が与えられている場合に、ある事象から次の事象が発生するまでの時間間隔を分布する。
 
-`std::exponential_distribution<T>`は浮動小数点型`T`の乱数$x \geq 0$を以下の確率密度関数に従って分布させる。
+`std::exponential_distribution<RealType>`は浮動小数点型`RealType`の乱数$x \geq 0$を以下の確率密度関数に従って分布させる。
 
 $$
 p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
@@ -94,10 +94,10 @@ $$
 変数の宣言方法は以下の通り。
 
 ~~~c++
-std::exponential_distribution<T> d( lambda ) ;
+std::exponential_distribution<RealType> d( lambda ) ;
 ~~~
 
-`T`は浮動小数点数型でデフォルトは`double`、`lambda`はポアソン分布の`mean`と同じで、ある時間間隔における事象の発生回数だ。
+`RealType`は浮動小数点数型でデフォルトは`double`、`lambda`はポアソン分布の`mean`と同じで、ある時間間隔における事象の発生回数だ。
 
 `std::exponential_distribution`の生成する乱数は`1.0`のとき、ある時間間隔に等しくなる。`0.5`なら半分の時間間隔、`2.0`なら2倍の時間間隔だ。
 
@@ -122,4 +122,41 @@ auto until_next_traffic_accident( Engine & e )
 
 早いときは1日も立たずして次の交通事故が起きるが、遅いときは10日を超えてもなかなか交通事故が起きない。平均すると3日に1件交通事故が起きる確率の乱数が生成される。
 
-### ガンマ分布
+### ガンマ分布(`std::gamma_distribution<RealType>`)
+
+`std::gamma_distribution<RealType>`は浮動小数点数型の乱数$x > 0$を以下の確率密度関数に従って分布する。
+
+$$
+ p(x\,|\,\alpha,\beta) =
+     \frac{e^{-x/\beta}}{\beta^{\alpha} \cdot \Gamma(\alpha)} \, \cdot \, x^{\, \alpha-1}
+     \text{ .} 
+$$
+
+$\alpha$を`alpha`、$\beta$を`beta`とする。
+
+変数の宣言は以下の通り。
+
+~~~c++
+std::gamma_distribution<RealType> d( alpha, beta ) ;
+~~~
+
+`RealType`は浮動小数点数型でデフォルトは`double`。
+
+使い方。
+
+~~~cpp
+int main()
+{
+    std::mt19937 e ;
+    std::gamma_distribution d( 1.0, 1.0 ) ;
+
+    for ( int i = 0 ; i != 10 ; ++i )
+    {
+        std::cout << d(e) << ", "sv ;
+    }  
+}
+~~~
+
+### ウェイブル分布(`std::weibull_distribution<RealType>`)
+
+

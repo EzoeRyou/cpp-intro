@@ -140,7 +140,7 @@ $ dice
 std::uniform_int_distribution<int> d(a, b) ;
 ~~~
 
-この乱数分布クラスの変数`d`は、$a \leq r \leq b$までの範囲の乱数`r`を作り出す。
+この乱数分布クラスの変数`d`は、$a \leq r \leq b$までの範囲の`int`型の乱数`r`を作り出す。
 
 6面ダイスを作るには、`d(a, b)`を`d(1, 6)`にすればよい。
 
@@ -504,9 +504,9 @@ void f( Distribution & d )
 
 一様分布とは乱数の取りうる状態がすべて等しい確率で出現する乱数のことだ。
 
-### 整数の一様分布(`std::uniform_int_distribution<T>`)
+### 整数の一様分布(`std::uniform_int_distribution<IntType>`)
 
-`uniform_int_distribution<T>`は整数型の乱数$i$, $a \leq i \leq b$を以下の定数離散確率関数に従って分布させる。
+`uniform_int_distribution<IntType>`は整数型の乱数$i$, $a \leq i \leq b$を以下の定数離散確率関数に従って分布させる。
 
 $$
 P(i\,|\,a,b) = 1 / (b - a + 1) \text{ .}
@@ -515,10 +515,10 @@ $$
 以下のように変数を宣言する。
 
 ~~~c++
-std::uniform_int_distribution<T> d(a, b) ;
+std::uniform_int_distribution<IntType> d(a, b) ;
 ~~~
 
-`T`は整数型でデフォルトは`int`、`a`は最小値、`b`は最大値。
+`IntType`は整数型でデフォルトは`int`、`a`は最小値、`b`は最大値。
 
 エンジンも含めた使い方は以下の通り
 
@@ -540,9 +540,9 @@ std::uniform_int_distribution d( -3, 3 ) ;
 
 この分布は、-3,-2,-1,0,1,2,3のいずれかをそれぞれ$\frac{1}{7}$の等しい確率で返す。
 
-### 浮動小数点数の一様分布(`uniform_real_distribution<T>`)
+### 浮動小数点数の一様分布(`uniform_real_distribution<RealType>`)
 
-`uniform_real_distribution<T>`は浮動小数点数型の乱数$x$, $a \leq x < b$を以下の定数確率密度関数に従って分布させる。
+`uniform_real_distribution<RealType>`は浮動小数点数型の乱数$x$, $a \leq x < b$を以下の定数確率密度関数に従って分布させる。
 
 
 $$
@@ -554,10 +554,10 @@ $$
 以下のように変数を宣言する。
 
 ~~~c++
-std::uniform_real_distribution<T> d( a, b ) ;
+std::uniform_real_distribution<RealType> d( a, b ) ;
 ~~~
 
-`T`は浮動小数点数型でデフォルトは`double`、`a`は最小値、`b`は最大値。
+`RealType`は浮動小数点数型でデフォルトは`double`、`a`は最小値、`b`は最大値。
 
 エンジンも含めた使い方は以下の通り。
 
@@ -625,7 +625,7 @@ bool open_chest( Engine & e )
 
 ベルヌーイ分布(bernoulli distribution)は一回のベルヌーイ試行の結果を乱数として返す。
 
-`std::bernoulli_distribution`はbool型の乱数$b$を以下の離散確率関数に従って分布する。
+`std::bernoulli_distribution`は`bool`型の乱数$b$を以下の離散確率関数に従って分布する。
 
 $$
   P(b\,|\,p) = \left\{ \begin{array}{ll}
@@ -712,7 +712,7 @@ true : 31.5%
 
 $p=1.0$ならば常に`true`, $p=0.0$なら常に`false`、$p=0.5$ならば`true/false`が一様分布する。
 
-### 二項分布(`std::binomial_distribution<T>`)
+### 二項分布(`std::binomial_distribution<IntType>`)
 
 二項分布(binomial distribution)は確率$p$で成功するベルヌーイ試行を$t$回行ったときに成功した回数$i$を乱数として返す。
 
@@ -726,7 +726,7 @@ $p=1.0$ならば常に`true`, $p=0.0$なら常に`false`、$p=0.5$ならば`true
 確率1%で当たるくじを100回引いた場合もそうだ。この場合、$p=0.01$で$t=100$になる。期待値は$1$なので、1回当たることが平均的に期待できる。ちなみに、実際に100回くじ引きをして1回でも当たる確率は約63%だ。
 
 
-`std::binomial_distribution<T>`は`T`型の整数の乱数値$i \geq 0$を以下の離散確率関数に従って分布する。
+`std::binomial_distribution<IntType>`は`IntType`型の乱数$i \geq 0$を以下の離散確率関数に従って分布する。
 
 $$
 P(i\,|\,t,p) = \binom{t}{i} \cdot p^i \cdot (1-p)^{t-i} \text{ .}
@@ -735,10 +735,10 @@ $$
 以下のように変数を宣言する。
 
 ~~~c++
-std::binomial_distribution<T> d( t, p ) ;
+std::binomial_distribution<IntType> d( t, p ) ;
 ~~~
 
-テンプレート実引数`T`は整数型でデフォルトは`int`だ。`t`は`T`型の整数値で、値の範囲は$0 \leq t$だ。`p`はdouble型の値で確率を指定する。`p`の値の範囲は$0 \leq p \leq 1$だ。
+`IntType`は整数型でデフォルトは`int`だ。`t`は`IntType`型の整数値で、値の範囲は$0 \leq t$だ。`p`は`double`型の値で確率を指定する。`p`の値の範囲は$0 \leq p \leq 1$だ。
 
 100回コイントスとした結果、表が出た回数を乱数で得る関数`coinflips100`は以下のように書ける。
 
@@ -808,7 +808,7 @@ auto lootbox( Engine & e )
 
 確率1%で当たるくじを100回引くと、複数回当たることもあれば、1回も当たらないこともある。期待値は1だが、期待値というのは平均的に期待できる結果でしかない。読者諸君もくじ引きをするときは確率に気をつけよう。たとえくじが毎回公平であったとしても、確率は無記憶性なのだ。「もう90回くじを引いたから後10回引けば当たるはず」という考え方は通用しない。
 
-### 幾何分布(std::geometric_distribution<T>)
+### 幾何分布(std::geometric_distribution<IntType>)
 
 幾何分布(geometric distribution)とは、確率$p$で成功するベルヌーイ試行をはじめて成功するまで行った回数を乱数として分布する。
 
@@ -820,7 +820,7 @@ auto lootbox( Engine & e )
 
 コイントスの例で考えよう。コイントス一回をベルヌーイ試行とし、成功を表とする。表が出るまでコイントスをしてみよう。コイントスを何回する必要があるだろうか。運がよければ1回で表がでるので1回だ。運が悪ければ、5回コイントスをしても全部裏なこともあるだろう。100回コイントスをして表が一度も出ないことは、確率的にはありえる。ただしその確率は$\frac{1}{2^{100}}$なので、およそありえない確率ではある。
 
-`std::geometric_distribution<T>`は`T`型の整数$i$, $i \geq 0$を以下の離散確率関数に従って分布する。
+`std::geometric_distribution<IntType>`は`IntType`型の乱数$i$, $i \geq 0$を以下の離散確率関数に従って分布する。
 
 $$
 P(i\,|\,p) = p \cdot (1-p)^{i} \text{ .}
@@ -829,10 +829,10 @@ $$
 変数の宣言配下の通り。
 
 ~~~c++
-std::geometric_distribution<T> d( p ) ;
+std::geometric_distribution<IntType> d( p ) ;
 ~~~
 
-`T`は整数型でデフォルトは`int`、`p`は確率$0 < p < 1$だ。`p`の値の範囲に注意すること。0と1であってはならない。幾何分布は成功するまでベルヌーイ試行した回数をかえすので、$p=0$の場合、必ず失敗するベルヌーイ試行になり意味がない。$p=1$のときは必ず成功するベルヌーイ試行であり、やはり意味がない。
+`IntType`は整数型でデフォルトは`int`、`p`は確率$0 < p < 1$だ。`p`の値の範囲に注意すること。0と1であってはならない。幾何分布は成功するまでベルヌーイ試行した回数をかえすので、$p=0$の場合、必ず失敗するベルヌーイ試行になり意味がない。$p=1$のときは必ず成功するベルヌーイ試行であり、やはり意味がない。
 
 `geometric_distribution`の生成する乱数の範囲にも注意が必要だ。生成される乱数$i$の範囲は$i \geq 0$だ。0もあり得る。0ということは、最初のベルヌーイ試行が成功したということだ。1は2回めのベルヌーイ試行が成功したということだ。幾何分布はベルヌーイ試行が初めて成功するまでのベルヌーイ試行の回数を返すので、成功したベルヌーイ試行は回数に含めない。
 
@@ -895,7 +895,7 @@ unsigned int try_lootboxes( Engine & e )
 
 確率1%のくじを当てるには、運が悪いと何百回も引かなければならない。
 
-### 負の二項分布(std::negative_binomial_distribution<T>)
+### 負の二項分布(std::negative_binomial_distribution<IntType>)
 
 負の二項分布(negative binomial distribution)は幾何分布に似ている。幾何分布がベルヌーイ試行が1回成功するまでに行ったベルヌーイ試行の回数を乱数として分布するのに対し、負の二項分布はベルヌーイ試行が`k`回成功するまでに行ったベルヌーイ試行の回数を乱数として分布する。
 
@@ -911,7 +911,7 @@ unsigned int try_lootboxes( Engine & e )
 + 6面ダイスを、1回、1の目が出るまで振った回数
 + 確率1%で当たるくじ引きを、1回、アタリが出るまで引いた回数
 
-`std::negative_binomial_distribution<T>`は`T`型の整数の乱数$i$, $i \geq 0$を以下の離散確率関数に従って分布する。
+`std::negative_binomial_distribution<IntType>`は`IntType`型の乱数$i$, $i \geq 0$を以下の離散確率関数に従って分布する。
 
 $$
 P(i\,|\,k,p) = \binom{k+i-1}{i} \cdot p^k \cdot (1-p)^i \text{ .} 
@@ -922,10 +922,10 @@ $p = 1$のときの$P(i\,|\,k,p)$は未定義だ。
 変数の宣言は以下の通り。
 
 ~~~c++
-std::negative_binomial_distribution<T> d( k, p ) ;
+std::negative_binomial_distribution<IntType> d( k, p ) ;
 ~~~
 
-`T`は整数型でデフォルトは`int`、`k`は`T`型の値$0 < k$で成功させるベルヌーイ試行の回数、p`は確率$- < p \leq 1$だ。
+`IntType`は整数型でデフォルトは`int`、`k`は`IntType`型の値$0 < k$で成功させるベルヌーイ試行の回数、p`は`double`型の確率$- < p \leq 1$だ。
 
 幾何分布と同じく、負の二項分布が生成する乱数`i`は`k`回のベルヌーイ試行を成功させるまでに失敗したベルヌーイ試行の数を返す。
 
