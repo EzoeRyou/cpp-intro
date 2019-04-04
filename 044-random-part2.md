@@ -159,4 +159,72 @@ int main()
 
 ### ウェイブル分布(`std::weibull_distribution<RealType>`)
 
+`std::weibull_distribution<RealType>`は浮動小数点数型の乱数$x > 0$を以下の確率密度関数に従って分布する。
+
+$$
+p(x\,|\,a,b) = \frac{a}{b}
+     \cdot \left(\frac{x}{b}\right)^{a-1}
+     \cdot \, \exp\left( -\left(\frac{x}{b}\right)^a\right)
+     \text{ .}
+$$
+
+変数の宣言は以下の通り。
+
+~~~c++
+std::weibull_distribution<RealType> d( a, b ) ;
+~~~
+
+`RealType`は浮動小数点数型でデフォルトは`double`。
+
+使い方。
+
+
+~~~cpp
+int main()
+{
+    std::mt19937 e ;
+    std::weibull_distribution d( 1.0, 1.0 ) ;
+
+    for ( int i = 0 ; i != 10 ; ++i )
+    {
+        std::cout << d(e) << ", "sv ;
+    }  
+}
+~~~
+
+## 極値分布(`std::extreme_value_distribution<RealType>`)
+
+`std::extreme_value_distribution<RealType>`は浮動小数点数型の乱数$x$お以下の確率密度関数に従って分布する。
+
+$$
+p(x\,|\,a,b) = \frac{1}{b}
+     \cdot \exp\left(\frac{a-x}{b} - \exp\left(\frac{a-x}{b}\right)\right)
+     \text{ .}
+$$
+
+極値分布(extreme value distribution)は、ガンベルI型(Gumbel Type I)、対数ウェイブル(log-Weibull)、フィッシャー＝ティペットI型(Fisher-Tippett Type I)という名前の分布と呼ばれることもある。
+
+変数の宣言は以下の通り。
+
+~~~c++
+std::extreme_value_distribution<RealType> d( a, b ) ;
+~~~
+
+`RealType`は浮動小数点数型でデフォルトは`double`。
+
+使い方。
+
+~~~cpp
+int main()
+{
+    std::mt19937 e ;
+    std::extreme_value_distribution d( 1.0, 1.0 ) ;
+
+    for ( int i = 0 ; i != 10 ; ++i )
+    {
+        std::cout << d(e) << ", "sv ;
+    }  
+}
+~~~
+
 
