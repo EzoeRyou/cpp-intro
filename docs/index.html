@@ -18155,7 +18155,7 @@ P(i\,|\,a,b) = 1 / (b - a + 1) \text{ .}
 \]</span></p>
 <p>以下のように変数を宣言する。</p>
 <div class="sourceCode" id="cb1693"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1693-1" data-line-number="1"><span class="bu">std::</span>uniform_int_distribution&lt;IntType&gt; d(a, b) ;</a></code></pre></div>
-<p><code>IntType</code>は整数型でデフォルトは<code>int</code>、<code>a</code>は最小値、<code>b</code>は最大値。</p>
+<p><code>IntType</code>は整数型でデフォルトは<code>int</code>、<code>a</code>は最小値、<code>b</code>は最大値。ただし<span class="math inline">\(a \leq b\)</span></p>
 <p>エンジンも含めた使い方は以下の通り</p>
 <div class="sourceCode" id="cb1694"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1694-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
 <a class="sourceLine" id="cb1694-2" data-line-number="2"><span class="dt">void</span> f( Engine &amp; e )</a>
@@ -18175,7 +18175,7 @@ p(x\,|\,a,b) = 1 / (b - a) \text{ .}
 <p><code>a == b</code>のときは未定義となる。</p>
 <p>以下のように変数を宣言する。</p>
 <div class="sourceCode" id="cb1696"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1696-1" data-line-number="1"><span class="bu">std::</span>uniform_real_distribution&lt;RealType&gt; d( a, b ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>、<code>a</code>は最小値、<code>b</code>は最大値。</p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>、<code>a</code>は最小値、<code>b</code>は最大値。値の範囲は<span class="math inline">\(a \leq b\)</span> かつ <span class="math inline">\(b - a \leq \text{RealType型の最大値}\)</span></p>
 <p>エンジンも含めた使い方は以下の通り。</p>
 <div class="sourceCode" id="cb1697"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1697-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
 <a class="sourceLine" id="cb1697-2" data-line-number="2"><span class="dt">void</span> f( Engine &amp; e )</a>
@@ -18232,7 +18232,7 @@ p(x\,|\,a,b) = 1 / (b - a) \text{ .}
 <p>確率<span class="math inline">\(p\)</span>で<code>true</code>が、確率<span class="math inline">\(1-p\)</span>で<code>false</code>が返る。</p>
 <p>以下のように変数を宣言する。</p>
 <div class="sourceCode" id="cb1699"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1699-1" data-line-number="1"><span class="bu">std::</span>bernoulli_distribution d( p ) ;</a></code></pre></div>
-<p><code>bernoulli_distribution</code>はテンプレートクラスではない。生成する乱数の型は<code>bool</code>だ。<code>p</code>は<code>double</code>型で確率<span class="math inline">\(p\)</span>のことだ。</p>
+<p><code>bernoulli_distribution</code>はテンプレートクラスではない。生成する乱数の型は<code>bool</code>だ。<code>p</code>は<code>double</code>型で確率<span class="math inline">\(p\)</span>のことだ。値の範囲は<span class="math inline">\(0 \leq p \leq 1\)</span></p>
 <p>例えば前述の32%の確率でアイテムが入っている宝箱を実装するには以下のようになる。</p>
 <div class="sourceCode" id="cb1700"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1700-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
 <a class="sourceLine" id="cb1700-2" data-line-number="2"><span class="dt">bool</span> open_chest( Engine &amp; e )</a>
@@ -18456,7 +18456,7 @@ P(i\,|\,\mu) = \frac{e^{-\mu} \mu^{i}}{i\,!} \text{ .}
 <p>ここで<span class="math inline">\(\mu\)</span>を<code>mean</code>とする。<span class="math inline">\(\mu &gt; 0\)</span>ではない場合未定義だ。</p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1725"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1725-1" data-line-number="1"><span class="bu">std::</span>poisson_distribution&lt;T&gt; d( mean ) ;</a></code></pre></div>
-<p><code>T</code>は整数型でデフォルトは<code>int</code>、<code>mean</code>は<span class="math inline">\(\mu\)</span>と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。</p>
+<p><code>T</code>は整数型でデフォルトは<code>int</code>、<code>mean</code>は<span class="math inline">\(\mu\)</span>と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は<span class="math inline">\(0 &lt; \text{mean}\)</span></p>
 <p>ポアソン分布が生成する乱数は0以上の事象が発生した回数となる。</p>
 <p>例えば、1ヶ月に交通事故が平均して10件発生するとする。1ヶ月に発生した交通事故の件数は平均が10件になるように増減するはずだ。1ヶ月の交通事故の発生件数を乱数で返す関数<code>traffic_accidents</code>は以下のようになる。</p>
 <div class="sourceCode" id="cb1726"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1726-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
@@ -18494,7 +18494,7 @@ p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
 \]</span></p>
 <p>変数の宣言方法は以下の通り。</p>
 <div class="sourceCode" id="cb1728"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1728-1" data-line-number="1"><span class="bu">std::</span>exponential_distribution&lt;RealType&gt; d( lambda ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>、<code>lambda</code>はポアソン分布の<code>mean</code>と同じで、ある時間間隔における事象の発生回数だ。</p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>、<code>lambda</code>はポアソン分布の<code>mean</code>と同じで、ある時間間隔における事象の発生回数だ。値の範囲は<span class="math inline">\(0 &lt; \text{lambda}\)</span></p>
 <p><code>std::exponential_distribution</code>の生成する乱数は<code>1.0</code>のとき、ある時間間隔に等しくなる。<code>0.5</code>なら半分の時間間隔、<code>2.0</code>なら2倍の時間間隔だ。</p>
 <p>一ヶ月に10件の交通事故がポアソン分布に従って発生する場合に、ある交通事故から次の交通事故までの時間間隔の乱数を日数で得る関数<code>until_next_traffic_accident</code>は以下のように書く。</p>
 <div class="sourceCode" id="cb1729"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1729-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
@@ -18517,7 +18517,7 @@ p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
 <p><span class="math inline">\(\alpha\)</span>を<code>alpha</code>、<span class="math inline">\(\beta\)</span>を<code>beta</code>とする。</p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1731"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1731-1" data-line-number="1"><span class="bu">std::</span>gamma_distribution&lt;RealType&gt; d( alpha, beta ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。</p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。値の範囲は<span class="math inline">\(0 &lt; alpha\)</span>, <span class="math inline">\(0 &lt; beta\)</span></p>
 <p>使い方。</p>
 <div class="sourceCode" id="cb1732"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1732-1" data-line-number="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1732-2" data-line-number="2">{</a>
@@ -18539,7 +18539,7 @@ p(x\,|\,a,b) = \frac{a}{b}
 \]</span></p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1733"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1733-1" data-line-number="1"><span class="bu">std::</span>weibull_distribution&lt;RealType&gt; d( a, b ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。</p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。値の範囲は<span class="math inline">\(0 &lt; a\)</span>, <span class="math inline">\(0 &lt; b\)</span></p>
 <p>使い方。</p>
 <div class="sourceCode" id="cb1734"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1734-1" data-line-number="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1734-2" data-line-number="2">{</a>

@@ -34,7 +34,7 @@ $$
 std::poisson_distribution<T> d( mean ) ;
 ~~~
 
-`T`は整数型でデフォルトは`int`、`mean`は$\mu$と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。
+`T`は整数型でデフォルトは`int`、`mean`は`RealType`型。$\mu$と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は$0 < \text{mean}$
 
 ポアソン分布が生成する乱数は0以上の事象が発生した回数となる。
 
@@ -97,7 +97,7 @@ $$
 std::exponential_distribution<RealType> d( lambda ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`、`lambda`はポアソン分布の`mean`と同じで、ある時間間隔における事象の発生回数だ。
+`RealType`は浮動小数点数型でデフォルトは`double`、`lambda`は`RealType`型。ポアソン分布の`mean`と同じで、ある時間間隔における事象の発生回数だ。値の範囲は$0 < \text{lambda}$
 
 `std::exponential_distribution`の生成する乱数は`1.0`のとき、ある時間間隔に等しくなる。`0.5`なら半分の時間間隔、`2.0`なら2倍の時間間隔だ。
 
@@ -140,7 +140,7 @@ $\alpha$を`alpha`、$\beta$を`beta`とする。
 std::gamma_distribution<RealType> d( alpha, beta ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。
+`RealType`は浮動小数点数型でデフォルトは`double`。`alpha`, `beta`は`RealType`型。値の範囲は$0 < alpha$, $0 < beta$
 
 使い方。
 
@@ -174,7 +174,7 @@ $$
 std::weibull_distribution<RealType> d( a, b ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。
+`RealType`は浮動小数点数型でデフォルトは`double`。`a`, `b`は`RealType`型。値の範囲は$0 < a$, $0 < b$
 
 使い方。
 
@@ -210,7 +210,7 @@ $$
 std::extreme_value_distribution<RealType> d( a, b ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。
+`RealType`は浮動小数点数型でデフォルトは`double`。`a`, `b`は`RealType`型。値の範囲は$0 < b$
 
 使い方。
 
