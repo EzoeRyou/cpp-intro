@@ -518,7 +518,7 @@ $$
 std::uniform_int_distribution<IntType> d(a, b) ;
 ~~~
 
-`IntType`は整数型でデフォルトは`int`、`a`は最小値、`b`は最大値。
+`IntType`は整数型でデフォルトは`int`、`a`は最小値、`b`は最大値。ただし$a \leq b$
 
 エンジンも含めた使い方は以下の通り
 
@@ -557,7 +557,7 @@ $$
 std::uniform_real_distribution<RealType> d( a, b ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`、`a`は最小値、`b`は最大値。
+`RealType`は浮動小数点数型でデフォルトは`double`、`a`は最小値、`b`は最大値。値の範囲は$a \leq b$ かつ $b - a \leq \text{RealType型の最大値}$
 
 エンジンも含めた使い方は以下の通り。
 
@@ -642,7 +642,7 @@ $$
 std::bernoulli_distribution d( p ) ;
 ~~~
 
-`bernoulli_distribution`はテンプレートクラスではない。生成する乱数の型は`bool`だ。`p`は`double`型で確率$p$のことだ。
+`bernoulli_distribution`はテンプレートクラスではない。生成する乱数の型は`bool`だ。`p`は`double`型で確率$p$のことだ。値の範囲は$0 \leq p \leq 1$
 
 例えば前述の32%の確率でアイテムが入っている宝箱を実装するには以下のようになる。
 
