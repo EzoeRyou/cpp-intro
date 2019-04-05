@@ -1575,7 +1575,7 @@ solve(1) ; // 1
 ~~~c++
 int solve( int n )
 {
-    if ( n < 1 )
+    if ( n <= 1 )
         return n ;
     else
         // その他の場合
@@ -1596,7 +1596,7 @@ solve(111) ; // 5
 ~~~c++
 int solve( int n )
 {
-    if ( n < 1 )
+    if ( n <= 1 )
         return n ;
     else // 未完成
         return n%10 ;
