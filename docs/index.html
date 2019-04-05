@@ -587,6 +587,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="#ウェイブル分布stdweibull_distributionrealtype">ウェイブル分布(<code>std::weibull_distribution&lt;RealType&gt;</code>)</a></li>
 </ul></li>
 <li><a href="#極値分布stdextreme_value_distributionrealtype">極値分布(<code>std::extreme_value_distribution&lt;RealType&gt;</code>)</a></li>
+<li><a href="#正規分布">正規分布</a><ul>
+<li><a href="#正規分布stdnormal_distributionrealtype">正規分布(<code>std::normal_distribution&lt;RealType&gt;</code>)</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#cプリプロセッサー">Cプリプロセッサー</a><ul>
 <li><a href="#includeディレクティブ">#includeディレクティブ</a></li>
@@ -4010,7 +4013,7 @@ hello
 <p>引数が0か1の場合、単にその値を返すだけだ。関数<code>solve</code>には正数しか渡されないので、負数は考えなくてよい。すると、以下のように書ける。</p>
 <div class="sourceCode" id="cb356"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb356-1" data-line-number="1"><span class="dt">int</span> solve( <span class="dt">int</span> n )</a>
 <a class="sourceLine" id="cb356-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb356-3" data-line-number="3">    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )</a>
+<a class="sourceLine" id="cb356-3" data-line-number="3">    <span class="cf">if</span> ( n &lt;= <span class="dv">1</span> )</a>
 <a class="sourceLine" id="cb356-4" data-line-number="4">        <span class="cf">return</span> n ;</a>
 <a class="sourceLine" id="cb356-5" data-line-number="5">    <span class="cf">else</span></a>
 <a class="sourceLine" id="cb356-6" data-line-number="6">        <span class="co">// その他の場合</span></a>
@@ -4023,7 +4026,7 @@ hello
 <p>関数<code>solve</code>が解決するのは最下位桁だ。110の場合は0で、111の場合は1となる。最も右側の桁のみを扱う。数値から10進数で表記したときの最下位桁を取り出すには、10で割った余りが使える。覚えているだろうか。剰余演算子のoperator %を。</p>
 <div class="sourceCode" id="cb358"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb358-1" data-line-number="1"><span class="dt">int</span> solve( <span class="dt">int</span> n )</a>
 <a class="sourceLine" id="cb358-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb358-3" data-line-number="3">    <span class="cf">if</span> ( n &lt; <span class="dv">1</span> )</a>
+<a class="sourceLine" id="cb358-3" data-line-number="3">    <span class="cf">if</span> ( n &lt;= <span class="dv">1</span> )</a>
 <a class="sourceLine" id="cb358-4" data-line-number="4">        <span class="cf">return</span> n ;</a>
 <a class="sourceLine" id="cb358-5" data-line-number="5">    <span class="cf">else</span> <span class="co">// 未完成</span></a>
 <a class="sourceLine" id="cb358-6" data-line-number="6">        <span class="cf">return</span> n%<span class="dv">10</span> ;</a>
@@ -18456,7 +18459,7 @@ P(i\,|\,\mu) = \frac{e^{-\mu} \mu^{i}}{i\,!} \text{ .}
 <p>ここで<span class="math inline">\(\mu\)</span>を<code>mean</code>とする。<span class="math inline">\(\mu &gt; 0\)</span>ではない場合未定義だ。</p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1725"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1725-1" data-line-number="1"><span class="bu">std::</span>poisson_distribution&lt;T&gt; d( mean ) ;</a></code></pre></div>
-<p><code>T</code>は整数型でデフォルトは<code>int</code>、<code>mean</code>は<span class="math inline">\(\mu\)</span>と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は<span class="math inline">\(0 &lt; \text{mean}\)</span></p>
+<p><code>T</code>は整数型でデフォルトは<code>int</code>、<code>mean</code>は<code>RealType</code>型。<span class="math inline">\(\mu\)</span>と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は<span class="math inline">\(0 &lt; \text{mean}\)</span></p>
 <p>ポアソン分布が生成する乱数は0以上の事象が発生した回数となる。</p>
 <p>例えば、1ヶ月に交通事故が平均して10件発生するとする。1ヶ月に発生した交通事故の件数は平均が10件になるように増減するはずだ。1ヶ月の交通事故の発生件数を乱数で返す関数<code>traffic_accidents</code>は以下のようになる。</p>
 <div class="sourceCode" id="cb1726"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1726-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
@@ -18494,7 +18497,7 @@ p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
 \]</span></p>
 <p>変数の宣言方法は以下の通り。</p>
 <div class="sourceCode" id="cb1728"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1728-1" data-line-number="1"><span class="bu">std::</span>exponential_distribution&lt;RealType&gt; d( lambda ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>、<code>lambda</code>はポアソン分布の<code>mean</code>と同じで、ある時間間隔における事象の発生回数だ。値の範囲は<span class="math inline">\(0 &lt; \text{lambda}\)</span></p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>、<code>lambda</code>は<code>RealType</code>型。ポアソン分布の<code>mean</code>と同じで、ある時間間隔における事象の発生回数だ。値の範囲は<span class="math inline">\(0 &lt; \text{lambda}\)</span></p>
 <p><code>std::exponential_distribution</code>の生成する乱数は<code>1.0</code>のとき、ある時間間隔に等しくなる。<code>0.5</code>なら半分の時間間隔、<code>2.0</code>なら2倍の時間間隔だ。</p>
 <p>一ヶ月に10件の交通事故がポアソン分布に従って発生する場合に、ある交通事故から次の交通事故までの時間間隔の乱数を日数で得る関数<code>until_next_traffic_accident</code>は以下のように書く。</p>
 <div class="sourceCode" id="cb1729"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1729-1" data-line-number="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
@@ -18517,7 +18520,7 @@ p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
 <p><span class="math inline">\(\alpha\)</span>を<code>alpha</code>、<span class="math inline">\(\beta\)</span>を<code>beta</code>とする。</p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1731"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1731-1" data-line-number="1"><span class="bu">std::</span>gamma_distribution&lt;RealType&gt; d( alpha, beta ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。値の範囲は<span class="math inline">\(0 &lt; alpha\)</span>, <span class="math inline">\(0 &lt; beta\)</span></p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。<code>alpha</code>, <code>beta</code>は<code>RealType</code>型。値の範囲は<span class="math inline">\(0 &lt; alpha\)</span>, <span class="math inline">\(0 &lt; beta\)</span></p>
 <p>使い方。</p>
 <div class="sourceCode" id="cb1732"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1732-1" data-line-number="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1732-2" data-line-number="2">{</a>
@@ -18539,7 +18542,7 @@ p(x\,|\,a,b) = \frac{a}{b}
 \]</span></p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1733"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1733-1" data-line-number="1"><span class="bu">std::</span>weibull_distribution&lt;RealType&gt; d( a, b ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。値の範囲は<span class="math inline">\(0 &lt; a\)</span>, <span class="math inline">\(0 &lt; b\)</span></p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。<code>a</code>, <code>b</code>は<code>RealType</code>型。値の範囲は<span class="math inline">\(0 &lt; a\)</span>, <span class="math inline">\(0 &lt; b\)</span></p>
 <p>使い方。</p>
 <div class="sourceCode" id="cb1734"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1734-1" data-line-number="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1734-2" data-line-number="2">{</a>
@@ -18561,7 +18564,7 @@ p(x\,|\,a,b) = \frac{1}{b}
 <p>極値分布(extreme value distribution)は、ガンベルI型(Gumbel Type I)、対数ウェイブル(log-Weibull)、フィッシャー＝ティペットI型(Fisher-Tippett Type I)という名前の分布と呼ばれることもある。</p>
 <p>変数の宣言は以下の通り。</p>
 <div class="sourceCode" id="cb1735"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1735-1" data-line-number="1"><span class="bu">std::</span>extreme_value_distribution&lt;RealType&gt; d( a, b ) ;</a></code></pre></div>
-<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。</p>
+<p><code>RealType</code>は浮動小数点数型でデフォルトは<code>double</code>。<code>a</code>, <code>b</code>は<code>RealType</code>型。値の範囲は<span class="math inline">\(0 &lt; b\)</span></p>
 <p>使い方。</p>
 <div class="sourceCode" id="cb1736"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1736-1" data-line-number="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1736-2" data-line-number="2">{</a>
@@ -18573,6 +18576,20 @@ p(x\,|\,a,b) = \frac{1}{b}
 <a class="sourceLine" id="cb1736-8" data-line-number="8">        <span class="bu">std::</span>cout &lt;&lt; d(e) &lt;&lt; <span class="st">&quot;, &quot;</span>sv ;</a>
 <a class="sourceLine" id="cb1736-9" data-line-number="9">    }  </a>
 <a class="sourceLine" id="cb1736-10" data-line-number="10">}</a></code></pre></div>
+<h2 id="正規分布">正規分布</h2>
+<h3 id="正規分布stdnormal_distributionrealtype">正規分布(<code>std::normal_distribution&lt;RealType&gt;</code>)</h3>
+<p><code>std::normal_distribution&lt;RealType&gt;</code>は浮動小数点数型の乱数<span class="math inline">\(x\)</span> 以下の確率密度関数に従って分布する。</p>
+<p><span class="math display">\[
+ p(x\,|\,\mu,\sigma)
+      = \frac{1}{\sigma \sqrt{2\pi}}
+        \cdot
+        % e^{-(x-\mu)^2 / (2\sigma^2)}
+        \exp{\left(- \, \frac{(x - \mu)^2}
+                             {2 \sigma^2}
+             \right)
+            }
+ \text{ .}
+\]</span></p>
 <h1 id="cプリプロセッサー">Cプリプロセッサー</h1>
 <p>CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。</p>
 <p>C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読む時、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++は未だに廃止できていない。</p>
