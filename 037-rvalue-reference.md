@@ -168,7 +168,7 @@ int & ref = object ;
 
 ### prvalue
 
-prvalueは純粋なrvalue(pure rvalue)のことだ。名前無しのオブジェクトや計算結果の一時オブジェクトのことだ。
+prvalueは純粋なrvalue(pure rvalue)のことだ。つまり、名前無しのオブジェクトや計算結果の一時オブジェクトのことだ。
 
 ~~~c++
 int f() { return 0 ; }
