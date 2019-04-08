@@ -36,6 +36,19 @@ std::poisson_distribution<T> d( mean ) ;
 
 `T`は整数型でデフォルトは`int`、`mean`は`RealType`型。$\mu$と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は$0 < \text{mean}$
 
+使い方。
+
+~~~cpp
+int main()
+{
+    std::poisson_distribution d( 1.0 ) ;
+    d.mean() ; // 1.0
+
+    std::mt19937 e ;
+    d(e) ;
+}
+~~~
+
 ポアソン分布が生成する乱数は0以上の事象が発生した回数となる。
 
 例えば、1ヶ月に交通事故が平均して10件発生するとする。1ヶ月に発生した交通事故の件数は平均が10件になるように増減するはずだ。1ヶ月の交通事故の発生件数を乱数で返す関数`traffic_accidents`は以下のようになる。
@@ -101,6 +114,19 @@ std::exponential_distribution<RealType> d( lambda ) ;
 
 `std::exponential_distribution`の生成する乱数は`1.0`のとき、ある時間間隔に等しくなる。`0.5`なら半分の時間間隔、`2.0`なら2倍の時間間隔だ。
 
+使い方。
+
+~~~cpp
+int main()
+{
+    std::exponential_distribution d( 1.0 ) ;
+    d.lambda() ; // 1.0 ;
+
+    std::mt19937 e ;
+    d(e) ;
+}
+~~~
+
 一ヶ月に10件の交通事故がポアソン分布に従って発生する場合に、ある交通事故から次の交通事故までの時間間隔の乱数を日数で得る関数`until_next_traffic_accident`は以下のように書く。
 
 ~~~cpp
@@ -147,13 +173,12 @@ std::gamma_distribution<RealType> d( alpha, beta ) ;
 ~~~cpp
 int main()
 {
-    std::mt19937 e ;
     std::gamma_distribution d( 1.0, 1.0 ) ;
+    d.alpha() ; // 1.0
+    d.beta() ; // 1.0
 
-    for ( int i = 0 ; i != 10 ; ++i )
-    {
-        std::cout << d(e) << ", "sv ;
-    }  
+    std::mt19937 e ;
+    d(e) ;
 }
 ~~~
 
@@ -182,13 +207,12 @@ std::weibull_distribution<RealType> d( a, b ) ;
 ~~~cpp
 int main()
 {
-    std::mt19937 e ;
     std::weibull_distribution d( 1.0, 1.0 ) ;
+    d.a() ; // 1.0
+    d.b() ; // 1.0
 
-    for ( int i = 0 ; i != 10 ; ++i )
-    {
-        std::cout << d(e) << ", "sv ;
-    }  
+    std::mt19937 e ;
+    d(e) ;
 }
 ~~~
 
@@ -217,13 +241,12 @@ std::extreme_value_distribution<RealType> d( a, b ) ;
 ~~~cpp
 int main()
 {
-    std::mt19937 e ;
     std::extreme_value_distribution d( 1.0, 1.0 ) ;
+    d.a() ; // 1.0
+    d.b() ; // 1.0
 
-    for ( int i = 0 ; i != 10 ; ++i )
-    {
-        std::cout << d(e) << ", "sv ;
-    }  
+    std::mt19937 e ;
+    d(e) ;
 }
 ~~~
 
