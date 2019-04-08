@@ -194,7 +194,7 @@ int main()
 
 ## 極値分布(`std::extreme_value_distribution<RealType>`)
 
-`std::extreme_value_distribution<RealType>`は浮動小数点数型の乱数$x$お以下の確率密度関数に従って分布する。
+`std::extreme_value_distribution<RealType>`は浮動小数点数型の乱数$x$を以下の確率密度関数に従って分布する。
 
 $$
 p(x\,|\,a,b) = \frac{1}{b}
