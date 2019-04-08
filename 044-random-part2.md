@@ -85,7 +85,7 @@ auto traffic_accidents( Engine & e )
 
 指数分布が扱うのはこの次の交通事故が発生するまでの時間間隔だ。抽象的にもう一度書くと、ポアソン分布に従う離散的な事象の平均回数が与えられている場合に、ある事象から次の事象が発生するまでの時間間隔を分布する。
 
-`std::exponential_disttribution<RealType>`は浮動小数点型`RealType`の乱数$x \geq 0$を以下の確率密度関数に従って分布させる。
+`std::exponential_distribution<RealType>`は浮動小数点型`RealType`の乱数$x \geq 0$を以下の確率密度関数に従って分布させる。
 
 $$
 p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
