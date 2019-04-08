@@ -22,7 +22,7 @@ T && rvalue_reference = ... ;
 
 lvalueリファレンスはlvalueで初期化する。rvalueリファレンスはrvalueで初期化する。
 
-lvalueとは名前付きのオブジェクト、戻り値の型としてのlvalueリファレンスのことだ。
+lvalueとは名前付きのオブジェクトや戻り値の型としてのlvalueリファレンスのことだ。
 
 ~~~cpp
 int object { } ;
@@ -38,7 +38,7 @@ int main()
 
 ここで、式`object`や式`f()`を評価した結果はlvalueだ。
 
-rvalueとは、名前無しのオブジェクト、計算結果の一時オブジェクト、戻り値の型としてのrvalueリファレンスのことだ。
+rvalueとは、名前無しのオブジェクトや計算結果の一時オブジェクト、戻り値の型としてのrvalueリファレンスのことだ。
 
 ~~~cpp
 int && g() { return 0 ; }
@@ -168,7 +168,7 @@ int & ref = object ;
 
 ### prvalue
 
-prvalueは純粋なrvalue(pure rvalue)のことだ。名前無しのオブジェクト、計算結果の一時オブジェクトのことだ。
+prvalueは純粋なrvalue(pure rvalue)のことだ。つまり、名前無しのオブジェクトや計算結果の一時オブジェクトのことだ。
 
 ~~~c++
 int f() { return 0 ; }
