@@ -471,6 +471,8 @@ auto dice( Engine & e )
 
 分布クラスには共通の機能がある。本書ではすべてを解説しないが、重要な機能を解説する。
 
+まず標準ライブラリの分布クラスに共通する機能を説明する。
+
 分布クラスはオブジェクトを作り、そのオブジェクトを乱数エンジンと組み合わせて使う。その際、コンストラクターの引数で細かい設定を指定する。
 
 ~~~c++
@@ -500,6 +502,74 @@ void f( Distribution & d )
 }
 ~~~
 
+分布クラスは構築時の実引数を同名のメンバー関数で取得することができる。
+
+例えば、`std::uniform_int_distribution( a, b )`の場合、構築時に渡した`a`, `b`を引数の名前でメンバー関数として取得できる。
+
+~~~c++
+std::uniform_int_distribution d( 1, 6 ) ;
+d.a() ; // 1
+d.b() ; // 6
+~~~
+
+分布クラスは内部状態のリセットができる。
+
+分布クラスは内部的に乱数値をキャッシュしている可能性がある。例えば乱数値が0か1である場合、1 bitの乱数しか必要ない。ここで渡した乱数エンジンが2 bit以上の乱数を生成できるのであれば、乱数値をキャッシュしておいて、1 bitずつ切り出して使うという最適化が考えられる。
+
+しかしこの場合、同じ乱数エンジンを渡したのに、結果が違うということが起こり得る。
+
+~~~cpp
+int main()
+{
+    std::uniform_int_distribution a( 1, 6 ) ;
+    std::uniform_int_distributio b( 1, 6 ) ;
+
+    std::mt19937 x ;
+
+    // 乱数を生成
+    // aは内部に乱数をキャッシュするかも知れない。
+    a( x ) ;
+
+    // yはxと同じ内部状態を持つ
+    // つまり生成する生の乱数は同じ
+    std::mt19937 y = x ;
+
+    auto r1 = a( x ) ;
+    auto r2 = b( y ) ;
+
+    // r1 == r2 である保証はない
+    
+}
+~~~
+
+このような場合に、内部状態をリセットするメンバー関数`reset`を呼び出せば、同じ内部状態になることが保証される。
+
+~~~c++
+// 内部状態をリセット
+a.reset() ;
+// true
+auto bool = ( a(x) == b(y) ) ;
+~~~
+
+また、この内部状態を取り出すこともできる。内部状態はネストされた型名`param_type`で保持できる。内部状態を取り出すにはメンバー関数`param()`を呼び出す。分布クラスのコンストラクターこの`param_type`の値を渡すと、同じ内部状態の分布クラスを作り出すことができる。またメンバー関数`param(parm)`で`param_type`の値を渡して内部状態を設定することも可能だ。
+
+~~~cpp
+template < typename Distribution >
+void f( Distribution & d )
+{
+    // 内部状態の取り出し
+    // Distribution::param_type型
+    auto p = d.param() ;
+
+    // dと同じ内部状態を持つ変数
+    Distribution same_d( p ) ;
+
+    Distribution other ;
+    // 既存の変数の内部状態を変更
+    other.param( p ) ;
+} 
+~~~
+
 ## 一様分布(Uniform Distribution)
 
 一様分布とは乱数の取りうる状態がすべて等しい確率で出現する乱数のことだ。
@@ -515,7 +585,7 @@ $$
 以下のように変数を宣言する。
 
 ~~~c++
-std::uniform_int_distribution<IntType> d(a, b) ;
+std::uniform_int_distribution<IntType> d( a, b ) ;
 ~~~
 
 `IntType`は整数型でデフォルトは`int`、`a`は最小値、`b`は最大値。ただし$a \leq b$
@@ -527,6 +597,9 @@ template < typename Engine >
 void f( Engine & e )
 {
     std::uniform_int_distribution d(1, 10) ;
+    d.a() ; // 1
+    d.b() ; // 10
+
     // 1から10までの範囲の乱数
     auto r = d(e) ;
 }
@@ -566,6 +639,9 @@ template < typename Engine >
 void f( Engine & e )
 {
     std::uniform_real_distribution d(0.0, 1.0 ) ;
+    d.a() ; // 0.0
+    d.b() ; // 1.0
+
     // 0.0から1.0までの範囲の乱数
     auto r = d(e) ;
 }
@@ -640,6 +716,22 @@ $$
 
 ~~~c++
 std::bernoulli_distribution d( p ) ;
+~~~
+
+`p`は`double`型で、値の範囲は$0 \leq p \leq 1$
+
+使い方。
+
+~~~cpp
+int main()
+{
+    std::bernoulli_distribution d( 0.5 ) ;
+    d.p() ; // 0.5 ;
+
+    std::mt19937 e ;
+    // 乱数生成
+    d(e) ;
+}
 ~~~
 
 `bernoulli_distribution`はテンプレートクラスではない。生成する乱数の型は`bool`だ。`p`は`double`型で確率$p$のことだ。値の範囲は$0 \leq p \leq 1$
@@ -740,6 +832,21 @@ std::binomial_distribution<IntType> d( t, p ) ;
 
 `IntType`は整数型でデフォルトは`int`だ。`t`は`IntType`型の整数値で、値の範囲は$0 \leq t$だ。`p`は`double`型の値で確率を指定する。`p`の値の範囲は$0 \leq p \leq 1$だ。
 
+使い方。
+
+~~~cpp
+int main()
+{
+    std::binomial_distribution d( 1, 0.5 ) ;
+    d.t() ; // 1
+    d.p() ; // 0.5
+
+    std::mt19937 e ;
+    // 乱数生成
+    d(e) ;
+}
+~~~
+
 100回コイントスとした結果、表が出た回数を乱数で得る関数`coinflips100`は以下のように書ける。
 
 ~~~cpp
@@ -826,15 +933,29 @@ $$
 P(i\,|\,p) = p \cdot (1-p)^{i} \text{ .}
 $$
 
-変数の宣言配下の通り。
+変数の宣言。
 
 ~~~c++
 std::geometric_distribution<IntType> d( p ) ;
 ~~~
 
-`IntType`は整数型でデフォルトは`int`、`p`は確率$0 < p < 1$だ。`p`の値の範囲に注意すること。0と1であってはならない。幾何分布は成功するまでベルヌーイ試行した回数をかえすので、$p=0$の場合、必ず失敗するベルヌーイ試行になり意味がない。$p=1$のときは必ず成功するベルヌーイ試行であり、やはり意味がない。
+`IntType`は整数型でデフォルトは`int`、`p`は確率で値の範囲は$0 < p < 1$だ。`p`の値の範囲に注意すること。0と1であってはならない。幾何分布は成功するまでベルヌーイ試行した回数をかえすので、$p=0$の場合、必ず失敗するベルヌーイ試行になり意味がない。$p=1$のときは必ず成功するベルヌーイ試行であり、やはり意味がない。
 
 `geometric_distribution`の生成する乱数の範囲にも注意が必要だ。生成される乱数$i$の範囲は$i \geq 0$だ。0もあり得る。0ということは、最初のベルヌーイ試行が成功したということだ。1は2回めのベルヌーイ試行が成功したということだ。幾何分布はベルヌーイ試行が初めて成功するまでのベルヌーイ試行の回数を返すので、成功したベルヌーイ試行は回数に含めない。
+
+使い方。
+
+~~~cpp
+int main()
+{
+    // p == 0.5
+    std::geometric_distribution d( 0.5 ) ;
+    d.p() ; // 0.5 ;
+
+    std::mt19937 e ;
+    d(e) ;
+}
+~~~
 
 コイントスを表が出るまで繰り返し、その合計回数を乱数で返す関数`try_coinflips`を書いてみよう。
 
@@ -926,6 +1047,21 @@ std::negative_binomial_distribution<IntType> d( k, p ) ;
 ~~~
 
 `IntType`は整数型でデフォルトは`int`、`k`は`IntType`型の値$0 < k$で成功させるベルヌーイ試行の回数、p`は`double`型の確率$- < p \leq 1$だ。
+
+使い方。
+
+~~~cpp
+int main()
+{
+    // k == 1, p == 0.5
+    std::negative_binomial_distribution d( 1, 0.5 ) ;
+    d.k() ; // 1
+    d.p() ; // 0.5
+
+    std::mt19937 e ;
+    d(e) ;
+}
+~~~
 
 幾何分布と同じく、負の二項分布が生成する乱数`i`は`k`回のベルヌーイ試行を成功させるまでに失敗したベルヌーイ試行の数を返す。
 
