@@ -837,3 +837,69 @@ void shrink_to_fit()
 
 この実装は`reserve`と似ている。
 
+# vectorのその他のコンストラクター
+
+## イテレーターのペア
+
+`std::vector`はイテレーターのペアを取り、その参照する値で要素を初期化できる。
+
+~~~cpp
+int main()
+{
+    std::array<int, 5> a {1,2,3,4,5} ;
+    std::vector<int> v( std::begin(a), std::end(a) ) ;
+    // vは{1,2,3,4,5}
+}
+~~~
+
+これはすでに実装したメンバー関数を使えば簡単に実装できる。
+
+~~~c++
+template < typename InputIterator >
+vector( InputIterator first, InputIterator last, const Allocator & = Allocator() )
+{
+    reserve( std::distance( first, last ) ;
+    for ( auto i = first ; i != last ; ++i )
+    {
+        push_back( *i ) ;
+    }
+}
+~~~
+
+## 初期化リスト
+
+`std::vector`は配列のように初期化できる。
+
+~~~cpp
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+}
+~~~
+
+このような初期化を*リスト初期化*と呼ぶ。
+
+リスト初期化に対応するためには、`std::initializer_list<T>`を引数に取るコンストラクターを追加する。
+
+~~~c++
+template < typename T, Allocator = std::allocator<T> >
+{
+// コンストラクター
+vector( std::initializer_list<value_type> init, const Allocator & = Allocator() ) ; 
+    // 省略...
+} ;
+~~~
+
+`std::initializer_list<T>`は`T`型の要素を格納する標準ライブラリで、`{a,b,c,...}`のようなリスト初期化で構築することができる。
+
+~~~c++
+std::initializer_list<int> init = {1,2,3,4,5} ;
+~~~
+
+`std::initializer_list`は`begin/end`によるイテレーターを提供しているので、すでに実装したコンストラクターにデリゲートすればよい。
+
+~~~c++
+vector( std::initializer_list<value_type> init, const Allocator & alloc = Allocator() ) ; 
+    : vector( std::begin(init), std::end(init), alloc )
+{ }
+~~~
