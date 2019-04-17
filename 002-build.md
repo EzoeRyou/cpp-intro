@@ -16,7 +16,7 @@ C++はプログラマーが直接コンパイラーを使い、ソースファ�
 
 ### サンプルコード
 
-以下のC++のソースファイルは標準出力にhelloと出力するものだ。
+以下のC++のソースファイルは標準出力に`hello`と出力するものだ。
 
 ~~~cpp
 #include <iostream>
@@ -81,7 +81,7 @@ hello hello.cpp
 
 ### 実行
 
-さて、いよいよ実行だ。通常のOSではカレントディレクトリがPATHに含まれていないため、実行するにはカレントディレクトリからパスを指定する必要がある。
+さて、いよいよ実行だ。通常のOSではカレントディレクトリが`PATH`に含まれていないため、実行するにはカレントディレクトリからパスを指定する必要がある。
 
 ~~~
 $ ./hello
@@ -280,7 +280,7 @@ g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h
 
 こうすると、コンパイル済みヘッダーファイル`all.h.gch`が生成できる。
 
-GCCはヘッダーファイルを使うときに、同名の.gchファイルが存在する場合は、そちらをコンパイル済みヘッダーファイルとして使うことで、ヘッダーファイルの処理を省略する。
+GCCはヘッダーファイルを使うときに、同名の`.gch`ファイルが存在する場合は、そちらをコンパイル済みヘッダーファイルとして使うことで、ヘッダーファイルの処理を省略する。
 
 ~~~
 g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
@@ -435,7 +435,7 @@ program : source
 	cat source > program
 ~~~
 
-さっそくこのルールを、ファイル`Makefile`に書き込み、makeを呼び出してみよう。
+さっそくこのルールを、ファイル`Makefile`に書き込み、`make`を呼び出してみよう。
 
 ~~~
 $ ls
@@ -449,7 +449,7 @@ $ ls
 Makefile program source
 ~~~
 
-これがMakeの仕組みだ。`ターゲット`の生成に必要な`事前要件`と、`ターゲット`を生成する`レシピ`を組み合わせた`ルール`で依存関係を記述する。makeを実行すると、実行した`レシピ`が表示される。
+これがMakeの仕組みだ。`ターゲット`の生成に必要な`事前要件`と、`ターゲット`を生成する`レシピ`を組み合わせた`ルール`で依存関係を記述する。`make`を実行すると、実行した`レシピ`が表示される。
 
 もうすこしMakeの`ルール`を追加してみよう。例えばファイル`source`は予め存在するのではなく、ファイル`source01`, `source02`, `source03`の中身をこの順番で連結して生成するとしよう。以下のように書ける。
 
@@ -461,7 +461,7 @@ source : source01 source02 source03
 	cat source01 source02 source03 > source
 ~~~
 
-GNU Makeはカレントディレクトリにあるファイル`Makefile`の一番上に書かれたルールを実行しようとする。`program`を生成するには`source`が必要だが、`source`の生成には別のルールの実行が必要だ。Makefileはこの依存関係を自動で解決してくれる。
+GNU Makeはカレントディレクトリにあるファイル`Makefile`の一番上に書かれたルールを実行しようとする。`program`を生成するには`source`が必要だが、`source`の生成には別のルールの実行が必要だ。`Makefile`はこの依存関係を自動で解決してくれる。
 
 ~~~
 $ touch source01 source02 source03
@@ -481,7 +481,7 @@ $ make
 make: 'program' is up to date.
 ~~~
 
-このメッセージの意味は「programは最新だ」という意味だ。`make`はファイルのタイムスタンプを調べ、もしファイル`program`より`source`のタイムスタンプの方が若い場合、つまり`program`が変更されたよりも後に`source`が変更された場合、`ルール`を実行する。
+このメッセージの意味は「`program`は最新だ」という意味だ。`make`はファイルのタイムスタンプを調べ、もしファイル`program`より`source`のタイムスタンプの方が若い場合、つまり`program`が変更されたよりも後に`source`が変更された場合、`ルール`を実行する。
 
 ためしにファイル`source02`のタイムスタンプを更新してみよう。
 
@@ -602,7 +602,7 @@ target :
 	echo $@
 ~~~
 
-このMakefileを実行すると以下のように出力される。
+この`Makefile`を実行すると以下のように出力される。
 
 ~~~
 $ make
@@ -618,7 +618,7 @@ target : A B C
 	echo $<
 ~~~
 
-このMakefileを実行すると以下のように出力される。
+この`Makefile`を実行すると以下のように出力される。
 
 ~~~
 $ make
@@ -634,7 +634,7 @@ target : A B C
 	echo $^
 ~~~
 
-このMakefileを実行すると以下のように出力される。
+この`Makefile`を実行すると以下のように出力される。
 
 ~~~
 $ make
@@ -725,24 +725,24 @@ clean :
 
 今回構築する環境のファイル名とその意味は以下の通り。
 
-main.cpp
+`main.cpp`
 :   C++のコードを書く
-all.h
+`all.h`
 :   標準ライブラリのヘッダーファイルを書く
-all.h.gch
+`all.h.gch`
 :   コンパイル済みヘッダー
-program
+`program`
 :   実行可能ファイル
-Makefile
+`Makefile`
 :   GNU makeのルールを書く
 
 使い方は以下の通り。
 
-make
+`make`
 :   コンパイルする
-make run
+`make run`
 :   コンパイルして実行
-make clean
+`make clean`
 :   コンパイル結果を削除
 
 
@@ -781,7 +781,7 @@ clean :
 
 `make`でコンパイル。`make run`で実行。`make clean`でコンパイル結果の削除。
 
-Makefile全体は以下のようになる。
+`Makefile`全体は以下のようになる。
 
 ~~~makefile
 gcc_options = -std=c++17 -Wall --pedantic-error

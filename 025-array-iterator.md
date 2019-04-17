@@ -2,7 +2,7 @@
 
 ## イテレーターの中身
 
-自作の`array`をイテレーターに対応させる前に、まず'std::array'のイテレーターについて一通り調べよう。
+自作の`array`をイテレーターに対応させる前に、まず`'std::array'`のイテレーターについて一通り調べよう。
 
 イテレーターは`std::begin/std::end`で取得する
 
@@ -176,7 +176,7 @@ array_iterator_begin::operator * ()
 
 どうやら最初の要素を読み書きするイテレーターはできたようだ。`array`側も実装して試してみよう。
 
-array側の実装にはまだ現時点では完全に理解できない黒魔術が必要だ。
+`array`側の実装にはまだ現時点では完全に理解できない黒魔術が必要だ。
 
 ~~~cpp
 template < typename T, std::size_t N >
@@ -376,7 +376,7 @@ auto last = a.end() ;
 
 これを考えていくと、イテレーターの実装をどうすればいいのかがわかってくる。
 
-array_iteratorの`operator *`は`a[i]`を返す。
+`array_iterator`の`operator *`は`a[i]`を返す。
 
 ~~~c++
 typename Array::reference array_iterator::operator *()
@@ -431,7 +431,7 @@ struct array
 } ;
 ~~~
 
-何度も書くように、インデックスは0から始まる。要素がN個ある場合、最初の要素は0番目で、最後の要素はN-1番目だ。
+何度も書くように、インデックスは`0`から始まる。要素がN個ある場合、最初の要素は0番目で、最後の要素はN-1番目だ。
 
 インクリメント演算子`operator ++`にも対応しよう。
 
@@ -473,7 +473,7 @@ int main()
 }
 ~~~
 
-int型では、前置`operator ++`はオペランドの値を1加算した値にする。後置`operator ++`はオペランドの値を1加算するが、式を評価した結果は前のオペランドの値になる。
+`int`型では、前置`operator ++`はオペランドの値を1加算した値にする。後置`operator ++`はオペランドの値を1加算するが、式を評価した結果は前のオペランドの値になる。
 
 ~~~c++
 ++i ; // i+1
@@ -525,7 +525,7 @@ int main()
 }
 ~~~
 
-もちろん、リファレンスを返さない実装は可能だ。そもそも何も値を返さないvoidを使うことも可能だ。
+もちろん、リファレンスを返さない実装は可能だ。そもそも何も値を返さない`void`を使うことも可能だ。
 
 ~~~cpp
 struct S
@@ -558,7 +558,7 @@ int main()
 }
 ~~~
 
-値に意味はないが、演算子として使用した場合、値は0になるというどうでもいい仕様がある。メンバー関数として使用すると好きな値を渡せるというこれまたどうでもいい仕様がある。テストには出ないので覚える必要はない。
+値に意味はないが、演算子として使用した場合、値は`0`になるというどうでもいい仕様がある。メンバー関数として使用すると好きな値を渡せるというこれまたどうでもいい仕様がある。テストには出ないので覚える必要はない。
 
 前置は自然な挙動のためにリファレンスを返すが、後置はリファレンスではなくコピーした値を返す。
 
@@ -590,9 +590,9 @@ IntLike IntLike::operator ++(int)
 }
 ~~~
 
-IntLikeのように簡単な処理であればこれでもいいが、もっと複雑な何行もある処理の場合は、すでに実装した前置インクリメントを呼び出したほうが楽だ。コードの重複を省けるのでインクリメントの処理を変更するときに、二箇所に同じ変更をしなくても済む。
+`IntLike`のように簡単な処理であればこれでもいいが、もっと複雑な何行もある処理の場合は、すでに実装した前置インクリメントを呼び出したほうが楽だ。コードの重複を省けるのでインクリメントの処理を変更するときに、二箇所に同じ変更をしなくても済む。
 
-以上を踏まえて、array_iteratorに後置インクリメント演算子を実装しよう。
+以上を踏まえて、`array_iterator`に後置インクリメント演算子を実装しよう。
 
 ~~~c++
 array_iterator array_iterator::operator ++(int)
@@ -667,7 +667,7 @@ int main()
 
 イテレーターは比較ができるので、各種アルゴリズムに渡すことができる。
 
-array_iteratorの比較は、単にデータメンバー`i`の比較でよい。
+`array_iterator`の比較は、単にデータメンバー`i`の比較でよい。
 
 ~~~c++
 bool array_iterator::operator ==( array_iterator const & right )
@@ -710,7 +710,7 @@ int main()
 i += 3 ;
 ~~~
 
-`i += n`はイテレーター`i`をn回進める。
+`i += n`はイテレーター`i`を`n`回進める。
 
 `operator +`もある
 
@@ -746,9 +746,9 @@ struct array_iterator
 
 `operator +`はオペランドの値を変更しないので`const`にできる。
 
-同様に、`operator -=`とoperator `-`もある。上を参考に自分で実装してみよう。
+同様に、`operator -=`と`operator -`もある。上を参考に自分で実装してみよう。
 
-`operator +`によって任意のn個先の要素を使うことができるようになったので、イテレーターiのn個先の要素を参照したければ、以下のように`*(i+n)`も書ける。
+`operator +`によって任意の`n`個先の要素を使うことができるようになったので、イテレーター`i`の`n`個先の要素を参照したければ、以下のように`*(i+n)`も書ける。
 
 ~~~cpp
 int main()
@@ -797,9 +797,9 @@ struct array_iterator
 } ;
 ~~~
 
-この`operator []`は、`array_iterator`のデータメンバーを変更しないのでconst修飾できる。
+この`operator []`は、`array_iterator`のデータメンバーを変更しないので`const`修飾できる。
 
-`*this`というのはこのイテレーターのオブジェクトなので、それに対してすでに実装済みの`operator +`を適用し、その結果に`operator *`を適用している。既存の実装を使わない場合、return文は以下のようになる。
+`*this`というのはこのイテレーターのオブジェクトなので、それに対してすでに実装済みの`operator +`を適用し、その結果に`operator *`を適用している。既存の実装を使わない場合、`return`文は以下のようになる。
 
 ~~~c++
 return a[i+n] ;
@@ -853,7 +853,7 @@ struct array_iterator
 
 ## constなイテレーター: const_iterator
 
-`std::array<T,N>`は通常のイテレーターである`std::array<T,N>::iterator`の他に、constなイテレーターである`std::array<T,N>::const_iterator`を提供している。
+`std::array<T,N>`は通常のイテレーターである`std::array<T,N>::iterator`の他に、`const`なイテレーターである`std::array<T,N>::const_iterator`を提供している。
 
 ~~~cpp
 int main()
@@ -869,7 +869,7 @@ int main()
 
 `const_iterator`は`const iterator`ではない。`const_iterator`とはそれ自体が型名だ。`const`というのは型名を修飾する別の機能だ。
 
-そのため、constの有無の2種類の状態と、`iterator`, `const_iterator`の2つの型をかけ合わせた、以下の型が存在する。
+そのため、`const`の有無の2種類の状態と、`iterator`, `const_iterator`の2つの型をかけ合わせた、以下の型が存在する。
 
 + `iterator`
 + `const iterator`
@@ -905,11 +905,11 @@ struct array
 } ;
 ~~~
 
-それぞれの型に対して、constキーワードをつけた型とそうでない型が存在する。
+それぞれの型に対して、`const`キーワードをつけた型とそうでない型が存在する。
 
 `const_iterator`を得る方法はいくつかある。
 
-+ constなarrayの`begin/end`を呼び出す
++ `const`な`array`の`begin`/`end`を呼び出す
 
 ~~~cpp
 int main()
@@ -922,7 +922,7 @@ int main()
 }
 ~~~
 
-+ `cbegin/cend`を呼び出す
++ `cbegin`/`cend`を呼び出す
 
 ~~~cpp
 int main()
@@ -949,7 +949,7 @@ int main()
 }
 ~~~
 
-constキーワードはすでに学んだように、オブジェクトの値を変更できないようにする機能だ。
+`const`キーワードはすでに学んだように、オブジェクトの値を変更できないようにする機能だ。
 
 なぜ`const_iterator`が存在するのか。`const iterator`ではだめなのか。その理由は、`const iterator`は値の変更ができないためだ。
 
@@ -1018,7 +1018,7 @@ int main()
 }
 ~~~
 
-`auto const`もしくは`const auto`を使うと、変数の型を自動で推定してくれるが、constがつくようになる。
+`auto const`もしくは`const auto`を使うと、変数の型を自動で推定してくれるが、`const`がつくようになる。
 
 `const_iterator`はどう実装するのか。まず`array`にネストされた型名`const_iterator`を追加する。
 
@@ -1031,7 +1031,7 @@ struct array
 } ;
 ~~~
 
-`array`に`const_iterator`を返す`cbegin/cend`と、`const array`のときに`const_iterator`を返す`begin/end`を追加する。
+`array`に`const_iterator`を返す`cbegin/cend`と、`const array`のときに`const_iterator`を返す`begin`/`end`を追加する。
 
 ~~~cpp
 template < typename T, std::size_t N >

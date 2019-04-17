@@ -2,27 +2,27 @@
 
 ## 概要
 
-今まで使っているリファレンスは、正式にはlvalueリファレンスという名前がついている。これはlvalueへのリファレンスという意味だ。lvalueへのリファレンスがあるからには、lvalueではないリファレンスがあるということだ。C++にはrvalueへのリファレンスがある。これをrvalueリファレンスという。
+今まで使っているリファレンスは、正式には`lvalue`リファレンスという名前がついている。これは`lvalue`へのリファレンスという意味だ。`lvalue`へのリファレンスがあるからには、`lvalue`ではないリファレンスがあるということだ。C++には`rvalue`へのリファレンスがある。これを`rvalue`リファレンスという。
 
 この章で説明する内容はとても難しい。完全に理解するためには、何度も読み直す必要があるだろう。
 
 ## rvalueリファレンスの宣言
 
-T型へのlvalue型リファレンス型は`T &`と書く。
+`T`型への`lvalue`型リファレンス型は`T &`と書く。
 
 ~~~c++
 T & lvalue_reference = ... ;
 ~~~
 
-T型へのrvalueリファレンス型は`T &&`と書く。
+`T`型への`rvalue`リファレンス型は`T &&`と書く。
 
 ~~~c++
 T && rvalue_reference = ... ;
 ~~~
 
-lvalueリファレンスはlvalueで初期化する。rvalueリファレンスはrvalueで初期化する。
+`lvalue`リファレンスは`lvalue`で初期化する。`rvalue`リファレンスは`rvalue`で初期化する。
 
-lvalueとは名前付きのオブジェクトや戻り値の型としてのlvalueリファレンスのことだ。
+`lvalue`とは名前付きのオブジェクトや戻り値の型としての`lvalue`リファレンスのことだ。
 
 ~~~cpp
 int object { } ;
@@ -36,9 +36,9 @@ int main()
 }
 ~~~
 
-ここで、式`object`や式`f()`を評価した結果はlvalueだ。
+ここで、式`object`や式`f()`を評価した結果は`lvalue`だ。
 
-rvalueとは、名前無しのオブジェクトや計算結果の一時オブジェクト、戻り値の型としてのrvalueリファレンスのことだ。
+`rvalue`とは、名前無しのオブジェクトや計算結果の一時オブジェクト、戻り値の型としての`rvalue`リファレンスのことだ。
 
 ~~~cpp
 int && g() { return 0 ; }
@@ -54,10 +54,10 @@ int main()
 }
 ~~~
 
-ここで、式`0`、式`1 + 1`、式`g()`を評価した結果はrvalueだ。
+ここで、式`0`、式`1 + 1`、式`g()`を評価した結果は`rvalue`だ。
 
 
-rvalueリファレンスをlvalueで初期化することはできない。
+`rvalue`リファレンスを`lvalue`で初期化することはできない。
 
 ~~~c++
 int object { } ;
@@ -71,7 +71,7 @@ int main()
 }
 ~~~
 
-lvalueリファレンスをrvalueで初期化することはできない。
+`lvalue`リファレンスを`rvalue`で初期化することはできない。
 
 ~~~c++
 int && g() { return 0 ; }
@@ -87,9 +87,9 @@ int main()
 }
 ~~~
 
-リファレンスを初期化することを、リファレンスはリファレンス先を束縛するという。lvalueリファレンスはlvalueを束縛する。rvalueリファレンスはrvalueを束縛する。
+リファレンスを初期化することを、リファレンスはリファレンス先を束縛するという。`lvalue`リファレンスは`lvalue`を束縛する。`rvalue`リファレンスは`rvalue`を束縛する。
 
-ただし、constなlvalueリファレンスはrvalueを束縛することができる。
+ただし、`const`な`lvalue`リファレンスは`rvalue`を束縛することができる。
 
 ~~~cpp
 int && g() { return 0 ; }
@@ -103,7 +103,7 @@ int main()
 }
 ~~~
 
-rvalueリファレンス自体はlvalueだ。なぜならばrvalueリファレンスはオブジェクトに名前をつけて束縛するからだ。
+`rvalue`リファレンス自体は`lvalue`だ。なぜならば`rvalue`リファレンスはオブジェクトに名前をつけて束縛するからだ。
 
 ~~~c++
 int main()
@@ -119,26 +119,26 @@ int main()
 
 ## 値カテゴリー
 
-lvalueとrvalueとは何か。元々lvalueとは左辺値(left-hand value)、rvalueとは右辺値(right-hand value)という語源を持っている。これはまだC言語すらなかったはるか昔から存在する用語で、代入式の左辺に書くことができる値をlvalue、右辺に書くことができる値をrvalueと読んでいたことに由来する。
+`lvalue`と`rvalue`とは何か。元々`lvalue`とは左辺値(left-hand value)、`rvalue`とは右辺値(right-hand value)という語源を持っている。これはまだC言語すらなかったはるか昔から存在する用語で、代入式の左辺に書くことができる値を`lvalue`、右辺に書くことができる値を`rvalue`と読んでいたことに由来する。
 
 ~~~
 lvalue = rvalue ;
 ~~~
 
-例えば、`int`型の変数`x`は代入式の左辺に書くことができるからlvalue、整数リテラル`0`は右辺に書くことができるからrvalueといった具合だ。
+例えば、`int`型の変数`x`は代入式の左辺に書くことができるから`lvalue`、整数リテラル`0`は右辺に書くことができるから`rvalue`といった具合だ。
 
 ~~~c++
 int x ;
 x = 0 ;
 ~~~
 
-C++ではlvalueとrvalueをこのような意味では使っていない。
+C++では`lvalue`と`rvalue`をこのような意味では使っていない。
 
-lvalueとrvalueを理解するには、値カテゴリーを理解しなければならない。
+`lvalue`と`rvalue`を理解するには、値カテゴリーを理解しなければならない。
 
-1. 式(expression)とはglvalueかrvalueである
-2. glvalueとはlvalueかxvalueである
-3. rvalueとはprvalueかxvalueである
+1. 式(expression)とは`glvalue`か`rvalue`である
+2. `glvalue`とは`lvalue`か`xvalue`である
+3. `rvalue`とは`prvalue`か`xvalue`である
 
 この関係を図示すると以下のようになる。
 
@@ -156,7 +156,7 @@ lvalue     xvalue   prvalue
 
 ### lvalue
 
-lvalueはすでに説明したとおり名前付きのオブジェクトのことだ。
+`lvalue`はすでに説明したとおり名前付きのオブジェクトのことだ。
 
 ~~~c++
 // lvalue
@@ -164,11 +164,11 @@ int object ;
 int & ref = object ;
 ~~~
 
-通常使う殆どのオブジェクトはlvalueになる。
+通常使う殆どのオブジェクトは`lvalue`になる。
 
 ### prvalue
 
-prvalueは純粋なrvalue(pure rvalue)のことだ。つまり、名前無しのオブジェクトや計算結果の一時オブジェクトのことだ。
+`prvalue`は純粋なrvalue(pure rvalue)のことだ。つまり、名前無しのオブジェクトや計算結果の一時オブジェクトのことだ。
 
 ~~~c++
 int f() { return 0 ; }
@@ -179,7 +179,7 @@ int f() { return 0 ; }
 f() ;
 ~~~
 
-ほとんどのprvalueは式を評価するときに自動的に生成され、自動的に破棄されるので、あまり意識することはない。
+ほとんどの`prvalue`は式を評価するときに自動的に生成され、自動的に破棄されるので、あまり意識することはない。
 
 関数の戻り値の型がリファレンスではない場合、一時オブジェクトが生成される。
 
@@ -194,7 +194,7 @@ X f() ;
 auto result = x + y + z ;
 ~~~
 
-のような式がある場合、まず`x + y`が評価され、その結果が一時オブジェクトとして返される。その一時オブジェクトを仮にtempとすると、`temp + z`が評価され、また一時オブジェクトが生成され、変数`result`に代入される。
+のような式がある場合、まず`x + y`が評価され、その結果が一時オブジェクトとして返される。その一時オブジェクトを仮に`temp`とすると、`temp + z`が評価され、また一時オブジェクトが生成され、変数`result`に代入される。
 
 式文全体を評価し終わった後に、一時オブジェクトは自動的に破棄される。
 
@@ -202,11 +202,11 @@ auto result = x + y + z ;
 
 ### xvalue
 
-xvalueとは寿命が尽きかけているlvalue(eXpiring lvalue)のことだ。xvalueはlvalueやprvalueから変換することで発生する。
+`xvalue`とは寿命が尽きかけている`lvalue`(eXpiring lvalue)のことだ。`xvalue`は`lvalue`や`prvalue`から変換することで発生する。
 
-xvalueとなる値は以下のような場合だ。
+`xvalue`となる値は以下のような場合だ。
 
-+ 戻り値の型がオブジェクトの型へのrvalueリファレンスである関数の呼び出しの結果。
++ 戻り値の型がオブジェクトの型への`rvalue`リファレンスである関数の呼び出しの結果。
 
 ~~~cpp
 int && f() { return 0 ; }
@@ -218,7 +218,7 @@ int main()
 }
 ~~~
 
-+ オブジェクトの型へのrvalueリファレンスへのキャスト
++ オブジェクトの型への`rvalue`リファレンスへのキャスト
 
 ~~~cpp
 int main()
@@ -229,7 +229,7 @@ int main()
 }
 ~~~
 
-+ xvalue配列への添字操作
++ `xvalue`配列への添字操作
 
 ~~~c++
 int main()
@@ -239,9 +239,9 @@ int main()
 }
 ~~~
 
-xvalue配列というのは配列のオブジェクトを配列へのrvalueリファレンス型にキャストすると得られる。xvalue配列への添字操作の結果はxvalueだ。
+`xvalue`配列というのは配列のオブジェクトを配列への`rvalue`リファレンス型にキャストすると得られる。`xvalue`配列への添字操作の結果は`xvalue`だ。
 
-+ xvalueなクラスのオブジェクトへのリファレンスではない非staticデータメンバーへのアクセス
++ `xvalue`なクラスのオブジェクトへのリファレンスではない非`static`データメンバーへのアクセス
 
 ~~~c++
 struct X { int data_member ; } ;
@@ -253,7 +253,7 @@ int main()
 } ;
 ~~~
 
-+ 式`.*`で最初のオペランドがxvalueで次のオペランドがデータメンバーへのポインターの場合
++ 式`.*`で最初のオペランドが`xvalue`で次のオペランドがデータメンバーへのポインターの場合
 
 ~~~c++
 struct X { int data_member ; } ;
@@ -265,15 +265,15 @@ int main()
 }
 ~~~
 
-これも配列と似ていて、xvalueのクラスオブジェクトに対するメンバーへのポインター経由でのメンバーの参照結果はxvalueになるということだ。
+これも配列と似ていて、`xvalue`のクラスオブジェクトに対するメンバーへのポインター経由でのメンバーの参照結果は`xvalue`になるということだ。
 
-重要なのは最初の2つだ。残りは覚える必要はない。重要なのは、xvalueとは、lvalueかprvalueから変換した結果発生するものだ。
+重要なのは最初の2つだ。残りは覚える必要はない。重要なのは、`xvalue`とは、`lvalue`か`prvalue`から変換した結果発生するものだ。
 
 ### rvalue
 
-prvalueとxvalueを合わせて、rvalueという。rvalueリファレンスというのは、rvalueでしか初期化できない。rvalueというのはprvalueかxvalueのどちらかだ。
+`prvalue`と`xvalue`を合わせて、`rvalue`という。`rvalue`リファレンスというのは、`rvalue`でしか初期化できない。`rvalue`というのは`prvalue`か`xvalue`のどちらかだ。
 
-lvalueはxvalueに変換できるので、結果としてrvalueに変換できることになる。
+`lvalue`は`xvalue`に変換できるので、結果として`rvalue`に変換できることになる。
 
 ~~~c++
 int main()
@@ -290,17 +290,17 @@ int main()
 }
 ~~~
 
-lvalueはそのままではrvalueではないが、xvalueに変換すればrvalueになる。
+`lvalue`はそのままでは`rvalue`ではないが、`xvalue`に変換すれば`rvalue`になる。
 
-prvalueはもともとrvalueである。
+`prvalue`はもともと`rvalue`である。
 
 この性質は次の章で説明するムーブセマンティクスで利用する。
 
 ### glvalue
 
-glvalueは一般的なlvalue(generalized lvalue)という意味だ。glvalueとは、lvalueかxvalueのことだ。
+`glvalue`は一般的な`lvalue`(generalized lvalue)という意味だ。`glvalue`とは、`lvalue`か`xvalue`のことだ。
 
-lvalueから変換したxvalueはもともとlvalueだったのだから、glvalueとなるのも自然だ。xvalueに変換したprvalueはglvalueになれる。
+`lvalue`から変換した`xvalue`はもともと`lvalue`だったのだから、`glvalue`となるのも自然だ。`xvalue`に変換した`prvalue`は`glvalue`になれる。
 
 この性質はムーブセマンティクスで利用する。
 
@@ -309,7 +309,7 @@ lvalueから変換したxvalueはもともとlvalueだったのだから、glval
 
 ### std::move
 
-`std::move(e)`は値`e`をxvalueにするための標準ライブラリだ。`std::move(e)`は値`e`の型`T`へのrvalueリファレンス型にキャストしてくれるので、xvalueになる。そしてxvalueはrvalueだ。
+`std::move(e)`は値`e`を`xvalue`にするための標準ライブラリだ。`std::move(e)`は値`e`の型`T`への`rvalue`リファレンス型にキャストしてくれるので、`xvalue`になる。そして`xvalue`は`rvalue`だ。
 
 ~~~cpp
 int main()
@@ -343,7 +343,7 @@ T && move( T & t ) noexcept
 }
 ~~~
 
-この実装はlvalueをxvalueに変換することはできるが、rvalue(prvalueとxvalue)をxvalueに変換することはできない。
+この実装は`lvalue`を`xvalue`に変換することはできるが、`rvalue`(`prvalue`と`xvalue`)を`xvalue`に変換することはできない。
 
 ~~~c++
 int main()
@@ -357,7 +357,7 @@ int main()
 }
 ~~~
 
-rvalueはrvalueリファレンスで受け取れるので、lvalueリファレンスを関数の引数として受け取る`move`の他に、rvalueリファレンスを関数の引数として受け取る`move`を書くとよい。
+`rvalue`は`rvalue`リファレンスで受け取れるので、`lvalue`リファレンスを関数の引数として受け取る`move`の他に、`rvalue`リファレンスを関数の引数として受け取る`move`を書くとよい。
 
 すると以下のように書けるだろうか。
 
@@ -381,7 +381,7 @@ T && move( T && t ) noexcept
 
 ### フォワーディングリファレンス
 
-C++のテンプレートはコードの重複を省くためにある。そのため、C++ではテンプレートパラメーターへのrvalueリファレンスを関数の仮引数として取る場合を、フォワーディングリファレンス(forwarding reference)として、特別にlvalueでもrvalueでも受け取れるようにしている。
+C++のテンプレートはコードの重複を省くためにある。そのため、C++ではテンプレートパラメーターへの`rvalue`リファレンスを関数の仮引数として取る場合を、フォワーディングリファレンス(forwarding reference)として、特別に`lvalue`でも`rvalue`でも受け取れるようにしている。
 
 ~~~cpp
 // T &&はフォワーディングリファレンス
@@ -389,14 +389,14 @@ template < typename T >
 void f( T && t ) ;
 ~~~
 
-このような関数テンプレートの仮引数`t`に実引数としてrvalueを渡すと、`T`はrvalueの型となり、結果として`t`の型は`T &&`になる。
+このような関数テンプレートの仮引数`t`に実引数として`rvalue`を渡すと、`T`は`rvalue`の型となり、結果として`t`の型は`T &&`になる。
 
 ~~~c++
 // Tはint
 f(0) ;
 ~~~
 
-もし実引数として型`U`のlvalueを渡すと、テンプレートパラメーター`T`が`U &`となる。そして、テンプレートパラメーター`T`に対するリファレンス宣言子(`&`, `&&`)は単に無視される。
+もし実引数として型`U`の`lvalue`を渡すと、テンプレートパラメーター`T`が`U &`となる。そして、テンプレートパラメーター`T`に対するリファレンス宣言子(`&`, `&&`)は単に無視される。
 
 ~~~c++
 int lvalue{} ;
@@ -405,7 +405,7 @@ int lvalue{} ;
 f(lvalue) ;
 ~~~
 
-ここで、関数テンプレート`f`のテンプレートパラメーターTは`int &`となる。この`T`にリファレンス宣言子を`T &`や`T &&`のように使っても、単に無視されて、`T &`となる。
+ここで、関数テンプレート`f`のテンプレートパラメーター`T`は`int &`となる。この`T`にリファレンス宣言子を`T &`や`T &&`のように使っても、単に無視されて、`T &`となる。
 
 ~~~cpp
 template < typename T >
@@ -425,11 +425,11 @@ int main()
 }
 ~~~
 
-`f(0)`はprvalueを渡している。この場合、`T`の型は`int`となる。`A`は`int &`、`B`は`int &&`となる。
+`f(0)`は`prvalue`を渡している。この場合、`T`の型は`int`となる。`A`は`int &`、`B`は`int &&`となる。
 
-`f(lvalue)`はlvalueを渡している。この場合、`T`の型は`int &`となる。この場合の`T`に`&`や`&&`をつけても無視される。なので、`A`, `B`の型はどちらも`int &`になる。
+`f(lvalue)`は`lvalue`を渡している。この場合、`T`の型は`int &`となる。この場合の`T`に`&`や`&&`をつけても無視される。なので、`A`, `B`の型はどちらも`int &`になる。
 
-したがって、以下のように書くと`move`はlvalueもrvalueも受け取ることができる。
+したがって、以下のように書くと`move`は`lvalue`も`rvalue`も受け取ることができる。
 
 ~~~c++
 // lvalueもrvalueも受け取ることができるmove
@@ -440,7 +440,7 @@ T && move( T && t ) noexcept
 }
 ~~~
 
-ただし、この実装にはまだ問題がある。この`move`にlvalueを渡した場合、lvalueの型を`U`とすると、テンプレートパラメーター`T`は`U &`になる。
+ただし、この実装にはまだ問題がある。この`move`に`lvalue`を渡した場合、`lvalue`の型を`U`とすると、テンプレートパラメーター`T`は`U &`になる。
 
 ~~~c++
 U lvalue{} ;
@@ -448,7 +448,7 @@ U lvalue{} ;
 move( lvalue ) ;
 ~~~
 
-テンプレートパラメーター名`T`がリファレンスのとき、`T`にリファレンス宣言子`&&`をつけても単に無視されることを考えると、上の`move`に`int &`型のlvalueが実引数として渡されたときは、以下のように書いたものと等しくなる。
+テンプレートパラメーター名`T`がリファレンスのとき、`T`にリファレンス宣言子`&&`をつけても単に無視されることを考えると、上の`move`に`int &`型の`lvalue`が実引数として渡されたときは、以下のように書いたものと等しくなる。
 
 ~~~c++
 int & move( int & t ) noexcept
@@ -457,7 +457,7 @@ int & move( int & t ) noexcept
 }
 ~~~
 
-`move(e)`は`e`がlvalueであれrvalueであれ、xvalueにする関数だ。そのためには、rvalueリファレンスにキャストしなければならない。テンプレートではフォーワーディングリファレンスという例外的な仕組みによってlvalueもrvalueも`T &&`で受け取れるが、lvalueを受け取ったときには`T &&`がlvalueリファレンスになってしまうのでは、xvalueにキャストできない。
+`move(e)`は`e`が`lvalue`であれ`rvalue`であれ、`xvalue`にする関数だ。そのためには、`rvalue`リファレンスにキャストしなければならない。テンプレートではフォーワーディングリファレンスという例外的な仕組みによって`lvalue`も`rvalue`も`T &&`で受け取れるが、`lvalue`を受け取ったときには`T &&`が`lvalue`リファレンスになってしまうのでは、`xvalue`にキャストできない。
 
 この問題は別のライブラリによって解決できる。
 
@@ -478,7 +478,7 @@ int main()
 }
 ~~~
 
-ということは、これとリファレンス宣言子を組み合わせると、どのような型がテンプレート実引数に渡されてもrvalueリファレンスにできる。
+ということは、これとリファレンス宣言子を組み合わせると、どのような型がテンプレート実引数に渡されても`rvalue`リファレンスにできる。
 
 ~~~cpp
 template < typename T >
@@ -488,7 +488,7 @@ void f()
 }
 ~~~
 
-`add_pointer_t/remove_pointer_t`があるように、`remove_reference_t`にも対となるリファレンスを追加するライブラリが存在する。ただしリファレンスにはlvalueリファレンスとrvalueリファレンスがあるので、それぞれ`std::add_lvalue_reference_t<T>`、`std::add_rvalue_reference_t<T>`となっている。
+`add_pointer_t/remove_pointer_t`があるように、`remove_reference_t`にも対となるリファレンスを追加するライブラリが存在する。ただしリファレンスには`lvalue`リファレンスと`rvalue`リファレンスがあるので、それぞれ`std::add_lvalue_reference_t<T>`、`std::add_rvalue_reference_t<T>`となっている。
 
 ~~~cpp
 int main()
@@ -514,7 +514,7 @@ std::remove_reference_t<T> && move( T && t ) noexcept
 
 ### std::forward
 
-テンプレートパラメーターにrvalueリファレンス宣言子を使うとlvalueもrvalueも受け取れる。
+テンプレートパラメーターに`rvalue`リファレンス宣言子を使うと`lvalue`も`rvalue`も受け取れる。
 
 ~~~cpp
 template < typename T >
@@ -541,9 +541,9 @@ void f( T && t )
 }
 ~~~
 
-このとき、関数`f`に渡されたものがlvalueでもrvalueでも、関数`g`に渡される値はlvalueになってしまう。
+このとき、関数`f`に渡されたものが`lvalue`でも`rvalue`でも、関数`g`に渡される値は`lvalue`になってしまう。
 
-なぜならば、名前付きのrvalueリファレンスに束縛されたオブジェクトはlvalueだからだ。
+なぜならば、名前付きの`rvalue`リファレンスに束縛されたオブジェクトは`lvalue`だからだ。
 
 ~~~cpp
 int main()
@@ -555,9 +555,9 @@ int main()
 }
 ~~~
 
-なので、`g(t)`の`t`はlvalueとなる。
+なので、`g(t)`の`t`は`lvalue`となる。
 
-ここでrvalueを渡すのは簡単だ。`std::move`を使えばいい。
+ここで`rvalue`を渡すのは簡単だ。`std::move`を使えばいい。
 
 ~~~c++
 template < typename T >
@@ -567,9 +567,9 @@ void f( T && t )
 }
 ~~~
 
-ただし、これはtがlvalueのときも問答無用でxvalueにしてしまう。
+ただし、これは`t`が`lvalue`のときも問答無用で`xvalue`にしてしまう。
 
-`t`がlvalueならばlvalueとして、rvalueならばxvalueとして、渡された値カテゴリーのまま別の関数に渡したい場合、`std::forward<T>(t)`が使える。
+`t`が`lvalue`ならば`lvalue`として、`rvalue`ならば`xvalue`として、渡された値カテゴリーのまま別の関数に渡したい場合、`std::forward<T>(t)`が使える。
 
 ~~~c++
 template < typename T >
@@ -579,7 +579,7 @@ void f( T && t )
 }
 ~~~
 
-`std::forward<T>(t)`の`T`にはテンプレートパラメーター名を書く。こうすると、`t`がlvalueならばlvalueリファレンス、rvalueならばrvalueリファレンスが戻り値として返される。
+`std::forward<T>(t)`の`T`にはテンプレートパラメーター名を書く。こうすると、`t`が`lvalue`ならば`lvalue`リファレンス、`rvalue`ならば`rvalue`リファレンスが戻り値として返される。
 
 
 `std::forward`の実装は以下の通りだ。
@@ -598,6 +598,6 @@ forward(remove_reference_t<T>&& t) noexcept
 { return static_cast<T&&>(t) ; }
 ~~~
 
-もし`std::forward<T>(t)`にlvalueが渡された場合、上の`forward`が呼ばれる。その場合、`T`はlvalueリファレンスになっているはずなのでrvalueリファレンス宣言子は無視され、lvalueリファレンスが戻り値の型になる。
+もし`std::forward<T>(t)`に`lvalue`が渡された場合、上の`forward`が呼ばれる。その場合、`T`は`lvalue`リファレンスになっているはずなので`rvalue`リファレンス宣言子は無視され、`lvalue`リファレンスが戻り値の型になる。
 
-rvalueが渡された場合、rvalueリファレンスが戻り値の型になる。
+`rvalue`が渡された場合、`rvalue`リファレンスが戻り値の型になる。
