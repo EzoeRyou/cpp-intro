@@ -92,7 +92,11 @@ int main()
 
 ~~~c++
 template<class UnaryOperation>
-    discrete_distribution(size_t nw, double xmin, double xmax, UnaryOperation fw);
+    discrete_distribution(
+        size_t nw,
+        double xmin, double xmax,
+        UnaryOperation fw
+);
 ~~~
 
 `UnaryOperation`はひとつの実引数を取る関数オブジェクトで戻り値の型は`double`型に変換できること。さらに、`double`型は`UnaryOperation`の引数に変換可能なこと。もし$nw = 0$の場合は、$n = 1$とする。それ以外の場合、$n = \tcode{nw}$とする。このとき、$0 < \delta = (\tcode{xmax} - \tcode{xmin}) / n$となる関係が満たされなければならない。
@@ -151,7 +155,7 @@ int roll_dice( Engine & e )
 
 #### 簡単な説明
 
-区分定数分布(piecewise constant distribution)とは、区分と、区分ごとの確率を指定し、いずれかの区分の範囲の値に一様分布させる分布だ。
+区分定数分布(piecewise constant distribution)とは、区分と、区分ごとの確率を指定し、いずれかの区分の範囲の値に一様分布させる分布だ。ここで言う確率は、密度、あるいはウエイトともいう。
 
 ひとつの区分は`double`型の値2つ$b_i, b_{i+1}$で与える。このとき区分の乱数$x$の範囲は$[b_i, b_{i+1})$、もしくは$b_i \leq x < b_{i+1}$だ。$n$個の値を指定すると、$n-1$個の区分を指定したことになる。
 
@@ -211,7 +215,10 @@ $0 < S = w_0 + \dotsb + w_{n-1}$
 
 ~~~c++
 template<class InputIteratorB, class InputIteratorW>
-piecewise_constant_distribution(InputIteratorB firstB, Inp
+piecewise_constant_distribution(
+    InputIteratorB firstB, InputIteratorB lastB,
+    InputIteratorW firstW
+);
 ~~~
 
 `[firstB, lastB)`は区間を指定するための$N$個の値を参照する入力イテレーターのペアだ。`firstW`はそれぞれの区間の確率を指定する$N-1$個の値を参照する入力イテレーターの先頭だ。`lastW`がないのは、確率の個数は$N-1$個であると分かっているからだ。
@@ -251,13 +258,16 @@ int main()
 }
 ~~~
 
-##### 初期化リストと関数による指定
+##### 初期化リストと関数オブジェクトによる指定
 
 初期化リストと関数を指定するコンストラクターは以下の通り。
 
 ~~~c++
 template<class UnaryOperation>
-piecewise_constant_distribution(initializer_list<RealType> bl, UnaryOperation fw);
+piecewise_constant_distribution(
+    initializer_list<RealType> bl,
+    UnaryOperation fw
+);
 ~~~
 
 イテレーターのペアと同じく、区間は`[bl.begin(), bl.end())`で指定する。
@@ -282,4 +292,253 @@ int main()
 
 この場合、区間は`[1.0, 2.0)`, `[2.0, 3.0)`, '[3.0, 4.0)', '[4.0, 5.0)'の4個になり、確率は`{1.5, 2.5, 3.5, 4.5}`となる。
 
+##### 区間数、最小、最大、関数オブジェクトによる指定
 
+コンストラクターの宣言
+
+~~~c++
+emplate<class UnaryOperation>
+piecewise_constant_distribution(
+    size_t nw,
+    RealType xmin, RealType xmax,
+    UnaryOperation fw
+);
+~~~
+
+`nw`は区間数、`xmin`は最小値、`xmax`は最大値、`fw`は関数オブジェクトで、`double`型から変換できる型の実引数を取り、`double`型に変換可能な戻り値を返す。
+
+$nw = 0$の場合、区間の個数$n$は$1$になる。それ以外の場合、$n = nw$となる。このとき関係、$0 < \delta = (\tcode{xmax} - \tcode{xmin}) / n$が成り立たなければならない。
+ Let $b_k = \tcode{xmin} + k \cdot \delta $ for $ k = 0, \dotsc, n$,
+ and $w_k = \tcode{fw}(b_k + \delta / 2) $ for .
+
+$ k = 0, \dotsc, n - 1$において、区間は$b_k = \tcode{xmin} + k \cdot \delta $ for $ k = 0, \dotsc, n$とし、確率は$w_k = \tcode{fw}(b_k + \delta / 2) $とする。
+
+##### 利用例
+
+~~~cpp
+int main()
+{
+    std::piecewise_constant_distribution d( 5, 1.0, 5.0,
+        []( auto x ) { return x ; } ) ;
+}
+~~~
+
+この場合、区間の集合は`{1.0, 1.8, 2.6, 3.4, 4.2, 5.0}`となり、確率は`{1.4, 2.2, 3.0, 3.8, 4.6}`となる。
+
+#### 内部状態の取得
+
+`std::piecewise_constant_distribution`の内部状態は、メンバー関数`intervals`と`densities`で得ることができる。
+
+~~~c++
+template<class RealType = double>
+class piecewise_constant_distribution {
+public :
+    vector<result_type> intervals() const;
+    vector<result_type> densities() const;
+} ;
+~~~
+
+`intervals`は区間、densitiesは確率を返す。
+
+~~~cpp
+int main()
+{
+    auto bs = { 1.0, 2.0, 3.0 } ;
+    auto ps = { 1.0, 2.0 } ;
+    std::piecewise_constant_distribution d( std::begin(bs), std::end(bs), std::begin(ps) ) ;
+
+    // {1.0, 2.0, 3.0}
+    auto intervals = d.intervals() ;
+    // {0.333333, 0.666667}
+    auto densities = d.densities() ;
+}
+~~~
+
+`densities()`の結果が正規化されているのは、ユーザーが指定した確率は$w_k$だが、ここで返すのは$p_k$だからだ。
+
+### 区分線形分布(`std::piecewise_linear_distribution<RealType>`)
+
+
+#### 簡単な説明
+
+区分線形分布(piecewise linear distribution)は区分定数分布と同じく、区間と確率（又の名を密度、ウエイト）を指定する。
+
+区間の指定は区分定数分布と同じだ。内部境界の集合で指定する。例えば`{1.0, 2.0, 3.0}`は2つの区間`[1.0, 2.0)`と`[2.0, 3.0)`を指定する。
+
+区分線形分布における確率は、区間に対してではなく、内部境界に対して指定する。指定した全区間における値の出現確率は、内部境界から内部境界に向かって指定した確率の差の方向に線形に増加、もしくは減少する。
+
+例えば区分`{0.0, 1.0}`と確率`{1.0, 2.0}`を指定した場合、これはひとつの区間`[0.0, 1.0)`について、内部境界`0.0`の確率は$\frac{1}{3}$、内部境界`1.0'の確率は`\frac{2}{3}`とし、$0.0 \leq x < 1.0$の範囲の乱数`x`を生成する。内部境界区間の範囲に注意。`1.0`未満なので。`1.0`は出ない。
+
+そして、区間の間の値は、区間を区切る2つの内部境界の確率の差によって、線形に増加、もしくは減少する。例えば値`0.25`が出る確率は$\frac{1.25}{3}$、`0.5`が出る確率は$\frac{1.5}{3}$、値`1.75`がでる確率は$\frac{1.75}{3}$だ。
+
+区分`{0.0, 1.0, 2.0}`と確率`{1.0, 2.0, 1.0}`の場合、2つの区間`[0.0, 1.0)`と`[1.0, 2.0)`の範囲について、`0.0`から`1.0`に向かう区間についての確率は$\frac{1}{4}$から$\frac{1}{2}$に増加し、`1.0`から`2.0`に向かう区間についての確率は$\frac{1}{2}$から$\frac{1}{4}$に減少する。
+
+結果として、乱数値の分布をグラフに描画すると、`1.0`が最も出やすく、その前後±1.0の範囲で徐々に減少していく山のようなグラフになる。
+
+TODO: グラフ、横軸が乱数値、縦軸が確率
+
+~~~
+      *       + \frac{1}{2}
+     ***      |
+    *****     |
+   *******    |
+  *********   |
+ ***********  + \frac{1}{4}
+ ***********
+ ***********
+ ***********
+ ***********
+-+----+----+
+0.0  1.0  2.0
+~~~
+
+#### 数学的な説明
+
+`std::piecewise_linear_distribution<RealType>`は乱数$x$, $b_0 \leq x < b_n$を以下の確率密度関数に従って分布する。
+
+$$
+p(x \,|\, b_0, \dotsc, b_n, \; \rho_0, \dotsc, \rho_n)
+     = \rho_{i}   \cdot {\frac{b_{i+1} - x}{b_{i+1} - b_i}}
+     + \rho_{i+1} \cdot {\frac{x - b_i}{b_{i+1} - b_i}}
+     \text{ , for $b_i \le x < b_{i+1}$.} 
+$$
+
+一般に*内部境界*とも呼ばれる$n + 1$分布パラメーター$b_i$は$i = 0, \dotsc, n - 1$において関係$b_i < b_{i+1}$ for $i = 0, \dotsc, n - 1$を満たさねばならない。別記する場合を除いて、残りの$n + 1$パラメーターは$k = 0, \dotsc, n$において$\rho_k = {w_k / S}$と計算される。このとき$w_k$は一般に境界におけるウエイト(weight at boundaries)と呼ばれ、非負数、非NaN、非無弁でなければならない。さらに、以下の関係が成り立たねばならない。
+
+$$
+0 < S = \frac{1}{2} \cdot \sum_{k=0}^{n-1} (w_k + w_{k+1}) \cdot (b_{k+1} - b_k) \text{ .}
+$$
+
+#### 変数の宣言
+
+`piecewise_linear_distribution`は区間と確率を指定するために`n`個の`double`型に変換可能な値を指定する必要がある。
+
+##### イテレーターによる指定
+
+~~~c++
+template<class InputIteratorB, class InputIteratorW>
+piecewise_linear_distribution(
+    InputIteratorB firstB, InputIteratorB lastB,
+    InputIteratorW firstW );
+~~~
+
+`[firstB, lastB)`は区間、`firstW`から区間数までのイテレーターが確立。
+
+`firstB == lastB`もしくは`+firstB == lastB`の場合、つまり内部境界が1個以下で、空の場合、区間数はひとつで`[0.0, 1.0)`の範囲、確率は`{0.0, 1.0}`となる。
+
+##### 使い方
+
+~~~cpp
+int main()
+{
+    auto bs = { 0.0, 1.0, 2.0 } ;
+    auto ps = { 1.0, 2.0, 1.0 } ;
+    std::piecewise_linear_distribution d( std::begin(bs), std::end(bs), std::begin(ps) ) ;
+
+    std::mt19937 e ;
+    d(e) ;
+}
+~~~
+
+空の場合。
+
+~~~cpp
+int main()
+{
+    auto bs = { 0.0 } ;
+    auto ps = { 0.0 } ;
+    std::piecewise_linear_distribution d( std::begin(bs), std::end(bs), std::begin(ps) ) ;
+}
+~~~
+
+これは以下のコードと同じだ。
+
+~~~cpp
+int main()
+{
+    auto bs = { 0.0, 1.0 } ;
+    auto ps = { 0.0, 1.0 } ;
+    std::piecewise_linear_distribution d( std::begin(bs), std::end(bs), std::begin(ps) ) ;
+}
+~~~
+
+##### 初期化リストと関数オブジェクトによる指定
+
+~~~c++
+template<class UnaryOperation>
+piecewise_linear_distribution(
+    initializer_list<RealType> bl,
+    UnaryOperation fw
+);
+~~~
+
+区間を指定する内部境界は`[bl.begin(), bl.end())`、内部境界$b_k$に対する確率$w_k$は$k = 0, \dotsc, n$について、$w_k = \tcode{fw}(b_k)$とする。
+
+内部境界が1個以下の場合はイテレーターの場合と同じ。
+
+##### 使い方
+
+~~~cpp
+int main()
+{
+    std::piecewise_linear_distribution d(
+        {0.0, 1.0, 2.0},
+        [](auto x){ return x ; }
+    ) ;
+}
+~~~
+
+これは以下のコード同じだ。
+
+~~~cpp
+int main()
+{
+    auto bs = { 0.0, 1.0, 2.0 } ;
+    auto ps = { 0.0, 1.0, 2.0 } ;
+    std::piecewise_linear_distribution d( std::begin(bs), std::end(bs), std::begin(ps) ) ;
+}
+~~~
+
+##### 個数、最小値、最大値、関数オブジェクトによる指定
+
+~~~c++
+template<class UnaryOperation>
+piecewise_linear_distribution(
+    size_t nw,
+    RealType xmin, RealType xmax,
+    UnaryOperation fw
+);
+~~~
+
+`nw`が個数、`xmin`が最小値、`xmax`が最大値、`fw`が関数オブジェクト。
+
+関数オブジェクト`fw`は`double`型から変換できる実引数を1つだけとり、戻り値の型は`double`型に変換できること。
+
+$\tcode{nw} = 0$ならば空であり、イテレーターの場合と同じ。
+
+関係$0 < \delta = (\tcode{xmax} - \tcode{xmin}) / n$が成り立つこと。
+
+内部境界$b_k$は$k = 0, \dotsc, n$について$b_k = \tcode{xmin} + k \cdot \delta$とする。確率$w_k$は$k = 0, \dotsc, n$について$w_k = \tcode{fw}(b_k)$とする。
+
+##### 使い方
+
+~~~cpp
+int main()
+{
+    std::piecewise_linear_distribution d(
+        5,
+        1.0, 5.0,
+        [](auto x){ return x ;}
+    ) ;
+}
+~~~
+
+上のコードは以下のコードと同じだ。
+
+~~~cpp
+int main()
+{
+    auto params = { 1.8, 2.6, 3.4, 4.2, 5.0, 5.8 } ;
+    std::piecewise_linear_distribution d( std::begin(params), std::end(params), std::begin(params) ) ;
+}
+~~~
