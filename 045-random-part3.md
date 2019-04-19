@@ -2,8 +2,7 @@
 
 ### 正規分布(`std::normal_distribution<RealType>`)
 
-`std::normal_distribution<RealType>`は浮動小数点数型の乱数$x$
-以下の確率密度関数に従って分布する。
+`std::normal_distribution<RealType>`は浮動小数点数型の乱数$x$を以下の確率密度関数に従って分布する。
 
 $$
  (x\,|\,\mu,\sigma)
@@ -164,7 +163,7 @@ $$
 std::fisher_f_distribution<RealType> d( m, n ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`dobule`。`m`, `n`は`RealType`型。値の範囲は$0 < m$ かつ $0 < n$
+`RealType`は浮動小数点数型でデフォルトは`double`。`m`, `n`は`RealType`型。値の範囲は$0 < m$ かつ $0 < n$
 
 使い方。
 
@@ -183,7 +182,7 @@ int main()
 
 スチューデントのt分布(Student's t-distribution)はウィリアム・シーリー・ゴセットによって考案された。当時、ウィリアムはギネス醸造所で働いていたが、ギネスは従業員に科学論文を発表することを禁じていたために、ウィリアムはスチューデントという偽名で発表した。
 
-`std::student_t_distribution<RealType>`は浮動小数点数型の乱数$x$お以下の確率密度関数に従って分布する。
+`std::student_t_distribution<RealType>`は浮動小数点数型の乱数$x$を以下の確率密度関数に従って分布する。
 
 $$
 p(x\,|\,n) = \frac{1}{\sqrt{n \pi}}

@@ -2,7 +2,7 @@
 
 クラス、ポインター、メモリ確保を学んだので、とうとうコンテナーの中でも一番有名な`std::vector`を実装する用意ができた。しかしその前に、アロケーターについて学ぶ必要がある。
 
-`std::vector`は`std::vector<T>`のように要素の型Tを指定して使うので、以下のようになっていると思う読者もいるだろう。
+`std::vector`は`std::vector<T>`のように要素の型`T`を指定して使うので、以下のようになっていると思う読者もいるだろう。
 
 ~~~c++
 namespace std {
@@ -120,7 +120,7 @@ int main()
 }
 ~~~
 
-確保されるのが生のメモリだということに注意したい。実際にT型の値として使うには、newによる構築が必要だ。
+確保されるのが生のメモリだということに注意したい。実際にT型の値として使うには、`new`による構築が必要だ。
 
 ~~~cpp
 int main()
@@ -261,7 +261,7 @@ int main()
 }
 ~~~
 
-T型のN個の配列を構築するには、まずN個の生のメモリを確保し、
+`T`型の`N`個の配列を構築するには、まず`N`個の生のメモリを確保し、
 
 ~~~c++
 std::allocator<std::string> a ;
@@ -269,7 +269,7 @@ using traits = std::allocator_traits<decltype(a)> ;
 std::string * p = traits::allocate( a, N ) ;
 ~~~
 
-N回の構築を行う。
+`N`回の構築を行う。
 
 ~~~c++
 for ( auto i = p, last = p + N ; i != last ; ++i )
@@ -278,7 +278,7 @@ for ( auto i = p, last = p + N ; i != last ; ++i )
 }
 ~~~
 
-破棄もN回行う。
+破棄も`N`回行う。
 
 ~~~c++
 for ( auto i = p + N, first = p ; i != first ; --i )
@@ -296,7 +296,7 @@ traits::deallocate( a, p, N ) ;
 
 ## 簡易vectorの概要
 
-準備はできた。簡易的なvectorを実装していこう。以下が本書で実装する簡易vectorだ。
+準備はできた。簡易的な`vector`を実装していこう。以下が本書で実装する簡易`vector`だ。
 
 ~~~c++
 template < typename T, typename Allocator = std::allocator<T> >
@@ -325,7 +325,7 @@ public :
 } ;
 ~~~
 
-これだけの簡易vectorでもかなり便利に使える。
+これだけの簡易`vector`でもかなり便利に使える。
 
 例えば要素数を定めて配列のようにアクセスできる。
 
@@ -352,7 +352,7 @@ std::copy(
 
 ## classとアクセス指定
 
-簡易vectorの概要では、まだ学んでいない機能が使われていた。`class`と`public`と`private`だ。
+簡易`vector`の概要では、まだ学んでいない機能が使われていた。`class`と`public`と`private`だ。
 
 C++のクラスにはアクセス指定がある。`public:`と`private:`だ。アクセス指定が書かれた後、別のアクセス指定が現れるまでの間のメンバーは、アクセス指定の影響を受ける。
 
@@ -374,7 +374,7 @@ public :
 ~~~
 
 
-publicメンバーはクラスの外から使うことができる。
+`public`メンバーはクラスの外から使うことができる。
 
 ~~~cpp
 struct C
@@ -393,7 +393,7 @@ int main()
 }
 ~~~
 
-privateメンバーはクラスの外から使うことができない。
+`private`メンバーはクラスの外から使うことができない。
 
 ~~~c++
 struct C
@@ -433,9 +433,9 @@ int main()
 }
 ~~~
 
-この例では、`C::C(int)`はpublicメンバーなのでクラスの外から使えるが、`C::C(double)`はprivateメンバーなのでクラスの外からは使えない。
+この例では、`C::C(int)`は`public`メンバーなのでクラスの外から使えるが、`C::C(double)`は`private`メンバーなのでクラスの外からは使えない。
 
-privateメンバーはクラスの中から使うことができる。クラスの中であればどのアクセス指定のメンバーからでも使える。
+`private`メンバーはクラスの中から使うことができる。クラスの中であればどのアクセス指定のメンバーからでも使える。
 
 ~~~cpp
 struct C
@@ -454,7 +454,7 @@ private :
 } ;
 ~~~
 
-privateメンバーの目的はクラスの外から使ってほしくないメンバーを守ることだ。例えば以下のようにコンストラクターでnewしてデストラクターでdeleteするようなクラスがあるとする。
+`private`メンバーの目的はクラスの外から使ってほしくないメンバーを守ることだ。例えば以下のようにコンストラクターで`new`してデストラクターで`delete`するようなクラスがあるとする。
 
 ~~~cpp
 class dynamic_int
@@ -472,7 +472,7 @@ public :
 } ;
 ~~~
 
-もし`dynamic_int::ptr`がpublicメンバーだった場合、以下のようなコードのコンパイルが通ってしまう。
+もし`dynamic_int::ptr`が`public`メンバーだった場合、以下のようなコードのコンパイルが通ってしまう。
 
 ~~~c++
 int main()
@@ -484,9 +484,9 @@ int main()
 }
 ~~~
 
-このプログラムが`dynamic_int`のデストラクターを呼ぶと、main関数のローカル変数のポインターに対して`delete`を呼び出してしまう。これは未定義の挙動となる。
+このプログラムが`dynamic_int`のデストラクターを呼ぶと、`main`関数のローカル変数のポインターに対して`delete`を呼び出してしまう。これは未定義の挙動となる。
 
-外部から使われては困るメンバーをprivateメンバーにすることでこの問題はコンパイル時にエラーにでき、未然に回避できる。
+外部から使われては困るメンバーを`private`メンバーにすることでこの問題はコンパイル時にエラーにでき、未然に回避できる。
 
 クラスを定義するにはキーワードとして`struct`もしくは`class`を使う。
 
@@ -497,7 +497,7 @@ class   bar { } ;
 
 違いはデフォルトのアクセス指定だ。
 
-structはデフォルトでpublicとなる。
+`struct`はデフォルトで`public`となる。
 
 ~~~cpp
 struct foo
@@ -507,7 +507,7 @@ struct foo
 } ;
 ~~~
 
-classはデフォルトでprivateとなる。
+`class`はデフォルトで`private`となる。
 
 ~~~cpp
 class bar
@@ -534,7 +534,7 @@ int main()
 }
 ~~~
 
-自作の簡易vectorで`std::vector`と同じようにネストされた型名を書いていこう。
+自作の簡易`vector`で`std::vector`と同じようにネストされた型名を書いていこう。
 
 要素型に関係するネストされた型名
 
@@ -551,7 +551,7 @@ public :
 } ;
 ~~~
 
-本物の`std::vector`とは少し異なるが、ほぼ同じだ。要素型が`value_type`で、あとは要素型のポインター、constポインター、リファレンス、constリファレンスがそれぞれエイリアス宣言される。
+本物の`std::vector`とは少し異なるが、ほぼ同じだ。要素型が`value_type`で、あとは要素型のポインター、`const`ポインター、リファレンス、`const`リファレンスがそれぞれエイリアス宣言される。
 
 アロケーター型も`allocator_type`としてエイリアス宣言される。
 
@@ -607,13 +607,13 @@ using reverse_iterator          = std::reverse_iterator<iterator> ;
 using const_reverse_iterator    = std::reverse_iterator<const_iterator> ;
 ~~~
 
-今回実装する簡易vectorでは、ポインター型をイテレーター型として使う。`std::vector`の実装がこのようになっている保証はない。
+今回実装する簡易`vector`では、ポインター型をイテレーター型として使う。`std::vector`の実装がこのようになっている保証はない。
 
 `reverse_iterator`と`const_reverse_iterator`はリバースイテレーターだ。
 
 ## 簡易vectorのデータメンバー
 
-簡易vectorにはどのようなデータメンバーがあればいいのだろうか。以下の4つの情報を保持する必要がある。
+簡易`vector`にはどのようなデータメンバーがあればいいのだろうか。以下の4つの情報を保持する必要がある。
 
 1. 動的確保したストレージへのポインター
 2. 現在有効な要素数
@@ -663,7 +663,7 @@ private :
 
 ## 簡単なメンバー関数の実装
 
-簡易vectorの簡単なメンバー関数を実装していく。ここでのサンプルコードはすべて簡易vectorのクラス定義の中に書いたかのように扱う。例えば
+簡易`vector`の簡単なメンバー関数を実装していく。ここでのサンプルコードはすべて簡易`vector`のクラス定義の中に書いたかのように扱う。例えば
 
 ~~~c++
 void f() { }
@@ -685,7 +685,7 @@ public :
 
 ### イテレーター
 
-簡易vectorは要素の集合を配列のように連続したストレージ上に構築された要素として保持する。したがってイテレーターは単にポインターを返すだけでよい。
+簡易`vector`は要素の集合を配列のように連続したストレージ上に構築された要素として保持する。したがってイテレーターは単にポインターを返すだけでよい。
 
 まず通常のイテレーター
 
@@ -698,7 +698,7 @@ iterator end() noexcept
 
 これは簡単だ。`iterator`型は実際には`T *`型へのエイリアスだ。このメンバー関数は例外を投げないので`noexcept`を指定する。
 
-`vector`のオブジェクトがconstの場合、`begin/end`は`const_iterator`が返る。
+`vector`のオブジェクトが`const`の場合、`begin/end`は`const_iterator`が返る。
 
 ~~~cpp
 int main()
@@ -718,7 +718,7 @@ int main()
 }
 ~~~
 
-これを実現するには、メンバー関数をconst修飾する。
+これを実現するには、メンバー関数を`const`修飾する。
 
 ~~~c++
 struct Foo
@@ -742,9 +742,9 @@ int main()
 }
 ~~~
 
-すでに学んだようにconst修飾はthisポインターを修飾する。オブジェクトのconst性によって、適切な方のメンバー関数が呼ばれてくれる。
+すでに学んだように`const`修飾は`this`ポインターを修飾する。オブジェクトの`const`性によって、適切な方のメンバー関数が呼ばれてくれる。
 
-簡易vectorでの実装は単にconst修飾するだけだ。
+簡易`vector`での実装は単に`const`修飾するだけだ。
 
 ~~~c++
 iterator begin() const noexcept
@@ -753,7 +753,7 @@ iterator end() const noexcept
 { return last ; }
 ~~~
 
-constではないvectorのオブジェクトから`const_iterator`がほしいときに、わざわざconstなリファレンスに変換するのは面倒なので、`const_reference`を返す`cbegin/cend`もある。
+`const`ではない`vector`のオブジェクトから`const_iterator`がほしいときに、わざわざ`const`なリファレンスに変換するのは面倒なので、`const_reference`を返す`cbegin`/`cend`もある。
 
 ~~~cpp
 int main()
@@ -773,7 +773,7 @@ const_iterator cend() const noexcept
 { return last ; }
 ~~~
 
-`std::vector`にはリバースイテレーターを返すメンバー関数`rbegin/rend`と`crbegin/crend`がある。
+`std::vector`にはリバースイテレーターを返すメンバー関数`rbegin`/`rend`と`crbegin`/`crend`がある。
 
 ~~~c++
 int main()
@@ -790,7 +790,7 @@ int main()
 }
 ~~~
 
-`begin`に対する`rbegin/rend`の実装は以下のようになる。`crbegin/crend`は自分で実装してみよう。
+`begin`に対する`rbegin`/`rend`の実装は以下のようになる。`crbegin`/`crend`は自分で実装してみよう。
 
 ~~~c++
 reverse_iterator rbegin() noexcept
@@ -799,7 +799,7 @@ reverse_iterator rend() noexcept
 { return reverse_iterator{ first } ; }
 ~~~
 
-return文で`T{e}`という形の明示的な型変換を使っている。これには理由がある。
+`return`文で`T{e}`という形の明示的な型変換を使っている。これには理由がある。
 
 C++では引数が1つしかないコンストラクターを`変換コンストラクター`として特別に扱う。
 
@@ -814,7 +814,7 @@ class Number
 } ;
 ~~~
 
-この`Number`は初期値をコンストラクターで取る。そのとき、int型、double型、はては文字列で数値を表現したstd::string型まで取る。この3つのコンストラクターは引数が1つしかないため変換コンストラクターだ。
+この`Number`は初期値をコンストラクターで取る。そのとき、`int`型、`double`型、はては文字列で数値を表現した`std::string`型まで取る。この3つのコンストラクターは引数が1つしかないため変換コンストラクターだ。
 
 クラスは変換コンストラクターの引数の型から暗黙に型変換できる。
 
@@ -838,7 +838,7 @@ int main()
 }
 ~~~
 
-intやdoubleやstd::stringはNumberではないが、変換コンストラクターによって暗黙に型変換される。
+`int`や`double`や`std::string`は`Number`ではないが、変換コンストラクターによって暗黙に型変換される。
 
 戻り値として返すときにも変換できる。
 
@@ -920,7 +920,7 @@ size_type size() const noexcept
 }
 ~~~
 
-`empty`は空であればtrue、そうでなければfalseを返す。「空」というのは要素数がゼロという意味だ。
+`empty`は空であれば`true`、そうでなければ`false`を返す。「空」というのは要素数がゼロという意味だ。
 
 ~~~c++
 bool empty() const noexcept
@@ -951,7 +951,7 @@ size_type capacity() const noexcept
 
 #### operator []
 
-`std::vector`の`operator []`相当のものを簡易vectorにも実装しよう。
+`std::vector`の`operator []`相当のものを簡易`vector`にも実装しよう。
 
 ~~~cpp
 int main()
@@ -962,7 +962,7 @@ int main()
 }
 ~~~
 
-`operator []`は非const版とconst版の2種類がある。
+`operator []`は非`const`版と`const`版の2種類がある。
 
 ~~~c++
 reference operator []( size_type i )
@@ -991,7 +991,7 @@ int main()
 }
 ~~~
 
-実装はインデックスを`size()`と比較して、範囲外であれば`std::out_of_range`をthrowする。`operator []`と同じく、非const版とconst版がある。
+実装はインデックスを`size()`と比較して、範囲外であれば`std::out_of_range`をthrowする。`operator []`と同じく、非`const`版と`const`版がある。
 
 ~~~c++
 reference at( size_type i )
@@ -1025,7 +1025,7 @@ int main()
 }
 ~~~
 
-これにもconst版と非const版がある。`vector`の`last`が最後の要素の次のポインターを指していることに注意。
+これにも`const`版と非`const`版がある。`vector`の`last`が最後の要素の次のポインターを指していることに注意。
 
 ~~~c++
 reference front()

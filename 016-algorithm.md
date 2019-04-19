@@ -104,11 +104,11 @@ auto print_with_newline = []( auto first, auto last )
 } ;
 ~~~
 
-これを見ると、for文によるイテレーターのループは全く同じコードだとわかる。
+これを見ると、`for`文によるイテレーターのループは全く同じコードだとわかる。
 
-全く同じfor文を手で書くのは間違いの元だ。同じコードはできれば書きたくない。ここで必要なのは、共通な処理は一度書くだけで済ませ、特別な処理だけを記述すればすむような方法だ。
+全く同じ`for`文を手で書くのは間違いの元だ。同じコードはできれば書きたくない。ここで必要なのは、共通な処理は一度書くだけで済ませ、特別な処理だけを記述すればすむような方法だ。
 
-この問題を解決するには、問題を分割することだ。問題を「for文によるループ」と「特別な処理」に分けることだ。
+この問題を解決するには、問題を分割することだ。問題を「`for`文によるループ」と「特別な処理」に分けることだ。
 
 ところで、関数は変数に代入できる。
 
@@ -204,7 +204,7 @@ int main()
 }
 ~~~
 
-わざわざfor文を書かずに、問題の本質的な処理だけを書くことができるようになった。
+わざわざ`for`文を書かずに、問題の本質的な処理だけを書くことができるようになった。
 
 このイテレーターを先頭から末尾までループで回し、要素ごとに関数を呼び出すという処理はとても便利なので、標準ライブラリには`std::for_each( first, last, f)`がある。使い方は同じだ。
 
@@ -218,7 +218,7 @@ int main()
 }
 ~~~
 
-C++17の時点ではまだ使えないが、将来のC++では、イテレーターを渡さずに、vectorを直接渡すことができるようになる予定だ。
+C++17の時点ではまだ使えないが、将来のC++では、イテレーターを渡さずに、`vector`を直接渡すことができるようになる予定だ。
 
 ~~~c++
 // C++20予定
@@ -244,7 +244,7 @@ auto for_each = []( auto first, auto last, auto f )
 } ;
 ~~~
 
-`f(*iter)`がとても興味深い。もし関数fがリファレンスを引数に取っていたらどうなるだろうか。
+`f(*iter)`がとても興味深い。もし関数`f`がリファレンスを引数に取っていたらどうなるだろうか。
 
 ~~~cpp
 int main()
@@ -264,7 +264,7 @@ int main()
 }
 ~~~
 
-元のvectorを書き換えることもできる。
+元の`vector`を書き換えることもできる。
 
 
 
@@ -306,7 +306,7 @@ int main()
 }
 ~~~
 
-この場合、`all_of`はtrueを返す。
+この場合、`all_of`は`true`を返す。
 
 実装は以下のようになる。
 
@@ -394,7 +394,7 @@ auto none_of = []( auto first, auto last, auto pred )
 
 ## find/find_if
 
-`find( first, last, value )`はイテレーター`[first,last)`からvalueに等しい値を見つけて、そのイテレーターを返すアルゴリズムだ。
+`find( first, last, value )`はイテレーター`[first,last)`から`value`に等しい値を見つけて、そのイテレーターを返すアルゴリズムだ。
 
 ~~~cpp
 int main()
@@ -408,7 +408,7 @@ int main()
 }
 ~~~
 
-要素が見つからない場合はlastが返る。
+要素が見つからない場合は`last`が返る。
 
 ~~~cpp
 int main()
@@ -428,9 +428,9 @@ int main()
 }
 ~~~
 
-イテレーターがlastかどうかは実際にlastと比較すればよい。
+イテレーターが`last`かどうかは実際に`last`と比較すればよい。
 
-アルゴリズムを理解するには、自分で実装してみるとよい。さっそくfindを実装してみよう。
+アルゴリズムを理解するには、自分で実装してみるとよい。さっそく`find`を実装してみよう。
 
 ~~~cpp
 auto find = []( auto first, auto last, auto const & value )
@@ -446,10 +446,10 @@ auto find = []( auto first, auto last, auto const & value )
 } ;
 ~~~
 
-`value`が`auto const & value`になっているのは、リファレンスによってコピーを回避するためと、変更が必要ないためだ。しかし、intやdoubleのような単純な型については、わざわざconstなlvalueリファレンスを使う必要はない。
+`value`が`auto const & value`になっているのは、リファレンスによってコピーを回避するためと、変更が必要ないためだ。しかし、`int`や`double`のような単純な型については、わざわざ`const`な`lvalue`リファレンスを使う必要はない。
 
 
-`find_if(first, last, pred)`はイテレーター`[first,last)`から、要素を関数`pred`に渡したときにtrueを返す要素へのイテレーターを探すアルゴリズムだ。
+`find_if(first, last, pred)`はイテレーター`[first,last)`から、要素を関数`pred`に渡したときに`true`を返す要素へのイテレーターを探すアルゴリズムだ。
 
 関数`pred`についてはもう少し解説が必要だ。`pred`とは`predicate`の略で、以下のような形をしている。
 
@@ -460,7 +460,7 @@ auto pred = []( auto const & value ) -> bool
 } ;
 ~~~
 
-関数predは値を一つ引数にとり、bool型を返す関数だ。
+関数`pred`は値を一つ引数にとり、`bool`型を返す関数だ。
 
 早速使ってみよう。
 
@@ -505,7 +505,7 @@ auto find_if = []( auto first, auto last, auto pred )
 
 値との比較が関数になっただけだ。
 
-つまりある値と比較する関数を渡したならば、find_ifはfindと同じ動きをするということだ。
+つまりある値と比較する関数を渡したならば、`find_if`は`find`と同じ動きをするということだ。
 
 ~~~cpp
 int main()
@@ -641,7 +641,7 @@ auto count = []( auto first, auto last, auto pred )
 
 これまでのアルゴリズムは一つのイテレーターの範囲だけを扱ってきた。アルゴリズムの中には複数の範囲を取るものもある。
 
-`equal(first1, last1, first2, last2)`は`[first1, last1)`と`[first2, last2)`が等しい場合にtrueを返す。「等しい」というのは、要素の数が同じで、各要素がそれぞれ等しい場合を指す。
+`equal(first1, last1, first2, last2)`は`[first1, last1)`と`[first2, last2)`が等しい場合に`true`を返す。「等しい」というのは、要素の数が同じで、各要素がそれぞれ等しい場合を指す。
 
 ~~~cpp
 int main()
@@ -751,9 +751,9 @@ auto equal = []( auto first1, auto last1, auto first2, auto last2)
 } ;
 ~~~
 
-for文の終了条件では`i != last1`だけを見ていて、`j != last2`は見ていないが、これは問題がない。なぜならば、このfor文が実行されるのは、要素数が等しい場合だけだからだ。
+`for`文の終了条件では`i != last1`だけを見ていて、`j != last2`は見ていないが、これは問題がない。なぜならば、この`for`文が実行されるのは、要素数が等しい場合だけだからだ。
 
-関数`pred`を取る`equal(first1, last1, first2, last2, pred)`もある。この`pred`は`pred(a, b)`で、`a`と`b`が等しい場合に`true`、そうでない場合に`false`を返す関数だ。つまり`a == b`のoperator ==の代わりに使う関数を指定する。
+関数`pred`を取る`equal(first1, last1, first2, last2, pred)`もある。この`pred`は`pred(a, b)`で、`a`と`b`が等しい場合に`true`、そうでない場合に`false`を返す関数だ。つまり`a == b`の`operator ==`の代わりに使う関数を指定する。
 
 `equal`に関数を渡すことにより、例えば小数点以下の値を誤差として切り捨てるような処理が書ける。
 
@@ -801,7 +801,7 @@ int main()
 }
 ~~~
 
-この例では、v1の中にv2と同じ並びの`{4,5,6}`が存在するので`true`、v3と同じ並びの`{1,3,5}`は存在しないので`false`になる。
+この例では、`v1`の中に`v2`と同じ並びの`{4,5,6}`が存在するので`true`、`v3`と同じ並びの`{1,3,5}`は存在しないので`false`になる。
 
 `search`の実装例は今の読者にはまだ理解できない。`equal`や`search`を効率的に実装するにはイテレーターの詳細な理解が必要だ。
 
@@ -875,7 +875,7 @@ int main()
 }
 ~~~
 
-要素数が3しかないvectorに5個の要素をコピーしようとしている。
+要素数が3しかない`vector`に5個の要素をコピーしようとしている。
 
 `copy`の戻り値は`[first,last)`の要素数だけ進めたイテレーター`result`になる。これはつまり、`result + (last - first)`だ。
 
@@ -896,7 +896,7 @@ int main()
 }
 ~~~
 
-ここで、`last-first`は`source`の要素数の5なので、`result + 5`は`copy`の戻り値のイテレーターと等しい。
+ここで、`last-first`は`source`の要素数の`5`なので、`result + 5`は`copy`の戻り値のイテレーターと等しい。
 
 `copy`には`[first,last)`の範囲が`result`から続く範囲とオーバーラップしてはいけないという制約がある。
 
@@ -929,7 +929,7 @@ auto copy = []( auto first, auto last, auto result )
 
 ## transform
 
-`transform(first, last, result, op)`は`copy`に似ているが、`result`へのコピーが`*result = *iter ;`ではなく、`*result = op(*iter) ;`になる。opは関数だ。
+`transform(first, last, result, op)`は`copy`に似ているが、`result`へのコピーが`*result = *iter ;`ではなく、`*result = op(*iter) ;`になる。`op`は関数だ。
 
 以下が実装例だ。`copy`とほぼ同じだ。
 
@@ -1103,7 +1103,7 @@ auto generate_n = []( first, n, gen )
 
 `remove`は取り除くべき値の入った要素を、後続の値で上書きする。この場合、1番目の`2`を2番目の`3`で上書きする。2番目は不定な状態になる。これは、`remove`アルゴリズムは2番目がどのような値になるかを保証しないという意味だ。
 
-以下のような数列で値`2`をremoveしたとき
+以下のような数列で値`2`を`remove`したとき
 
 ~~~
 1,2,2,3,2,2,4
@@ -1124,7 +1124,7 @@ auto last2 = remove( first, last, value ) ;
 
 この例では、`remove`は`[first, last)`から値`value`に等しい要素を取り除いたイテレーターの範囲を戻り値として返す。その戻り値が`last2`だ。`[first, last2)`が値を取り除いた後の新しいイテレーターの範囲だ。
 
-`remove`を呼び出しても元のvectorの要素数が変わることはない。`remove`はvectorの要素の値を変更するだけだ。
+`remove`を呼び出しても元の`vector`の要素数が変わることはない。`remove`は`vector`の要素の値を変更するだけだ。
 
 以上を踏まえて、以下が`remove`を使う例だ。
 
