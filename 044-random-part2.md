@@ -86,7 +86,7 @@ auto traffic_accidents( Engine & e )
 
 抽象的に書くと、
 
-+ 時間間隔に平均してN回発生する事象があるとき、ある時間間隔における事象発生の回数
++ 時間間隔に平均して$N$回発生する事象があるとき、ある時間間隔における事象発生の回数
 
 の分布だ。
 
@@ -218,7 +218,7 @@ int main()
 
 ## 極値分布(`std::extreme_value_distribution<RealType>`)
 
-`std::extreme_value_distribution<RealType>`は浮動小数点数型の乱数$x$お以下の確率密度関数に従って分布する。
+`std::extreme_value_distribution<RealType>`は浮動小数点数型の乱数$x$を以下の確率密度関数に従って分布する。
 
 $$
 p(x\,|\,a,b) = \frac{1}{b}
