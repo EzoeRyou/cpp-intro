@@ -93,7 +93,7 @@ int main()
     double bmi = mass / (height*height) ;
 
     // BMIの出力
-    std::cout << "BMI=" << bmi << "\n"s ;
+    std::cout << "BMI="s << bmi << "\n"s ;
 }
 ~~~
 
