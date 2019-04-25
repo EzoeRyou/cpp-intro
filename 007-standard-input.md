@@ -26,7 +26,7 @@ int main()
     double bmi = mass / (height*height) ;
 
     // BMIの出力
-    std::cout << "BMI=" << bmi << "\n"s ;
+    std::cout << "BMI="s << bmi << "\n"s ;
 }
 ~~~
 
@@ -53,7 +53,7 @@ int main()
     double bmi = mass / (height*height) ;
 
     // BMIの出力
-    std::cout << "BMI=" << bmi << "\n"s ;
+    std::cout << "BMI="s << bmi << "\n"s ;
 
     // 状態の判定をする関数
     auto status = []( double bmi )
