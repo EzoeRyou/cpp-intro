@@ -1172,7 +1172,7 @@ int main()
     std::string s ;
     s.size() ;
     s.resize(10) ;
-    s.clar() ;
+    s.clear() ;
 }
 ~~~
 
