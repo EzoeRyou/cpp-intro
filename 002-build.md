@@ -466,7 +466,7 @@ GNU Makeはカレントディレクトリにあるファイル`Makefile`の一�
 ~~~
 $ touch source01 source02 source03
 $ ls
-Makefile source01 source03 source03
+Makefile source01 source02 source03
 $ make
 cat source01 source02 source03 > source
 cat source > program
