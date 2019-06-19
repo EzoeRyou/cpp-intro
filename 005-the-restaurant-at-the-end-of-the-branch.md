@@ -917,7 +917,7 @@ int main()
 
 `bool`型の`true`を`整数型`に変換すると`1`になる。`false`は`0`になる。
 
-~~~
+~~~cpp
 int main()
 {
     // 1
