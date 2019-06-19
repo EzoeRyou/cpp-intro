@@ -335,7 +335,7 @@ $ cat bodymass.txt
 1.63
 73
 $ ./bmi < bodymass.txt > index.txt
-$ cat index.text
+$ cat index.txt
 27.4756
 ~~~
 
