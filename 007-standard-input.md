@@ -44,7 +44,7 @@ BMI                         状態
 ~~~cpp
 int main()
 {
-    // 身長1.6m
+    // 身長1.63m
     double height = 1.63 ;
     // 体重73kg
     double mass = 73.0 ;
