@@ -440,7 +440,7 @@ for ( std::size_t head = 0 ; head != size ; ++head )
     // 現在の先頭の次の要素から探すのでhead + 1
     for ( std::size_t index = head + 1 ; index != size ; ++index )
     {
-        if ( v.at(index) < v.at(min)
+        if ( v.at(index) < v.at(min) )
             min = index ;
     }
 
