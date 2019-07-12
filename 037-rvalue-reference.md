@@ -2,7 +2,7 @@
 
 ## 概要
 
-今まで使っているリファレンスは、正式には`lvalue`リファレンスという名前がついている。これは`lvalue`へのリファレンスという意味だ。`lvalue`へのリファレンスがあるからには、`lvalue`ではないリファレンスがあるということだ。C++には`rvalue`へのリファレンスがある。これを`rvalue`リファレンスという。
+いままで使っているリファレンスは、正式には`lvalue`リファレンスという名前がついている。これは`lvalue`へのリファレンスという意味だ。`lvalue`へのリファレンスがあるからには、`lvalue`ではないリファレンスがあるということだ。C++には`rvalue`へのリファレンスがある。これを`rvalue`リファレンスという。
 
 この章で説明する内容はとても難しい。完全に理解するためには、何度も読み直す必要があるだろう。
 
@@ -10,13 +10,13 @@
 
 `T`型への`lvalue`型リファレンス型は`T &`と書く。
 
-~~~c++
+~~~cpp
 T & lvalue_reference = ... ;
 ~~~
 
 `T`型への`rvalue`リファレンス型は`T &&`と書く。
 
-~~~c++
+~~~cpp
 T && rvalue_reference = ... ;
 ~~~
 
@@ -38,7 +38,7 @@ int main()
 
 ここで、式`object`や式`f()`を評価した結果は`lvalue`だ。
 
-`rvalue`とは、名前無しのオブジェクトや計算結果の一時オブジェクト、戻り値の型としての`rvalue`リファレンスのことだ。
+`rvalue`とは、名前なしのオブジェクトや計算結果の一時オブジェクト、戻り値の型としての`rvalue`リファレンスのことだ。
 
 ~~~cpp
 int && g() { return 0 ; }
@@ -59,7 +59,7 @@ int main()
 
 `rvalue`リファレンスを`lvalue`で初期化することはできない。
 
-~~~c++
+~~~cpp
 int object { } ;
 int & f() { return object ; }
 
@@ -73,7 +73,7 @@ int main()
 
 `lvalue`リファレンスを`rvalue`で初期化することはできない。
 
-~~~c++
+~~~cpp
 int && g() { return 0 ; }
 int h() { return 0 ; }
 
@@ -103,9 +103,9 @@ int main()
 }
 ~~~
 
-`rvalue`リファレンス自体は`lvalue`だ。なぜならば`rvalue`リファレンスはオブジェクトに名前をつけて束縛するからだ。
+`rvalue`リファレンス自体は`lvalue`だ。なぜならば`rvalue`リファレンスはオブジェクトに名前を付けて束縛するからだ。
 
-~~~c++
+~~~cpp
 int main()
 {
     // rvalueリファレンス
@@ -119,15 +119,15 @@ int main()
 
 ## 値カテゴリー
 
-`lvalue`と`rvalue`とは何か。元々`lvalue`とは左辺値(left-hand value)、`rvalue`とは右辺値(right-hand value)という語源を持っている。これはまだC言語すらなかったはるか昔から存在する用語で、代入式の左辺に書くことができる値を`lvalue`、右辺に書くことができる値を`rvalue`と読んでいたことに由来する。
+`lvalue`と`rvalue`とは何か。もともと`lvalue`とは左辺値(left-hand value)、`rvalue`とは右辺値(right-hand value)という語源を持っている。これはまだC言語すらなかったはるか昔から存在する用語で、代入式の左辺に書くことができる値を`lvalue`、右辺に書くことができる値を`rvalue`と読んでいたことに由来する。
 
-~~~
+~~~cpp
 lvalue = rvalue ;
 ~~~
 
 例えば、`int`型の変数`x`は代入式の左辺に書くことができるから`lvalue`、整数リテラル`0`は右辺に書くことができるから`rvalue`といった具合だ。
 
-~~~c++
+~~~cpp
 int x ;
 x = 0 ;
 ~~~
@@ -136,41 +136,41 @@ C++では`lvalue`と`rvalue`をこのような意味では使っていない。
 
 `lvalue`と`rvalue`を理解するには、値カテゴリーを理解しなければならない。
 
-1. 式(expression)とは`glvalue`か`rvalue`である
-2. `glvalue`とは`lvalue`か`xvalue`である
-3. `rvalue`とは`prvalue`か`xvalue`である
+1. 式(expression)とは`glvalue`か`rvalue`である。
+2. `glvalue`とは`lvalue`か`xvalue`である。
+3. `rvalue`とは`prvalue`か`xvalue`である。
 
 この関係を図示すると以下のようになる。
 
-
-
+~~~
 TODO: 図示
 
-~~~
         expression
         /         \
     glvalue     rvalue
     /     \     /   \
 lvalue     xvalue   prvalue
 ~~~
+fig/fig37-01.png
+
 
 ### lvalue
 
 `lvalue`はすでに説明したとおり名前付きのオブジェクトのことだ。
 
-~~~c++
+~~~cpp
 // lvalue
 int object ;
 int & ref = object ;
 ~~~
 
-通常使う殆どのオブジェクトは`lvalue`になる。
+通常使うほとんどのオブジェクトは`lvalue`になる。
 
 ### prvalue
 
-`prvalue`は純粋なrvalue(pure rvalue)のことだ。つまり、名前無しのオブジェクトや計算結果の一時オブジェクトのことだ。
+`prvalue`は純粋なrvalue(pure rvalue)のことだ。つまり、名前なしのオブジェクトや計算結果の一時オブジェクトのことだ。
 
-~~~c++
+~~~cpp
 int f() { return 0 ; }
 
 // prvalue
@@ -183,20 +183,20 @@ f() ;
 
 関数の戻り値の型がリファレンスではない場合、一時オブジェクトが生成される。
 
-~~~c++
+~~~cpp
 struct X { } ;
 X f() ;
 ~~~
 
 演算子も関数の一種なので、
 
-~~~c++
+~~~cpp
 auto result = x + y + z ;
 ~~~
 
 のような式がある場合、まず`x + y`が評価され、その結果が一時オブジェクトとして返される。その一時オブジェクトを仮に`temp`とすると、`temp + z`が評価され、また一時オブジェクトが生成され、変数`result`に代入される。
 
-式文全体を評価し終わった後に、一時オブジェクトは自動的に破棄される。
+式文全体を評価し終わったあとに、一時オブジェクトは自動的に破棄される。
 
 一時オブジェクトは自動的に生成され、自動的に破棄される。ここがとても重要な点だ。これは次の章で説明するムーブセマンティクスに関わってくる。
 
@@ -231,7 +231,7 @@ int main()
 
 + `xvalue`配列への添字操作
 
-~~~c++
+~~~cpp
 int main()
 {
     int a[3] = {1,2,3} ;
@@ -243,7 +243,7 @@ int main()
 
 + `xvalue`なクラスのオブジェクトへのリファレンスではない非`static`データメンバーへのアクセス
 
-~~~c++
+~~~cpp
 struct X { int data_member ; } ;
 
 int main()
@@ -255,7 +255,7 @@ int main()
 
 + 式`.*`で最初のオペランドが`xvalue`で次のオペランドがデータメンバーへのポインターの場合
 
-~~~c++
+~~~cpp
 struct X { int data_member ; } ;
 
 int main()
@@ -275,7 +275,7 @@ int main()
 
 `lvalue`は`xvalue`に変換できるので、結果として`rvalue`に変換できることになる。
 
-~~~c++
+~~~cpp
 int main()
 {
     // lvalueなオブジェクト
@@ -345,7 +345,7 @@ T && move( T & t ) noexcept
 
 この実装は`lvalue`を`xvalue`に変換することはできるが、`rvalue`(`prvalue`と`xvalue`)を`xvalue`に変換することはできない。
 
-~~~c++
+~~~cpp
 int main()
 {
     // エラー、prvalueを変換できない
@@ -357,7 +357,7 @@ int main()
 }
 ~~~
 
-`rvalue`は`rvalue`リファレンスで受け取れるので、`lvalue`リファレンスを関数の引数として受け取る`move`の他に、`rvalue`リファレンスを関数の引数として受け取る`move`を書くとよい。
+`rvalue`は`rvalue`リファレンスで受け取れるので、`lvalue`リファレンスを関数の引数として受け取る`move`のほかに、`rvalue`リファレンスを関数の引数として受け取る`move`を書くとよい。
 
 すると以下のように書けるだろうか。
 
@@ -391,14 +391,14 @@ void f( T && t ) ;
 
 このような関数テンプレートの仮引数`t`に実引数として`rvalue`を渡すと、`T`は`rvalue`の型となり、結果として`t`の型は`T &&`になる。
 
-~~~c++
+~~~cpp
 // Tはint
 f(0) ;
 ~~~
 
 もし実引数として型`U`の`lvalue`を渡すと、テンプレートパラメーター`T`が`U &`となる。そして、テンプレートパラメーター`T`に対するリファレンス宣言子(`&`, `&&`)は単に無視される。
 
-~~~c++
+~~~cpp
 int lvalue{} ;
 // Tはint &
 // T &&はint &
@@ -427,11 +427,11 @@ int main()
 
 `f(0)`は`prvalue`を渡している。この場合、`T`の型は`int`となる。`A`は`int &`、`B`は`int &&`となる。
 
-`f(lvalue)`は`lvalue`を渡している。この場合、`T`の型は`int &`となる。この場合の`T`に`&`や`&&`をつけても無視される。なので、`A`, `B`の型はどちらも`int &`になる。
+`f(lvalue)`は`lvalue`を渡している。この場合、`T`の型は`int &`となる。この場合の`T`に`&`や`&&`を付けても無視される。なので、`A`, `B`の型はどちらも`int &`になる。
 
 したがって、以下のように書くと`move`は`lvalue`も`rvalue`も受け取ることができる。
 
-~~~c++
+~~~cpp
 // lvalueもrvalueも受け取ることができるmove
 template < typename T >
 T && move( T && t ) noexcept
@@ -442,15 +442,15 @@ T && move( T && t ) noexcept
 
 ただし、この実装にはまだ問題がある。この`move`に`lvalue`を渡した場合、`lvalue`の型を`U`とすると、テンプレートパラメーター`T`は`U &`になる。
 
-~~~c++
+~~~cpp
 U lvalue{} ;
 // TはU &
 move( lvalue ) ;
 ~~~
 
-テンプレートパラメーター名`T`がリファレンスのとき、`T`にリファレンス宣言子`&&`をつけても単に無視されることを考えると、上の`move`に`int &`型の`lvalue`が実引数として渡されたときは、以下のように書いたものと等しくなる。
+テンプレートパラメーター名`T`がリファレンスのとき、`T`にリファレンス宣言子`&&`を付けても単に無視されることを考えると、上の`move`に`int &`型の`lvalue`が実引数として渡されたときは、以下のように書いたものと等しくなる。
 
-~~~c++
+~~~cpp
 int & move( int & t ) noexcept
 {
     return static_cast<int &>(t) ;
@@ -559,7 +559,7 @@ int main()
 
 ここで`rvalue`を渡すのは簡単だ。`std::move`を使えばいい。
 
-~~~c++
+~~~cpp
 template < typename T >
 void f( T && t )
 {
@@ -571,7 +571,7 @@ void f( T && t )
 
 `t`が`lvalue`ならば`lvalue`として、`rvalue`ならば`xvalue`として、渡された値カテゴリーのまま別の関数に渡したい場合、`std::forward<T>(t)`が使える。
 
-~~~c++
+~~~cpp
 template < typename T >
 void f( T && t )
 {
@@ -582,9 +582,9 @@ void f( T && t )
 `std::forward<T>(t)`の`T`にはテンプレートパラメーター名を書く。こうすると、`t`が`lvalue`ならば`lvalue`リファレンス、`rvalue`ならば`rvalue`リファレンスが戻り値として返される。
 
 
-`std::forward`の実装は以下の通りだ。
+`std::forward`の実装は以下のとおりだ。
 
-~~~c++
+~~~cpp
 template<class T>
 constexpr 
 T &&

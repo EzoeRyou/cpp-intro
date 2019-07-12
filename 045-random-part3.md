@@ -2,8 +2,7 @@
 
 ### 正規分布(`std::normal_distribution<RealType>`)
 
-`std::normal_distribution<RealType>`は浮動小数点数型の乱数$x$
-以下の確率密度関数に従って分布する。
+`std::normal_distribution<RealType>`は浮動小数点数型の乱数$x$を以下の確率密度関数に従って分布する。
 
 $$
  (x\,|\,\mu,\sigma)
@@ -25,7 +24,7 @@ $$
 std::normal_distribution<RealType> d( mean, stddev ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。`mean`, `stddev`は浮動小数点数型。`mean`は平均。`stddev`は標準偏差で値の範囲は$0 < \text{stddev}$
+`RealType`は浮動小数点数型でデフォルトは`double`。`mean`, `stddev`は浮動小数点数型。`mean`は平均。`stddev`は標準偏差で値の範囲は$0 < \text{stddev}$。
 
 使い方。
 
@@ -93,7 +92,7 @@ $$
 std::chi_squared_distribution<RealType> d( n ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。`n`は`RealType`型。値の範囲は$0 < n$
+`RealType`は浮動小数点数型でデフォルトは`double`。`n`は`RealType`型。値の範囲は$0 < n$。
 
 使い方。
 
@@ -125,7 +124,7 @@ $$
 std::cauchy_distribution<RealType> d( a, b ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。`a`, `b`は`RealType`型。値の範囲は$0 < b$
+`RealType`は浮動小数点数型でデフォルトは`double`。`a`, `b`は`RealType`型。値の範囲は$0 < b$。
 
 使い方。
 
@@ -144,9 +143,9 @@ int main()
 }
 ~~~
 
-### フィッシャーのF分布(`std::fisher_f_distribution<RealType>`)
+### フィッシャーの$F$分布(`std::fisher_f_distribution<RealType>`)
 
-フィッシャーのF分布(Fisher's F-distribution)の名前は数学者サー・ロナルド・エイルマー・フィッシャー(Sir Ronald Aylmer Fisher)に由来する。
+フィッシャーの$F$分布(Fisher's $F$-distribution)の名前は数学者サー・ロナルド・エイルマー・フィッシャー(Sir Ronald Aylmer Fisher)に由来する。
 
 `std::fisher_f_distribution<RealType>`は浮動小数点数の乱数$x > 0$を以下の関数密度関数に従って分布する。
 
@@ -164,7 +163,7 @@ $$
 std::fisher_f_distribution<RealType> d( m, n ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`dobule`。`m`, `n`は`RealType`型。値の範囲は$0 < m$ かつ $0 < n$
+`RealType`は浮動小数点数型でデフォルトは`dobule`。`m`, `n`は`RealType`型。値の範囲は$0 < m$ かつ $0 < n$。
 
 使い方。
 
@@ -179,11 +178,11 @@ int main()
 }
 ~~~
 
-### スチューデントのt分布(`std::student_t_distribution<RealType>`)
+### スチューデントの$t$分布(`std::student_t_distribution<RealType>`)
 
-スチューデントのt分布(Student's t-distribution)はウィリアム・シーリー・ゴセットによって考案された。当時、ウィリアムはギネス醸造所で働いていたが、ギネスは従業員に科学論文を発表することを禁じていたために、ウィリアムはスチューデントという偽名で発表した。
+スチューデントの$t$分布(Student's $t$-distribution)はウィリアム・シーリー・ゴセットによって考案された。当時、ウィリアムはギネス醸造所で働いていたが、ギネスは従業員に科学論文を発表することを禁じていたために、ウィリアムはスチューデントという偽名で発表した。
 
-`std::student_t_distribution<RealType>`は浮動小数点数型の乱数$x$お以下の確率密度関数に従って分布する。
+`std::student_t_distribution<RealType>`は浮動小数点数型の乱数$x$を以下の確率密度関数に従って分布する。
 
 $$
 p(x\,|\,n) = \frac{1}{\sqrt{n \pi}}

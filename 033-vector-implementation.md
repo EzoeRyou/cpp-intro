@@ -1,10 +1,10 @@
 # vectorの実装 : 基礎
 
-クラス、ポインター、メモリ確保を学んだので、とうとうコンテナーの中でも一番有名な`std::vector`を実装する用意ができた。しかしその前に、アロケーターについて学ぶ必要がある。
+クラス、ポインター、メモリー確保を学んだので、とうとうコンテナーの中でも一番有名な`std::vector`を実装する用意ができた。しかしその前に、アロケーターについて学ぶ必要がある。
 
 `std::vector`は`std::vector<T>`のように要素の型`T`を指定して使うので、以下のようになっていると思う読者もいるだろう。
 
-~~~c++
+~~~cpp
 namespace std {
     template < typename T >
     struct vector ;
@@ -13,20 +13,20 @@ namespace std {
 
 実際には以下のようになっている。
 
-~~~c++
+~~~cpp
 namespace std {
     template < typename T, typename allocator = allocator<T> >
     struct vector ;
 }
 ~~~
 
-`std::allocator<T>`というのは標準ライブラリのアロケーターだ。アロケーターは生のメモリの確保と解放をするライブラリだ。デフォルトで`std::allocator<T>`が渡されるので、普段ユーザーはアロケーターを意識することはない。
+`std::allocator<T>`というのは標準ライブラリのアロケーターだ。アロケーターは生のメモリーの確保と解放をするライブラリだ。デフォルトで`std::allocator<T>`が渡されるので、普段ユーザーはアロケーターを意識することはない。
 
-`std::vector`は`malloc`や`operator new`を直接使わずアロケーターを使ってメモリ確保を行う。
+`std::vector`は`malloc`や`operator new`を直接使わずアロケーターを使ってメモリー確保を行う。
 
-アロケーターはテンプレートパラメーターで指定できる。何らかの理由で独自のメモリ確保を行いたい場合、独自のアロケーターを実装してコンテナーに渡すことができる。
+アロケーターはテンプレートパラメーターで指定できる。何らかの理由で独自のメモリー確保を行いたい場合、独自のアロケーターを実装してコンテナーに渡すことができる。
 
-~~~c++
+~~~cpp
 // 独自のアロケーター
 template < typename T >
 struct custom_allocator
@@ -40,16 +40,16 @@ using custom_vector = std::vector< T, custom_allocator<T> > ;
 int main()
 {
     custom_vector<int> v ;
-    // 独自のアロケーターを使ったメモリ確保
+    // 独自のアロケーターを使ったメモリー確保
     v.push_back(0) ;
 }
 ~~~
 
 ## `std::allocator<T>`の概要
 
-`std::allocator<T>`は`T`型を構築できる生のメモリを確保するための以下のようになっている。
+`std::allocator<T>`は`T`型を構築できる生のメモリーを確保するための以下のようになっている。
 
-~~~c++
+~~~cpp
 namespace std {
 template<class T> class allocator {
     // ネストされた型名の宣言
@@ -77,36 +77,36 @@ template<class T> class allocator {
 
 `constexpr`というキーワードがあるが、ここでは気にする必要はない。あとで学ぶ。
 
-重要なのはメモリ確保をする`allocate`と、メモリ解放をする`deallocate`だ。
+重要なのはメモリー確保をする`allocate`と、メモリー解放をする`deallocate`だ。
 
 ## `std::allocator<T>`の使い方
 
-標準ライブラリのアロケーター、`std::allocator<T>`は、T型を構築できる生のメモリの確保と解放をするライブラリだ。重要なメンバーは以下の通り。
+標準ライブラリのアロケーター、`std::allocator<T>`は、`T`型を構築できる生のメモリーの確保と解放をするライブラリだ。重要なメンバーは以下のとおり。
 
 ~~~cpp
-// メモリ確保
+// メモリー確保
 [[nodiscard]] T* allocate(size_t n);
-// メモリ解放
+// メモリー解放
 void deallocate(T* p, size_t n);
 ~~~
 
-`allocate(n)`はT型のn個の配列を構築できるだけの生のメモリを確保してその先頭へのポインターを返す。
+`allocate(n)`は`T`型の`n`個の配列を構築できるだけの生のメモリーを確保してその先頭へのポインターを返す。
 
-`deallocate(p, n)`は`allocate(n)`で確保されたメモリを解放する。
+`deallocate(p, n)`は`allocate(n)`で確保されたメモリーを解放する。
 
 ~~~cpp
 int main()
 {
     std::allocator<std::string> a ;
-    // 生のメモリ確保
-    // std::string [1]分のメモリサイズ
+    // 生のメモリー確保
+    // std::string [1]分のメモリーサイズ
     std::string * p = a.allocate(1) ;
-    // メモリ解放
+    // メモリー解放
     a.deallocate( p, 1 ) ;
 }
 ~~~
 
-`allocate`には`[[nodiscard]]`という属性がついている。これにより戻り値を無視すると警告が出る。
+`allocate`には`[[nodiscard]]`という属性が付いている。これにより戻り値を無視すると警告が出る。
 
 ~~~cpp
 int main()
@@ -120,20 +120,20 @@ int main()
 }
 ~~~
 
-確保されるのが生のメモリだということに注意したい。実際にT型の値として使うには、`new`による構築が必要だ。
+確保されるのが生のメモリーだということに注意したい。実際に`T`型の値として使うには、`new`による構築が必要だ。
 
 ~~~cpp
 int main()
 {
     std::allocator<std::string> a ;
-    // 生のメモリ確保
-    // std::string [1]分のメモリサイズ
+    // 生のメモリー確保
+    // std::string [1]分のメモリーサイズ
     std::string * p = a.allocate(1) ;
     // 構築
     std::string * s = new(p) std::string("hello") ;
     // 明示的なデストラクター呼び出し
     s->basic_string() ;
-    // メモリ解放
+    // メモリー解放
     a.deallocate( p, 1 ) ;
 }
 ~~~
@@ -142,7 +142,7 @@ int main()
 
 実は`std::string`は以下のようなクラステンプレートになっている。
 
-~~~c++
+~~~cpp
 namespace std {
 template <
     typename charT,
@@ -161,7 +161,7 @@ class basic_string
 
 普段は使っている`std::string`というのは、以下のようなエイリアスだ。
 
-~~~c++
+~~~cpp
 namespace std {
 using string = basic_string<char> ;
 }
@@ -182,7 +182,7 @@ void destroy_at( T * location )
 
 このようにテンプレートで書くことによって、クラス名を意識せずに破棄ができる。
 
-~~~c++
+~~~cpp
 // 破棄
 destroy_at( s ) ;
 ~~~
@@ -195,14 +195,14 @@ destroy_at( s ) ;
 
 `allocator_traits<Alloc>`はアロケーターの型`Alloc`を指定して使う。
 
-~~~c++
+~~~cpp
 std::allocator<int> a ;
 int * p = a.allocate(1) ;
 ~~~
 
-と書くかわりに、
+と書く代わりに、
 
-~~~c++
+~~~cpp
 std::allocator<int> a ;
 int * p = std::allocator_traits< std::allocator<int> >::allocate( a, 1 ) ;
 ~~~
@@ -211,7 +211,7 @@ int * p = std::allocator_traits< std::allocator<int> >::allocate( a, 1 ) ;
 
 これはとても使いづらいので、`allocator_traits`のエイリアスを書くとよい。
 
-~~~c++
+~~~cpp
 std::allocator<int> a ;
 // エイリアス
 using traits = std::allocator_traits< std::allocator<int> > ;
@@ -220,7 +220,7 @@ int * p = traits::allocate( a, 1 ) ;
 
 これもまだ書きにくいので、`decltype`を使う。`decltype(expr)`は式`expr`の型として使える機能だ。
 
-~~~c++
+~~~cpp
 // int型
 decltype(0) a ;
 // double型
@@ -233,14 +233,14 @@ decltype( "hello"s ) c ;
 
 `decltype`を使うと以下のように書ける。
 
-~~~c++
+~~~cpp
 std::allocator<int> a ;
 // エイリアス
 using traits = std::allocator_traits< decltype(a) > ;
 int * p = traits::allocate( a, 1 ) ;
 ~~~
 
-`allocator_traits`はアロケーターを使った生のメモリの確保、解放と、そのメモリ上にオブジェクトを構築、破棄する機能を提供している。
+`allocator_traits`はアロケーターを使った生のメモリーの確保、解放と、そのメモリー上にオブジェクトを構築、破棄する機能を提供している。
 
 
 ~~~cpp
@@ -250,20 +250,20 @@ int main()
     // allocator_traits型
     using traits = std::allocator_traits<decltype(a)> ;
 
-    // 生のメモリ確保
+    // 生のメモリー確保
     std::string * p = traits::allocate( a, 1 ) ;
     // 構築
     std::string * s = traits::construct( a, p, "hello") ;
     // 破棄
     traits::destroy( a, s ) ;
-    // メモリ解放
+    // メモリー解放
     traits::deallocate( a, p, 1 ) ;
 }
 ~~~
 
-`T`型の`N`個の配列を構築するには、まず`N`個の生のメモリを確保し、
+`T`型の`N`個の配列を構築するには、まず`N`個の生のメモリーを確保し、
 
-~~~c++
+~~~cpp
 std::allocator<std::string> a ;
 using traits = std::allocator_traits<decltype(a)> ;
 std::string * p = traits::allocate( a, N ) ;
@@ -271,7 +271,7 @@ std::string * p = traits::allocate( a, N ) ;
 
 `N`回の構築を行う。
 
-~~~c++
+~~~cpp
 for ( auto i = p, last = p + N ; i != last ; ++i )
 {
     traits::construct( a, i, "hello" ) ;
@@ -280,16 +280,16 @@ for ( auto i = p, last = p + N ; i != last ; ++i )
 
 破棄も`N`回行う。
 
-~~~c++
+~~~cpp
 for ( auto i = p + N, first = p ; i != first ; --i )
 {
     traits::destroy( a, i ) ;
 }
 ~~~
 
-生のメモリを破棄する。
+生のメモリーを破棄する。
 
-~~~c++
+~~~cpp
 traits::deallocate( a, p, N ) ;
 ~~~
 
@@ -298,7 +298,7 @@ traits::deallocate( a, p, N ) ;
 
 準備はできた。簡易的な`vector`を実装していこう。以下が本書で実装する簡易`vector`だ。
 
-~~~c++
+~~~cpp
 template < typename T, typename Allocator = std::allocator<T> >
 class vector
 {
@@ -329,7 +329,7 @@ public :
 
 例えば要素数を定めて配列のようにアクセスできる。
 
-~~~c++
+~~~cpp
 vector v(100) ;
 for ( auto i = 0 ; i != 100 ; ++i )
     v[i] = i ; 
@@ -337,14 +337,14 @@ for ( auto i = 0 ; i != 100 ; ++i )
 
 イテレーターも使える。
 
-~~~c++
+~~~cpp
 std::for_each( std::begin(v), std::end(v),
     []( auto x ) { std::cout << x ; } ) ;
 ~~~
 
 要素を際限なく追加できる。
 
-~~~c++
+~~~cpp
 std::copy(
     std::istream_iterator<int>(std::cin), std::istream_iterator<int>(), 
     std::back_inserter(v) ) ;
@@ -354,7 +354,7 @@ std::copy(
 
 簡易`vector`の概要では、まだ学んでいない機能が使われていた。`class`と`public`と`private`だ。
 
-C++のクラスにはアクセス指定がある。`public:`と`private:`だ。アクセス指定が書かれた後、別のアクセス指定が現れるまでの間のメンバーは、アクセス指定の影響を受ける。
+C++のクラスにはアクセス指定がある。`public:`と`private:`だ。アクセス指定が書かれたあと、別のアクセス指定が現れるまでの間のメンバーは、アクセス指定の影響を受ける。
 
 ~~~cpp
 struct C
@@ -395,7 +395,7 @@ int main()
 
 `private`メンバーはクラスの外から使うことができない。
 
-~~~c++
+~~~cpp
 struct C
 {
 private :
@@ -415,7 +415,7 @@ int main()
 
 コンストラクターもアクセス指定の対象になる。
 
-~~~c++
+~~~cpp
 struct C
 {
 public :
@@ -474,7 +474,7 @@ public :
 
 もし`dynamic_int::ptr`が`public`メンバーだった場合、以下のようなコードのコンパイルが通ってしまう。
 
-~~~c++
+~~~cpp
 int main()
 {
     dynamic_int i ;
@@ -521,7 +521,7 @@ class bar
 
 ## ネストされた型名
 
-`std::vector`には様々なネストされた型名がある。
+`std::vector`にはさまざまなネストされた型名がある。
 
 ~~~cpp
 int main()
@@ -536,9 +536,9 @@ int main()
 
 自作の簡易`vector`で`std::vector`と同じようにネストされた型名を書いていこう。
 
-要素型に関係するネストされた型名
+要素型に関係するネストされた型名。
 
-~~~c++
+~~~cpp
 template < typename T, typename Allocator = std::allocator<T> >
 class vector
 {
@@ -555,7 +555,7 @@ public :
 
 アロケーター型も`allocator_type`としてエイリアス宣言される。
 
-~~~c++
+~~~cpp
 template < typename T, typename Allocator = std::allocator<T> >
 class vector
 {
@@ -575,7 +575,7 @@ void f( std::vector<int> & v )
 
 通常`std::size_t`が使われる。
 
-~~~c++
+~~~cpp
 size_type = std::size_t ;
 ~~~
 
@@ -594,13 +594,13 @@ void f( std::vector<int> & v )
 
 通常`std::ptrdiff_t`が使われる。
 
-~~~c++
+~~~cpp
 difference_type = std::ptrdiff_t ;
 ~~~
 
 イテレーターのエイリアス。
 
-~~~c++
+~~~cpp
 using iterator                  = pointer ;
 using const_iterator            = const_pointer ;
 using reverse_iterator          = std::reverse_iterator<iterator> ;
@@ -623,7 +623,7 @@ using const_reverse_iterator    = std::reverse_iterator<const_iterator> ;
 これを素直に考えると、ポインター1つ、整数2つ、アロケーター1つの4つのデータメンバーになる。
 
 
-~~~c++
+~~~cpp
 template < typename T, typename Allocator = std::allocator<T> >
 class vector
 {
@@ -641,14 +641,14 @@ private :
 
 確かに`std::vector`はこのようなデータメンバーでも実装できる。しかし多くの実装では以下のようなポインター3つとアロケーター1つになっている。
 
-~~~c++
+~~~cpp
 template < typename T, typename Allocator = std::allocator<T> >
 class vector
 {
 private :
     // 先頭の要素へのポインター
     pointer first ;
-    // 最後の要素のひとつ前方のポインター
+    // 最後の要素の1つ前方のポインター
     pointer last ;
     // 確保したストレージの終端
     pointer reserved_last ;
@@ -665,13 +665,13 @@ private :
 
 簡易`vector`の簡単なメンバー関数を実装していく。ここでのサンプルコードはすべて簡易`vector`のクラス定義の中に書いたかのように扱う。例えば
 
-~~~c++
+~~~cpp
 void f() { }
 ~~~
 
 とある場合、これは、
 
-~~~c++
+~~~cpp
 template < typename T, typename Allocator = std::allocator<T> >
 class vector
 {
@@ -689,7 +689,7 @@ public :
 
 まず通常のイテレーター
 
-~~~c++
+~~~cpp
 iterator begin() noexcept
 { return first ; }
 iterator end() noexcept
@@ -720,7 +720,7 @@ int main()
 
 これを実現するには、メンバー関数を`const`修飾する。
 
-~~~c++
+~~~cpp
 struct Foo
 {
     // 非const版
@@ -746,7 +746,7 @@ int main()
 
 簡易`vector`での実装は単に`const`修飾するだけだ。
 
-~~~c++
+~~~cpp
 iterator begin() const noexcept
 { return first ; }
 iterator end() const noexcept
@@ -766,7 +766,7 @@ int main()
 
 この実装はメンバー関数名以外同じだ。
 
-~~~c++
+~~~cpp
 const_iterator cbegin() const noexcept
 { return first ; }
 const_iterator cend() const noexcept
@@ -775,7 +775,7 @@ const_iterator cend() const noexcept
 
 `std::vector`にはリバースイテレーターを返すメンバー関数`rbegin`/`rend`と`crbegin`/`crend`がある。
 
-~~~c++
+~~~cpp
 int main()
 {
     std::vector<int> v = {1,2,3,4,5} ;
@@ -792,7 +792,7 @@ int main()
 
 `begin`に対する`rbegin`/`rend`の実装は以下のようになる。`crbegin`/`crend`は自分で実装してみよう。
 
-~~~c++
+~~~cpp
 reverse_iterator rbegin() noexcept
 { return reverse_iterator{ last } ; }
 reverse_iterator rend() noexcept
@@ -820,13 +820,13 @@ class Number
 
 例えば`Number`クラスを引数に取る関数があると、
 
-~~~c++
+~~~cpp
 void print_number( Number n ) ;
 ~~~
 
 変換コンストラクターの型の値を渡せる。
 
-~~~c++
+~~~cpp
 int main()
 {
     // int型から変換
@@ -842,7 +842,7 @@ int main()
 
 戻り値として返すときにも変換できる。
 
-~~~c++
+~~~cpp
 // Number型のゼロを返す
 Number zero()
 {
@@ -851,10 +851,9 @@ Number zero()
 }
 ~~~
 
-しかし、場合によってはこのような暗黙の型変換を行いたくないこともある。そういう場合、コンストラクターに`explicit`キーワードをつけると、暗黙の型変換を禁止させることができる。
+しかし、場合によってはこのような暗黙の型変換を行いたくないこともある。そういう場合、コンストラクターに`explicit`キーワードを付けると、暗黙の型変換を禁止させることができる。
 
-~~~c++
-
+~~~cpp
 class Number
 {
     explicit Number( int i ) ;
@@ -863,9 +862,9 @@ class Number
 } ;
 ~~~
 
-実は`std::reverse_iterator<Iterator>`のコンストラクターにも`explicit`キーワードがついている。
+実は`std::reverse_iterator<Iterator>`のコンストラクターにも`explicit`キーワードが付いている。
 
-~~~c++
+~~~cpp
 namespace std {
 template< typename  Iterator >
 class reverse_iterator
@@ -894,16 +893,16 @@ int main()
     bool b = v.empty() ;
     // 1、現在の要素数
     auto s = v.size() ;
-    // 実装依存、追加の動的メモリ確保をせずに格納できる要素の最大数
+    // 実装依存、追加の動的メモリー確保をせずに格納できる要素の最大数
     auto c = v.capacity() ;
 }
 ~~~
 
-早速実装していこう。
+さっそく実装していこう。
 
 `size`は要素数を返す。イテレーターの距離を求めればよい。
 
-~~~c++
+~~~cpp
 size_type size() const noexcept
 {
     return end() - begin() ;
@@ -913,7 +912,7 @@ size_type size() const noexcept
 イテレーターライブラリを使ってもよい。本物の`std::vector`では以下のように実装されている。
 
 
-~~~c++
+~~~cpp
 size_type size() const noexcept
 {
     return std::distance( begin(), end() ) ;
@@ -922,7 +921,7 @@ size_type size() const noexcept
 
 `empty`は空であれば`true`、そうでなければ`false`を返す。「空」というのは要素数がゼロという意味だ。
 
-~~~c++
+~~~cpp
 bool empty() const noexcept
 {
     return size() == 0 ;
@@ -931,16 +930,16 @@ bool empty() const noexcept
 
 しかし`size() == 0`というのは、`begin() == end()`ということだ。なぜならば要素数が0であれば、イテレーターのペアはどちらも終端のイテレーターを差しているからだ。本物の`std::vector`では以下のように実装されている。
 
-~~~c++
+~~~cpp
 bool empty() const noexcept
 {
     return begin() == end() ;
 }
 ~~~
 
-`capacity`は、追加の動的メモリ確保をせずに追加できる要素の最大数を返す。これを計算するには、動的確保したストレージの末尾の1つ次のポインターであるデータメンバーである`reserved_last`を使う。最初の要素へのポインターである`first`から`reserved_last`までの距離が答えだ。ポインターの距離はイテレーターと同じく引き算する。
+`capacity`は、追加の動的メモリー確保をせずに追加できる要素の最大数を返す。これを計算するには、動的確保したストレージの末尾の1つ次のポインターであるデータメンバーである`reserved_last`を使う。最初の要素へのポインターである`first`から`reserved_last`までの距離が答えだ。ポインターの距離はイテレーターと同じく引き算する。
 
-~~~c++
+~~~cpp
 size_type capacity() const noexcept
 {
     return reserved_last - first ;
@@ -964,7 +963,7 @@ int main()
 
 `operator []`は非`const`版と`const`版の2種類がある。
 
-~~~c++
+~~~cpp
 reference operator []( size_type i )
 { return first[i] ; }
 const_reference operator []( size_type i ) const
@@ -991,9 +990,9 @@ int main()
 }
 ~~~
 
-実装はインデックスを`size()`と比較して、範囲外であれば`std::out_of_range`をthrowする。`operator []`と同じく、非`const`版と`const`版がある。
+実装はインデックスを`size()`と比較して、範囲外であれば`std::out_of_range`を`throw`する。`operator []`と同じく、非`const`版と`const`版がある。
 
-~~~c++
+~~~cpp
 reference at( size_type i )
 {
     if ( i >= size() )
@@ -1027,7 +1026,7 @@ int main()
 
 これにも`const`版と非`const`版がある。`vector`の`last`が最後の要素の次のポインターを指していることに注意。
 
-~~~c++
+~~~cpp
 reference front()
 { return first ; }
 const_reference front() const
@@ -1053,7 +1052,7 @@ int main()
 
 実装は`first`を返すだけだ。
 
-~~~c++
+~~~cpp
 pointer data() noexcept
 { return first ; }
 const_pointer data() const noexcept
