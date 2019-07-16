@@ -45,7 +45,7 @@ int main()
     int x = 0 ;
 
     // rはxを参照する
-    int r = x ;
+    int & r = x ;
 
     int y = 1 ;
 
@@ -216,7 +216,7 @@ int * pointer = nullptr ;
 double * p1 = nullptr ;
 
 // std::stringへのポインター
-std::string p2 = nullptr ;
+std::string * p2 = nullptr ;
 ~~~
 
 C言語とC++では歴史的な理由で、`nullptr`の他にも`NULL`もnullポインター値
