@@ -50,7 +50,7 @@ $$X_3 = 3 \times X_2 + 5 \bmod 2^{32}-1 = 65$$
 ~~~c++
 template < typename Engine >
 void f( Engine & e )
-
+{
     // 最小値
     auto a = e.min() ;
     // 最大値
