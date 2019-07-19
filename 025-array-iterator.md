@@ -34,7 +34,7 @@ namespace std
     { return c.end() ;}
 
     template < typename C >
-    auto begin( C const & c )
+    auto end( C const & c )
     { return c.end() ;}
 }
 ~~~
