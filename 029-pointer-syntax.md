@@ -607,7 +607,7 @@ using pointer_to_array_type = int (*)[5] ;
 int main()
 {
     int a[5] ;
-    pointer_to_function_type = &a ;
+    pointer_to_array_type ptr = &a ;
 }
 ~~~
 
