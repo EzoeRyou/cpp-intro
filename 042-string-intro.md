@@ -658,8 +658,8 @@ class basic_string
 あるいは、配列のサイズを表現するために、配列の最後の要素の1つ次のポインターを使っているかもしれない。
 
 ~~~c++
-    CharT * ptr ;
-    CharT * last ;
+    charT * ptr ;
+    charT * last ;
     Allocator alloc ;
 ~~~
 
