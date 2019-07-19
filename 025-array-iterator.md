@@ -423,10 +423,10 @@ struct array
         return array_iterator( *this, 0 ) ;
     }
 
-    // 末尾要素へのイテレーター
+    // 最後の次の要素へのイテレーター
     iterator end()
     {
-        return array_iterator( *this, N-1 ) ;
+        return array_iterator( *this, N ) ;
     }
 } ;
 ~~~
@@ -1044,13 +1044,13 @@ struct array
     const_iterator begin() const
     { return const_iterator(*this, 0) ; }
     const_iterator end() const
-    { return const_iterator(*this, N-1) ; }
+    { return const_iterator(*this, N) ; }
 
     // 常にconst_iteratorを返す
     const_iterator cbegin() const
     { return const_iterator(*this, 0) ; }
     const_iterator cend() const
-    { return const_iterator(*this, N-1) ; }
+    { return const_iterator(*this, N) ; }
 
     // その他のメンバー
 } ;
