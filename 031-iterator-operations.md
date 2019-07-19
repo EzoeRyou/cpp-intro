@@ -4,7 +4,7 @@
 
 `array`のイテレーターの実装を振り返ろう。前回実装したイテレーターは、リファレンスとインデックスを使うものだった。
 
-~~~c++
+~~~cpp
 template < Array >
 struct array_iterator
 {
@@ -101,6 +101,7 @@ TODO: 図示
 ランダムアクセスイテレーター → 双方向イテレーター → 前方イテレーター → 入力イテレーター
                                                                      → 出力イテレーター
 ~~~
+fig/fig31-01.png
 
 矢印`A → B`は`A`が`B`であることを意味している。
 
@@ -112,7 +113,7 @@ TODO: 図示
 
 ### ランダムアクセスイテレーター
 
-ランダムアクセスイテレーターは名前の通りランダムアクセスができる。イテレーターが`n`番目の要素を指すとき、`n+m`番目の要素を指すことができる。`m`は負数でもよい。
+ランダムアクセスイテレーターは名前のとおりランダムアクセスができる。イテレーターが`n`番目の要素を指すとき、`n+m`番目の要素を指すことができる。`m`は負数でもよい。
 
 ~~~cpp
 template < typename RandomAccessIterator >
@@ -136,7 +137,7 @@ void f( RandomAccessIterator i, int n  )
 
 イテレーター間の距離を計算したいときはイテレーター同士を引き算する。
 
-~~~c++
+~~~cpp
 template < typename RandomAccessIterator >
 void f( RandomAccessIterator a, RandomAccessIterator b )
 {
@@ -147,7 +148,7 @@ void f( RandomAccessIterator a, RandomAccessIterator b )
 
 イテレーター間の距離は負数にもなる。
 
-~~~c++
+~~~cpp
 template < typename RandomAccessIterator >
 void f( RandomAccessIterator a )
 {
@@ -159,7 +160,7 @@ void f( RandomAccessIterator a )
 }
 ~~~
 
-イテレーター`b`は`a`より3進んでいるので、`a`から`b`までの距離である`b - a`は3になる。では`b`から`a`までの距離である`a - b`はどうなるかというと、-3になる。`b`にとって`a`は3戻っているからだ。
+イテレーター`b`は`a`より3進んでいるので、`a`から`b`までの距離である`b - a`は3になる。では`b`から`a`までの距離である`a - b`はどうなるかというと、$-3$になる。`b`にとって`a`は3戻っているからだ。
 
 イテレーター `i`の`n`個先の要素を参照したい場合は、
 
@@ -231,9 +232,9 @@ void f( Iterator i )
 
 ### 双方向イテレーター
 
-双方向イテレーターは名前の通り双方向のイテレーターの移動ができる。双方向というのはイテレーターが参照している`n`番目の要素の`n-1`番目の要素と`n+1`番目の要素だ。
+双方向イテレーターは名前のとおり双方向のイテレーターの移動ができる。双方向というのはイテレーターが参照している`n`番目の要素の`n-1`番目の要素と`n+1`番目の要素だ。
 
-~~~c++
+~~~cpp
 template < typename BidirectionalIterator >
 void f( BidirectionalIterator i )
 {
@@ -262,7 +263,7 @@ nth_next( BidirectionalIterator iter, std::size_t n )
 }
 ~~~
 
-たしかにこれはできる。できるが、効率的ではない。双方向イテレーターが提供される場合というのは、ランダムアクセスが技術的に可能ではあるが非効率的な場合だ。具体的なデータ構造を出すと、例えばリンクリストがある。リンクリストに対するランダムアクセスは技術的に可能であるが非効率的だ。
+確かにこれはできる。できるが、効率的ではない。双方向イテレーターが提供される場合というのは、ランダムアクセスが技術的に可能ではあるが非効率的な場合だ。具体的なデータ構造を出すと、例えばリンクリストがある。リンクリストに対するランダムアクセスは技術的に可能であるが非効率的だ。
 
 ### 前方イテレーター
 
@@ -276,7 +277,7 @@ void f( ForwardIterator i )
 }
 ~~~
 
-前方イテレーターにはマルチパス保証がある。イテレーターの指す要素を動かす前のイテレーターの値を保持しておき、保持した値を動かしたとき、ふたつのイテレーターは同一になるという保証だ。
+前方イテレーターにはマルチパス保証がある。イテレーターの指す要素を動かす前のイテレーターの値を保持しておき、保持した値を動かしたとき、2つのイテレーターは同一になるという保証だ。
 
 ~~~cpp
 template < typename ForwardIterator >
@@ -326,7 +327,7 @@ void f( InputIterator i, InputIterator j )
 
 入力イテレーターの参照は、読み込みことしか保証されていない。
 
-~~~c++
+~~~cpp
 template < typename InputIterator >
 void f( InputIterator i )
 {
@@ -416,7 +417,7 @@ void f( Iterator i )
 
 `iterator_category`はイテレーターカテゴリーを示す型で、以下のようになっている。
 
-~~~c++
+~~~cpp
 namespace std {
 struct input_iterator_tag { };
 struct output_iterator_tag { };
@@ -426,7 +427,7 @@ struct random_access_iterator_tag: public bidirectional_iterator_tag { };
 }
 ~~~
 
-`forward_iterator_tag`以降のコロン文字の後に続くコードについては、今は気にしなくてもよい。これは派生というまだ説明していないクラスの機能だ。
+`forward_iterator_tag`以降のコロン文字のあとに続くコードについては、いまは気にしなくてもよい。これは派生というまだ説明していないクラスの機能だ。
 
 あるイテレーターがあるイテレーターカテゴリーを満たすかどうかを調べるには以下のようにする。
 
@@ -512,9 +513,9 @@ int main()
 }
 ~~~
 
-`cout_iterator`は`*i = x;`と書いたときに、値xを`std::cout`で出力する。
+`cout_iterator`は`*i = x;`と書いたときに、値`x`を`std::cout`で出力する。
 
-`cout_iterator`は出力イテレーターの要件を満たすので`std::copy`に渡せる。`std::copy`はイテレーターを順番に`*out = *i ;`のように実行するので、結果として値が全て`std::cout`で出力される。
+`cout_iterator`は出力イテレーターの要件を満たすので`std::copy`に渡せる。`std::copy`はイテレーターを順番に`*out = *i ;`のように実行するので、結果として値がすべて`std::cout`で出力される。
 
 `cout_iterator`はとても便利なので、標準ライブラリには`std::ostream_iterator<T>`がある。
 
@@ -532,7 +533,7 @@ int main()
 
 上のような出力イテレーターが`operator =`で以下のようなことをしていたらどうだろう。
 
-~~~c++
+~~~cpp
 template < typename Container >
 struct back_inserter ;
 {
@@ -579,7 +580,7 @@ int main()
 
 ただし、`std::back_inserter`は古いライブラリなので、ここで示した方法とは少し違う実装がされている。
 
-~~~c++
+~~~cpp
 // 出力イテレーター
 template < typename Container >
 struct back_insert_iterator
@@ -629,7 +630,7 @@ C++17以前のC++では関数の実引数からテンプレート仮引数`T`の
 
 入力イテレーターの実例はどうか。
 
-`std::cin`からT型を読み込む入力イテレーターの実装は以下のようになる。
+`std::cin`から`T`型を読み込む入力イテレーターの実装は以下のようになる。
 
 ~~~cpp
 template < typename T >
@@ -690,7 +691,7 @@ bool operator !=( cin_iterator<T> const & l, cin_iterator<T> const & r )
 
 以下のように使える。
 
-~~~c++
+~~~cpp
 int main()
 {
     cin_iterator<int> input, fail(true) ;
@@ -702,7 +703,7 @@ int main()
 
 実装としては、まずボイラープレートコード
 
-~~~c++
+~~~cpp
 using difference_type = std::ptrdiff_t ;
 using value_type = T ;
 using reference = T & ;
@@ -719,7 +720,7 @@ using iterator_category = std::input_iterator_tag ;
 
 データメンバーが2つ。
 
-~~~c++
+~~~cpp
 bool fail ;
 value_type value ;
 ~~~
@@ -739,7 +740,7 @@ int main()
 
 イテレーターから値を読み込むのは`operator *`の仕事だ。これは単に`value`を返す。
 
-~~~c++
+~~~cpp
 const reference operator *() const
 { return value ; }
 ~~~
@@ -748,7 +749,7 @@ const reference operator *() const
 
 実際に`std::cin`から値を読み込むのは`operator ++`で行われる。
 
-~~~c++
+~~~cpp
 cin_iterator & operator ++()
 {
     // 失敗状態でなければ
@@ -767,7 +768,7 @@ cin_iterator & operator ++()
 
 後置インクリメントは前置インクリメントを呼び出すだけの汎用的な実装だ。
 
-~~~c++
+~~~cpp
 cin_iterator operator ++(int)
 {
     // 元の値をコピーし
@@ -781,7 +782,7 @@ cin_iterator operator ++(int)
 
 コンストラクターに`true`を渡すと、イテレーターを最初から失敗状態にしておく
 
-~~~c++
+~~~cpp
 cin_iterator( bool fail = false )
     : fail(fail)
 { ++*this ; }    
@@ -791,7 +792,7 @@ cin_iterator( bool fail = false )
 
 入力イテレーターは同値比較ができる。
 
-~~~c++
+~~~cpp
 template < typename T >
 bool operator ==( cin_iterator<T> const & l, cin_iterator<T> const & r )
 { return l.fail == r.fail ; }
@@ -818,7 +819,7 @@ void print( InputIterator iter, InputIterator end_iter )
 
 このような関数`print`に、`vector`の`begin`/`end`を渡すと、`vector`の要素をすべて標準出力する。
 
-~~~c++
+~~~cpp
 int main()
 {
     std::vector<int> v = {1,2,3,4,5} ;
@@ -828,7 +829,7 @@ int main()
 
 `cin_iterator`を渡した場合、失敗状態になるまで標準出力する。
 
-~~~c++
+~~~cpp
 int main()
 {
     cin_iterator iter, fail(true) ;
@@ -860,7 +861,7 @@ int main()
 
 以下のように使える。
 
-~~~c++
+~~~cpp
 int main()
 {
     iota_iterator iter(0) ;
@@ -881,7 +882,7 @@ int main()
 }
 ~~~
 
-早速実装してみよう。まずはネストされた型名と初期化から。
+さっそく実装してみよう。まずはネストされた型名と初期化から。
 
 ~~~cpp
 template < typename T >
@@ -910,7 +911,7 @@ struct iota_iterator
 
 これでイテレーターとしてオブジェクトを作ることができるようになる。コピーは自動的に生成されるので書く必要はない。
 
-~~~c++
+~~~cpp
 int main()
 {
     // i(0)
@@ -925,7 +926,7 @@ int main()
 
 残りのコードも書いていこう。`operator *`は単に`value`を返すだけだ。
 
-~~~c++
+~~~cpp
 // 非const版
 reference       operator *() noexcept
 { return value ; }
@@ -936,7 +937,7 @@ const reference operator *() const noexcept
 
 非`const`版と`const`版があるのは、`const`な`iota_iterator`のオブジェクトからも使えるようにするためだ。
 
-~~~c++
+~~~cpp
 int main()
 {
     // 非constなオブジェクト
@@ -959,7 +960,7 @@ int main()
 `operator ++`を実装しよう。
 
 
-~~~c++
+~~~cpp
 // 前置
 iota_iterator & operator ++() noexcept
 {
@@ -977,7 +978,7 @@ iota_iterator   operator ++(int) noexcept
 
 すでに説明したようにインクリメント演算子には前置後置の2種類が存在する。
 
-~~~c++
+~~~cpp
 ++i ; // 前置
 i++ ; // 後置
 ~~~
@@ -990,7 +991,7 @@ i++ ; // 後置
 
 最後は比較演算子だ。
 
-~~~c++
+~~~cpp
 bool operator == ( iota_iterator const & i ) const noexcept
 {
     return value == i.value ;
@@ -1001,7 +1002,7 @@ bool operator != ( iota_iterator const & i ) const noexcept
 }
 ~~~
 
-前方イテレーターがサポートする比較演算子は2つ、`operator ==`と`operator !=`だ。`!=`は`==`で実装してしまうとして、`==`は単に`value`を比較する。通常、イテレーターの比較は要素の値の比較ではなく、同じ要素を参照するイテレーターかどうかの比較になるが、`iota_iterator`の場合、`vector`や`array`のようなメモリ上に構築された要素は存在しないので、`value`の比較でよい。
+前方イテレーターがサポートする比較演算子は2つ、`operator ==`と`operator !=`だ。`!=`は`==`で実装してしまうとして、`==`は単に`value`を比較する。通常、イテレーターの比較は要素の値の比較ではなく、同じ要素を参照するイテレーターかどうかの比較になるが、`iota_iterator`の場合、`vector`や`array`のようなメモリー上に構築された要素は存在しないので、`value`の比較でよい。
 
 前方イテレーターが提供される実例としては、前方リンクリストがある。
 
@@ -1026,7 +1027,7 @@ int main()
 
 このような`forward_link_list<T>`へのイテレーターの骨子は以下のように書ける。
 
-~~~c++
+~~~cpp
 template < typename T >
 struct iterator 
 {
@@ -1048,7 +1049,7 @@ struct iterator
 
 前方リンクリストは`vector`や`array`のように要素の線形の集合を表現できる。`n`番目の要素から`n+1`番目の要素を返すことはできる。
 
-~~~c++
+~~~cpp
 // n+1番目の要素を返す関数
 template < typename T >
 forward_link_list<T> & next( forward_link_list<T> & list ) noexcept
@@ -1060,7 +1061,7 @@ forward_link_list<T> & next( forward_link_list<T> & list ) noexcept
 
 ただし`n-1`番目の要素を返すことはできない。その方法がないからだ。
 
-前方イテレーターが入力/出力イテレーターと違う点は、マルチパス保証があることだ。イテレーターのコピーを使いまわして複数回同じ要素をたどることができる。
+前方イテレーターが入力/出力イテレーターと違う点は、マルチパス保証があることだ。イテレーターのコピーを使い回して複数回同じ要素をたどることができる。
 
 ~~~cpp
 template < typename ForwardIterator >
@@ -1090,7 +1091,7 @@ void f( ForwardIterator first, ForwardIterator last )
 
 双方向イテレーターは`n`番目の要素を指すイテレーターから`n-1`番目を指すイテレーターを得られるイテレーターだ。`n-1`番目を指すには`operator --`を使う。
 
-~~~c++
+~~~cpp
 template < typename Iterator >
 void f( Iterator i )
 {
@@ -1101,7 +1102,7 @@ void f( Iterator i )
 
 `iota_iterator`を双方向イテレーターにするのは簡単だ。
 
-~~~c++
+~~~cpp
 template < typename T >
 struct iota_iterator
 {
@@ -1145,8 +1146,7 @@ struct bidirectional_link_list
 
 双方向リンクリストに対するイテレーター操作の骨子は以下のようになる。
 
-~~~c++
-
+~~~cpp
 template < typename T >
 struct iterator 
 {
@@ -1171,7 +1171,7 @@ struct iterator
 
 イテレーターの参照する要素の移動の部分。
 
-~~~c++
+~~~cpp
 template < typename T >
 struct iota_iterator
 {
@@ -1223,7 +1223,7 @@ iota_iterator<T> operator -
 
 参考に、クラス外のフリー関数として実装する場合は以下のようになる。
 
-~~~c++
+~~~cpp
 template < typename T >
 iota_iterator<T> operator +
 (
@@ -1242,13 +1242,13 @@ iota_iterator<T> operator -
 { return i - n ; }
 ~~~
 
-`n + i`は必ずクラス外のフリー関数として実装しなければならない。クラスのメンバー関数として演算子のオーバーロードをする場合はオペランドがthisになるからだ。
+`n + i`は必ずクラス外のフリー関数として実装しなければならない。クラスのメンバー関数として演算子のオーバーロードをする場合はオペランドが`this`になるからだ。
 
 イテレーターの距離の実装は`iota_iterator`の場合、単に`value`の差だ。
 
-メンバー関数として実装する場合は以下の通り。
+メンバー関数として実装する場合は以下のとおり。
 
-~~~c++
+~~~cpp
 template < typename T >
 struct iota_iterator
 {
@@ -1259,9 +1259,9 @@ struct iota_iterator
 } ;
 ~~~
 
-クラス外のフリー関数として実装する場合は以下の通り。
+クラス外のフリー関数として実装する場合は以下のとおり。
 
-~~~c++
+~~~cpp
 template < typename T >
 typename iota_iterator<T>::difference_type
 ( iota_iterator<T> const & a, iota_iterator<T> const & b )
@@ -1272,7 +1272,7 @@ typename iota_iterator<T>::difference_type
 
 大小比較の実装も`value`を比較するだけだ。
 
-~~~c++
+~~~cpp
 template < typename T >
 struct iota_iterator 
 {
@@ -1288,11 +1288,11 @@ struct iota_iterator
 } ;
 ~~~
 
-ランダムアクセスイテレーターの実例としては、連続したメモリ上に構築された要素の集合に対するイテレーターがある。標準ライブラリでは、`vector`や`array`が該当する。
+ランダムアクセスイテレーターの実例としては、連続したメモリー上に構築された要素の集合に対するイテレーターがある。標準ライブラリでは、`vector`や`array`が該当する。
 
-`vector`や`array`の中身は連続したメモリ上に確保された要素で、要素の参照にはポインターか、ポインターとインデックスが用いられる。
+`vector`や`array`の中身は連続したメモリー上に確保された要素で、要素の参照にはポインターか、ポインターとインデックスが用いられる。
 
-~~~c++
+~~~cpp
 // arrayやvectorのイテレーター
 template < typename T >
 struct iterator
@@ -1310,7 +1310,7 @@ struct iterator
 
 そこで、C++標準ライブラリの実装によっては、`vector`や`array`の実装は単に生のポインターを返す。
 
-~~~c++
+~~~cpp
 template < typename T, std::size_t N >
 struct array
 {
@@ -1349,7 +1349,7 @@ get_value( Iterator i )
 }
 ~~~
 
-そのため、イテレーターのネストされた型名を使うときには、直接使うのではなく、一度`iterator_traits`を経由してつかうとよい。
+そのため、イテレーターのネストされた型名を使うときには、直接使うのではなく、一度`iterator_traits`を経由して使うとよい。
 
 ## イテレーター操作
 
@@ -1359,20 +1359,20 @@ get_value( Iterator i )
 
 イテレーター `i`を`n`回移動したいとする。ランダムアクセスイテレーターならば以下のようにする。
 
-~~~c++
+~~~cpp
 i += n ;
 ~~~
 
 しかし前方イテレーターの場合、`operator +=`は使えない。`n`回`operator ++`を呼び出す必要がある。
 
-~~~c++
+~~~cpp
 for ( auto count = 0 ; count != n ; ++count )
     ++i ;
 ~~~
 
 双方向イテレーターの場合、`n`は負数の場合がある。`n`が負数の場合、`n`回`operator --`を呼び出すことになる。
 
-~~~c++
+~~~cpp
 if ( n > 0 )
     for ( auto count = 0 ; count != n ; ++count )
         ++i ;
@@ -1383,9 +1383,9 @@ else
 
 双方向イテレーター用のコードはランダムアクセスイテレーターでも動くが非効率的だ。
 
-今使っているイテレーターの種類を把握して適切な方法を選ぶコードを書くのは面倒だ。そこで標準ライブラリには、イテレーター `i`を`n`回移動してくれる`advance(i, n)`がある。
+いま使っているイテレーターの種類を把握して適切な方法を選ぶコードを書くのは面倒だ。そこで標準ライブラリには、イテレーター `i`を`n`回移動してくれる`advance(i, n)`がある。
 
-~~~c++
+~~~cpp
 // iを1前方に移動
 std::advance(i, 1) ;
 // iを5前方に移動
@@ -1400,7 +1400,7 @@ std::advance(i, 0) ;
 
 `advance(i,n)`はi自体が書き換わる。
 
-~~~c++
+~~~cpp
 i ; // n番目を指す
 std::advance( i, 1 ) ;
 i ; // n+1番目を指す
@@ -1412,13 +1412,13 @@ i ; // n+1番目を指す
 
 ランダムアクセスイテレーターならば以下のようにする。
 
-~~~c++
+~~~cpp
 auto dist = last - first ;
 ~~~
 
 それ以外のイテレーターならば、`first`が`last`と等しくなるまで`operator ++`を呼び出す。
 
-~~~c++
+~~~cpp
 std::size_t dist = 0 ;
 for ( auto iter = first ; iter != last ; ++iter )
     ++dist ;
@@ -1428,7 +1428,7 @@ for ( auto iter = first ; iter != last ; ++iter )
 
 `distance( first, last )`は`first`から`last`までの距離を返す。
 
-~~~c++
+~~~cpp
 // iからjまでの距離を返す
 auto dist = std::distance( i, j ) ;
 ~~~
@@ -1439,7 +1439,7 @@ auto dist = std::distance( i, j ) ;
 
 ### next/prev : 移動したイテレーターを返す
 
-`advance(i, n)`はイテレーターiを変更してしまう。イテレーターを変更させずに移動後のイテレーターも欲しい場合、以下のように書かなければならない。
+`advance(i, n)`はイテレーター`i`を変更してしまう。イテレーターを変更させずに移動後のイテレーターもほしい場合、以下のように書かなければならない。
 
 ~~~cpp
 template < typename Iterator >
@@ -1471,7 +1471,7 @@ void f( Iterator i )
 {
     auto j = std::prev( i, 3 ) ;
     // jはiより3後方に移動している
-    // jはstd::advance(i, 3)した後のiと同じ値
+    // jはstd::advance(i, 3)したあとのiと同じ値
 }
 ~~~
 
@@ -1491,7 +1491,7 @@ void f( Iterator i )
 
 ## リバースイテレーター
 
-イテレーターは要素を順番通りにたどる。例えば以下は要素を順番に出力する関数テンプレート`print`だ。
+イテレーターは要素を順番どおりにたどる。例えば以下は要素を順番に出力する関数テンプレート`print`だ。
 
 ~~~cpp
 template < typename Iterator >
@@ -1519,7 +1519,7 @@ void reverse_print( Iterator first, Iterator last )
 }
 ~~~
 
-しかしイテレーターを正順にたどるか逆順にたどるかという違いだけで、本質的に同じアルゴリズム、同じコードを二度も書きたくはない。そういうときに役立つのがリバースイテレーターだ。
+しかしイテレーターを正順にたどるか逆順にたどるかという違いだけで、本質的に同じアルゴリズム、同じコードを2度も書きたくはない。そういうときに役立つのがリバースイテレーターだ。
 
 
 `std::reverse_iterator<Iterator>`はイテレーター`Iterator`に対するリバースイテレーターを提供する。リバースイテレーターはイテレーターのペア `[first,last)`を受け取り、`last`の1つ前の要素が先頭で`first`の要素が末尾になるような順番のイテレーターにしてくれる。
