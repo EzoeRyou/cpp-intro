@@ -163,6 +163,7 @@ $$
 std::fisher_f_distribution<RealType> d( m, n ) ;
 ~~~
 
+
 `RealType`は浮動小数点数型でデフォルトは`dobule`。`m`, `n`は`RealType`型。値の範囲は$0 < m$ かつ $0 < n$。
 
 使い方。

@@ -504,7 +504,7 @@ int f() { return 1 ; }
 
 int main()
 {
-    using namespace std ;
+    using namespace abc ;
 
     // エラー、名前が曖昧
     f() ;
@@ -523,7 +523,7 @@ int f() { return 1 ; }
 
 int main()
 {
-    using namespace std ;
+    using namespace abc ;
 
     // OK、名前空間abcのf
     abc::f() ;

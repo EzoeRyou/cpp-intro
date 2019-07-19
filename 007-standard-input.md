@@ -26,7 +26,7 @@ int main()
     double bmi = mass / (height*height) ;
 
     // BMIの出力
-    std::cout << "BMI=" << bmi << "\n"s ;
+    std::cout << "BMI="s << bmi << "\n"s ;
 }
 ~~~
 
@@ -44,7 +44,7 @@ BMI                         状態
 ~~~cpp
 int main()
 {
-    // 身長1.6m
+    // 身長1.63m
     double height = 1.63 ;
     // 体重73kg
     double mass = 73.0 ;
@@ -53,7 +53,7 @@ int main()
     double bmi = mass / (height*height) ;
 
     // BMIの出力
-    std::cout << "BMI=" << bmi << "\n"s ;
+    std::cout << "BMI="s << bmi << "\n"s ;
 
     // 状態の判定をする関数
     auto status = []( double bmi )
@@ -93,7 +93,7 @@ int main()
     double bmi = mass / (height*height) ;
 
     // BMIの出力
-    std::cout << "BMI=" << bmi << "\n"s ;
+    std::cout << "BMI="s << bmi << "\n"s ;
 }
 ~~~
 
@@ -335,7 +335,7 @@ $ cat bodymass.txt
 1.63
 73
 $ ./bmi < bodymass.txt > index.txt
-$ cat index.text
+$ cat index.txt
 27.4756
 ~~~
 
