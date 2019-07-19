@@ -357,7 +357,7 @@ struct X
 struct X
 {
     // エラー、リファレンス修飾子がない
-    void f()
+    void f() ;
     void f() & ;
 
     // OK、リファレンス修飾子がある
