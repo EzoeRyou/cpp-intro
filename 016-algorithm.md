@@ -1150,7 +1150,7 @@ int main()
 }
 ~~~
 
-`remove_if(first, last, pred)`は、`[first, last]`の範囲の要素を指すイテレーター`i`のうち、関数`pred`に渡した結果`pred(*i)`が`true`になる要素を取り除くアルゴリズムだ。
+`remove_if(first, last, pred)`は、`[first, last)`の範囲の要素を指すイテレーター`i`のうち、関数`pred`に渡した結果`pred(*i)`が`true`になる要素を取り除くアルゴリズムだ。
 
 ~~~cpp
 int main()
