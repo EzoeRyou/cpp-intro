@@ -881,7 +881,7 @@ int main()
 
 期待値は50なので、50前後の乱数が出やすい。
 
-6面ダイスを60回振った結果出た1の目の合計を乱数で返す関数`'roll_for_one'`は以下のようになる。
+6面ダイスを60回振った結果出た1の目の合計を乱数で返す関数`roll_for_one`は以下のようになる。
 
 ~~~cpp
 template < typename Engine >
@@ -1106,7 +1106,7 @@ auto count_n_coinflips( unsigned int n, Engine & e )
 }
 ~~~
 
-6面ダイスを10回、1の目が出るまで振った回数を乱数で返す関数`"count_10_rolls"`は以下のとおり。
+6面ダイスを10回、1の目が出るまで振った回数を乱数で返す関数`count_10_rolls`は以下のとおり。
 
 ~~~cpp
 template < typename Engine >
