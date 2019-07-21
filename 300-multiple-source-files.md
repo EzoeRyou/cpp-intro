@@ -404,7 +404,7 @@ void print_int( int x )
 void print_int( int x ) ;
 
 // library.cpp
-std::string delimiter ;
+std::string delimiter{"\n"} ;
 
 void print_int( int x )
 { std::cout << x << delimiter ; }
