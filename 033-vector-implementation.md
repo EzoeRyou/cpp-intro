@@ -132,13 +132,13 @@ int main()
     // 構築
     std::string * s = new(p) std::string("hello") ;
     // 明示的なデストラクター呼び出し
-    s->basic_string() ;
+    s->~basic_string() ;
     // メモリー解放
     a.deallocate( p, 1 ) ;
 }
 ~~~
 
-このように書くのはとても面倒だ。特に`std::string`の明示的なデストラクター呼び出し`s->basic_string`が面倒だ。なぜ`s->string`ではだめなのか。
+このように書くのはとても面倒だ。特に`std::string`の明示的なデストラクター呼び出し`s->~basic_string`が面倒だ。なぜ`s->~string`ではだめなのか。
 
 実は`std::string`は以下のようなクラステンプレートになっている。
 
