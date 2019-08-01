@@ -815,7 +815,7 @@ int main()
         return false ;
     } ;
 
-    bool c = a() && b() ;
+    bool c = a() || b() ;
     std::cout << std::boolalpha << c ; 
 }
 ~~~
