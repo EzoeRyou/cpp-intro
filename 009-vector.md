@@ -57,7 +57,7 @@ int main()
 }
 ~~~
 
-もちろん、上の`vector`を保持する`vector`も書ける。その場合、`std::vector<std::vector<std::vector<int>>>`になる。このvectorを保持する`vector`も当然書けるが省略する。
+もちろん、上の`vector`を保持する`vector`も書ける。その場合、`std::vector<std::vector<std::vector<int>>>`になる。この`vector`を保持する`vector`も当然書けるが省略する。
 
 `std::vector`型の変数にはメンバー関数`push_back`を使うことで値を保持できる。
 

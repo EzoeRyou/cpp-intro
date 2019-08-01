@@ -4,7 +4,7 @@
 
 自作の`array`をイテレーターに対応させる前に、まず`'std::array'`のイテレーターについてひと通り調べよう。
 
-イテレーターは`std::begin/std::end`で取得する
+イテレーターは`std::begin/std::end`で取得する。
 
 ~~~cpp
 int main()
@@ -712,7 +712,7 @@ i += 3 ;
 
 `i += n`はイテレーター`i`を`n`回進める。
 
-`operator +`もある
+`operator +`もある。
 
 ~~~cpp
 auto j = i + 3 ;
@@ -768,7 +768,6 @@ int main()
 イテレーター`i`の`n`個先の要素を読み書きするのにいちいち`*(i+n)`と書くのは面倒なので、`std::array`や`std::vector`のイテレーターには`operator []`がある。これを使うと`i[n]`と書ける。
 
 ~~~cpp
-
 int main()
 {
     std::array<int, 5> a = {1,2,3,4,5} ;
@@ -1090,7 +1089,6 @@ int main()
 これに対応するために、`const_iterator`のコンストラクターは`iterator`から変換するためのコンストラクターも持つ。
 
 ~~~cpp
-
 template < typename Array >
 struct array_const_iterator
 {
