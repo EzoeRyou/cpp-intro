@@ -14,7 +14,7 @@ C++のソースファイルをコンパイルして実行可能ファイルを�
 `source.cpp`という名前のソースファイルがあるとき、ここから`program`という名前の実行可能ファイルを作るには、
 
 ~~~
-$ g++ -o program source.file
+$ g++ -o program source.cpp
 ~~~
 
 としていた。毎回このコマンドを入力するのは面倒なので、`Makefile`を以下のように書いていた。
@@ -283,7 +283,7 @@ void f( double ) { }
 名前は使う前に宣言が必要だが、肝心の定義は別のソースファイルに書いてある。宣言と定義を間違えてしまった場合はエラーになる。
 
 ~~~cpp
-// print_int.hpp
+// print_int.cpp
 // 失敗状態を返す
 bool print_int( int x )
 {
@@ -404,7 +404,7 @@ void print_int( int x )
 void print_int( int x ) ;
 
 // library.cpp
-std::string delimiter ;
+std::string delimiter{"\n"} ;
 
 void print_int( int x )
 { std::cout << x << delimiter ; }
@@ -492,7 +492,7 @@ ODRの例外的な回避の怖いところは、間違えてしまってもコ�
 
 ~~~c++
 // 宣言
-strut Foo ;
+struct Foo ;
 
 // 定義
 struct Foo
@@ -615,7 +615,7 @@ struct S
 } ;
 ~~~
 
-`static`メンバー関数はクラスのオブジェクトには依存していない。そのため、クラスのオブジェクトなしで呼び出すことができる
+`static`メンバー関数はクラスのオブジェクトには依存していない。そのため、クラスのオブジェクトなしで呼び出すことができる。
 
 ~~~cpp
 struct S
