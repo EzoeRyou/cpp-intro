@@ -168,7 +168,7 @@ int & ref = object ;
 
 ### prvalue
 
-`prvalue`は純粋なrvalue(pure rvalue)のことだ。つまり、名前なしのオブジェクトや計算結果の一時オブジェクトのことだ。
+`prvalue`は純粋な`rvalue`(pure rvalue)のことだ。つまり、名前なしのオブジェクトや計算結果の一時オブジェクトのことだ。
 
 ~~~cpp
 int f() { return 0 ; }
@@ -206,7 +206,7 @@ auto result = x + y + z ;
 
 `xvalue`となる値は以下のような場合だ。
 
-+ 戻り値の型がオブジェクトの型への`rvalue`リファレンスである関数の呼び出しの結果。
++ 戻り値の型がオブジェクトの型への`rvalue`リファレンスである関数の呼び出しの結果
 
 ~~~cpp
 int && f() { return 0 ; }

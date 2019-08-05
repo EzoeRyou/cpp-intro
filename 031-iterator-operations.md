@@ -142,7 +142,7 @@ template < typename RandomAccessIterator >
 void f( RandomAccessIterator a, RandomAccessIterator b )
 {
     b - a ; // aからbまでの距離
-    a - b ; // bからaまでの距離。
+    a - b ; // bからaまでの距離
 }
 ~~~
 

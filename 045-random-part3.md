@@ -59,7 +59,7 @@ $$
 std::lognormal_distribution<RealType> d( m, s ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。`m`, `s`は`RealType`型。値の範囲は$0 < s$
+`RealType`は浮動小数点数型でデフォルトは`double`。`m`, `s`は`RealType`型。値の範囲は$0 < s$。
 
 使い方。
 
@@ -198,7 +198,7 @@ $$
 std::student_t_distribution<RealType> d( n ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`。`n`は`RealType`型で、値の範囲は$0 < n$
+`RealType`は浮動小数点数型でデフォルトは`double`。`n`は`RealType`型で、値の範囲は$0 < n$。
 
 使い方。
 

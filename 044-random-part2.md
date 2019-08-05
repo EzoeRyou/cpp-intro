@@ -34,7 +34,7 @@ $$
 std::poisson_distribution<T> d( mean ) ;
 ~~~
 
-`T`は整数型でデフォルトは`int`、`mean`は`RealType`型。$\mu$と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は$0 < \text{mean}$
+`T`は整数型でデフォルトは`int`、`mean`は`RealType`型。$\mu$と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は$0 < \text{mean}$。
 
 使い方。
 
@@ -110,7 +110,7 @@ $$
 std::exponential_distribution<RealType> d( lambda ) ;
 ~~~
 
-`RealType`は浮動小数点数型でデフォルトは`double`、`lambda`は`RealType`型。ポアソン分布の`mean`と同じで、ある時間間隔における事象の発生回数だ。値の範囲は$0 < \text{lambda}$
+`RealType`は浮動小数点数型でデフォルトは`double`、`lambda`は`RealType`型。ポアソン分布の`mean`と同じで、ある時間間隔における事象の発生回数だ。値の範囲は$0 < \text{lambda}$。
 
 `std::exponential_distribution`の生成する乱数は`1.0`のとき、ある時間間隔に等しくなる。`0.5`なら半分の時間間隔、`2.0`なら2倍の時間間隔だ。
 
