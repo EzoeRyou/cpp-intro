@@ -843,7 +843,7 @@ struct array_iterator
 
     bool operator < ( array_iterator const & right ) const
     {
-        return i < right ;
+        return i < right.i ;
     }
 }
 ~~~
