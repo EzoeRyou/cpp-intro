@@ -251,7 +251,7 @@ int main()
 {
     std::vector<int> v = {1,2,3,4,5} ;
 
-    // 引数をリファレンスでとって2倍にする関数
+    // 引数をリファレンスで取って2倍にする関数
     auto twice = [](auto & value){ value = 2 * value ; } ;
 
     std::for_each( std::begin(v), std::end(v), twice ) ;
@@ -923,7 +923,7 @@ auto copy = []( auto first, auto last, auto result )
     { *result = *iter ; }
 
     return result ;
-}
+} ;
 ~~~
 
 
@@ -940,7 +940,7 @@ auto transform = []( auto first, auto last, auto result, auto op )
     { *result = op(*iter) ; }
 
     return result ;
-}
+} ;
 ~~~
 
 使い方は`copy`と似ているが、値をコピーをする際に関数を適用することができる。
@@ -1030,7 +1030,7 @@ auto fill_n = []( auto first, auto n, auto value )
     {
         *first = value ;
     }
-}
+} ;
 ~~~
 
 

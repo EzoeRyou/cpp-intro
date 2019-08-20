@@ -55,7 +55,7 @@ struct array
     using value_type = T ;
     using reference = T & ;
 
-    using size_type = std::size_t
+    using size_type = std::size_t ;
 
     value_type storage[N] ;
 

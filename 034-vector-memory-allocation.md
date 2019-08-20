@@ -166,7 +166,7 @@ int main()
 
 ~~~cpp
 vector( const allocator_type & alloc ) noexcept
-    alloc( alloc )
+    : alloc( alloc )
 { }
 ~~~
 

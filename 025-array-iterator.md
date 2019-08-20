@@ -61,7 +61,7 @@ int main()
 
 ~~~cpp
 // イテレーターを表現するクラス
-struct array_iterator { }
+struct array_iterator { } ;
 
 template < typename T, std::size_t N >
 struct array
@@ -189,7 +189,7 @@ struct array
     // 黒魔術2: *this
     // 黒魔術3: iterator(*this)
     { return iterator(*this) ; }
-}
+} ;
 ~~~
 
 黒魔術1は`array_iterator_begin<array>`の中にある。この`array`は`array<T,N>`と同じ意味になる。つまり全体としては、`array_iterator_begin<array<T,N>>`と書いたものと同じだ。クラステンプレートの中でクラス名を使うと、テンプレート実引数をそれぞれ指定したものと同じになる。
@@ -343,7 +343,7 @@ struct array_iterator
     // 前の要素を指す
     array_iterator & operator --() ;
     
-    //いま参照している要素へのリファレンスを返す
+    // いま参照している要素へのリファレンスを返す
     Array::reference operator *() ;
 } ;
 ~~~
@@ -399,7 +399,7 @@ struct array_iterator
     array_iterator( Array & a, std::size_t i )
         : a( a ), i(i) { }
 
-    //いま参照している要素へのリファレンスを返す
+    // いま参照している要素へのリファレンスを返す
     Array::reference operator *()
     {
         return a[i] ;
@@ -1066,7 +1066,7 @@ struct array_const_iterator
 
     // コンストラクター
     array_const_iterator( Array const & a, std::size_t i )
-        a(a), i(i) { }
+        : a(a), i(i) { }
 } ;
 ~~~
 
@@ -1097,7 +1097,7 @@ struct array_const_iterator
 
     // array_iteratorからの変換コンストラクター
     array_const_iterator( typename array_iterator<Array>::iterator const & iter )
-        a( iter.a ), i( iter.i ) { }
+        : a( iter.a ), i( iter.i ) { }
 } ;
 ~~~
 

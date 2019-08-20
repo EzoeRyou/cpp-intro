@@ -14,7 +14,7 @@ struct array_iterator
     std::size_t i ;
 
     array_iterator( Array * a, std::size_t i )
-        a(a), i(i) { }
+        : a(a), i(i) { }
 
     reference operator *() const
     { return a[i] ; }
@@ -857,7 +857,7 @@ int main()
 
 前方イテレーター以上のイテレーターの例として、`iota_iterator<T>`を実装してみよう。
 
-このイテレーターはT型の整数を保持し、`operator *`でリファレンスを返し、`operator ++`でインクリメントする。
+このイテレーターは`T`型の整数を保持し、`operator *`でリファレンスを返し、`operator ++`でインクリメントする。
 
 以下のように使える。
 
