@@ -335,7 +335,7 @@ struct array_iterator
 {
     Array & a ;
 
-    array_iterator_begin( Array & a )
+    array_iterator( Array & a )
         : a( a ) { }
 
     // 次の要素を指す
