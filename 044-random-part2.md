@@ -28,7 +28,7 @@ $$
 
 ここで$\mu$を`mean`とする。$\mu > 0$ではない場合未定義だ。
 
-変数の宣言は以下のとおり。
+変数の宣言:
 
 ~~~c++
 std::poisson_distribution<T> d( mean ) ;
@@ -36,7 +36,7 @@ std::poisson_distribution<T> d( mean ) ;
 
 `T`は整数型でデフォルトは`int`、`mean`は`RealType`型。$\mu$と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は$0 < \text{mean}$。
 
-使い方。
+使い方:
 
 ~~~cpp
 int main()
@@ -104,7 +104,7 @@ $$
 p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
 $$
 
-変数の宣言方法は以下のとおり。
+変数の宣言:
 
 ~~~c++
 std::exponential_distribution<RealType> d( lambda ) ;
@@ -114,7 +114,7 @@ std::exponential_distribution<RealType> d( lambda ) ;
 
 `std::exponential_distribution`の生成する乱数は`1.0`のとき、ある時間間隔に等しくなる。`0.5`なら半分の時間間隔、`2.0`なら2倍の時間間隔だ。
 
-使い方。
+使い方:
 
 ~~~cpp
 int main()
@@ -160,7 +160,7 @@ $$
 
 $\alpha$を`alpha`、$\beta$を`beta`とする。
 
-変数の宣言は以下のとおり。
+変数の宣言:
 
 ~~~c++
 std::gamma_distribution<RealType> d( alpha, beta ) ;
@@ -168,7 +168,7 @@ std::gamma_distribution<RealType> d( alpha, beta ) ;
 
 `RealType`は浮動小数点数型でデフォルトは`double`。`alpha`, `beta`は`RealType`型。値の範囲は$0 < alpha$, $0 < beta$。
 
-使い方。
+使い方:
 
 ~~~cpp
 int main()
@@ -193,7 +193,7 @@ p(x\,|\,a,b) = \frac{a}{b}
      \text{ .}
 $$
 
-変数の宣言は以下のとおり。
+変数の宣言:
 
 ~~~c++
 std::weibull_distribution<RealType> d( a, b ) ;
@@ -201,7 +201,7 @@ std::weibull_distribution<RealType> d( a, b ) ;
 
 `RealType`は浮動小数点数型でデフォルトは`double`。`a`, `b`は`RealType`型。値の範囲は$0 < a$, $0 < b$。
 
-使い方。
+使い方:
 
 
 ~~~cpp
@@ -228,7 +228,7 @@ $$
 
 極値分布(extreme value distribution)は、ガンベルI型(Gumbel Type I)、対数ウェイブル(log-Weibull)、フィッシャー＝ティペットI型(Fisher-Tippett Type I)という名前の分布と呼ばれることもある。
 
-変数の宣言は以下のとおり。
+変数の宣言:
 
 ~~~c++
 std::extreme_value_distribution<RealType> d( a, b ) ;
@@ -236,7 +236,7 @@ std::extreme_value_distribution<RealType> d( a, b ) ;
 
 `RealType`は浮動小数点数型でデフォルトは`double`。`a`, `b`は`RealType`型。値の範囲は$0 < b$。
 
-使い方。
+使い方:
 
 ~~~cpp
 int main()
