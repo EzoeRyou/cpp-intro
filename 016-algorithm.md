@@ -1135,7 +1135,7 @@ int main()
 
     auto last = std::remove( std::begin(v), std::end(v), 2 ) ;
 
-    // "12"
+    // "13"
     std::for_each( std::begin(v), last,
         [](auto x) { std::cout << x ; } ) ;
 
