@@ -1,1 +1,0 @@
-npm install --save  textlint textlint-rule-preset-ja-technical-writing prh
