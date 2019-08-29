@@ -250,7 +250,7 @@ int main()
 {
     X x{} ;
     int && r = static_cast<X &&>(x).data_member ;
-} ;
+}
 ~~~
 
 + 式`.*`で最初のオペランドが`xvalue`で次のオペランドがデータメンバーへのポインターの場合
@@ -281,7 +281,7 @@ int main()
     // lvalueなオブジェクト
     int lvalue { } ;
 
-    // OK、lvalueリファレンスはlvalueで初期化できる。
+    // OK、lvalueリファレンスはlvalueで初期化できる
     int & l_ref = lvalue ;
 
     // OK、rvalueリファレンスはrvalueで初期化できる

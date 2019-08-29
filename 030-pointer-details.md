@@ -622,7 +622,6 @@ int main()
 確かめてみよう。
 
 ~~~cpp
-
 struct Object
 {
     int x = 123 ;

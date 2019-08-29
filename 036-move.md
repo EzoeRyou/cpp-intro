@@ -204,7 +204,7 @@ public :
 
     // コピーコンストラクター
     dynamic_array( const dynamic_array & r ) ;
-}
+} ;
 ~~~
 
 このクラスのコピーコンストラクターの定義は以下のように書ける。

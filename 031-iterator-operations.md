@@ -364,7 +364,7 @@ void f( OutputIterator i, typename OutputIterator::value_type v )
 template < typename OutputIterator >
 void f( OutputIterator i )
 {
-    // 意味がない。
+    // 意味がない
     auto value = *i ;
 }
 ~~~
@@ -1398,7 +1398,7 @@ std::advance(i, 0) ;
 
 `n`が正数の場合は前方(`i+1`の方向)に、`n`が負数の場合は後方(`i-1`の方向)に、それぞれ`n`回移動させる。
 
-`advance(i,n)`はi自体が書き換わる。
+`advance(i,n)`は`i`自体が書き換わる。
 
 ~~~cpp
 i ; // n番目を指す

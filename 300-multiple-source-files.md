@@ -434,7 +434,7 @@ inline void print_int( int x )
 #include "library.h"
 ~~~
 
-`inline`はODRを例外的に回避できるとは言え、強い制約がある。
+`inline`はODRを例外的に回避できるとはいえ、強い制約がある。
 
 1. 異なる翻訳単位に限る
 

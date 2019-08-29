@@ -237,7 +237,7 @@ int main()
     // constの付いている型のオブジェクト
     const int x = 0 ;
 
-    // エラー、constがない。
+    // エラー、constがない
     int & ref = x ;
 
     // OK、constが付いている
