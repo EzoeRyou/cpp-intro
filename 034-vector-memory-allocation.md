@@ -618,7 +618,7 @@ int main()
 
 `sz == size()`の場合は、どちらの`if`文の条件にも引っかからないので、何もしない。
 
-`size(sz, value)`は、追加の引数を取るほか、`construct( iter )`の部分が`constrcut( iter, value )`に変わるだけだ。
+`size(sz, value)`は、追加の引数を取るほか、`construct( iter )`の部分が`construct( iter, value )`に変わるだけだ。
 
 ~~~cpp
 void resize( size_type sz, const_reference value )
