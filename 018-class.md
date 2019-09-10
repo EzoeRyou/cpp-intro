@@ -159,7 +159,7 @@ int main()
 ~~~cpp
 struct S
 {
-    // これは変数ではない。
+    // これは変数ではない
     int data ;
 } ;
 ~~~

@@ -561,7 +561,7 @@ class vector
 {
 public :
     using allocator_type = Allocator ;
-}
+} ;
 ~~~
 
 `size_type`は要素数を表現する型だ。

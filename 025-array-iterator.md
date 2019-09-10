@@ -469,7 +469,7 @@ int main()
     std::cout << ++i ;  // 1
     // 後置
     std::cout << i++ ;  // 1
-    std::cout << i      // 2
+    std::cout << i ;    // 2
 }
 ~~~
 

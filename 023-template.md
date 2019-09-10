@@ -39,7 +39,7 @@ struct array_double_1
     double storage[1] ;
     double & operator []( std::size_t i )
     { return storage[i] ; }
-}
+} ;
 
 // array_double_2, array_double_3, ...
 ~~~

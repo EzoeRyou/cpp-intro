@@ -28,7 +28,7 @@ reference array::operator [] ( std::size_t i )
     if ( i >= size() )
     {
         // エラー検出
-        // しかし何をreturnすればいいのだろう。
+        // しかし何をreturnすればいいのだろう
     }
 
     return storage[i] ;
