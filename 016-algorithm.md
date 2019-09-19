@@ -60,7 +60,7 @@ auto print_all = []( auto first, auto last )
         // 重要な処理
         std::cout << *iter ;
     }
-} ; 
+} ;
 
 int main()
 {
@@ -259,7 +259,7 @@ int main()
     // 引数を出力する関数
     auto print = [](auto & value){ std::cout << value << ", "s ; } ;
 
-    // 2, 4, 6, 8, 10, 
+    // 2, 4, 6, 8, 10,
     std::for_each( std::begin(v), std::end(v), print ) ;
 }
 ~~~
@@ -419,7 +419,7 @@ int main()
 
     if ( pos != std::end(v) )
     {
-        std::cout << "Found."s ; 
+        std::cout << "Found."s ;
     }
     else
     {
@@ -546,7 +546,7 @@ int main()
 {
     int value = 123 ;
 
-    auto f = [&]{ ++value ; } ; 
+    auto f = [&]{ ++value ; } ;
 
     f() ;
     std::cout << value ; // 124
@@ -593,7 +593,7 @@ auto count = []( auto first, auto last, auto value )
     for ( auto i = first ; i != last ; ++i )
     {
         if ( *i == value )
-            ++counter ;  
+            ++counter ;
     }
     return counter ;
 } ;
@@ -631,7 +631,7 @@ auto count = []( auto first, auto last, auto pred )
     for ( auto i = first ; i != last ; ++i )
     {
         if ( pred(*i) != false )
-            ++counter ;  
+            ++counter ;
     }
     return counter ;
 } ;
@@ -796,7 +796,7 @@ int main()
     bool a = std::search( std::begin(v1), std::end(v1), std::begin(v2), std::end(v2) ) ;
 
     std::vector<int> v3 = {1,3,5} ;
-    // false 
+    // false
     bool a = std::search( std::begin(v1), std::end(v1), std::begin(v3), std::end(v3) ) ;
 }
 ~~~
@@ -848,13 +848,12 @@ int main()
 {
     std::vector<int> source = {1,2,3,4,5} ;
     std::vector<int> destination(5) ;
-    // 要素をそれぞれコピー 
+    // 要素をそれぞれコピー
    destination[0] = source[0] ;
    destination[1] = source[1] ;
    destination[2] = source[2] ;
    destination[3] = source[3] ;
    destination[4] = source[4] ;
-   
 }
 ~~~
 
@@ -884,11 +883,11 @@ int main()
 {
     std::vector<int> source = {1,2,3,4,5} ;
     std::vector<int> destination(5) ;
-    
+
     auto first = std::begin(source) ;
     auto last = std::end(source) ;
     auto result = std::begin(destination) ;
-    
+
     auto returned = std::copy( first, last, result ) ;
 
     // true
@@ -961,7 +960,7 @@ int main()
         [](auto x){ return x % 3 ; } ) ;
     // cは{1,2,0,1,2}
 
-    
+
     std::vector<bool> d(5) ;
     std::transform( std::begin(a), std::end(a), std::begin(d),
         [](auto x){ return x < 3 ; } ) ;
@@ -1146,7 +1145,6 @@ int main()
     // "134"
     std::for_each( std::begin(w), last2,
         [](auto x) { std::cout << x ; } ) ;
-   
 }
 ~~~
 
