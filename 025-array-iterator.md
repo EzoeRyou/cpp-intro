@@ -368,7 +368,6 @@ auto first = a.begin() ;
 --first ;
 *first ; // 最初の前の要素？
 auto last = a.end() ;
-++last ; //
 *last ; // 最後の次の要素？
 ~~~
 
