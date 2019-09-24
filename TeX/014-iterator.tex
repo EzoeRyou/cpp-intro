@@ -1,0 +1,534 @@
+\hyperchapter{ch14}{イテレーターの基礎}{イテレーターの基礎}
+
+\texttt{vector}の章では\texttt{vector}の要素にアクセスする方法としてメンバー関数\texttt{at(i)}を学んだ。\texttt{at(i)}は\texttt{i}番目の要素にアクセスできる。ただし最初の要素は0番目だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    int x = v.at(2) ; // 3
+    v.at(2) = 0 ;
+    // vは{1,2,0,4,5}
+}
+\end{lstlisting}
+
+この章では\texttt{vector}\index{vector@\texttt{vector}}の要素にアクセスする方法としてイテレーター（iterator）\index{いてれた@イテレーター}を学ぶ。
+
+\hypersection{ch1401}{イテレーターの取得方法}
+\index{いてれた@イテレーター!しゅとく@取得}
+
+イテレーターは\texttt{std::begin(v)}\index{begin@\texttt{begin}}で取得する。\texttt{v}は\texttt{vector}の変数だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    auto i = std::begin(v) ;
+}
+\end{lstlisting}
+
+\hypersection{ch1402}{イテレーターの参照する要素に対する読み書き}
+\index{いてれた@イテレーター!さんしよう@参照}
+
+イテレーターは\texttt{vector}の先頭の要素を指し示している。イテレーターの指し示す要素を参照するには\,\texttt{*}\,\index{\protect{*}@\texttt{\protect{*}}}\index{いてれた@イテレーター!*@\texttt{*}}を使う。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    auto i = std::begin(v) ;
+
+    int x = *i ; // 1
+
+    *i = 0 ;
+    // vは{0,2,3,4,5} 
+}
+\end{lstlisting}
+
+\texttt{*i}を読み込むと指し示す要素の値を読むことができ、\texttt{*i}に代入をすると指し示す要素の値を変えることができる。
+
+\hypersection{ch1403}{イテレーターの参照する要素を変更}
+
+現在指している要素の次の要素を指すように変更するには\,\texttt{++}\,\index{\protect{++}@\texttt{\protect{++}}}\index{いてれた@イテレーター!++@\texttt{++}}を使う。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    auto i = std::begin(v) ;
+
+    *i ; // 1
+    ++i ;
+    *i ; // 2
+    ++i ;
+    *i ; // 3
+}
+\end{lstlisting}
+
+現在指している要素の前の要素を指すように変更するには\,\texttt{{-}{-}}\,\index{{-}{-}@\texttt{{-}{-}}}\index{いてれた@イテレーター!{-}{-}@\texttt{{-}{-}}}を使う。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+(@\ifTombow\pagebreak\fi@)
+    auto i = std::begin(v) ;
+
+    *i ; // 1
+    ++i ;
+    *i ; // 2
+    --i ;
+    *i ; // 1
+}
+\end{lstlisting}
+
+\texttt{vector}の全要素を先頭からイテレーターでアクセスするには、要素数だけ\,\texttt{++i}すればよいことになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    auto iter = std::begin(v) ;
+
+    for ( std::size_t i = 0 ; i != std::size(v) ; ++i, ++iter )
+    {
+        std::cout << *iter << "\n"s ;
+    }
+}
+\end{lstlisting}
+
+これは動く。ただしもっとマシな方法がある。イテレーターの比較だ。
+
+\hypersection{ch1404}{イテレーターの比較}
+\index{いてれた@イテレーター!ひかく@比較}
+
+イテレーターは比較できる。同じ順番の要素を指すイテレーターは等しく、そうではないイテレーターは等しくない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    auto x = std::begin(v) ;
+    auto y = x ;
+
+    // x, yは0番目の要素を指す
+
+    bool b1 = (x == y) ; // true
+    bool b2 = (x != y) ; // false
+
+    ++x ; // xは1番目の要素を指す。
+
+    bool b3 = (x == y) ; // false
+    bool b4 = (x != y) ; // true
+}
+\end{lstlisting}
+
+\hypersection{ch1405}{最後の次の要素へのイテレーター}
+
+\texttt{std::begin(v)}\index{begin@\texttt{begin}}は\texttt{vector}の変数\texttt{v}の最初の要素を指し示すイテレーターを取得する。
+
+\texttt{std::end(v)}\index{end@\texttt{end}}は\texttt{vector}の変数\texttt{v}の最後の次の要素を指し示すイテレーターを取得する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = { 1,2,3,4,5 };
+
+    // 最後の次の要素を指し示すイテレーター
+    auto i = std::end(v) ;
+}
+\end{lstlisting}
+
+最後の次の要素とは何か。ある\texttt{vector<int>}\,の変数の中身が\,\texttt{\{1,2,3,4,5\}}\,のとき、最初の0番目の要素の値は\texttt{1}だ。最後の4番目の要素の値は\texttt{5}だ。最後の次の要素とは、値が\texttt{5}の最後の要素の次の要素だ。そのような要素は実際には存在しないが、\texttt{std::end}は概念として最後の次の要素を返す。
+
+最後の次の要素を指し示すイテレーターに対して、\texttt{*}\,で要素にアクセスを試みるとエラーになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    auto i = std::end(v) ;
+
+    *i ; // エラー
+}
+\end{lstlisting}
+
+最後の次の要素を\,\texttt{++}\,しようとするとエラーになる。\texttt{{-}{-}}\,することはできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    auto i = std::end(v) ;
+
+    --i ;   // 最後の要素を指す
+    *i ;    // 5
+    ++i ;   // 最後の次の要素を指す
+    *i ;    // エラー
+}
+\end{lstlisting}
+
+実際には存在しない最後の次の要素を指し示すイテレーターは何の役に立つのか。答えはイテレーターの比較だ。
+
+実際には存在しない最後の次の要素を指すイテレーターに\,\texttt{'*'}\,を使って要素にアクセスするのはエラーだが、イテレーター同士の比較はできる。すでに説明したように、イテレーターの比較は同じ要素を指す場合は\texttt{true}、違う要素を指す場合は\texttt{false}になる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+
+    // xは最初の要素を指す
+    auto x = std::begin(v) ;
+    // yは最後の次の要素を指す
+    auto y = std::end(v) ;
+
+
+    x == y ; // false
+    ++x ; // xは最初の次の要素を指す
+    x == y ; // false
+    ++x ; // xは最後の要素を指す
+    x == y ; // false
+    ++x ; // xは最後の次の要素を指す
+    x == y ; // true
+}
+\end{lstlisting}
+
+\texttt{std::end}で取得する最後の次の要素を指すイテレーターと比較することで、イテレーターが最後の次の要素を指し示す状態に到達したことを判定できる。
+
+ということは、\texttt{vector}の要素を先頭から最後まで順番に出力するプログラムは、以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    for ( auto iter = std::begin(v), last = std::end(v) ;
+          iter != last ; ++iter )
+    {
+        std::cout << *iter << "\n"s ;
+    }
+}
+\end{lstlisting}
+
+\hypersection{ch1406}{なんでもイテレーター}
+
+イテレーターというのは要素にアクセスする回りくどくて面倒な方法に見える。イテレーターという面倒なものを使わずに、\texttt{vector::at(i)}で\texttt{i}番目の要素にアクセスする方が楽ではないか。そう考える読者もいるだろう。イテレーターの利点はその汎用性\index{いてれた@イテレーター!はんようせい@汎用性}にある。イテレーターの作法に従うことで、さまざまな処理が同じコードで書けるようになるのだ。
+
+たとえば、\texttt{vector}の要素を先頭から順番に出力する処理を振り返ってみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    for ( std::size_t i = 0 ; i != std::size(v) ; ++i )
+    {
+        std::cout << v.at(i) << "\n"s ;
+    }
+}
+\end{lstlisting}
+
+このコードは\texttt{vector}にしか使えないコードだ。イテレーターで書き直してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    for ( auto iter = std::begin(v), last = std::end(v) ;
+          iter != last ; ++iter )
+    {
+        std::cout << *iter << "\n"s ;
+    }
+}
+\end{lstlisting}
+
+そして、この要素を先頭から出力する処理を関数にしてみよう。
+
+\begin{lstlisting}[language={C++}]
+auto output_all = []( auto first, auto last )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        std::cout << *iter << "\n"s ;
+    }
+} ;
+
+(@\ifTombow\pagebreak\fi@)
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    output_all( std::begin(v), std::end(v) ) ;
+}
+\end{lstlisting}
+
+この\texttt{関数output\_all}は\texttt{vector}以外のイテレーターにも対応している。C++にはさまざまなイテレーターがある。例えば標準入力から値を受け取るイテレーターがある。さっそく使ってみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::istream_iterator<int> first( std::cin ), last ;
+
+    output_all( first, last ) ;
+}
+\end{lstlisting}
+
+このプログラムは標準入力から\texttt{int}型の値を受け取り、それをそのまま標準出力する。
+
+C++にはほかにも、カレントディレクトリーにあるファイルの一覧を取得するイテレーターがある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::filesystem::directory_iterator first("./"), last ;
+
+    output_all( first, last ) ;
+}
+\end{lstlisting}
+
+\texttt{関数output\_all}のコードは何も変えていないのに、さまざまなイテレーターに対応できる。イテレーターというお作法にのっとることで、さまざまな処理が可能になるのだ。
+
+これは出力にも言えることだ。\texttt{関数output\_all}は\texttt{std::cout}に出力していた。これをイテレーターに対する書き込みに変えてみよう。
+
+\begin{lstlisting}[language={C++}]
+auto output_all = []( auto first, auto last, auto output_iter )
+{
+    for ( auto iter = first ; iter != last ; ++iter, ++output_iter )
+    {
+        *output_iter = *iter ;
+    }
+} ;
+\end{lstlisting}
+
+書き換えた\texttt{関数output\_all}は新しく\texttt{output\_iter}という引数を取る。これはイテレーターだ。\texttt{std::cout}に出力する代わりに、このイテレーターに書き込むように変更している。
+
+こうすることによって、出力にもさまざまなイテレーターが使える。
+
+標準出力に出力するイテレーターがある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    
+    output_all( std::begin(v), std::end(v),
+                std::ostream_iterator<int>(std::cout) ) ;
+}
+\end{lstlisting}
+
+\texttt{vector}も出力先にできる。つまり\texttt{vector}のコピーだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> source = {1,2,3,4,5} ;
+    std::vector<int> destination(5) ;
+
+    output_all( std::begin(source), std::end(source), std::begin( destination ) ) ;
+}
+\end{lstlisting}
+
+\texttt{destination(5)}というのは、\texttt{vector}にあらかじめ5個の要素を入れておくという意味だ。あらかじめ入っている要素の値は\texttt{int}の場合ゼロになる。
+
+このほかにもイテレーターはさまざまある。自分でイテレーターを作ることもできる。そして、\texttt{関数output\_all}はイテレーターにさえ対応していればさまざまな処理にコードを1行たりとも変えずに使えるのだ。
+
+\hypersection{ch1407}{イテレーターと添字の範囲}
+\index{いてれた@イテレーター!はんい@範囲}
+
+イテレーターは順序のある値の集合を表現するために、最初の要素への参照と、最後の次の要素への参照のペアを用いる。
+
+たとえば、\texttt{\{1,2,3,4,5\}}\,という順序の値の集合があった場合、イテレーターは最初の要素である\texttt{1}と最後の1つ次の要素である5の次の架空の要素を指し示す。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    auto i = std::begin(v) ;
+    auto j = std::end(v) ;
+}
+\end{lstlisting}
+
+このようにして範囲を表現することを、\texttt{半閉鎖（half-closed）}\index{はんへいさ@半閉鎖}とか、\texttt{[i,j)}などと表現する。
+
+この状態から\,\texttt{\{2,3,4,5\}}\,のような値の集合を表現したい場合、イテレーター\texttt{i}をインクリメントすればよい。
+
+\begin{lstlisting}[language={C++}]
+++i ;
+\end{lstlisting}
+
+これで\texttt{[i,j)}は\,\texttt{\{2,3,4,5\}}\,になった。
+
+このような範囲の表現方法に疑問を感じる読者もいるだろう。なぜ最後の次の要素という本来存在しない架空の要素をあたかも参照しているかのようなイテレーターが必要なのか。最後の要素を参照するのではだめなのか。
+
+そのような範囲の表現方法は、\texttt{閉鎖（closed）}\index{へいさ@閉鎖}とか\texttt{[i,j]}などと表現する。
+
+実はこの方法は\texttt{vector}の要素の順番を指定する方法と同じなのだ。
+
+\texttt{\{1,2,3,4,5\}}\,と5個の順序ある要素からなる\texttt{vector}では、最初の要素は0番目で、最後の要素は4番目だ。1番目から5番目ではない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    v.at(0) ; // 最初の要素: 1
+    v.at(4) ; // 最後の要素: 5
+}
+\end{lstlisting}
+
+ではなぜなのか。なぜ\texttt{vector}では\(n\)個の要素の順番を0番目から\(n-1\)番目として表現するのか。
+
+実はC++に限らず、現在使われているすべてのプログラミングはインデックスを\texttt{0}から始めている。かつてはインデックスを\texttt{1}から始める言語も存在したが、そのような言語はいまは使われていない。
+
+この疑問はエドガー・ダイクストラ（Edsger Wybe Dijkstra）\index{Dijkstra, Edsger Wybe}が``Why numbering should start at zero''（EWD831）で解説している。
+
+2, 3, \ldots, 12の範囲の自然数を表現するのに、慣習的に以下の4つの表記がある。
+\begin{gather*}
+\textrm{a)}\quad 2 \le i < 13\\
+\textrm{b)}\quad 1 < i \le 12\\
+\textrm{c)}\quad 2 \le i \le 12\\
+\textrm{d)}\quad 1 < i < 13
+\end{gather*}
+
+C++のイテレーターはa)を元にしている。
+
+この4つのうち、a)とb)は上限から下限を引くと、範囲にある自然数の個数である11になる。
+
+この性質はとても便利なのでC++でも、イテレーター同士の引き算ができるようになっている。イテレーター\texttt{i}, \texttt{j}\,(\(i \le j\))\,で\texttt{j - i}をした結果はイテレーターの範囲の要素の個数だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {2,3,4,5,6,7,8,9,10,11,12} ;
+
+    auto i = std::begin(v) ;
+    auto j = std::end(v) ;
+
+    // 11
+    // イテレーターの範囲の要素の個数
+    std::cout << j - i << "\n"s ;
+
+    ++i ; // 先頭の次の要素を指す
+    // 10
+    std::cout << j - i ; 
+}
+\end{lstlisting}
+
+a)とb)はどちらがいいのだろうか。b)を元にイテレーターを設計すると以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+// b)案を採用する場合
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 最初の1つ前の架空の要素を指す
+    auto i = std::begin(v) ;
+    // 最後の要素を指す
+    auto j = std::end(v) ;
+
+    // 最初の要素を指すようにする。
+    ++i ;
+
+    // iが最後の要素を指すとループを抜ける
+    for ( ; i != j ; ++i )
+    {
+        std::cout << *i ;
+    }
+    // 最後の要素を処理する
+    std::cout << *i ;
+    
+
+}
+\end{lstlisting}
+
+a)の方がよい。
+
+\begin{lstlisting}[language={C++}]
+// a)案を採用する場合
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 最初の要素を指す
+    auto i = std::begin(v) ;
+(@\ifTombow\pagebreak\fi@)
+    // 最後の次の要素を指す
+    auto j = std::end(v) ;
+
+    // iが最後の次の要素を指すとループを抜ける
+    for ( ; i != j ; ++i )
+    {
+        std::cout << *i ;
+    }
+
+    // すべての要素について処理を終えている
+}
+\end{lstlisting}
+
+b)案では末尾から先頭まで後ろ向きに要素を一巡する操作はやりやすいが、実際には先頭から末尾まで一巡する操作の方が多い。
+
+C++では要素の順番を数値で指し示すとき、最初の要素は0番目であり、次の要素は1番目であり、\(N\)個目の要素は\(N-1\)番目になっている。この数値で指し示すことを\texttt{添字}\index{そえじ@添字}とか\texttt{インデックス}\index{いんでつくす@インデックス}というがなぜ最初の要素を1番目にしないのか。
+
+C++ではさまざまなところでa)を採用している。これを添字に適用すると、最初の要素が1番目から始まる場合、\(N\)個の要素を参照する添字の範囲は\(1 \le i < N+1\)になる。そのような場合、以下のようなコードになる。
+
+\begin{lstlisting}[language={C++}]
+// 最初の要素が1番目の場合
+int main()
+{
+    // 5個の要素を持つvector
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // iの値の範囲は1から5まで
+    for ( std::size_t i = 1 ; i < 6 ; ++i )
+    {
+        std::cout << v.at(i) ;
+    }    
+}
+\end{lstlisting}
+
+要素数は5個なのに\texttt{6}が出てくる。最初の要素が0番目の場合、\(N\)個の要素を参照する添字の範囲は\(0 \le i < N\)になる。
+
+\begin{lstlisting}[language={C++}]
+// 最初の要素が0番目の場合
+int main()
+{
+    // 5個の要素を持つvector
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // iの値の範囲は0から5まで
+    for ( std::size_t i = 0 ; i < 5 ; ++i )
+    {
+        std::cout << v.at(i) ;
+    }    
+}
+\end{lstlisting}
+
+一貫性のために最初の要素は0番目となっている。
+
+また、空の集合にも対応できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 空
+    std::vector<int> v ;
+
+    // 空なので何も出力されない
+    for (   auto i = std::begin(v), j = std::end(v) ;
+            i != j ; ++i )
+    {
+        std::cout << *i ;
+    }
+}
+\end{lstlisting}
+
+変数\texttt{v}は空なので\texttt{i != j}は\texttt{false}となり、\texttt{for}文の中の文は一度も実行されない。

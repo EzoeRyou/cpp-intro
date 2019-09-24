@@ -1,0 +1,719 @@
+\hyperchapter{ch03}{C++ヒッチハイクガイド}{C++ヒッチハイクガイド}
+
+プログラミング言語の個々の機能の解説を理解するためには、まず言語の全体像を掴まなければならない。この章ではC++のさまざまなコードをひと通り観光していく。ここではコードの詳細な解説はしない。
+
+\hypersection{ch0301}{最小のコード}
+
+以下はC++の最小のコードだ。
+
+\begin{lstlisting}[language={C++}]
+int main(){}
+\end{lstlisting}
+
+暗号のようなコードで訳がわからないが、これが最小のコードだ。\texttt{main}というのは\texttt{main関数}\index{main@\texttt{main}関数}のことだ。C++ではプログラムの実行は\texttt{main}関数から始まる。
+
+ソースコードにコメントを記述して、もう少しわかりやすく書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+int     // 関数の戻り値の型
+main    // 関数名
+()      // 関数の引数
+{       // 関数の始まり
+        // 実行される処理
+}       // 関数の終わり
+\end{lstlisting}
+
+\texttt{//}\,\index{//@\texttt{//}}から行末まではコメント\index{こめんと@コメント}だ。コメントには好きなことを書くことができる。
+
+このコードと1つ前のコードは、コメントの有無を別にすれば何の違いもない。このコードで使っている、\texttt{int}とか\texttt{main}とか記号文字の1つ1つをトークン（token）\index{とくん@トークン}と呼ぶ。C++ではトークンの間に空白文字や改行文字をいくら使ってもよい。
+
+なので、
+\begin{lstlisting}[language={C++}]
+int main(){ }
+\end{lstlisting}
+と書くこともできるし、
+\begin{lstlisting}[language={C++}]
+int    main    (    )    {   }
+\end{lstlisting}
+と書くこともできるし、紙に印刷する都合上とても読みづらくなるかもしれないが
+\begin{lstlisting}[language={C++}]
+int
+main
+(
+)
+{
+}
+\end{lstlisting}
+と書くこともできる。
+
+ただし、トークンの途中で空白文字や改行文字を使うことはできない。以下のコードは間違っている。
+
+\begin{lstlisting}[language={C++}]
+i
+nt ma in(){}
+\end{lstlisting}
+
+\hypersection{ch0302}{標準出力}
+
+\begin{lstlisting}[language={C++}]
+// helloと改行を出力するプログラム
+int main()
+{
+    std::cout << "hello"s ;
+}
+\end{lstlisting}
+
+標準出力\index{ひようじゆんしゆつりよく@標準出力}はプログラムの基本だ。C++で標準出力する方法はいくつもあるが、\texttt{<iostream>}\,ライブラリ\index{iostream@\texttt{iostream}}を利用するものが最も簡単だ。
+
+\texttt{std::cout}\index{cout@\texttt{cout}}は標準出力を使うためのライブラリだ。
+
+\texttt{{<}{<}}\,\index{{<}{<}@\texttt{{<}{<}}}は\texttt{operator {<}{<}}という演算子だ。C++では演算子にも名前が付いていて、例えば\texttt{+}は\texttt{operator +}となる。\texttt{{<}{<}}\,も演算子の一種だ。
+
+\texttt{"hello"s}というのは文字列\index{もじれつ@文字列}で、二重引用符で囲まれた中の文字列が標準出力に出力される。
+
+セミコロン\texttt{;}\index{;@\texttt{;}}\index{せみころん@セミコロン}は文の区切り文字\index{くぎりもじ@区切り文字}だ。C++では文の区切りは明示的にセミコロンを書く必要がある。ほかの言語では改行文字を文脈から判断して文の区切りとみなすこともあるが、C++では明示的に文の区切り文字としてセミコロンを書かなければならない。
+
+セミコロンを書き忘れるとエラーとなる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // エラー！　セミコロンがない
+    std::cout << "error"s
+}
+\end{lstlisting}
+
+複数の文を書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << "one "s ;
+    std::cout << "two "s ;
+    std::cout << "three "s ;
+}
+\end{lstlisting}
+
+C++はほかの多くの言語と同じように、逐次実行される。つまり、コードは書いた順番に実行される。そして標準出力のような外部への副作用は、実行された順番で出力される。このコードを実行した結果は以下のとおり。
+
+\begin{lstlisting}[style=terminal]
+one two three 
+\end{lstlisting}
+
+\texttt{"three two one "}\,や\,\texttt{"two one three "}\,のような出力結果にはならない。
+
+C++を含む多くの言語で\texttt{a + b + c}と書けるように、\texttt{operator {<}{<}}も\texttt{a {<}{<} b {<}{<} c}と書ける。\texttt{operator {<}{<}}で標準出力をするには、左端は\texttt{std::cout}でなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << "aaa"s << "bbb"s << "ccc"s ;
+}
+\end{lstlisting}
+
+出力は\texttt{aaabbbccc}となる。
+
+\clearpage
+\hypersection{ch0303}{文字列}
+
+二重引用符で囲まれた文字列を、文字どおり\texttt{文字列}\index{もじれつ@文字列}という。文字列には末尾に\texttt{s}\index{もじれつ@文字列!s@\texttt{s}}が付くものと付かないものがある。これには違いがあるのだが、わからないうちは\texttt{s}を付けておいた方が便利だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // これは文字列
+    std::cout << "hello"s ;
+    // これも文字列、 ただし不便
+    std::cout << "hello" ;
+}
+\end{lstlisting}
+
+文字列リテラルの中にバックスラッシュ\index{ばつくすらすしゆ@バックスラッシュ}\index{{\textbackslash}@\texttt{{\textbackslash}}}を書くと、エスケープシーケンスとして扱われる。最もよく使われるのは改行文字\index{かいぎようもじ@改行文字}を表す\,\texttt{{\textbackslash}n}\index{{\textbackslash}n@{\texttt{{\textbackslash}n}}}だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << "aaa\nbbb\nccc"s ;
+}
+\end{lstlisting}
+
+これは以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+aaa
+bbb
+ccc
+\end{lstlisting}
+
+バックスラッシュを文字列で使いたい場合は\,\texttt{{\textbackslash}}\,と書かなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << "\\n is a new-line.\n"s ;
+}
+\end{lstlisting}
+
+文字列は演算子\texttt{operator +}\index{\protect{+}@\texttt{\protect{+}}}で「足す」ことができる。「文字列を足す」というのは、「文字列を結合する」\index{もじれつ@文字列!けつごう@結合}という意味だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << "hello"s + "world"s ;
+}
+\end{lstlisting}
+
+\hypersection{ch0304}{整数と浮動小数点数}
+
+\texttt{iostream}は文字列のほかにも、整数\index{せいすう@整数}や浮動小数点数\index{ふどうしようすうてんすう@浮動小数点数}を出力できる。さっそく試してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout
+        << "Integer: "s << 42 << "\n"s
+        << "Floating Point: "s << 3.14 ;
+}
+\end{lstlisting}
+
+\texttt{-123}や\texttt{0}や\texttt{123}といった数値を整数という。\texttt{3.14}のような数値を浮動小数点数という。
+
+数値を扱えるのだから、計算をしてみたいところだ。C++は整数同士の演算子として、四則演算（\,\texttt{+-*/}\,）\index{しそくえんざん@四則演算}や剰余（\,\texttt{\%}\,）\index{じようよ@剰余}をサポートしている。
+\index{\protect{+}@\texttt{\protect{+}}}
+\index{\protect{-}@\texttt{\protect{-}}}
+\index{\protect{*}@\texttt{\protect{*}}}
+\index{/@\texttt{/}}
+\index{\%@\texttt{\%}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout
+        << 3 + 5 << " "s << 3 - 5 << " "s
+        << 3 * 5 << " "s << 3 / 5 << " "s
+        << 3 % 5 ;
+}
+\end{lstlisting}
+
+演算子は組み合わせて使うこともできる。その場合、演算子\,\texttt{*/\%}\,は演算子\,\texttt{+-}\,よりも優先される。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 7
+    std::cout << 1 + 2 * 3 ;
+}
+\end{lstlisting}
+
+この場合、まず\texttt{2*3}が計算され6となり、\texttt{1+6}が計算され\texttt{7}となる。
+
+\texttt{1+2}の方を先に計算したい場合、括弧\texttt{()}で囲むことにより、計算の優先度を変えることができる。
+\index{\protect{()}@\texttt{\protect{()}}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 9
+    std::cout << (1 + 2) * 3 ;
+}
+\end{lstlisting}
+
+これは\texttt{1+2}が先に計算され\texttt{3}となり、\texttt{3*3}が計算され\texttt{9}となる。
+
+浮動小数点数同士でも四則演算ができる。剰余はできない。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout
+        << 3.5 + 7.11 << " "s << 3.5 - 7.11 << " "s
+        << 3.5 * 7.11 << " "s << 3.5 / 7.11 ;
+}
+\end{lstlisting}
+
+では整数と浮動小数点数を演算した場合どうなるのだろう。さっそく試してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << 1 + 0.1 ;
+}
+\end{lstlisting}
+
+結果は\texttt{1.1}だ。整数と浮動小数点数を演算した結果は浮動小数点数になる。
+
+そういえばC++には文字列もあるのだった。文字列と文字列は足すことができる。数値と数値も足すことができる。では数値と文字列を足すとどうなるのだろう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << 1 + "234"s ;
+}
+\end{lstlisting}
+
+この結果はエラーになる。
+
+いや待て、C++には末尾に\texttt{s}を付けない文字列もあるのだった。これも試してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << 1 + "234" ;
+}
+\end{lstlisting}
+
+結果はなんと\texttt{34}になるではないか。C++では謎の数学により\,\texttt{1 + "234" = "34"}\,であることが判明した。この謎はいずれ解き明かすとして、いまは文字列には必ず末尾に\texttt{s}を付けることにしよう。その方が安全だ。
+
+\clearpage
+\hypersection{ch0305}{変数(variable)}
+
+さあどんどんプログラミング言語によくある機能を見ていこう。次は変数\index{へんすう@変数}だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 整数の変数
+    auto answer = 42 ;
+    std::cout << answer << "\n"s ;
+    // 浮動小数点数の変数
+    auto pi = 3.14 ;
+    std::cout << pi << "\n"s ;
+
+    // 文字列の変数
+    auto question = "Life, The Universe, and Everything."s ;
+    std::cout << question ;
+}
+\end{lstlisting}
+
+変数はキーワード\texttt{auto}\index{auto@\texttt{auto}}に続いて変数名を書き、\texttt{=}\,に続いて値を書くことで宣言できる。変数の宣言\index{へんすう@変数!せんげん@宣言}は文なので、文末にはセミコロンが必要だ。
+
+\begin{lstlisting}[style=grammar]
+auto 変数名 = 値 ;
+\end{lstlisting}
+
+\texttt{変数名}\index{へんすうめい@変数名}はキーワード、アンダースコア（\,\texttt{\_}\,）で始まる名前、アンダースコア2つ（\,\texttt{\_\_}\,）を含む名前以外は自由に名付けることができる。
+
+変数の最初の値は、\texttt{= 値}の代わりに\texttt{(値)}や\,\texttt{\{値\}}\,と書いてもよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto a = 1 ;
+    auto b(2) ;
+    auto c{3} ;
+}
+\end{lstlisting}
+
+この\,\texttt{=}, \texttt{()}, \texttt{\{\}}\,による変数の初期値の指定を、\texttt{初期化}\index{しよきか@初期化}\index{へんすう@変数!しよきか@初期化}という。
+
+変数は使う前に宣言しなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // エラー、 名前xは宣言されていない
+    std::cout << x ;
+    auto x = 123 ;
+}
+\end{lstlisting}
+
+変数の値は初期化したあとにも演算子\,\texttt{=}\,\index{=@\texttt{=}}で変更できる。これを\texttt{代入}\index{だいにゆう@代入}という。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 変数の宣言
+    auto x
+    // 初期化
+    = 123 ;
+
+    // 123
+    std::cout << x ;
+
+    // 代入
+    x = 456 ;
+
+    // 456
+    std::cout << x ;
+
+    // もう一度代入
+    x = 789 ;
+    // 789
+    std::cout << x ;
+}
+\end{lstlisting}
+
+代入演算子\index{だいにゆうえんざんし@代入演算子}\,\texttt{operator =}\,\index{=@\texttt{=}}は左辺に変数名を、右辺に代入する値を書く。面白いこととして、右辺には代入する変数名そのものを書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 10 ;
+    x = x + 5 ;
+
+    // 15
+    std::cout << x ;
+}
+\end{lstlisting}
+
+\texttt{operator =}\,は「代入」という意味で、「等号」という意味ではないからだ。\texttt{x=x+5}は、「\texttt{x}と\texttt{x+5}は等しい」という独創的な数学上の定義ではなく、「変数\texttt{x}に代入前の変数\texttt{x}の値に5を加えた数を代入する」という意味だ。
+
+変数のいまの値に対して演算した結果を変数に代入するという処理はとてもよく使うので、C++には\texttt{x = x + a}と同じ意味で使える演算子、\texttt{operator +=}\,もある。
+\index{\protect{+=}@\texttt{\protect{+=}}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 1 ;
+    // x = x + 5と同じ
+    x += 5 ;
+}
+\end{lstlisting}
+
+\texttt{operator +=}\,と同様に、\texttt{operator -=}, \texttt{operator *=}, \texttt{operator /=}, \texttt{operator \%=}\,もある。
+\index{-=@\texttt{-=}}\index{\protect{*=}@\texttt{\protect{*=}}}\index{/=@\texttt{/=}}\index{\%=@\texttt{\%=}}
+
+C++の変数は、専門用語を使うと「静的型付け」になる。静的型付けと対比されるのが「動的型付け」だ。もっと難しく書くと、動的型付け言語の変数は、C++で言えば型情報付きの\texttt{void *}\,型の変数のような扱いを受ける。
+
+C++の変数には\texttt{型}\index{かた@型}\index{へんすう@変数!かた@型}がある。\texttt{型}というのは値の種類を表す情報のことだ。
+
+例えば、以下は変数が動的型付けの言語JavaScriptのコードだ。
+
+\begin{lstlisting}[language=JavaScript]
+var x = 1 ;
+x = "hello" ;
+x = 2 ;
+\end{lstlisting}
+
+JavaScriptではこのコードは正しい。変数\texttt{x}は数値型であり、文字列型に代わり、また数値型に戻る。
+
+C++ではこのようなコードは書けない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 1 ;
+    // エラー
+    x = "hello"s ;
+    x = 2 ;
+}
+\end{lstlisting}
+
+C++では、変数\texttt{x}は整数型であり、文字列型に変わることはない。整数型の変数に文字列型を代入しようとするとエラーとなる。
+
+C++では型に名前が付いている。整数型\index{せいすうがた@整数型}は\texttt{int}\index{int@\texttt{int}型}、浮動小数点数型\index{ふどうしようすうてんすうがた@浮動小数点数型}は\texttt{double}\index{double@\texttt{double}型}、文字列型\index{もじれつがた@文字列型}は\texttt{std::string}\index{string@\texttt{string}型}だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // iはint型
+    auto i = 123 ;
+    // dはdouble型
+    auto d = 1.23 ;
+    // sはstd::string型
+    auto s = "123"s ;
+}
+\end{lstlisting}
+
+実は変数の宣言で\texttt{auto}と書く代わりに、具体的な型を書いてもよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int i           = 123 ;
+    double d        = 1.23 ;
+    std::string s   = "123"s ;
+}
+\end{lstlisting}
+
+整数型（\texttt{int}）と浮動小数点数型（\texttt{double}）はそれぞれお互いの型の変数に代入できる。ただし、変数の型は変わらない。単に一方の型の値がもう一方の型の値に変換\index{かた@型!へんかん@変換}されるだけだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 浮動小数点数型を整数型に変換
+    int a = 3.14 ;
+    // 3
+    std::cout << a << "\n"s ;
+
+    // 整数型を浮動小数点数型に変換
+    double d = 123 ;
+    // 123
+    std::cout << d ;
+}
+\end{lstlisting}
+
+浮動小数点数型を整数型に変換すると、小数部が切り捨てられる。この場合、\texttt{3.14}の小数部\texttt{0.14}が切り捨てられ\texttt{3}となる。\texttt{0.9999}も小数部が切り捨てられ\texttt{0}になる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int i = 0.9999 ;
+    // 0
+    std::cout << i ;
+}
+\end{lstlisting}
+
+整数型を浮動小数点数型に変換すると、値を正確に表現できる場合はその値になる。正確に表現できない場合は近い値になる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    double d = 1234567890 ;
+    // 正確に表現できるかどうかわからない
+    std::cout << d ;
+}
+\end{lstlisting}
+
+整数型と浮動小数点数型の挙動についてはあとの章で詳しく解説する。また、これ以外にも型はいくらでもあるし、読者が新しい型を作り出すこともできる。これもあとの章で詳しく解説する。
+
+\hypersection{ch0306}{関数(function)}
+
+「変数ぐらい知っている。さっさと教えてもらいたい。どうせC++の関数は書きづらいのだろう」と考える読者の皆さん、お待たせしました。こちらがC++の関数\index{かんすう@関数}でございます。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 関数
+    auto print = [](auto x)
+    {
+        std::cout << x << "\n"s ;
+    } ;
+
+    // 関数呼び出し
+    print(123) ;
+    print(3.14) ;
+    print("hello") ;
+}
+\end{lstlisting}
+
+C++では関数も変数として扱える。\texttt{auto print =}\,までは変数だ。変数の初期化として関数を書いている。より正確にはラムダ式\index{らむだしき@ラムダ式}と呼ばれる関数を値として書くための文法だ。
+
+ラムダ式は以下のような文法を持つ。
+
+\begin{lstlisting}[style=grammar]
+[] // ラムダ式導入部
+() // 引数
+{} // 本体
+\end{lstlisting}
+
+ラムダ式は\texttt{[]}で始まり、\texttt{()}の中に引数を書き、\texttt{\{\}}の中の文が実行される。
+
+例えば以下は引数を2回標準出力する関数だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto twice = [](auto x)
+    {
+        std::cout << x << " "s << x << "\n"s ;
+    } ;
+
+    twice(5) ;
+}
+\end{lstlisting}
+
+引数\index{ひきすう@引数}\index{かんすう@関数!ひきすう@引数}は\texttt{auto 引数名}で受け取れる。引数を複数取る場合は、カンマ\texttt{,}で区切る。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto print_two = []( auto x, auto y )
+    {
+        std::cout << x << " "s << y << "\n"s ;
+    } ;
+
+    print_two( 1, 2 ) ;
+    print_two( "Pi is", 3.14 ) ;
+}
+\end{lstlisting}
+
+引数を取らないラムダ式を書く場合は、単に\texttt{()}と書く。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto no_args = []()
+    {
+        std::cout << "Nothing.\n" ;
+    } ;
+
+    no_args() ;
+}
+\end{lstlisting}
+
+関数は演算子\texttt{operator ()}\index{\protect{()}@\texttt{\protect{()}}}を関数の直後に書いて呼び出す。これが演算子であるというのは少し不思議な感じがするが、C++では紛れもなく演算子だ。\texttt{operator +}とか\texttt{operator -}\,などと同じ演算子だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 何もしない関数
+    auto func = [](){} ;
+
+    // operator ()の適用
+    func() ;
+    // これもoperator ()
+    func    (   ) ;
+}
+\end{lstlisting}
+
+演算子\texttt{operator ()}は、ラムダ式そのものに対して適用することもできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 変数fをラムダ式で初期化
+    auto f = [](){} ;
+(@\ifTombow\pagebreak\fi@)
+    // 変数fを関数呼び出し
+    f() ;
+
+    // ラムダ式を関数呼び出し
+    [](){}() ;
+}
+\end{lstlisting}
+
+このコードを見ると、\texttt{operator ()}が単なる演算子であることがよくわかるだろう。\texttt{[]()\{\}}\,がラムダ式でその直後の\texttt{()}が関数呼び出し演算子だ。
+
+関数は値を返すことができる。関数から値を返すには、\texttt{return文}\index{return@\texttt{return文}}を使う。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto plus = []( auto x, auto y )
+        { return x + y ; } ;
+
+    std::cout
+        << plus( 1, 2 ) << "\n"s
+        << plus( 1.5, 0.5 ) << "\n"s
+        << plus( "123"s, "456"s) ;
+}
+\end{lstlisting}
+
+関数は\texttt{return}文を実行すると処理を関数の呼び出し元に返す。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto f = []()
+    {
+        std::cout << "f is called.\n" ;
+        return 0 ; // ここで処理が戻る
+        std::cout << "f returned zero.\n" ;
+    } ;
+
+    auto result = f() ;
+}
+\end{lstlisting}
+
+これを実行すると以下のようになる。
+
+\begin{lstlisting}[style=terminal]
+$ make
+f is called.
+\end{lstlisting}
+
+\texttt{return}文以降の文が実行されていないことがわかる。
+
+\hypersection{ch0307}{本当の関数}
+
+実はラムダ式は本当のC++の\texttt{関数}\index{かんすう@関数}ではない。本当の\texttt{関数}はとても書きづらいので心して読むべきだ。
+
+読者は本書の冒頭で使った\texttt{main関数}\index{main@\texttt{main}関数}という言葉を覚えているだろうか。覚えていないとしても、サンプルコードに必ずと言っていいほど出てくる\texttt{main}という名前は気になっていたことだろう。
+
+\begin{lstlisting}[language={C++}]
+int main(){}
+\end{lstlisting}
+
+これを見ると、聡明な読者はラムダ式と似通ったところがあることに気付くだろう。
+
+\begin{lstlisting}[style=grammar]
+[](){}
+\end{lstlisting}
+
+末尾の\,\texttt{()\{\}}\,が同じだ。これは同じ意味だ。\texttt{()}は関数の引数で、\texttt{\{\}}\,は関数の本体だ。
+
+では残りの部分はどうだろうか。\texttt{int}は関数の戻り値の型、\texttt{main}は関数の名前だ。
+
+C++の本当の関数は以下のような文法で定義される。
+
+\begin{lstlisting}[style=grammar]
+int     // 戻り値の型
+main    // 関数名
+()      // 関数の引数
+{}      // 関数の本体
+\end{lstlisting}
+
+試しに、\texttt{int}型の引数を2つ取り足して返す関数\texttt{plus}を書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+int plus( int x, int y )
+{
+    return x + y ;
+}
+
+int main()
+{
+    auto x = plus( 1, 2 ) ;
+}
+\end{lstlisting}
+
+では次に、\texttt{double}型の引数を2つ取り足して返す関数\texttt{plus}を書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+double plus( double x, double y )
+{
+    return x + y ;
+}
+
+(@\ifTombow\pagebreak\fi@)
+int main()
+{
+    auto x = plus( 1.0, 2.0 ) ;
+}
+\end{lstlisting}
+
+最後の\texttt{std::string}型の引数を2つ取り足して返す関数\texttt{plus}は読者への課題とする。
+
+これがC++の本当の関数だ。C++の関数では、型をすべて明示的に書かなければならない。型を間違えるとエラーだ。
+
+しかも、C++の関数は、戻り値の型を正しく返さなければならない。
+
+\begin{lstlisting}[language={C++}]
+int f()
+{
+    // エラー、 return文がない
+}
+\end{lstlisting}
+
+もし、何も値を返さない関数を書く場合は、どの値でもないという特別な型、\texttt{void}型\index{void@\texttt{void}型}\index{かた@型!void@\texttt{void}}を関数の戻り値の型として書かなければならないという特別なルールまである。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    // OK
+}
+\end{lstlisting}
+
+ただし、戻り値の型については、具体的な型の代わりに\texttt{auto}\index{auto@\texttt{auto}}を書くこともできる。その場合、\texttt{return}文で同じ型さえ返していれば、気にする必要はない。
+
+\begin{lstlisting}[language={C++}]
+// void
+auto a() { }
+// int
+auto b() { return 0 ; }
+// double
+auto c() { return 0.0 ; }
+// std::string
+auto d() { return ""s ; }
+
+// エラー
+// return文の型が一致しない。
+auto e()
+{
+    return 0 ;
+    return 0.0 ;
+}
+\end{lstlisting}
+

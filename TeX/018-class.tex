@@ -1,0 +1,503 @@
+\hyperchapter{ch18}{クラスの基本}{クラスの基本}
+
+C++はもともとC言語に\texttt{クラス}の機能を追加することを目的とした言語だった。
+
+\texttt{クラス}\index{くらす@クラス}とは何か。クラスにはさまざまな機能があるが、最も基本的な機能としては以下の2つがある。
+
+\begin{itemize}
+\item
+  変数をまとめる
+\item
+  まとめた変数に関数を提供する
+\end{itemize}
+
+この章は\texttt{クラス}の数ある機能のうち、この2つの機能だけを説明する。
+
+\hypersection{ch1801}{変数をまとめる}
+\index{へんすう@変数}\index{くらす@クラス!へんすう@変数}
+
+2次元座標上の点\texttt{(x,y)}を表現するプログラムを書くとする。
+
+とりあえず\texttt{int}型で表現してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 表現
+    int point_x = 0;
+    int point_y = 0;
+}
+\end{lstlisting}
+
+これはわかりやすい。ところでものは相談だが、点は複数表現したい。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x1 = 0 ;
+    int y1 = 0 ;
+
+    int x2 = 0 ;
+    int y2 = 0 ;
+
+    int x3 = 0 ;
+    int y3 = 0 ;
+}
+\end{lstlisting}
+
+これはわかりにくい。ところで点はユーザーがいくつでも入力できるものとしよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> xs ;
+    std::vector<int> ys ;
+
+    // xs.at(i)とys.at(i)は同じ点のための変数
+
+    int x {} ;
+    int y {} ;
+    while ( std::cin >> x >> y )
+    {
+        xs.push_back(x) ;
+        ys.push_back(y) ;
+    }
+}
+\end{lstlisting}
+
+これはとてもわかりにくい。
+
+ここで\texttt{クラス}の出番だ。\texttt{クラス}を使うと点を表現するコードは以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+struct point
+{
+    int x = 0 ;
+    int y = 0 ;
+} ;
+
+int main()
+{
+    point p ;
+
+    std::cout << p.x << p.y ;
+}
+\end{lstlisting}
+
+点を複数表現するのもわかりやすい。
+
+\begin{lstlisting}[language={C++}]
+point p1 ;
+point p2 ;
+point p3 ;
+\end{lstlisting}
+
+ユーザーが好きなだけ点を入力できるプログラムもわかりやすく書ける。
+
+\begin{lstlisting}[language={C++}]
+struct point
+{
+    int x = 0 ;
+    int y = 0 ;
+} ;
+
+int main()
+{
+    std::vector<point> ps ;
+
+    int x { } ;
+    int y { } ;
+
+    while( std::cin >> x >> y )
+    {
+        ps.push_back( point{ x, y } ) ;
+    }    
+}
+\end{lstlisting}
+
+これが\texttt{クラス}の変数をまとめる機能だ。
+
+\texttt{クラス}を定義するには、キーワード\texttt{struct}\index{struct@\texttt{struct}}\index{くらす@クラス!struct@\texttt{struct}}に続いて\texttt{クラス名}\index{くらすめい@クラス名}を書く。
+
+\begin{lstlisting}[style=grammar]
+struct class_name 
+{
+
+} ;
+\end{lstlisting}
+
+変数は\,\texttt{\{\}}\,の中に書く。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int a = 0 ;
+    double b = 0.0 ;
+    std::string c = "hello"s ;
+} ;
+\end{lstlisting}
+
+このクラスの中に書かれた変数のことを、\texttt{データメンバー}\index{でためんば@データメンバー}\index{くらす@クラス!でためんば@データメンバー}という。正確には変数ではない。
+
+定義した\texttt{クラス}は変数として宣言して使うことができる。\texttt{クラス}の\texttt{データメンバー}を使うには、クラス名に引き続いてドット文字を書きデータメンバー名を書く。
+\index{.@\texttt{.}}
+
+\begin{lstlisting}[language={C++}]
+// 名前と年齢を表現するクラスPerson
+struct Person
+{
+    std::string name ;
+    int age ;
+} ;
+
+int main()
+{
+    Person john ;
+    john.name = "john" ;
+    john.age = 20 ;
+}
+\end{lstlisting}
+
+\texttt{クラス}の\texttt{データメンバー}の定義は変数ではない。オブジェクトではない。つまり、それ自体にストレージが割り当てられてはいない。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    // これは変数ではない
+    int data ;
+} ;
+\end{lstlisting}
+
+クラスの変数を定義したときに、その変数のオブジェクト\index{おぶじえくと@オブジェクト}に紐付いたストレージが使われる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data ;
+} ;
+
+int main()
+{
+    S s1 ; // 変数
+    // オブジェクトs1に紐付いたストレージ
+    s1.data = 0 ;
+
+    S s2 ;
+    // 別のストレージ
+    s2.data = 1 ; 
+
+    // false
+    bool b = s1.data == s2.data ;
+}
+\end{lstlisting}
+
+クラスの変数を定義するときにデータメンバーを初期化できる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int x ;
+    int y ;
+    int z ;
+} ;
+
+int main()
+{
+    S s { 1, 2, 3 } ;
+    // s.x == 1
+    // s.y == 2
+    // s.z == 3
+}
+\end{lstlisting}
+
+クラスの初期化で\,\texttt{\{1,2,3\}}\,と書くと、クラスの最初のデータメンバーが\texttt{1}で、次のデータメンバーが\texttt{2}で、その次のデータメンバーが\texttt{3}で、それぞれ初期化される。
+
+クラスをコピーすると、データメンバーがそれぞれコピーされる。
+
+\begin{lstlisting}[language={C++}]
+struct S { int a ; double b ; std::string c ; } ;
+
+int main()
+{
+    S a{123, 1.23, "123"} ;
+    // データメンバーがそれぞれコピーされる
+    S b = a ;
+}
+\end{lstlisting}
+
+\hypersection{ch1802}{まとめた変数に関数を提供する}
+
+分数を表現するプログラムを書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int num = 1 ;
+    int denom = 2 ;
+
+    // 出力
+    std::cout << static_cast<double>(num) / static_cast<double>(denom) ;
+}
+\end{lstlisting}
+
+分子\texttt{num}と分母\texttt{denom}はクラスにまとめることができそうだ。そうすれば複数の分数を扱うのも楽になる。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+} ;
+
+int main()
+{
+    fractional x{1, 2} ;
+
+    // 出力
+    std::cout << static_cast<double>(x.num) / static_cast<double>(x.denom) ;
+}
+\end{lstlisting}
+
+ところで、この出力を毎回書くのが面倒だ。こういう処理は関数にまとめたい。
+
+\begin{lstlisting}[language={C++}]
+double value( fractional & x )
+{
+    return static_cast<double>(x.num) / static_cast<double>(x.denom) ;
+}
+
+int main()
+{
+    fractional x{ 1, 2 } ;
+    std::cout << value( x ) ;
+}
+\end{lstlisting}
+
+この関数\texttt{value}はクラス\texttt{fractional}専用だ。であれば、この関数をクラス自体に関連付けたい。そこでC++には\texttt{メンバー関数}\index{めんばかんすう@メンバー関数}\index{くらす@クラス!めんばかんすう@メンバー関数}という機能がある。
+
+\texttt{メンバー関数}はクラスの中で定義する関数だ。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void member_function( int x )
+    {
+        return x ;
+    }
+} ;
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+\texttt{メンバー関数}はクラスの\texttt{データメンバー}を使うことができる。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    double value()
+    {
+        return static_cast<double>(num) / static_cast<double>(denom) ;
+    }
+} ;
+\end{lstlisting}
+
+メンバー関数を呼び出すには、クラスのオブジェクト\index{おぶじえくと@オブジェクト}に続いてドット文字を書き、メンバー関数名を書く。あとは通常の関数のように書く。
+\index{.@\texttt{.}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    fractional x{ 1, 2 } ;
+    std::cout << x.value() ;
+}
+\end{lstlisting}
+
+\texttt{メンバー関数}から使える\texttt{データメンバー}は、メンバー関数が呼ばれたクラスのオブジェクトのデータメンバーだ。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int x ;
+    void print()
+    {
+        std::cout << x ;
+    }
+} ;
+
+int main()
+{
+    S s1(1) ;
+    s1.print() ; // 1
+
+    S s2(2) ;
+    s2.print() ; // 2
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+この\texttt{print}を非メンバー関数として書くと以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+void print( S & s )
+{
+    std::cout << s.x ;
+}
+\end{lstlisting}
+
+メンバー関数は隠し引数としてクラスのオブジェクトを受け取っている関数だ。メンバー関数の呼び出しには、対応するクラスのオブジェクトが必要になる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void f() { }
+} ;
+
+int main()
+{
+    f() ; // エラー
+    S s ;
+    s.f() ; // OK
+}
+\end{lstlisting}
+
+\texttt{メンバー関数}はデータメンバーを変更することもできる。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    int data ;
+    void f()
+    {
+        data = 3 ;
+    }
+} ;
+\end{lstlisting}
+
+先ほどの分数クラスに値を設定するための\texttt{メンバー関数}を追加してみよう。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    void set( int num_ )
+    {
+        num = num_ ;
+        denom = 1 ;
+    }
+(@\ifTombow\pagebreak\fi@)
+    void set( int num_, int denom_ )
+    {
+        num = num_ ;
+        denom = denom_ ;
+    }
+} ;
+
+int main()
+{
+    fractional x ;
+
+
+    x.set(5) ;
+    // x.num == 5
+    // x.denom == 1
+
+    x.set( 2, 3 ) ;
+    // x.num == 2
+    // x.denom == 3
+}
+\end{lstlisting}
+
+メンバー関数\texttt{set(num)}を呼び出すと、値が\(\frac{num}{1}\)になる。メンバー関数\texttt{set(num, denom)}を呼び出すと、値が\(\frac{num}{denom}\)になる。
+
+ところで上のコードを見ると、\texttt{データメンバー}と引数の名前の衝突を避けるために、アンダースコアを使っている。
+
+\texttt{データメンバー}と引数の名前が衝突するとどうなるのか。確かめてみよう。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int x ;
+    void f( int x )
+    {
+        x = x ;
+    }
+} ;
+
+int main()
+{
+    S s{0} ;
+    s.f(1) ;
+
+    std::cout << s.x ;
+}
+\end{lstlisting}
+
+結果は\texttt{0}だ。メンバー関数\texttt{f}の中の名前\texttt{x}は引数名の\texttt{x}だからだ。
+
+すでに名前は\texttt{スコープ}に属するということは説明した。実はクラスも\texttt{スコープ}\index{すこぷ@\texttt{スコープ}}を持つ。上のコードは以下のようなスコープを持つ。
+\index{くらすすこぷ@クラススコープ}
+
+\begin{lstlisting}[language={C++}]
+// グローバル名前空間スコープ
+int x ;
+
+struct S
+{
+    // クラススコープ
+    int x ;
+
+    void f( int x )
+    {
+        // 関数のブロックスコープ
+        x = x ;
+    }
+} ;
+\end{lstlisting}
+
+内側の\texttt{スコープ}は外側の\texttt{スコープ}の名前を隠す。そのため、クラススコープの\texttt{x}はグローバル名前空間スコープ\texttt{x}を隠す。関数のブロックスコープの\texttt{x}はクラススコープの\texttt{x}を隠す。
+
+名前がどのスコープに属するかを明示的に指定することによって、隠された名前を使うことができる。
+
+\begin{lstlisting}[language={C++}]
+int x ;
+
+struct S
+{
+    int x ;
+
+    void f( int x )
+    {
+        // 関数のブロックスコープのx
+        x = 0 ;
+        // クラススコープのx
+        S::x = 0 ;
+        // グローバル名前空間のスコープ
+        ::x = 0 ;
+    }
+} ;
+\end{lstlisting}
+
+名前空間スコープを明示するために\texttt{namespace\_name::name}を使うように、クラススコープを明示するために\texttt{class\_name::name}を使うことができる。
+
+\ifTombow\pagebreak\fi
+これを使えば、分数クラスは以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    void set( int num, int denom )
+    {
+        fractional::num = num ;
+        fractional::denom = denom ;
+    }
+}
+\end{lstlisting}
+

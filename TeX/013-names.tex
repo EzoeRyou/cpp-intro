@@ -1,0 +1,813 @@
+\hyperchapter{ch13}{名前}{名前}
+
+プログラミング言語C++にはさまざまな名前\index{なまえ@名前}が出てくる。変数、関数、型など、さまざまなものに名前が付いている。この章では名前について学ぶ。
+
+\hypersection{ch1301}{キーワード}
+
+一部の名前はキーワード\index{きわど@キーワード}として予約され、特別な意味を持つ。キーワードは名前として使うことができない。
+
+キーワードの一覧は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+alignas         alignof     asm         auto        bool            break
+case            catch       char        char16_t    char32_t        class
+concept         const       constexpr   const_cast  continue        decltype
+default         delete      do          double      dynamic_cast    else
+enum            explicit    export      extern      false           float
+for             friend      goto        if          inline          int
+long            mutable     namespace   new         noexcept        nullptr
+operator        private     protected   public      register        reinterpret_cast
+requires        return      short       signed      sizeof          static
+static_assert   static_cast struct      switch      template        this
+thread_local    throw       true        try         typedef         typeid
+typename        union       unsigned    using       virtual         void
+volatile        wchar_t     while
+\end{lstlisting}
+
+\hypersection{ch1302}{名前に使える文字}
+
+名前というのは根本的には識別子\index{しきべつし@識別子}と呼ばれる文字列で成り立っている。
+
+C++では識別子にラテンアルファベット小文字、大文字、アラビア数字、アンダースコア、を使うことができる。以下がその文字の一覧だ。
+
+\begin{lstlisting}[style=grammar]
+a b c d e f g h i j k l m
+n o p q r s t u v w x y z
+A B C D E F G H I J K L M
+N O P Q R S T U V W X Y Z
+0 1 2 3 4 5 6 7 8 9
+_
+\end{lstlisting}
+
+小文字と大文字は区別される。名前\texttt{a}と名前\texttt{A}は別の名前だ。
+
+ただし、名前はアラビア数字で始まってはならない。
+
+\begin{lstlisting}[language={C++}]
+int 123abc = 0 ; // エラー
+\end{lstlisting}
+
+名前にダブルアンダースコア（\,\texttt{\_\_}\,）が含まれているものは予約されているので使ってはならない。ダブルアンダースコアとはアンダースコア文字が2つ連続したものをいう。
+
+\begin{lstlisting}[language={C++}]
+// 使ってはならない
+// すべてダブルアンダースコアを含む
+int __ = 0 ;
+int a__ = 0 ;
+int __a = 0 ;
+\end{lstlisting}
+
+アンダースコアに大文字から始まる名前も予約されているので使ってはならない。
+
+\begin{lstlisting}[language={C++}]
+// 使ってはならない
+// アンダースコアに大文字から始まる
+int _A = 0 ;
+\end{lstlisting}
+
+アンダースコアに小文字から始まる名前もグローバル名前空間で予約されているので使ってはならない。グローバル名前空間についてはこのあと説明する。
+
+\begin{lstlisting}[language={C++}]
+// 使ってはならない
+// アンダースコアに小文字から始まる
+int _a = 0 ;
+\end{lstlisting}
+
+予約されているというのは、C++コンパイラーがその名前をC++の実装のために使うかもしれないということだ。例えばC++コンパイラーは\,\texttt{\_A}という名前を特別な意味を持つものとして使うかもしれないし、その名前の変数や関数をプログラムに追加するかもしれない。
+
+\hypersection{ch1303}{宣言と定義}
+
+C++では、名前は使う前に宣言\index{せんげん@宣言}\index{なまえ@名前!せんげん@宣言}しなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ; // 宣言
+    x = 1 ; // 使用
+}
+\end{lstlisting}
+
+宣言する前に使うことはできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // エラー、 名前xは宣言されていない。
+    x = 1 ; 
+
+    int x = 0 ;
+}
+\end{lstlisting}
+
+C++では多くの名前は宣言と定義\index{ていぎ@定義}\index{なまえ@名前!ていぎ@定義}に分かれている。宣言と定義の分離は関数が一番わかりやすい。
+
+\begin{lstlisting}[language={C++}]
+// 関数の宣言
+int plus_one( int x ) ;
+
+// 関数の定義
+int plus_one( int x ) // 宣言部分
+// 定義部分
+// 関数の本体
+{
+    return x + 1 ;
+}
+\end{lstlisting}
+
+関数の定義は宣言を兼ねる。
+
+宣言は何度でも書くことができる。
+
+\begin{lstlisting}[language={C++}]
+int plus_one( int x ) ; // 初出
+int plus_one( int x ) ; // OK
+int plus_one( int x ) ; // OK
+\end{lstlisting}
+
+定義はプログラム中に一度しか書くことができない。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// 定義
+int odr() { }
+
+// エラー、 定義の重複
+int odr() { }
+\end{lstlisting}
+
+名前を使うのに事前に必要なのは宣言だ。定義は名前を使ったあとに書いてもよい。
+
+\begin{lstlisting}[language={C++}]
+// 宣言
+int plus_one( int x ) ;
+
+int main()
+{
+    plus_one( 1 ) ;
+}
+
+// 定義
+int plus_one( int x )
+{
+    return x + 1 ;
+}
+\end{lstlisting}
+
+ほとんどの変数は宣言と定義が同時に行われる。変数でも宣言と定義を分割して行う方法もあるのだが、解説は分割コンパイルの章で行う。
+
+\hypersection{ch1304}{名前空間}
+\index{なまえくうかん@名前空間}
+
+本書をここまで読んだ読者は、一部の型名の記述が少し変なことに気が付いているだろう。
+
+\begin{lstlisting}[language={C++}]
+std::string a ;
+std::vector<int> b ;
+\end{lstlisting}
+
+コロンやアングルブラケットは名前に使える文字ではない。信じられない読者は試してみるとよい。
+
+\begin{lstlisting}[language={C++}]
+// エラー
+int :: = 0 ;
+int <int> = 0 ;
+\end{lstlisting}
+
+莫大なエラーが表示されるだろうが、すでに学んだようにとてもいいことだ。コンパイラーが間違いを見つけてくれたのだから。わからないことがあったらどんどんコンパイルエラーを出すとよい。
+
+実は\texttt{std}というのは名前空間（namespace）の名前だ。ダブルコロン（\texttt{::}）\index{::@\texttt{::}}は名前空間を指定する文法だ。
+
+\ifTombow\pagebreak\fi
+名前空間の文法は以下のとおり。
+\index{namespace@\texttt{namespace}}
+
+\begin{lstlisting}[style=grammar]
+namespace ns {
+// コード
+}
+\end{lstlisting}
+
+名前空間の中の名前を参照するには\,\texttt{::}\,\index{::@\texttt{::}}を使う。
+
+\begin{lstlisting}[language={C++}]
+ns::name ;
+\end{lstlisting}
+
+名前空間の中には変数も書ける。この変数は関数の内部に限定されたローカル変数とは違い、どの関数からでも参照できる。
+
+\begin{lstlisting}[language={C++}]
+namespace ns {
+    int name{} ;
+}
+
+int f()
+{
+    return ns::name ;
+}
+
+int main()
+{
+    ns::name = 1 ;
+}
+\end{lstlisting}
+
+名前空間の中で宣言された名前は、名前空間を指定しなければ使えなくなる。
+
+\begin{lstlisting}[language={C++}]
+namespace ns {
+    int f() { return 0 ; }
+}
+
+int main()
+{
+    ns::f() ;
+
+    f() ; // エラー
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+異なる名前空間名の下の名前は別の名前になる。
+
+\begin{lstlisting}[language={C++}]
+namespace a {
+    int f() { return 0 ; }
+}
+
+
+namespace b {
+    int f() { return 1 ; }
+}
+
+int main()
+{
+    a::f() ; // 0
+    b::f() ; // 1
+}
+\end{lstlisting}
+
+これだけを見ると、名前空間というのはわざわざ名前空間名を指定しなければ使えない面倒な機能に見えるだろう。名前空間の価値は複数人で同じプログラムのソースファイルを編集するときに出てくる。
+
+例えば、アリスとボブがプログラムを共同で開発しているとする。あるプログラムのソースファイル\texttt{f}という名前の関数を書いたとする。ここで、同じプログラムを共同開発している他人も\texttt{f}という名前の関数を書いたらどうなるか。
+
+\begin{lstlisting}[language={C++}]
+// アリスの書いた関数f
+int f() { return 0 ; }
+
+// ボブの書いた関数f
+int f() { return 1 ; }
+\end{lstlisting}
+
+すでに宣言と定義で学んだように、このコードはエラーになる。なぜならば、同じ名前に対して定義が2つあるからだ。
+
+名前空間なしでこの問題を解決するためはに、アリスとボブが事前に申し合わせて、名前が衝突しないように調整する必要がある。
+
+しかし名前空間があるC++では、そのような面倒な調整は必要がない。アリスとボブが別の名前空間を使えばいいのだ。
+
+\begin{lstlisting}[language={C++}]
+// アリスの名前空間
+namespace alice {
+    // アリスの書いた関数f
+    int f() { return 0 ; }
+}
+
+(@\ifTombow\pagebreak\fi@)
+// ボブの名前空間
+namespace bob {
+    // ボブの書いた関数f
+    int f() { return 1 ; }
+}
+\end{lstlisting}
+
+\texttt{alice::f}と\texttt{bob::f}は別の名前なので定義の衝突は起こらない。
+
+\hypersubsection{ch130401}{グローバル名前空間}
+\index{ぐろばるなまえくうかん@グローバル名前空間}
+
+名前空間に包まれていないソースファイルのトップレベルの場所は、実はグローバル名前空間（global name space）という名前のない名前空間で包まれているという扱いになっている。
+
+\begin{lstlisting}[language={C++}]
+// グローバル名前空間
+int f() { return 0 ; }
+
+namespace ns {
+    int f() { return 1 ; }
+}
+
+int main()
+{
+    f() ; // 0
+    ns::f() ; // 1
+}
+\end{lstlisting}
+
+グローバル名前空間は名前の指定のない単なる\,\texttt{::}\,\index{::@\texttt{::}}で指定することもできる。
+
+\begin{lstlisting}[language={C++}]
+int x { } ;
+
+int main()
+{
+    x ; // ::xと同じ
+    ::x ;
+}
+\end{lstlisting}
+
+すでに名前空間の中では変数を宣言できることは学んだ。グローバル名前空間は名前空間なので同じように変数を宣言できる。
+
+\texttt{main}関数はグローバル名前空間に存在しなければならない。
+
+\begin{lstlisting}[language={C++}]
+// グローバル名前空間
+int main() { }
+\end{lstlisting}
+
+\hypersubsection{ch130402}{名前空間のネスト}
+\index{なまえくうかん@名前空間!ねすと@ネスト}
+
+名前空間の中に名前空間を書くことができる。
+
+\begin{lstlisting}[language={C++}]
+namespace A { namespace B { namespace C {
+    int name {} ;
+} } }
+
+int main()
+{
+    A::B::C::name = 0 ;
+}
+\end{lstlisting}
+
+名前空間のネストは省略して書くこともできる。
+
+\begin{lstlisting}[language={C++}]
+namespace A::B::C {
+    int name { } ;
+}
+
+int main()
+{
+    A::B::C::name = 0 ;
+}
+\end{lstlisting}
+
+\hypersubsection{ch130403}{名前空間名の別名を宣言する名前空間エイリアス}
+\index{なまえくうかん@名前空間!べつめい@別名}\index{なまえくうかんえいりあす@名前空間エイリアス}
+
+名前空間名には別名を付けることができる。これを名前空間エイリアスと呼ぶ。
+
+たとえば名前空間名が重複することを恐れるあまり、とても長い名前空間名を付けたライブラリがあるとする。
+
+\begin{lstlisting}[language={C++}]
+namespace very_long_name {
+    int f() { return 0 ; }
+}
+
+int main()
+{
+    very_long_name::f() ;
+}
+\end{lstlisting}
+
+この関数\texttt{f}を使うために毎回\texttt{very\_long\_name::f}と書くのは面倒だ。こういうときには名前空間エイリアスを使うとよい。名前空間エイリアスは名前空間名の別名を宣言できる。
+
+\begin{lstlisting}[style=grammar]
+namespace 別名 = 名前空間名 ;
+\end{lstlisting}
+
+使い方。
+
+\begin{lstlisting}[language={C++}]
+namespace very_long_name {
+    int f() { return 0 ; }
+}
+
+int main()
+{
+    // 名前空間エイリアス
+    namespace vln = very_long_name ;
+    // vlnはvery_long_nameのエイリアス
+    vln::f() ;
+}
+\end{lstlisting}
+
+名前空間エイリアスは元の名前空間名と同じように使える。意味も同じだ。
+
+名前空間エイリアスはネストされた名前空間にも使える。
+
+\begin{lstlisting}[language={C++}]
+namespace A::B::C {
+    int f() { return 0 ; }
+}
+
+int main()
+{
+    namespace D = A::B::C ;
+    // DはA::B::Cのエイリアス
+    D::f() ;
+}
+\end{lstlisting}
+
+名前空間エイリアスを関数の中で宣言すると、その関数の中でだけ有効になる。
+
+\begin{lstlisting}[language={C++}]
+namespace A { int x { } ; }
+
+int f()
+{
+    // Bの宣言
+    namespace B = A ;
+    // OK、Bは宣言されている
+    return B::x ;
+}
+
+int g()
+{
+    // エラー、 Bは宣言されていない
+    return B::x ;
+}
+\end{lstlisting}
+
+名前空間エイリアスを名前空間の中で宣言すると、宣言以降の名前空間内で有効になる。
+
+\begin{lstlisting}[language={C++}]
+namespace ns {
+    namespace A { int x { } ; }
+    namespace B = A ;
+
+    // OK
+    int f(){ return B::x ; }
+    // OK
+    int g(){ return B::x ; }
+
+} // end namespace ns
+
+// エラー、 Bは宣言されていない
+int h(){ return B::x ; }
+\end{lstlisting}
+
+グローバル名前空間は名前空間なので、名前空間エイリアスを宣言できる。
+
+\begin{lstlisting}[language={C++}]
+namespace long_name_is_loooong { }
+namespace cat = long_name_is_loooong ;
+\end{lstlisting}
+
+\hypersubsection{ch130404}{名前空間名の指定を省略するusingディレクティブ}
+\index{なまえくうかん@名前空間!しようりやく@省略}\index{using@\texttt{using}ディレクティブ}
+
+名前空間は名前の衝突を防ぐ機能だが、名前空間名をわざわざ指定するのは面倒だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // std名前空間のstring
+    std::string s ;
+    // std名前空間のvector<int>
+    std::vector<int> v ;
+
+    // std名前空間のcout
+    std::cout << 123 ;
+}
+\end{lstlisting}
+
+もし自分のソースファイルが\texttt{string}, \texttt{vector<int>}, \texttt{cout}、その他\texttt{std}名前空間で使われる名前をいっさい使っていない場合、名前の衝突は発生しないことになる。その場合でも名前空間名を指定しなければならないのは面倒だ。
+
+C++では指定した名前空間を省略できる機能が存在する。\texttt{using}ディレクティブだ。
+
+\begin{lstlisting}[style=grammar]
+using namespace 名前空間名 ;
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+これを使えば、先ほどのコードは以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using namespace std ;
+    // std名前空間のstring
+    string s ;
+    // std名前空間のvector<int>
+    vector<int> v ;
+
+    // std名前空間のcout
+    cout << 123 ;
+}
+\end{lstlisting}
+
+では名前が衝突した場合はどうなるのか。
+
+\begin{lstlisting}[language={C++}]
+namespace abc {
+    int f() { return 0 ; }
+}
+
+int f() { return 1 ; }
+
+int main()
+{
+    using namespace abc ;
+
+    // エラー、 名前が曖昧
+    f() ;
+}
+\end{lstlisting}
+
+名前\texttt{f}に対してどの名前を使用するのか曖昧になってエラーになる。このエラーを回避するためには、名前空間を直接指定する。
+
+\begin{lstlisting}[language={C++}]
+namespace abc {
+    int f() { return 0 ; }
+}
+
+int f() { return 1 ; }
+
+int main()
+{
+    using namespace abc ;
+
+    // OK、名前空間abcのf
+    abc::f() ;
+
+    // OK、グローバル名前空間のf
+    ::f() ;
+}
+\end{lstlisting}
+
+\texttt{using}ディレクティブは関数の中だけではなく、名前空間の中にも書ける。
+
+\begin{lstlisting}[language={C++}]
+namespace A {
+    int f(){ return 0 ; }
+}
+
+namespace B {
+    using namespace A ;
+    int g()
+    {
+        // OK、A::f
+        f() ;
+    }
+}
+\end{lstlisting}
+
+名前空間の中に\texttt{using}ディレクティブを書くと、その名前空間の中では指定した名前空間を省略できる。
+
+グローバル名前空間は名前空間なので\texttt{using}ディレクティブが書ける。
+
+\begin{lstlisting}[language={C++}]
+using namespace std ;
+\end{lstlisting}
+
+ただし、グローバル名前空間の中に\texttt{using}ディレクティブを書くと、それ以降すべての箇所で指定した名前空間の省略ができてしまうので注意が必要だ。
+
+\hypersubsection{ch130405}{名前空間を指定しなくてもよいinline名前空間}
+\index{なまえくうかん@名前空間!inline@\texttt{inline}}\index{inline@\texttt{inline}名前空間}
+
+\texttt{inline名前空間}は\texttt{inline namespace}\index{inline namespace@\texttt{inline namespace}}で定義する。
+
+\begin{lstlisting}[style=grammar]
+inline namespace name { }
+\end{lstlisting}
+
+\texttt{inline}名前空間内の名前は名前空間名を指定して使うこともできるし、名前空間を指定せずとも使うことができる。
+
+\begin{lstlisting}[language={C++}]
+inline namespace A {
+    int a { } ;
+}
+
+namespace B {
+    int b { } ;
+}
+
+int main()
+{
+    a = 0 ;     // A::a
+    A::a = 0 ;  // A::a
+
+    b = 0 ;     // エラー、 名前bは宣言されていない
+    B::b = 0 ;  // B::b
+}
+\end{lstlisting}
+
+読者が\texttt{inline}名前空間を使うことはほとんどないだろうが、ライブラリのソースファイルを読むときには出てくるだろう。
+
+\hypersection{ch1305}{型名}
+\index{かためい@型名}\index{なまえ@名前!かためい@型名}
+
+型名とは型を表す名前だ。
+
+型名は\texttt{int}や\texttt{double}のように言語組み込みのキーワードを使うこともあれば、独自に作った型名を使うこともある。この独自に作った型名を専門用語ではユーザー定義された型（user--defined type）\index{ゆざていぎされたかた@ユーザー定義された型}\index{かた@型!ゆざていぎされた@ユーザー定義された〜}という。ユーザー定義された型を作る方法はさまざまだ。具体的に説明するのは本書のだいぶあとの方になるだろう。例としては、\texttt{std::string}や\texttt{std::vector<T>}\,がある。標準ライブラリによってユーザー定義された型だ。
+
+\begin{lstlisting}[language={C++}]
+// 組み込みの型名
+int i = 0 ;
+double d = 0.0 ;
+
+// ユーザー定義された型名
+std::string s ;
+std::vector<int> v ;
+\end{lstlisting}
+
+\hypersubsection{ch130501}{型名の別名を宣言するエイリアス宣言}
+\index{かためい@型名!べつめい@別名}\index{えいりあすせんげん@エイリアス宣言}\index{かためい@型名!えいりあすせんげん@エイリアス宣言}
+
+長い名前空間名を書くのが煩わしいように、長い型名を書くのも煩わしい。名前空間名の別名を宣言できるように、型名も別名を宣言できる。
+
+型名の別名を宣言するにはエイリアス宣言を使う。
+
+\begin{lstlisting}[style=grammar]
+using 別名 = 型名 ;
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+使い方。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // エイリアス宣言
+    using Number = int ;
+
+    // Numberはintの別名
+    Number x = 0 ;
+}
+\end{lstlisting}
+
+型名の別名は型名と同じように使える。意味も同じだ。
+
+歴史的な経緯により、エイリアス宣言による型名の別名のことを、\texttt{typedef名}（typedef name）\index{かためい@型名!typedef@\texttt{typedef}名}\index{typedef@\texttt{typedef}名}という。これは\texttt{typedef}名を宣言する文法が、かつては\texttt{typedef}キーワードを使ったものだったからだ。\texttt{typedef}キーワードを使った\texttt{typedef}名の宣言方法は、昔のコードによく出てくるので現代でも覚えておく必要はある。
+
+\begin{lstlisting}[style=grammar]
+typedef 型名 typedef名 ;
+\end{lstlisting}
+
+使い方。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // typedef名による型名の宣言
+    typedef int Number ;
+
+    Number x = 0 ;
+}
+\end{lstlisting}
+
+これは変数の宣言と同じ文法だ。変数の宣言が以下のような文法で、
+\begin{lstlisting}[style=grammar]
+型名 変数名 ;
+\end{lstlisting}
+これに\texttt{typedef}キーワードを使えば\texttt{typedef}名の宣言になる。
+
+しかし\texttt{typedef}キーワードによる\texttt{typedef}名の宣言はわなが多い。例えば熟練のC++プログラマーでも、以下のコードが合法だということに驚くだろう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int typedef Number ;
+    Number x = 0 ;
+}
+\end{lstlisting}
+
+しかし本書ではまだ教えていない複雑な型名について、このようなコードを書こうとするとコンパイルエラーになることに熟練のC++プログラマーは気が付くはずだ。その理由はとても難しい。
+
+エイリアス宣言にはこのようなわなはない。
+
+\hypersection{ch1306}{スコープ}
+
+スコープ（scope）\index{すこぷ@スコープ}というのはやや説明が難しい概念だ。名前空間や関数はスコープを持っている。とてもおおざっぱに説明するとカーリブラケット\,\texttt{\{\}}\,\index{\{\}@\texttt{\{\}}}で囲まれた範囲がスコープだ。
+
+\begin{lstlisting}[language={C++}]
+namespace ns
+{ // 名前空間スコープの始まり
+} // 名前空間スコープの終わり
+
+void f()
+{ // 関数スコープの始まり
+
+} // 関数スコープの終わり
+\end{lstlisting}
+
+これとは別にブロック文のスコープもある。ブロックとは関数の中で複数の文を束ねて1つの文として扱う機能だ。覚えているだろうか。
+\index{ぶろつくすこぷ@ブロックスコープ}
+
+\begin{lstlisting}[language={C++}]
+void f()
+{ // 関数スコープ
+
+    { // 外側のブロックスコープ
+        { // 内側のブロックスコープ
+        }
+    }
+}
+\end{lstlisting}
+
+スコープは\,\texttt{\{}\,に始まり\,\texttt{\}}\,に終わる。
+
+なぜスコープという概念について説明したかというと、宣言された名前が有効な範囲は、宣言された最も内側のスコープの範囲だからだ。
+
+\begin{lstlisting}[language={C++}]
+namespace ns
+{// aの所属するスコープ
+    int a {} ;
+
+    void f()
+    { // bの所属するスコープ
+        int b {} ;
+
+        { // cの所属するスコープ
+            int c {} ;
+        }// cの範囲終わり
+
+        
+    }// bの範囲終わり
+
+} // aの範囲終わり
+\end{lstlisting}
+
+名前が有効な範囲は、宣言された最も内側のスコープだ。
+
+外側のスコープで宣言された名前は内側のスコープで使える。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    int a {} ;
+    {// 新たなスコープ
+        a = 0 ;
+    }
+}
+\end{lstlisting}
+
+その逆はできない。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    { int a {} ; }
+    // エラー
+    a = 0 ;
+}
+\end{lstlisting}
+
+名前空間も同じだ。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+// グローバル名前空間スコープ
+
+namespace ns {
+    int a {} ;
+    void f()
+    {
+        a = 0 ; // OK
+    }
+} // 名前空間nsのスコープの終了
+
+int main()
+{
+    // エラー
+    a = 0 ;
+    // OK 
+    ns::a ;
+}
+\end{lstlisting}
+
+名前空間スコープと関数スコープには違う点もあるが、名前の有効な範囲としては同じスコープだ。
+
+外側のスコープで宣言された名前と同じ名前を内側で宣言すると、内側の名前が外側の名前を隠す。
+
+\begin{lstlisting}[language={C++}]
+// グローバル名前空間のf
+auto f =  []()
+{ std::cout << 1 ; } ;
+
+int main()
+{
+    f() ; // 1
+
+    // 関数mainのf
+    auto f = []()
+    { std::cout << 2 ; } ;
+
+    f() ; // 2
+
+    {
+        f() ; // 2
+
+        // ブロックのf
+        auto f = []()
+        { std::cout << 3 ; } ;
+        f() ; // 3
+    }
+
+    f() ; // 2
+}
+\end{lstlisting}
+
+宣言されている場所に注意が必要だ。名前\texttt{f}は3つある。最初の関数呼び出しの時点ではグローバル名前空間の\texttt{f}が呼ばれる。まだ名前\texttt{f}は関数\texttt{main}の中で宣言されていないからだ。そして関数\texttt{main}のスコープの中で名前\texttt{f}が宣言される。このときグローバル名前空間の\texttt{f}は隠される。そのため、次の関数\texttt{f}の呼び出しでは関数\texttt{main}の\texttt{f}が呼ばれる。次にブロックの中に入る。ここで関数\texttt{f}が呼ばれるが、まだこの\texttt{f}は関数\texttt{main}の\texttt{f}だ。そのあとにブロックの中で名前\texttt{f}が宣言される。すると次の関数\texttt{f}の呼び出しはブロックの\texttt{f}だ。ブロックから抜けたあとの関数\texttt{f}の呼び出しは関数\texttt{main}の\texttt{f}だ。
+
+この章では名前について解説した。名前は難しい。難しいが、プログラミングにおいては名前と向き合わなければならない。

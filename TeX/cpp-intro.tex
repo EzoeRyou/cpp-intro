@@ -1,0 +1,249 @@
+%
+% 江添亮のC++入門
+%
+% 備考：
+% RyuminPro-Light, Gothic-BBBでは出力できない漢字?
+% 隙（CID20273）--> \CID{1850} :
+%    030-pointer-details
+
+%
+%
+\newif\ifColor
+\Colortrue
+%\Colorfalse
+\newif\ifTombow
+\Tombowtrue
+%\Tombowfalse
+%
+\ifTombow
+% トンボあり
+\documentclass[a4paper,12Q,papersize,uplatex,b5var,openany,tombow]{asciibook}
+%\documentclass[a4paper,12Q,papersize,uplatex,b5var,openany]{asciibook_pdf}
+\else
+% トンボなし
+\documentclass[a4paper,12Q,papersize,uplatex,openany]{asciibook}
+\fi
+%
+\usepackage[uplatex,expert,deluxe,jis2004]{otf} % OpenTypeフォントを利用
+\usepackage{lmodern}        % Latin Modernフォントを利用
+\usepackage[T1]{fontenc}    % フォントエンコーディングをT1に変更
+\usepackage{textcomp}       % テキストシンボルの利用
+\usepackage[utf8]{inputenc} % UTF-8で欧文文字を入力
+\usepackage{setspace}       % 行間の調整
+\usepackage{layout}         % レイアウトの詳細
+\usepackage{comment}        % comment関連コマンド
+\usepackage{okumacro}       % 奥村先生のおまけパッケージ
+\usepackage{bm}             % ベクトルをボールドで表示
+\usepackage{wrapfig}        % 文字の回り込みをする図の配置
+\usepackage{longtable}      % Longtable
+\usepackage{tabularx}       % 表組みの横幅指定、セルの書式指定
+\usepackage{ltablex}        % テーブルのネスト
+\usepackage{colortbl}       % 表組みの色指定
+\usepackage{scrextend}      % 脚注のカスタマイズ
+\usepackage[dvipdfmx]{hyperref,graphicx} % PDFにハイパーリンクの機能を加える
+\usepackage{pxjahyper}      % PDFの日本語のしおりに対応
+\hypersetup{%
+ bookmarksnumbered=true,%
+ linktocpage=true,%
+ linktoc=all,%
+ colorlinks=true,%
+ %colorlinks=false,%         % 印刷所渡し
+ linkcolor=BrickRed,%
+ citecolor=OliveGreen,%
+ urlcolor=NavyBlue,%
+ setpagesize=false,%
+ pdfkeywords={TeX; dvipdfmx; hyperref; xcolor;}}
+%
+\usepackage[dvipsnames]{xcolor} % 色の指定
+\usepackage{amssymb, amsmath}   % 数式関連
+%
+% キャプション
+\usepackage{caption}
+\captionsetup{
+  singlelinecheck=off,   % 左寄せ
+  labelsep=colon,        % ラベルのセパレータ
+  labelfont={sf, small}, % ラベルのフォント
+  font={sf, small},      % キャプションのフォント
+  format=hang,           % 折り返し
+}
+\renewcommand{\figurename}{図} % 図のキャプションのタイトル
+\renewcommand{\tablename}{表}  % 表のキャプションのタイトル
+\makeatletter
+\renewcommand \thefigure
+     {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@figure}
+\renewcommand \thetable
+     {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@table}
+\makeatother
+%
+% プログラムリスト
+\usepackage{listings,jlisting}
+% terminal
+\lstdefinestyle{terminal} {%
+  %language=bash,%
+  language=,%
+  basicstyle={\small\ttfamily},%
+  identifierstyle={\small},%
+  frame={single},
+  frameround={tttt},
+  xleftmargin=2zw,%
+  framexleftmargin=2zw,
+}
+% grammar
+\lstdefinestyle{grammar} {%
+  language=C++,%
+  basicstyle={\small\ttfamily},%
+  identifierstyle={\small},%
+  frame={single},
+  xleftmargin=2zw,%
+  framexleftmargin=2zw,
+}
+% JavaScript
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+}
+% common
+\lstset{%
+  language={C++},
+  basicstyle={\small\ttfamily},%
+  identifierstyle={\small},%
+  frame={tb},%frame={none},
+%  frameround={tttt},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  xrightmargin=0zw,%
+  xleftmargin=2zw,%
+  framexleftmargin=2zw,
+%  numberstyle={\scriptsize},%
+%  stepnumber=1,
+  aboveskip=1.5zw,
+  belowskip=1.5zw,
+  showstringspaces=false,
+  keepspaces=true,
+  upquote=true,
+  breakindent={0pt},
+  escapeinside={(@}{@)}
+}
+% color
+\ifColor
+\lstset{%
+  commentstyle={\small\bfseries \color[rgb]{0.533,0,0}},%
+  keywordstyle={\small\bfseries \color[rgb]{0,0,0.533}},%
+  ndkeywordstyle={\small\bfseries \color[rgb]{0,0,0.533}},%
+  stringstyle={\small\ttfamily \color[rgb]{0,0.533,0}},
+}
+\else
+\lstset{%
+  commentstyle={\small\bfseries},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small\bfseries},%
+  stringstyle={\small\ttfamily},
+}
+\fi
+%
+% \textttのクォーテーションタイプを変更する
+\usepackage{expl3}
+\usepackage{xparse}
+\ExplSyntaxOn
+\RenewDocumentCommand{\texttt}{m}
+ {
+  \tl_set:Nn \l_nemgathos_upquotes_tl { #1 }
+  \tl_replace_all:Nnn \l_nemgathos_upquotes_tl { '' } { \textquotedbl }
+  \tl_replace_all:Nnn \l_nemgathos_upquotes_tl { `` } { \textquotedbl }
+  \tl_replace_all:Nnn \l_nemgathos_upquotes_tl { ' } { \textquotesingle }
+  \tl_replace_all:Nnn \l_nemgathos_upquotes_tl { ` } { \textquotesingle }
+  { \ttfamily \tl_use:N \l_nemgathos_upquotes_tl }
+ }
+\tl_new:N \l_nemgathos_upquotes_tl
+\ExplSyntaxOff
+%
+% \emphの再定義
+\renewcommand{\emph}[1]{\textsf{\textgt{#1}}}
+%
+% ハイフネーション
+%\hyphenation{}
+%
+% ルビ
+\usepackage{pxrubrica}
+%
+% 索引
+\usepackage{makeidx}
+\makeindex
+%
+% ヘッダー
+\pagestyle{asciiheadings}
+%
+% ドキュメント
+\begin{document}
+%\layout
+%
+\frontmatter
+\include{front}
+%\include{front_pdf}
+\input{000-preface}
+\clearpage
+{\thispagestyle{empty}
+\setcounter{tocdepth}{2}
+\tableofcontents}
+%
+\mainmatter
+\input{001-intro}
+\input{002-build}
+\input{003-guide-to-c++}
+\input{004-debug-compile-error}
+\input{005-the-restaurant-at-the-end-of-the-branch}
+\input{006-debug-compile-warning}
+\input{007-standard-input}
+\input{008-loop}
+\input{009-vector}
+\input{010-debug-printf}
+\input{011-integer}
+\input{012-floating-point}
+\input{013-names}
+\input{014-iterator}
+\input{015-reference}
+\input{016-algorithm}
+\input{017-lambda}
+\input{018-class}
+\input{019-operator-overloading}
+\input{020-array}
+\input{021-three-virtues-of-a-programmer}
+\input{022-implement-array}
+\input{023-template}
+\input{024-more-array}
+\input{025-array-iterator}
+\input{026-exception}
+\input{027-pointer}
+\input{028-pointer-semantics}
+\input{029-pointer-syntax}
+\input{030-pointer-details}
+\input{031-iterator-operations}
+\input{032-memory-allocation}
+\input{033-vector-implementation}
+\input{034-vector-memory-allocation}
+\input{035-copy}
+\input{036-move}
+\input{037-rvalue-reference}
+\input{038-move-semantics}
+\input{039-disable-copy}
+\input{040-smart-pointer}
+\input{041-move-support}
+\input{042-string-intro}
+\input{043-random}
+\input{044-random-part2}
+\input{045-random-part3}
+\input{046-random-part4}
+\input{200-cpp}
+\input{300-multiple-source-files}
+\input{400-gdb}
+%
+\backmatter
+\printindex
+\input{about-author}
+\cleardoublepage
+\include{okuduke}
+%\include{okuduke_pdf}
+
+\end{document}

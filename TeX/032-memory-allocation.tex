@@ -1,0 +1,443 @@
+\hyperchapter{ch29}{動的メモリー確保}{動的メモリー確保}
+
+\hypersection{ch2901}{概要}
+
+動的メモリー確保\index{どうてきめもりかくほ@動的メモリー確保}\index{めもり@メモリー!どうてきかくほ@動的〜確保}は任意のサイズのメモリーを確保できる機能だ。
+
+例えば\texttt{std::vector}は任意個の要素を保持できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int input { } ;
+    std::vector<int> v ;
+    while ( std::cin >> input )
+    {
+        v.push_back( input ) ;
+    }
+}
+\end{lstlisting}
+
+このプログラムは任意個の\texttt{int}型の値を保持する。いくつ保持するかはコンパイル時にはわからないし、実行途中にもわからない。プログラムが終了するまで、実際にいくつ値を保持したのかはわからない。
+
+このような事前にいくつの値を保持するかわからない状況では、動的メモリー確保を使う。
+
+\clearpage
+\hypersection{ch2902}{malloc/free}
+\index{malloc@\texttt{malloc}}\index{free@\texttt{free}}
+
+\texttt{malloc}/\texttt{free}はC言語から受け継いだ素朴な動的メモリー確保のライブラリだ。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+    void *  malloc  ( std::size_t size ) ;
+    void    free    ( void * ptr ) ;
+}
+\end{lstlisting}
+
+\texttt{malloc(n)}は\texttt{n}バイトの生のメモリーを確保\index{めもり@メモリー!かくほ@確保}して、その先頭バイトへのポインターを返す。
+
+\begin{lstlisting}[language={C++}]
+// 5バイトのメモリーを確保
+void * ptr = std::malloc( 5 ) ;
+\end{lstlisting}
+
+これによって確保されるメモリーは、1バイトごとのメモリーが配列のように連続したメモリーだ。型で書くと、\texttt{std::byte [5]}のようなものだ。
+
+確保したメモリーは\texttt{free}で解放\index{めもり@メモリー!かいほう@解放}するまで有効だ。\texttt{free(ptr)}は\texttt{malloc}が返したポインター\texttt{ptr}を解放する。その結果、メモリーはまた再び\texttt{malloc}によって再利用できるようになる。
+
+\begin{lstlisting}[language={C++}]
+// 5バイトの生のメモリーを確保
+void * ptr = std::malloc( 5 ) ;
+// 解放
+std::free( ptr ) ;
+// これ以降、 ptrの値は無効
+\end{lstlisting}
+
+\hypersection{ch2903}{operator new/operator delete}
+\index{new@\texttt{new}}\index{delete@\texttt{delete}}
+
+C++の追加した生のメモリーを確保する方法が、\texttt{operator new}と\texttt{operator delete}だ。
+
+\begin{lstlisting}[language={C++}]
+// グローバル名前空間
+void *  operator new    ( std::size_t size );
+void    operator delete ( void * ptr ) ;
+\end{lstlisting}
+
+使い方は\texttt{malloc}とほぼ同じだ。\texttt{"operator new"}\,までが名前なので少し混乱するが、通常の関数呼び出しと同じだ。
+
+\begin{lstlisting}[language={C++}]
+void * ptr = ::operator new( 5 ) ;
+\end{lstlisting}
+
+グローバル名前空間であることを明示するために\,\texttt{::}\,を使っている。
+
+\texttt{operator new}で確保したメモリーは、\texttt{operator delete}で解放するまで有効だ。
+
+\begin{lstlisting}[language={C++}]
+void * ptr = ::operator new( 5 ) ;
+::operator delete ( ptr ) ;
+\end{lstlisting}
+
+\hypersection{ch2904}{生のバイト列を基本的な型の値として使う方法}
+
+\texttt{int}や\texttt{double}のような基本的な型は、生のバイト列のポインターを型変換\index{ぽいんた@ポインター!かたへんかん@型変換}するだけで使える。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  生のメモリーを確保
+\item
+  ポインターを型変換
+\item
+  値を代入
+\end{enumerate}
+
+\vskip -0.5zw
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 確保
+    void * void_ptr = ::operator new( sizeof(int) ) ;
+    // 型変換
+    int * int_ptr = static_cast<int *>( void_ptr ) ;
+    // 代入
+    *int_ptr = 0 ;
+    // 解放
+    ::operator delete ( void_ptr ) ;
+}
+\end{lstlisting}
+
+\texttt{int}型のサイズは\texttt{sizeof(int)}バイトなので、\texttt{sizeof(int)}バイトのメモリーを確保する。\texttt{void *}\,型から\texttt{int *}\,型に型変換する。あとはポインターを経由して使うだけだ。
+\index{sizeof@\texttt{sizeof}}
+
+ポインターの文法がわかりにくい場合、リファレンスを使うこともできる。
+
+\begin{lstlisting}[language={C++}]
+int & int_ref = *int_ptr ;
+\end{lstlisting}
+
+\texttt{malloc}や\texttt{operator new}が返すメモリーの値は不定だ。なので、確保した生のメモリーへのポインターを、実際に使う型のポインターに型変換して、その値を参照しようとすると、結果は未定義だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // ここまでは定義された挙動
+    int * ptr = static_cast<int *>( ::operator new(sizeof(int)) ) ;
+    // 未定義の挙動
+    std::cout << *ptr ;
+}
+\end{lstlisting}
+
+このプログラムを実行した結果、何が起こるかはわからない。
+
+\hypersection{ch2905}{メモリー確保の失敗}
+\index{めもり@メモリー!かくほしつぱい@確保失敗}
+
+メモリー確保は失敗する可能性がある。現実のコンピューターは有限のリソースしか持たないために、メモリーも当然有限のリソースだ。
+
+\texttt{malloc}が失敗\index{malloc@\texttt{malloc}!しつぱい@失敗}すると、\texttt{nullptr}\index{nullptr@\texttt{nullptr}}が返される。\texttt{malloc}が失敗したかどうかを調べるには、戻り値を\texttt{nullptr}と比較すればよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    void * ptr = std::malloc( 1 ) ;
+
+    if ( ptr == nullptr ) {
+        // メモリー確保失敗
+    } else {
+        // メモリー確保成功
+    }
+}
+\end{lstlisting}
+
+\texttt{operator new}が失敗すると、\texttt{std::bad\_alloc}\index{bad\_alloc@\texttt{bad\_alloc}}が投げられる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    try {
+        void * ptr = ::operator new( 1 ) ;
+        // メモリー確保成功
+    } catch ( std::bad_alloc e )
+    {
+        // メモリー確保失敗
+    }
+}
+\end{lstlisting}
+
+たいていの環境ではメモリー確保が失敗したときにできることは少ない。そのままプログラムを終了するのが最も適切な処理だ。というのも、ほとんどの処理にはメモリー確保が必要だからだ。
+
+例外の場合、\texttt{catch}しなければプログラムは終了する。\texttt{malloc}の場合、自分でメモリー確保が失敗したかどうかを調べてプログラムを終了しなければならない。プログラムを途中で強制的に終了するには、\texttt{std::abort}\index{abort@\texttt{abort}}が使える。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    void * ptr = malloc(1) ;
+
+(@\ifTombow\pagebreak\fi@)
+    // 失敗判定
+    if ( ptr == nullptr )
+        std::abort() ;
+
+    // 成功
+}
+\end{lstlisting}
+
+\hypersection{ch2906}{クラス型の値の構築}
+\index{くらす@クラス!あたいのこうちく@値の構築}
+
+動的に確保したメモリーを\texttt{int}や\texttt{double}のような基本的な型の値として使うには以下のように書けばよいことはすでに学んだ。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  その型のサイズ分のメモリーを確保
+\item
+  ポインターを型変換
+\item
+  適切な値を代入
+\end{enumerate}
+
+より汎用的にテンプレートを使って書くと以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+// 動的確保したメモリーをT型の値として使う
+template < typename T >
+void dynamic_allocate()
+{
+    // 1. その型のサイズ分のメモリーを確保
+    void * ptr = ::operator new( sizeof(T) ) ;
+    // 2. ポインターを型変換
+    T * T_ptr = static_cast<T * >( ptr ) ;
+    // 3. 適切な値を代入
+    *T_ptr = T{} ;
+    ::operator delete( ptr ) ;
+}
+
+int main()
+{
+    dynamic_allocate<int>() ;
+    dynamic_allocate<double>() ;
+}
+\end{lstlisting}
+
+この方法は、ほとんどのクラスには使えない。例えば\texttt{std::vector<T>}\,には使えない。
+
+\begin{lstlisting}[language={C++}]
+// エラー
+dynamic_allocate< std::vector<int> >() ;
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+「ほとんどのクラス」と書いたからには、使えるクラスもあるということだ。例えば以下のようなクラスでは使える。
+
+\begin{lstlisting}[language={C++}]
+struct Simple
+{
+    int i ;
+    double d ;
+} ;
+
+int main()
+{
+    // 使える
+    dynamic_allocate<Simple>() ;
+}
+\end{lstlisting}
+
+なぜ\texttt{Simple}のようなクラスでは使えるのだろうか。\texttt{std::vector<T>}\,とはどう違うのか。この違いを厳密に解説するためには、とても長くて厳密なC++の標準規格の理解が必要だ。とても難しいため、本書では解説しない。
+
+クラスの値を使うためには、メモリー上にクラスのオブジェクトを構築する必要がある。クラスの構築にはコンストラクター呼び出し以外にも、そのメモリーをクラスのオブジェクトとして使うのに必要な何らかの初期化が含まれる。
+
+\begin{lstlisting}[language={C++}]
+// sizeof(std::vector<int>)バイトのメモリーを確保し
+// そのメモリー上にクラスのオブジェクトを構築
+std::vector<int> v ;
+\end{lstlisting}
+
+生のメモリー上にクラスのような複雑な型を構築するには、\texttt{newプレイスメント}\index{new@\texttt{new}!ぷれいすめんと@プレイスメント}を使う。
+
+\begin{lstlisting}[style=grammar]
+new ( 生のポインター ) 型 new初期化子
+\end{lstlisting}
+
+\texttt{new初期化子}\index{new@\texttt{new}!しよきかし@初期化子}というのは\texttt{()}か\,\texttt{\{\}}\,で囲んだコンストラクターへの引数だ。引数がない場合は省略もできる。
+
+例えば\texttt{std::vector<int>}\,型を構築するには以下のようにする。
+
+\begin{lstlisting}[language={C++}]
+// 生のメモリーを動的確保
+void * ptr = ::operator new ( sizeof( std::vector<int> ) ) ;
+// 生のメモリー上に型を構築
+std::vector<int> * vector_ptr = new (ptr) std::vector<int>{} ;
+\end{lstlisting}
+
+こうすればクラスが適切にメモリー上に構築され、コンストラクターも呼ばれる。コンストラクターが呼ばれることを確かめてみよう。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+struct Logger
+{
+    std::string name ;
+    Logger( std::string name )
+        : name( name )
+    { std::cout << name << " is constructed.\n"s ; }
+    ~Logger()
+    { std::cout << name << " is destructed.\n"s ; }
+} ;
+
+int main()
+{
+    void * ptr = ::operator new ( sizeof( Logger ) ) ;
+    Logger * logger_ptr = new (ptr) Logger{"Alice"s} ;
+}
+\end{lstlisting}
+
+このプログラムを実行すると、\texttt{"Alice is constructed."}\,と出力される。
+
+クラスのオブジェクトを適切に破棄するためには、デストラクターを呼ばなければならない。通常の変数ならば、変数が寿命を迎えたときに自動的にデストラクターが呼ばれてくれる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    Logger Alice("Alice"s) ;
+    {
+        Logger Bob("Bob"s) ;
+        // Bobの寿命はここまで
+    }
+    // Aliceの寿命はここまで
+}
+\end{lstlisting}
+
+このプログラムを実行すると、以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+Alice is constructed.
+Bob is constructed.
+Bob is destructed.
+Alice is destructed.
+\end{lstlisting}
+
+動的に確保されるメモリー上に構築されたオブジェクトは自動的に破棄されてくれない。クラスのオブジェクトの場合デストラクターを呼び出さなければならないが、動的メモリー確保したメモリー上に構築したクラスのオブジェクトの場合は、明示的に呼び出さなければならない。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// 動的メモリー確保
+void * raw_ptr = ::operator new( sizeof(Logger) ) ;
+// 構築
+Logger * logger_ptr = new(raw_ptr) Logger{ "Alice"s } ;
+// デストラクター呼び出し
+logger_ptr->~Logger() ;
+// 破棄
+::operator delete( raw_ptr ) ;
+\end{lstlisting}
+
+このようにすれば、コンストラクター、デストラクターが適切に呼ばれる。また確保したメモリーも解放される。
+
+\hypersection{ch2907}{new/delete}
+
+クラスのオブジェクトを動的確保するのに、生のメモリーの確保/解放と、クラスのオブジェクトの構築/破棄をすべて自前で行うのは面倒だ。幸い、確保と構築、破棄と解放を同時にやってくれる機能がある。\texttt{new式}と\texttt{delete式}だ。
+\index{new@\texttt{new}!しき@式}\index{delete@\texttt{delete}!しき@式}
+
+\begin{lstlisting}[style=grammar]
+new 型 new初期化子
+delete ポインター
+\end{lstlisting}
+
+\texttt{new式}は生のメモリーを確保し、型のオブジェクトを構築し、そのオブジェクトへのポインターを返す。
+
+\begin{lstlisting}[language={C++}]
+int * int_ptr = new int{123} ;
+std::vector<int> * vector_ptr = new std::vector<int>{} ;
+\end{lstlisting}
+
+\texttt{delete式}は\texttt{new式}で返されたポインターの指し示すオブジェクトを破棄し、生のメモリーを解放する。
+
+\begin{lstlisting}[language={C++}]
+delete int_ptr ;
+delete vector_ptr ;
+\end{lstlisting}
+
+\texttt{new式}がメモリーの確保に失敗すると、\texttt{std::bad\_alloc}\index{bad\_alloc@\texttt{bad\_alloc}}例外を投げる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    try {
+        new int{0} ;
+        // 確保成功
+    } catch( std::bad_alloc e )
+    {
+(@\ifTombow\pagebreak\fi@)
+        // 確保失敗
+    }
+}
+\end{lstlisting}
+
+\hypersection{ch2908}{配列版new/delete}
+\index{new@\texttt{new}!しき@式}\index{delete@\texttt{delete}!しき@式}
+
+\texttt{new式}は配列型を動的確保することもできる。
+\index{はいれつ@配列!どうてきかくほ@動的確保}
+
+\begin{lstlisting}[language={C++}]
+int * int_array_ptr =  new int[5]{1,2,3,4,5} ;
+\end{lstlisting}
+
+配列型を\texttt{new式}で動的確保した場合、\texttt{delete式}は通常の\texttt{delete}ではなく、\texttt{delete[]}\index{delete[]@\texttt{delete[]}}を使わなければならない。
+
+\begin{lstlisting}[language={C++}]
+delete [] int_array_ptr ;
+\end{lstlisting}
+
+\hypersection{ch2909}{スマートポインター}
+\index{すまとぽいんた@スマートポインター}\index{ぽいんた@ポインター!すまと@スマート〜}
+
+クラスのオブジェクトの動的確保は、解放を明示的にしなければならないので間違いをしやすい。この問題はクラスを使って解決できる。
+
+クラスのコンストラクターで動的確保し、デストラクターで解放すればよいのだ。
+
+\begin{lstlisting}[language={C++}]
+template < typename T >
+struct smart_ptr
+{
+    T * ptr ;
+    // コンストラクターで構築
+    smart_ptr()
+        : ptr( new T{} )
+    { }
+    // デストラクターで破棄
+    ~smart_ptr()
+    { delete ptr ; }
+
+    T & operator *() const noexcept
+    { return *ptr ; }
+} ;
+
+int main()
+{
+    smart_ptr<int> ptr ;
+    *ptr = 123 ;
+(@\ifTombow\pagebreak\fi@)
+    // 自動的に破棄される
+}
+\end{lstlisting}
+
+このクラスはさまざまな点で実用的ではない。例えばこのクラスはコピーできてしまう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    smart_ptr<int> p1 ;
+    // コピーされる
+    auto p2 = p1 ;
+    // p2の寿命
+    // エラー、 p1の寿命
+}
+\end{lstlisting}
+
+このコードの何がまずいかというと、\texttt{smart\_ptr::ptr}がコピーされてしまうということだ。\texttt{p2}が破棄されると、\texttt{delete ptr}が実行される。そのあとに\texttt{p1}が破棄されるのだが、もう一度\texttt{delete ptr}が実行されてしまうのだ。一度\texttt{delete}を呼び出したポインターはもう無効になっているので、それ以上\texttt{delete}を呼び出すことはできない。よってエラーになる。
+
+この問題を解決するには、まだ学んでいないC++の機能がたくさん必要になる。この問題は必要な機能をすべて学び終えたあとの章で、もう一度挑戦することにしよう。

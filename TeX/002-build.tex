@@ -1,0 +1,814 @@
+\hyperchapter{ch02}{C++の実行}{C++の実行}
+
+プログラミング言語を学ぶには、まず書いたソースコードをプログラムとして実行できるようになることが重要だ。自分が正しく理解しているかどうかを確認するために書いたコードが期待どおりに動くことを確かめてこそ、正しい理解が確認できる。
+
+\hypersection{ch0201}{C++の実行の仕組み}
+
+C++は慣習的に、ソースファイルをコンパイルしてオブジェクトファイルを生成し、オブジェクトファイルをリンクして実行可能ファイルを生成し、実行可能ファイルを直接実行することで実行する言語だ。
+\index{C++!じつこう@実行}\index{C++!こんぱいる@コンパイル}\index{C++!そすふあいる@ソースファイル}\index{C++!おぶじえくとふあいる@オブジェクトファイル}\index{C++!じつこうかのうふあいる@実行可能ファイル}
+
+ほかの言語では、ソースファイルをそのままパースし、解釈して実行するインタープリター形式\index{いんたぷりたけいしき@インタープリター形式}の言語が多い。もっとも、いまとなってはソースファイルから中間言語に変換して、VM（Virtual Machine）\index{VM@VM（Virtual Machine）}と呼ばれる中間言語を解釈して実行するソフトウェア上で実行するとか、JIT（Just-In-Time）コンパイル\index{JIT@JIT（Just-In-Time）コンパイル}してネイティブコードを生成して実行するといった実装もあるため、昔のように単純にインタープリター型の言語ということはできなくなっている事情はある。ただし、最終的にJITコンパイルされてネイティブコードが実行される言語でも、コンパイルやコード生成はプログラマーが意識しない形で行われるため、プログラマーはコンパイラーを直接使う必要のない言語も多い。
+
+C++はプログラマーが直接コンパイラーを使い、ソースファイルをプログラムに変換する言語だ。
+
+\hypersection{ch0202}{簡単な1つのソースファイルからなるプログラムの実行}
+
+ここでは、典型的なC++のソースファイルをどのようにコンパイルし実行するか、一連の流れを学ぶ。
+
+\hypersubsection{ch020201}{サンプルコード}
+
+以下のC++のソースファイル\index{C++!そすふあいる@のソースファイル}は標準出力に\texttt{hello}と出力するものだ。
+
+\begin{lstlisting}[language={C++}]
+#include <iostream>
+
+int main()
+{
+    std::cout << "hello" ;
+}
+\end{lstlisting}
+
+コードの詳細な意味はさておくとして、このサンプルコードを使ってC++の実行までの流れを見ていこう。
+
+まずは端末から作業用の適当な名前のディレクトリーを作る。ここでは\texttt{cpp}としておこう。ディレクトリーの作成は\texttt{mkdir}コマンド\index{mkdir@\texttt{mkdir}コマンド}で行える。
+
+\begin{lstlisting}[style=terminal]
+$ mkdir cpp
+$ cd cpp
+\end{lstlisting}
+
+好きなテキストエディターを使って上のサンプルコードをテキストファイルとして記述する。ファイル名は\texttt{hello.cpp}\index{hellocpp@\texttt{hello.cpp}}としておこう。
+
+\begin{lstlisting}[style=terminal]
+$ vim hello.cpp
+\end{lstlisting}
+
+C++のソースファイルの名前は何でもよいが、慣習で使われている拡張子がいくつかある。本書では\texttt{.cpp}\index{.cpp@\texttt{.cpp}}を使う。
+
+無事にソースファイルが作成できたかどうか確認してみよう。現在のカレントディレクトリー下のファイルの一覧を表示するには\texttt{ls}\index{ls@\texttt{ls}コマンド}、ファイルの内容を表示するには\texttt{cat}\index{cat@\texttt{cat}コマンド}を使う。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+hello.cpp
+$ cat hello.cpp
+#include <iostream>
+
+int main()
+{
+    std::cout << "hello" ;
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+\hypersubsection{ch020202}{コンパイル}
+
+さて、ソースファイルが用意できたならば、いよいよコンパイル\index{こんぱいる@コンパイル}だ。
+
+C++のソースファイルから、実行可能ファイル\index{じつこうかのうふあいる@実行可能ファイル}を生成するソフトウェアをC++コンパイラー\index{C++こんぱいら@C++コンパイラー}という。C++コンパイラーとしては、GCC（GNU Compiler Collection）\index{GCC@GCC（GNU Compiler Collection）}とClang（クラン）\index{Clang@Clang（クラン）}がある。使い方はどちらもほぼ同じだ。
+
+GCCを使って先ほどの\texttt{hello.cpp}をコンパイルするには以下のようにする。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -o hello hello.cpp
+\end{lstlisting}
+
+GCCという名前のC++コンパイラーなのに\texttt{g++}\index{g++@\texttt{g++}}なのは、\texttt{gcc}\index{gcc@\texttt{gcc}}はC言語コンパイラーの名前としてすでに使われているからだ。この慣習はClangも引き継いでいて、ClangのC++コンパイラーは\texttt{clang++}\index{clang++@\texttt{clang++}}だ。
+
+サンプルコードを間違いなくタイプしていれば、カレントディレクトリーに\texttt{hello}とぃう実行可能ファイルが作成されるはずだ。確認してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+hello hello.cpp
+\end{lstlisting}
+
+\hypersubsection{ch020203}{実行}
+
+さて、いよいよ実行だ。通常のOSではカレントディレクトリーが\texttt{PATH}に含まれていないため、実行するにはカレントディレクトリーからパスを指定する必要がある。
+\index{C++!じつこう@実行}
+
+\begin{lstlisting}[style=terminal]
+$ ./hello
+hello
+\end{lstlisting}
+
+上出来だ。初めてのC++プログラムが実行できた。さっそくC++を学んでいきたいところだが、その前にC++プログラミングに必要なツールの使い方を学ぶ必要がある。
+
+\clearpage
+\hypersection{ch0203}{GCC: C++コンパイラー}
+
+GCC\index{GCC@GCC（GNU Compiler Collection）}はC++のソースファイルからプログラムを生成するC++コンパイラー\index{C++こんぱいら@C++コンパイラー}だ。
+
+GCCの基本的な使い方は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+g++ その他のオプション -o 出力するファイル名 ソースファイル名
+\end{lstlisting}
+
+ソースファイル名は複数指定することができる。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -o abc a.cpp b.cpp c.cpp
+\end{lstlisting}
+
+これについては分割コンパイルの章で詳しく解説する。
+
+コンパイラーはメッセージを出力することがある。コンパイルメッセージ\index{こんぱいるめつせじ@コンパイルメッセージ}には、エラーメッセージと警告メッセージとがある。
+
+エラーメッセージ\index{えらめつせじ@エラーメッセージ}というのは、ソースコードに文法上、意味上の誤りがあるため、コンパイルできない場合に生成される。エラーメッセージはエラーの箇所も教えてくれる。ただし、文法エラーは往々にして適切な誤りの箇所を指摘できないこともある。これは、C++の文法としては正しくないテキストファイルから、妥当なC++であればどういう間違いなのかを推測する必要があるためだ。
+
+警告メッセージ\index{けいこくめつせじ@警告メッセージ}というのは、ソースコードにコンパイルを妨げる文法上、意味上の誤りは存在しないが、誤りの可能性が疑われる場合に出力される。
+
+\hypersubsection{ch020301}{コンパイラーオプション}
+
+GCCのコンパイラーオプション\index{GCC@GCC（GNU Compiler Collection）!こんぱいらおぷしよん@コンパイラーオプション}をいくつか学んでいこう。
+
+\texttt{-std=}\,\index{GCC@GCC（GNU Compiler Collection）!-std=@\texttt{-std=}}はC++の規格を選択するオプションだ。C++17に準拠したいのであれば\,\texttt{-std=c++17}を指定する。読者が本書を読むころには、C++20や、あるいはもっと未来の規格が発行されているかもしれない。常に最新のC++規格を選択するオプションを指定するべきだ。
+
+\texttt{-Wall}\index{GCC@GCC（GNU Compiler Collection）!-Wall@\texttt{-Wall}}はコンパイラーの便利な警告メッセージのほとんどすべてを有効にするオプションだ。コンパイラーによる警告メッセージはプログラムの不具合を未然に発見できるので、このオプションは指定すべきだ。
+
+\texttt{{-}{-}pedantic-errors}\index{GCC@GCC（GNU Compiler Collection）!--pedantic-errors@\texttt{{-}{-}pedantic-errors}}はC++の規格を厳格に守るオプションだ。規格に違反しているコードがコンパイルエラー扱いになる。
+
+これをまとめると、GCCは以下のように使う。
+
+\begin{lstlisting}[style=grammar]
+g++ -std=c++17 -Wall --pedantic-errors -o 出力ファイル名 入力ファイル名
+\end{lstlisting}
+
+ところで、GCCのオプションはとても多い。すべてを知りたい読者は、以下のようにしてGCCのマニュアルを読むとよい。
+
+\begin{lstlisting}[style=terminal]
+$ man gcc
+\end{lstlisting}
+
+手元にマニュアルがない場合、GCCのWebサイトにあるオンラインマニュアルも閲覧できる。
+
+\begin{itemize}
+\item
+  \url{https://gcc.gnu.org/}
+\item
+  \url{https://gcc.gnu.org/onlinedocs/}
+\end{itemize}
+
+\hypersubsection{ch020302}{ヘッダーファイルの省略}
+
+先ほどのソースコードをもう一度見てみよう。冒頭に以下のような行がある。
+
+\begin{lstlisting}[language={C++}]
+#include <iostream>
+\end{lstlisting}
+
+これは\,\texttt{\#includeディレクティブ}（\#include directive）\index{\#include@\texttt{\#include}ディレクティブ}といい、プリプロセッサー（preprocessor）\index{ぷりぷろせつさ@プリプロセッサー}の一部だ。プリプロセッサーについて詳しくは煩雑になるので巻末資料を参照してもらうとして、このコードは\texttt{iostream}ライブラリを使うために必要で、その意味としてはヘッダーファイル\texttt{iostream}の取り込みだ。
+
+C++の標準ライブラリを使うには、ライブラリごとに対応した\,\texttt{\#includeディレクティブ}を書かなければならない。それはあまりにも煩雑なので、本書では標準ライブラリのヘッダーファイルをすべて\,\texttt{\#include}した\texttt{ヘッダーファイル}（header file）\index{へつだふあいる@ヘッダーファイル}\index{.h@\texttt{.h}}を作成し、それを\,\texttt{\#include}することで、\texttt{\#include}を書かなくて済むようにする。
+
+そのためにはまず標準ライブラリのヘッダーファイルのほとんどすべてを\,\texttt{\#include}したヘッダーファイル、\texttt{all.h}\index{all.h@\texttt{all.h}}を作成する。
+
+\begin{lstlisting}[language={C++}]
+#include <cstddef>
+#include <limits>
+#include <climits>
+#include <cfloat>
+#include <cstdint>
+#include <cstdlib>
+#include <new>
+#include <typeinfo>
+#include <exception>
+#include <initializer_list>
+#include <cstdalign>
+#include <stdexcept>
+#include <cassert>
+#include <cerrno>
+#include <system_error>
+#include <string>
+
+#if __has_include(<string_view>)
+#   include <string_view>
+#endif
+
+#include <array>
+#include <deque>
+#include <forward_list>
+#include <list>
+#include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <iterator>
+#include <algorithm>
+#include <cfenv>
+#include <random>
+#include <numeric>
+#include <cmath>
+#include <iosfwd>
+#include <iostream>
+#include <ios>
+#include <streambuf>
+#include <istream>
+#include <ostream>
+#include <iomanip>
+#include <sstream>
+#include <fstream>
+
+#if __has_include(<filesystem>)
+#   include <filesystem>
+#endif
+
+#include <cstdio>
+#include <cinttypes>
+
+
+#include <regex>
+#include <atomic>
+#include <thread>
+#include <mutex>
+#include <shared_mutex>
+#include <condition_variable>
+#include <future>
+
+using namespace std::literals ;
+\end{lstlisting}
+
+このようなヘッダーファイル\texttt{all.h}を作成したあとに、ソースファイルで以下のように書けば、ほかのヘッダーファイルを\,\texttt{\#include}する必要がなくなる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+#include "all.h"
+
+// その他のコード
+\end{lstlisting}
+
+\texttt{//}\index{//@\texttt{//}}から行末まではコメント\index{こめんと@コメント}で、好きなテキストを書くことができる。
+
+しかし、この最初の1行の\,\texttt{\#include}も面倒だ。そこでGCCのオプション\,\texttt{-include}\index{GCC@GCC（GNU Compiler Collection）!-include@\texttt{-include}}を使い、\texttt{all.h}を常に\,\texttt{\#include}した扱いにする。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -include all.h -o program main.cpp
+\end{lstlisting}
+
+このようにすると、\texttt{main.cpp}が以下のコードでもコンパイルできるようになる。
+
+\begin{lstlisting}[language={C++}]
+// main.cpp
+// 面倒な#includeなどなし
+
+int main()
+{
+    std::cout << "hello" ;
+}
+\end{lstlisting}
+
+これでヘッダーファイルが省略できるようになった。
+
+\hypersubsection{ch020303}{コンパイル済みヘッダー(precompiled header)}
+
+C++はソースファイルをコンパイルする必要がある言語だ。コンパイルには時間がかかる。コンパイルにどれだけ時間がかかっているかを計測するには、以下のようにするとよい。
+
+\begin{lstlisting}[style=terminal]
+$ time g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
+\end{lstlisting}
+
+どうだろうか。読者の環境にもよるが、知覚できるぐらいの時間がかかっているのではないだろうか。プログラミングの習得にはコードを書いてから実行までの時間が短い方がよい。そこで本格的にC++を学ぶ前に、コンパイル時間を短縮する方法を学ぶ。
+
+プログラムで変更しないファイルを事前にコンパイルしておくと、変更した部分だけコンパイルすればよいので、コンパイル時間の短縮になる。GCCでは、ヘッダーファイルを事前にコンパイルする特別な機能がある。標準ライブラリのヘッダーファイルは変更しないので、事前にコンパイルしておけばコンパイル時間の短縮になる。
+
+事前にコンパイルしたヘッダーファイルのことをコンパイル済みヘッダー（precompiled header）\index{こんぱいるずみへつだ@コンパイル済みヘッダー}\index{へつだふあいる@ヘッダーファイル!こんぱいるずみへつだ@コンパイル済みヘッダー}という。
+
+すでに作成した\texttt{all.h}はコンパイル済みヘッダーとするのに適切なヘッダーファイルだ。
+
+コンパイル済みヘッダーファイルを作成するには、ヘッダーファイル単体をGCCに与え、出力するファイルを\texttt{ヘッダーファイル名.gch}\index{.gch@\texttt{.gch}}とする。ヘッダーファイル名が\texttt{all.h}の場合、\texttt{all.h.gch}となる。
+
+GCCのオプションにはほかのソースファイルをコンパイルするときと同じオプションを与えるほか、ヘッダーファイルがC++で書かれていることを示すオプション\,\texttt{-x c++-header}\index{GCC@GCC（GNU Compiler Collection）!-x c++-header@\texttt{-x c++-header}}を与える。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h
+\end{lstlisting}
+
+こうすると、コンパイル済みヘッダーファイル\texttt{all.h.gch}が生成できる。
+
+GCCはヘッダーファイルを使うときに、同名の\texttt{.gch}ファイルが存在する場合は、そちらをコンパイル済みヘッダーファイルとして使うことで、ヘッダーファイルの処理を省略する。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
+\end{lstlisting}
+
+コンパイル済みヘッダーは1回のコンパイルにつき1つしか使うことができない。そのため、コンパイル済みヘッダーとするヘッダーファイルを定め、そのヘッダーファイル内にほかのヘッダーをすべて記述する。本書ではコンパイル済みヘッダーファイルとする元のヘッダーファイルの名前を\texttt{all.h}とする。
+
+さっそくコンパイル時間の短縮効果を確かめてみよう。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+all.h main.cpp
+$ g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h
+$ ls
+all.h all.h.gch main.cpp
+$ time g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
+\end{lstlisting}
+
+\clearpage
+\hypersection{ch0204}{Make: ビルドシステム}
+\index{GNU Make}
+
+\hypersubsection{ch020401}{コンパイルと実行のまとめ}
+
+ここまで、我々はソースファイルをコンパイルして実行可能ファイルを生成し、プログラムを実行する方法について学んできた。これまでに学んできたことを一連のコマンドで振り返ってみよう。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+all.h main.cpp
+$ cat all.h
+#include <iostream>
+$ cat main.cpp
+int main() { std::cout << "hello"s ; }
+\end{lstlisting}
+
+まず、カレントディレクトリーには\texttt{all.h}と\texttt{main.cpp}がある。この2つのファイルは実行可能ファイルを生成するために必要なファイルだ。今回、その中身は最小限にしてある。本当の\texttt{all.h}は、実際には前回書いたように長い内容になる。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -std=c++17 -Wall --pedantic-errors -x c++-header -o all.h.gch all.h
+$ ls
+all.h all.h.gch main.cpp
+\end{lstlisting}
+
+次に、ソースファイルのコンパイルを高速化するために、ヘッダーファイル\texttt{all.h}から、コンパイル済みヘッダーファイル\texttt{all.h.gch}を生成する。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -std=c++17 -Wall --pedantic-errors -include all.h -o program main.cpp
+$ ls
+all.h all.h.gch main.cpp program
+\end{lstlisting}
+
+プリコンパイル済みヘッダーファイル\texttt{all.h.gch}とC++ソースファイル\texttt{main.cpp}から、実行可能ファイル\texttt{program}を生成する。
+
+\begin{lstlisting}[style=terminal]
+$ ./program
+hello
+\end{lstlisting}
+
+実行可能ファイル\texttt{program}を実行する。
+
+これで読者はC++のプログラミングを学び始めるにあたって必要なことはすべて学んだ。さっそくC++を学んでいきたいところだが、その前にもう1つ、ビルドシステムを学ぶ必要がある。
+
+\hypersubsection{ch020402}{依存関係を解決するビルドシステム}
+
+以上のC++のソースファイルからプログラムを実行するまでの流れは、C++のプログラムとしてはとても単純なものだが、それでも依存関係\index{いぞんかんけい@依存関係}が複雑だ。
+
+プログラムの実行にあたって最終的に必要なのはファイル\texttt{program}だが、このファイルはGCCで生成しなければならない。ところでGCCでファイル\texttt{program}を生成するには、事前に\texttt{all.h}, \texttt{all.h.gch}, \texttt{main.cpp}が必要だ。\texttt{all.h.gch}は\texttt{all.h}からGCCで生成しなければならない。
+
+一度コンパイルしたプログラムのソースファイルを書き換えて再びコンパイルする場合はどうすればいいだろう。\texttt{main.cpp}だけを書き換えた場合、\texttt{all.h}は何も変更されていないので、コンパイル済みヘッダーファイル\texttt{all.h.gch}の再生成は必要ない。\texttt{all.h}だけを書き換えた場合は、\texttt{all.h.gch}を生成するだけでなく、\texttt{program}も再生成しなければならない。
+
+プログラムのコンパイルには、このような複雑な依存関係の解決が必要になる。依存関係の解決を人間の手で行うのはたいへんだ。例えば読者が他人によって書かれた何千ものソースファイルと、プログラムをコンパイルする手順書だけを渡されたとしよう。手順書に従ってコンパイルをしたとして、ソースファイルの一部だけを変更した場合、いったいどの手順は省略できるのか、手順書から導き出すのは難しい。するとコンパイルを最初からやり直すべきだろうか。しかし、1つのソースファイルのコンパイルに1秒かかるとして、何千ものソースファイルがある場合、何千秒もかかってしまう。たった1つのソースファイルを変更しただけですべてをコンパイルし直すのは時間と計算資源の無駄だ。
+
+この依存関係の問題は、ビルドシステムによって解決できる。本書ではGNU Make\index{GNU Make}というビルドシステムを学ぶ。読者がこれから学ぶビルドシステムによって、以下のような簡単なコマンドだけで、他人の書いた何千ものソースファイルからなるプログラムがコンパイル可能になる。
+
+何千ものソースファイルから実行可能ファイルを生成したい。
+
+\begin{lstlisting}[style=terminal]
+$ make
+\end{lstlisting}
+
+これだけだ。\texttt{make}\index{make@\texttt{make}コマンド}というコマンド1つでプログラムのコンパイルは自動的に行われる。
+
+何千ものソースファイルのうち、1つのソースファイルだけを変更し、必要な部分だけを効率よく再コンパイルしたい。
+
+\begin{lstlisting}[style=terminal]
+$ make
+\end{lstlisting}
+
+これだけだ。\texttt{make}というコマンド1つでプログラムの再コンパイルは自動的に行われる。
+
+ところで、生成される実行可能ファイルの名前はプログラムごとにさまざまだ。プログラムの開発中は、共通の方法でプログラムを実行したい。
+
+\begin{lstlisting}[style=terminal]
+$ make run
+\end{lstlisting}
+\index{make@\texttt{make}コマンド!run@\texttt{run}}
+
+これでどんなプログラム名でも共通の方法で実行できる。
+
+ソースファイルから生成されたプログラムなどのファイルをすべて削除したい。
+
+\begin{lstlisting}[style=terminal]
+$ make clean
+\end{lstlisting}
+\index{make@\texttt{make}コマンド!clean@\texttt{clean}}
+
+これで生成されたファイルをすべて削除できる。
+
+テキストエディターにはVimを使っているがわざわざVimからターミナルに戻るのが面倒だ。
+
+\begin{lstlisting}[style=terminal]
+:make
+\end{lstlisting}
+
+VimはノーマルモードからMakeを呼び出すことができる。もちろん、\texttt{:make run}や\texttt{:make clean}もできる。
+
+\hypersubsection{ch020403}{依存関係を記述するルール}
+
+依存関係はどのように表現したらいいのだろうか。GNU Makeでは\texttt{Makefile}\index{Makefile@\texttt{Makefile}}\index{GNU Make!Makefile@\texttt{Makefile}}という名前のファイルの中に、\texttt{ターゲット}（targets）\index{GNU Make!たげつと@ターゲット}、\texttt{事前要件}（prerequisites）\index{GNU Make!じぜんようけん@事前要件}、\texttt{レシピ}（recipes）\index{GNU Make!れしぴ@レシピ}という3つの概念で依存関係を\texttt{ルール}（rules）\index{GNU Make!るる@ルール}として記述する。\texttt{ルール}は以下の文法だ。
+
+\begin{lstlisting}[style=grammar]
+ターゲット : 事前要件
+[TAB文字]レシピ
+\end{lstlisting}
+
+レシピは必ず\texttt{TAB文字}を直前に書かなければならない。スペース文字ではだめだ。これは\texttt{make}の初心者を混乱させる落とし穴の1つとなっている。忘れずに\texttt{TAB文字}を打とう。
+
+問題を簡単に理解するために、以下のような状況を考えよう。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+source
+$ cat source > program
+\end{lstlisting}
+
+この例では、ファイル\texttt{program}を生成するためにはファイル\texttt{source}が必要だ。ファイル\texttt{source}はすでに存在している。
+
+\texttt{ターゲット}は生成されるファイル名だ。この場合\texttt{program}となる。
+
+\begin{lstlisting}[language=make]
+program : 事前要件
+    レシピ
+\end{lstlisting}
+
+\texttt{事前要件}は\texttt{ターゲット}を生成するために必要なファイル名だ。この場合\texttt{source}となる。
+
+\begin{lstlisting}[language=make]
+program : source
+    レシピ
+\end{lstlisting}
+
+\texttt{レシピ}は\texttt{ターゲット}を生成するために必要な動作だ。この場合、\texttt{cat source > program}となる
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language=make]
+program : source
+    cat source > program
+\end{lstlisting}
+
+さっそくこのルールを、ファイル\texttt{Makefile}に書き込み、\texttt{make}を呼び出してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+Makefile source 
+$ cat Makefile
+program : source
+    cat source > program
+$ make
+cat source > program
+$ ls
+Makefile program source
+\end{lstlisting}
+
+これがMakeの仕組みだ。\texttt{ターゲット}の生成に必要な\texttt{事前要件}と、\texttt{ターゲット}を生成する\texttt{レシピ}を組み合わせた\texttt{ルール}で依存関係を記述する。\texttt{make}を実行すると、実行した\texttt{レシピ}が表示される。
+
+もう少しMakeの\texttt{ルール}を追加してみよう。例えばファイル\texttt{source}はあらかじめ存在するのではなく、ファイル\texttt{source01}, \texttt{source02}, \texttt{source03}の中身をこの順番で連結して生成するとしよう。以下のように書ける。
+
+\begin{lstlisting}[language=make]
+program : source
+    cat source > program
+
+source : source01 source02 source03
+    cat source01 source02 source03 > source
+\end{lstlisting}
+
+GNU Makeはカレントディレクトリーにあるファイル\texttt{Makefile}の一番上に書かれたルールを実行しようとする。\texttt{program}を生成するには\texttt{source}が必要だが、\texttt{source}の生成には別のルールの実行が必要だ。\texttt{Makefile}はこの依存関係を自動で解決してくれる。
+
+\begin{lstlisting}[style=terminal]
+$ touch source01 source02 source03
+$ ls
+Makefile source01 source02 source03
+$ make
+cat source01 source02 source03 > source
+cat source > program
+$ ls
+Makefile program source source01 source02 source03
+\end{lstlisting}
+
+すでに\texttt{make}を実行したあとで、もう一度\texttt{make}を実行するとどうなるだろうか。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=terminal]
+$ make
+make: 'program' is up to date.
+\end{lstlisting}
+
+このメッセージの意味は「\texttt{program}は最新だ」という意味だ。\texttt{make}はファイルのタイムスタンプを調べ、もしファイル\texttt{program}より\texttt{source}のタイムスタンプの方が若い場合、つまり\texttt{program}が変更されたよりもあとに\texttt{source}が変更された場合、\texttt{ルール}を実行する。
+
+試しにファイル\texttt{source02}のタイムスタンプを更新してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ touch source02
+$ make
+cat source01 source02 source03 > source
+cat source > program
+\end{lstlisting}
+
+ファイル\texttt{source}は\texttt{事前要件}に\texttt{source02}を含む。\texttt{source02}のタイムスタンプが\texttt{source}より若いので、\texttt{source}が再び生成される。すると、\texttt{source}のタイムスタンプが\texttt{program}のタイムスタンプよりも若くなったので、\texttt{program}も生成される。
+
+もう1つ例を見てみよう。
+
+\begin{lstlisting}[style=terminal]
+$ touch a b c
+$ ls
+a b c Makefile
+\end{lstlisting}
+
+あるディレクトリーにファイル\texttt{a}, \texttt{b}, \texttt{c}がある。
+
+\texttt{Makefile}は以下の内容になっている。
+
+\begin{lstlisting}[language=make]
+D : A B C
+    cat A B C > D
+
+A : a
+    cat a > A
+
+B : b
+    cat b > B
+
+C : c
+    cat c > C
+\end{lstlisting}
+
+この\texttt{Makefile}を呼び出したときに作られるのはファイル\texttt{D}だ。ファイル\texttt{D}を作るにはファイル\texttt{A}, \texttt{B}, \texttt{C}が必要だ。このファイルはそれぞれファイル\texttt{a}, \texttt{b}, \texttt{c}から生成されるルールが記述してある。
+
+これを\texttt{make}すると以下のようにファイル\texttt{A}, \texttt{B}, \texttt{C}, \texttt{D}が作られる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=terminal]
+$ ls
+a b c Makefile
+$ make
+cat a > A
+cat b > B
+cat c > C
+cat A B C > D
+\end{lstlisting}
+
+ここで、ファイル\texttt{b}のタイムスタンプだけを更新して\texttt{make}してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ touch b
+$ make
+cat b > B
+cat A B C > D
+\end{lstlisting}
+
+ファイル\texttt{b}のタイムスタンプがファイル\texttt{B}より若くなったので、ファイル\texttt{B}がターゲットとなったルールが再び実行される。ファイル\texttt{A}, \texttt{C}のルールは実行されない。そしてファイル\texttt{B}のタイムスタンプがファイル\texttt{D}より若くなったので、ファイル\texttt{D}がターゲットとなったルールが再び実行される。
+
+\texttt{make}により、処理する必要のあるルールだけが部分的に処理されていることがわかる。
+
+\texttt{make}は適切な\texttt{ルール}さえ書けば、依存関係の解決を自動的に行ってくれる。
+
+\hypersubsection{ch020404}{コメント}
+
+\texttt{Makefile}\index{Makefile@\texttt{Makefile}}にはコメント\index{Makefile@\texttt{Makefile}!こめんと@コメント}を書くことができる。\texttt{\#}\,\index{Makefile@\texttt{Makefile}!\#@\texttt{\#}}で始まる行はコメント扱いされる。
+
+\begin{lstlisting}[language=make]
+# programを生成するルール
+program : source
+    cat source > program
+
+# sourceを生成するルール
+source : source01 source02 source03
+    cat source01 source02 source03 > source
+\end{lstlisting}
+
+\hypersubsection{ch020405}{変数}
+
+\texttt{Makefile}には\texttt{変数}\index{Makefile@\texttt{Makefile}!へんすう@変数}を書くことができる。
+
+変数の文法は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+variable = foobar
+
+target : $(variable)
+\end{lstlisting}
+
+これは、
+\begin{lstlisting}[language=make]
+target : foobar
+\end{lstlisting}
+と書いたものと同じように扱われる。
+
+変数は\,\texttt{=}\,の左側に変数名、右側に変数の内容を書く。
+
+変数を使うときは、\texttt{\$(変数名)}のように、\texttt{\$()}\index{Makefile@\texttt{Makefile}!\$()@\texttt{\$()}}で変数名を包む。
+
+\hypersubsection{ch020406}{自動変数}
+
+GNU Makeは便利なことに、いくつかの変数を自動で作ってくれる。\index{Makefile@\texttt{Makefile}!じどうへんすう@自動変数}
+
+\hypersubsubsection{ch02040601}{\texorpdfstring{\texttt{\$@} ターゲット}{\$@ ターゲット}}
+
+\texttt{\$@}\,\index{Makefile@\texttt{Makefile}!\$\protect{@}@\texttt{\$\protect{@}}}はルールのターゲットのファイル名になる。
+
+\begin{lstlisting}[language=make]
+target :
+    echo $@
+\end{lstlisting}
+
+この\texttt{Makefile}を実行すると以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+$ make
+echo target
+\end{lstlisting}
+
+\hypersubsubsection{ch02040602}{\texorpdfstring{\texttt{\$\textless{}} 最初の事前要件}{\$\textless{} 最初の事前要件}}
+
+\texttt{\$<}\,\index{Makefile@\texttt{Makefile}!\$<@\texttt{\$<}}はルールの最初の事前要件のファイル名になる。
+
+\begin{lstlisting}[language=make]
+target : A B C
+    echo $<
+\end{lstlisting}
+
+この\texttt{Makefile}を実行すると以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+$ make
+echo A
+\end{lstlisting}
+
+\hypersubsubsection{ch02040603}{\texorpdfstring{\texttt{\$\^{}} すべての事前要件}{\$\^{} すべての事前要件}}
+
+\texttt{\${\textasciicircum}}\,\index{Makefile@\texttt{Makefile}!\${\textasciicircum}@\texttt{\${\textasciicircum}}}はすべての事前要件のファイル名が空白区切りされたものになる
+
+\begin{lstlisting}[language=make]
+target : A B C
+    echo $^
+\end{lstlisting}
+
+この\texttt{Makefile}を実行すると以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+$ make
+echo A B C
+\end{lstlisting}
+
+\hypersubsubsection{ch02040604}{自動変数の組み合わせ}
+
+例えば\texttt{ターゲット}を生成するために\texttt{事前要件}と\texttt{ターゲット}のファイル名をレシピに書く場合、
+\begin{lstlisting}[language=make]
+target : prerequisite
+    cat prerequisite > target
+\end{lstlisting}
+と書く代わりに、
+\begin{lstlisting}[language=make]
+target : prerequisite
+    cat $< > $@
+\end{lstlisting}
+と書ける。
+
+\hypersubsection{ch020407}{PHONYターゲット}
+
+PHONYターゲット\index{Makefile@\texttt{Makefile}!PHONY@PHONYターゲット}とは、ファイル名を意味せず、単にレシピを実行するターゲット名としてのみ機能するターゲットのことだ。
+
+\begin{lstlisting}[language=make]
+hi :
+    echo hi
+
+hello :
+    echo hello
+\end{lstlisting}
+
+これを実行すると以下のようになる。
+
+\begin{lstlisting}[style=terminal]
+$ make
+echo hi
+hi
+$ make hi
+echo hi
+hi
+$ make hello
+echo hello
+hello
+\end{lstlisting}
+
+\texttt{make}を引数を付けずに実行すると、一番上に書かれたルールが実行される。引数としてターゲットを指定すると、そのターゲットのルールと、依存するルールが実行される。
+
+ただし、ターゲットと同じファイル名が存在すると、ルールは実行されない。
+
+\begin{lstlisting}[style=terminal]
+$ touch hello
+$ make hello
+make: 'hello' is up to date.
+\end{lstlisting}
+
+GNU Makeはこの問題に対処するため、\texttt{.PHONY}ターゲット\index{Makefile@\texttt{Makefile}!.PHONY@\texttt{.PHONY}ターゲット}という特殊な機能がある。これはPHONYターゲットを\texttt{.PHONY}ターゲットの事前要件とすることで、ターゲットと同じファイル名の存在の有無にかかわらずルールを実行させられる。
+
+\begin{lstlisting}[language=make]
+hello :
+    echo hello
+
+.PHONY : hello
+\end{lstlisting}
+
+PHONYターゲットはコンパイルしたプログラムの実行や削除に使うことができる。
+
+\begin{lstlisting}[language=make]
+hello : hello.cpp
+    g++ -o $@ $<
+
+run : hello
+    ./hello
+
+clean :
+    rm -rf ./hello
+
+.PHONY : run clean
+\end{lstlisting}
+
+\hypersection{ch0205}{入門用の環境構築}
+
+以上を踏まえて、C++入門用の環境構築をしてこの章のまとめとする。
+
+今回構築する環境のファイル名とその意味は以下のとおり。
+
+\begin{description}
+\item[\texttt{main.cpp}]
+C++のコードを書く \texttt{all.h}
+
+標準ライブラリのヘッダーファイルを書く \texttt{all.h.gch}
+
+コンパイル済みヘッダー \texttt{program}
+
+実行可能ファイル \texttt{Makefile}
+
+GNU Makeのルールを書く
+\end{description}
+
+使い方は以下のとおり。
+
+\begin{description}
+\item[\texttt{make}]
+コンパイルする \texttt{make run}
+
+コンパイルして実行 \texttt{make clean}
+
+コンパイル結果を削除
+\end{description}
+
+GCCに与えるコンパイラーオプションを変数にまとめる。
+
+\begin{lstlisting}[language=make]
+gcc_options = -std=c++17 -Wall --pedantic-error
+\end{lstlisting}
+
+言語はC++17、すべての警告を有効にし、規格準拠ではないコードはエラーとする。
+
+プログラムをコンパイルする部分は以下のとおり。
+
+\begin{lstlisting}[language=make]
+program : main.cpp all.h all.h.gch
+    g++ $(gcc_options) -include all.h $< -o $@
+
+all.h.gch : all.h
+    g++ $(gcc_options) -x c++-header -o $@ $<
+\end{lstlisting}
+
+実行可能ファイル\texttt{program}と、コンパイル済みヘッダー\texttt{all.h.gch}をコンパイルするルールだ。
+
+PHONYターゲットは以下のとおり。
+
+\begin{lstlisting}[language=make]
+run : program
+    ./program
+
+clean :
+    rm -f ./program
+    rm -f ./all.h.gch
+
+.PHONY : run clean
+\end{lstlisting}
+
+\texttt{make}でコンパイル。\texttt{make run}で実行。\texttt{make clean}でコンパイル結果の削除。
+
+\texttt{Makefile}全体は以下のようになる。
+
+\begin{lstlisting}[language=make]
+gcc_options = -std=c++17 -Wall --pedantic-error
+
+program : main.cpp all.h all.h.gch
+    g++ $(gcc_options) -include all.h $< -o $@
+
+all.h.gch : all.h
+    g++ $(gcc_options) -x c++-header -o $@ $<
+
+run : program
+    ./program
+
+clean :
+    rm -f ./program
+    rm -f ./all.h.gch
+
+.PHONY : run clean
+\end{lstlisting}
+

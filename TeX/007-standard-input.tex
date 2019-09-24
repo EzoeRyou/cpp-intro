@@ -1,0 +1,456 @@
+\hyperchapter{ch07}{最近体重が気になるあなたのための\\標準入力}{最近体重が気になるあなたのための標準入力}
+\index{ひようじゆんにゆうりよく@標準入力}
+
+\hypersection{ch0701}{これまでのおさらい}
+
+ここまで学んできた範囲でも、かなりのプログラムが書けるようになってきた。試しにちょっとプログラムを書いてみよう。
+
+最近肥満が気になる読者は、肥満度を把握するためにBMI（Body Mass Index）\index{BMI@BMI（Body Mass Index）}を計算して出力するプログラムを書くことにした。
+
+BMIの計算は以下のとおり。
+
+\[
+BMI = \frac{体重_{kg}}{身長^2_{m}}
+\]
+
+本書をここまで読み進めた読者ならば、このようなプログラムは簡単に書けるだろう。計算は小数点以下の値を扱う必要があるために、変数は浮動小数点数型（\texttt{double}）にする。掛け算は\texttt{operator *}\,で、割り算は\texttt{operator /}\,だ。出力には\texttt{std::cout}を使う。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 身長1.63m
+    double height = 1.63 ;
+    // 体重73kg
+    double mass = 73.0 ;
+
+    // BMIの計算
+    double bmi = mass / (height*height) ;
+
+(@\ifTombow\pagebreak\fi@)
+    // BMIの出力
+    std::cout << "BMI="s << bmi << "\n"s ;
+}
+\end{lstlisting}
+
+結果は\,\texttt{"27.4756"}\,となった。これだけでは太っているのか痩せているのかよくわからない。調べてみると、BMIの数値と肥満との関係は以下の表のとおりになるそうだ。
+
+\vskip 1.0zw
+\begin{small}
+\begin{longtable}[]{@{\,\,}ll@{\,\,}}
+\hline%\toprule
+\textsf{BMI} & \textsf{状態}\tabularnewline
+\hline%\midrule
+\endhead
+18.5未満 & 痩せすぎ（Underweight）\tabularnewline
+18.5以上、25未満 & 普通（Normal）\tabularnewline
+25以上、30未満 & 太り気味（Overweight）\tabularnewline
+30以上 & 肥満（Obese）\tabularnewline
+\hline%\bottomrule
+\end{longtable}
+\end{small}
+
+ではさっそく、この表のようにBMIから肥満状態も出力してくれるように、プログラムを書き換えよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 身長1.63m
+    double height = 1.63 ;
+    // 体重73kg
+    double mass = 73.0 ;
+
+    // BMIの計算
+    double bmi = mass / (height*height) ;
+
+    // BMIの出力
+    std::cout << "BMI="s << bmi << "\n"s ;
+
+    // 状態の判定をする関数
+    auto status = []( double bmi )
+    {
+        if ( bmi < 18.5 )
+            return "Underweight.\n"s ;
+        else if ( bmi < 25.0 )
+            return "Normal.\n"s ;
+        else if ( bmi < 30.0 )
+            return "Overweight.\n"s ;
+        else
+            return "Obese."s ;
+    } ;
+
+    // 状態の出力
+    std::cout << status(bmi) ;
+}
+\end{lstlisting}
+
+ここまで問題なく読むことができただろうか。ここまでのコードはすべて、本書を始めから読めば理解できる機能しか使っていない。わからない場合、この先に進む前に本書をもう一度始めから読みなすべきだろう。
+
+\hypersection{ch0702}{標準入力}
+\index{ひようじゆんにゆうりよく@標準入力}
+
+上のプログラムには実用にする上で1つ問題がある。身長と体重の値を変えたい場合、ソースコードを書き換えてコンパイルしなければならないのだ。
+
+例えば読者の身長が1.8mで体重が80kgの場合、以下のように書き換えなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 身長1.63m
+    double height = 1.80 ;
+    // 体重73kg
+    double mass = 80.0 ;
+
+    // BMIの計算
+    double bmi = mass / (height*height) ;
+
+    // BMIの出力
+    std::cout << "BMI="s << bmi << "\n"s ;
+}
+\end{lstlisting}
+
+すると今度は身長が1.48mで体重が48kgの人がやってきて私のBMIも計測しろとうるさい。しかも昨日と今日で体重が変わったからどちらも計測したいと言い出す始末。
+
+こういうとき、プログラムのコンパイル時ではなく、実行時に値を入力できたならば、いちいちプログラムをコンパイルし直す必要がなくなる。
+
+入力には\texttt{std::cin}\index{cin@\texttt{cin}}を使う。\texttt{std::cout}は標準出力を扱うのに対し、\texttt{std::cin}は標準入力を扱う。\texttt{std::cout}が\texttt{operator {<}{<}}を使って値を出力したのに対し、\texttt{std::cin}は\texttt{operator {>}{>}}\,\index{{>}{>}@\texttt{{>}{>}}}を使って値を変数に入れる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 入力を受け取るための変数
+    std::string x{} ;
+    // 変数に入力を受け取る
+    std::cin >> x ;
+    // 入力された値を出力
+    std::cout << x ;
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+実行結果、
+
+\begin{lstlisting}[style=terminal]
+$ make run
+hello
+hello
+\end{lstlisting}
+
+標準入力はデフォルトでは、プログラムを実行したユーザーがターミナルから入力する。上の実行結果の2行目は、ユーザーの入力だ。
+
+\texttt{std::cin}は入力された文字列を変数に入れる。入力は空白文字や改行で区切られる。そのため、空白で区切られた文字列を渡すと、以下のようになる。
+
+\begin{lstlisting}[style=terminal]
+$ make run
+hello world
+hello
+\end{lstlisting}
+
+入力は複数取ることができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::string x{} ;
+    std::string y{} ;
+    std::cin >>  x >> y ;
+    std::cout << x << y ;
+}
+\end{lstlisting}
+
+実行結果、
+
+\begin{lstlisting}[style=terminal]
+$ make run
+hello world
+helloworld
+\end{lstlisting}
+
+空白文字は文字列の区切り文字として認識されるので変数\texttt{x}, \texttt{y}には入らない。
+
+\texttt{std::cin}では文字列のほかにも整数や浮動小数点数、\texttt{bool}を入力として得ることができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 整数
+    int i{} ;
+    std::cin >> i ;
+    // 浮動小数点数
+    double d{} ;
+    std::cin >> d ;
+}
+\end{lstlisting}
+
+実行結果、
+
+\begin{lstlisting}[style=terminal]
+$ make run
+123 1.23
+\end{lstlisting}
+
+数値はデフォルトで10進数として扱われる。
+
+\texttt{bool}の入力には注意が必要だ。普通に書くと、ゼロが\texttt{false}, 非ゼロが\texttt{true}として扱われる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    bool b{} ;
+    std::cin >> b ;
+
+    std::cout << std::boolalpha << b << "\n"s ;
+}
+\end{lstlisting}
+
+実行結果、
+
+\begin{lstlisting}[style=terminal]
+$ make run
+1
+true
+$ make run
+0
+false
+$ make run
+123
+true
+$ make run
+-1
+true
+\end{lstlisting}
+
+\texttt{"true"}, \texttt{"false"}\,という文字列で\texttt{true}, \texttt{false}の入力をしたい場合、\texttt{std::cin}に\texttt{std::boolalpha}\index{boolalpha@\texttt{boolalpha}}を「入力」させる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // bool型
+    bool b{} ;
+    std::cin >> std::boolalpha >> b ;
+
+    std::cout << std::boolalpha << b ;
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+実行結果
+
+\begin{lstlisting}[style=terminal]
+$ make run
+true
+true
+$ make run
+false
+false
+\end{lstlisting}
+
+\texttt{std::boolalpha}を入出力するというのは、実際には何も入出力しないので奇妙に見えるが、そういう設計になっているので仕方がない。
+
+では標準入力を学んだので、さっそくBMIを計算するプログラムを標準入力に対応させよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 身長の入力
+    double height{} ;
+    std::cout << "height(m)>" ;
+    std::cin >> height ;
+
+    // 体重の入力
+    double mass{} ;
+    std::cout << "mass(kg)>" ;
+    std::cin >> mass ;
+
+    double bmi = mass / (height*height) ;
+
+    std::cout << "BMI=" << bmi << "\n"s ;
+}
+\end{lstlisting}
+
+上出来だ。
+
+\hypersection{ch0703}{リダイレクト}
+\index{りだいれくと@リダイレクト}
+
+標準入出力が扱えるようになれば、もう自分の好きなプログラムを書くことができる。プログラムというのはけっきょく、入力を得て、処理して、出力するだけのものだからだ。入力はテキストだったりグラフィックだったり何らかの特殊なデバイスだったりするが、基本は変わらない。
+
+たとえば読者はまだC++でファイルを読み書きする方法を知らないが、標準入出力さえ使えれば、ファイルの読み書きはリダイレクトを使うだけでできるのだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout << "hello" ;
+}
+\end{lstlisting}
+
+これは\,\texttt{"hello"}\,と標準出力するだけの簡単なプログラムだ。このプログラムをコンパイルしたプログラム名を\texttt{program}としよう。標準出力の出力先はデフォルトで、ユーザーのターミナルになる。
+
+\begin{lstlisting}[style=terminal]
+$ ./program
+hello
+\end{lstlisting}
+
+リダイレクトを使えば、この出力先をファイルにできる。リダイレクトを使うには\,\texttt{"プログラム > ファイル名"}\,とする。
+\index{>@\texttt{>}}\index{りだいれくと@リダイレクト!>@\texttt{>}}
+
+\begin{lstlisting}[style=terminal]
+$ ./program > hello.txt
+$ cat hello.txt
+hello
+\end{lstlisting}
+
+ファイルへの簡単な書き込みは、リダイレクトを使うことであとから簡単に実現可能だ。
+
+リダイレクトはファイルの読み込みにも使える。例えば先ほどのBMIを計算するプログラムを用意しよう。
+
+\begin{lstlisting}[language={C++}]
+// bmi
+int main()
+{
+    double height{ } ;
+    double mass { } ;
+
+    std::cin >> height >> mass ;
+
+    std::cout << mass / (height*height) ;
+}
+\end{lstlisting}
+
+このプログラム名を\texttt{bmi}として、通常どおり実行すると以下のようになる。
+
+\begin{lstlisting}[style=terminal]
+$　./bmi
+1.63
+73
+27.4756
+\end{lstlisting}
+
+このうち、\texttt{1.63}と\texttt{73}はユーザーによる入力だ。これを毎回手で入力するのではなく、ファイルから入力することができる。つまり以下のようなファイルを用意して、
+
+\begin{lstlisting}[style=terminal]
+1.63
+73
+\end{lstlisting}
+
+このファイルを例えば、\texttt{"bodymass.txt"}\,とする。手で入力する代わりに、このファイルを入力として使いたい。これにはリダイレクトとして\,\texttt{"プログラム名 < ファイル名"}\,とする。
+\index{<@\texttt{<}}\index{りだいれくと@リダイレクト!<@\texttt{<}}
+
+\begin{lstlisting}[style=terminal]
+$ ./bmi < bodymass.txt
+27.4756
+\end{lstlisting}
+
+リダイレクトの入出力を組み合わせることも可能だ。
+
+\begin{lstlisting}[style=terminal]
+$ cat bodymass.txt
+1.63
+73
+$ ./bmi < bodymass.txt > index.txt
+$ cat index.txt
+27.4756
+\end{lstlisting}
+
+もちろん、このようなファイルの読み書きは簡易的なものだが、かなりの処理がこの程度のファイル操作でも行えるのだ。
+
+\hypersection{ch0704}{パイプ}
+\index{ぱいぷ@パイプ}
+
+プログラムが出力した結果をさらに入力にすることだってできる。
+
+例えば、先ほどのプログラム\texttt{bmi}に入力するファイル\texttt{bodymass.txt}の身長の単位がメートルではなくセンチメートルだったとしよう。
+
+\begin{lstlisting}[style=terminal]
+163
+73
+\end{lstlisting}
+
+この場合、プログラム\texttt{bmi}を書き換えて対処することもできるが、プログラムに入力させる前にファイルを読み込み、書き換えて出力し、その出力を入力とすることもできる。
+
+まず、身長の単位をセンチメートルからメートルに直すプログラムを書く。
+
+\begin{lstlisting}[language={C++}]
+// convert
+int main()
+{
+    double height{} ;
+    double mass{} ;
+
+    std::cin >> height >> mass ;
+
+    // 身長をセンチメートルからメートルに直す
+    // 体重はそのままでよい
+    std::cout << height/100.0 << "\n"s << mass ;
+}
+\end{lstlisting}
+
+このプログラムを\texttt{convert}と名付け、さっそく使ってみよう。
+
+\begin{lstlisting}[style=terminal]
+$ ./convert
+163
+73
+1.63
+73
+\end{lstlisting}
+
+身長の単位がセンチメートルからメートルに正しく直されている。
+
+これをリダイレクトで使うとこうなる。
+
+\begin{lstlisting}[style=terminal]
+$ ./convert < bodymass.txt > fixed_bodymass.txt
+$ ./bmi < fixed_bodymass.txt
+27.4756
+\end{lstlisting}
+
+しかしこれではファイルが増えて面倒だ。この場合、パイプを使うとスッキリと書ける。
+
+パイプはプログラムの標準出力をプログラムの標準入力とするの使い方は、\texttt{"プログラム名 | プログラム名"}\,だ。
+\index{\protect{|}@\texttt{|}}\index{ぱいぷ@パイプ!\protect{|}@\texttt{|}}
+
+\begin{lstlisting}[style=terminal]
+$ ./convert < bodymass.txt | ./bmi
+27.4756
+\end{lstlisting}
+
+ところで、すでに何度か説明なしで使っているが、POSIX規格を満たすOSには\texttt{cat}というプログラムが標準で入っている。\texttt{cat ファイル名}は指定したファイル名の内容を標準出力する。標準出力はパイプで標準入力にできる。
+
+\begin{lstlisting}[style=terminal]
+$ cat bodymass.txt | ./convert | ./bmi
+27.4756
+\end{lstlisting}
+
+\hypersection{ch0705}{プログラムの組み合わせ}
+
+現代のプログラミングというのは、すでに存在するプログラムを組み合わせて作るものだ。もし、自分の必要とする処理がすでに実装されているのであれば、自分で書く必要はない。
+
+例えば、読者はまだカレントディレクトリー下のファイルの一覧を列挙する方法を知らない。しかしPOSIX規格を満たすOSには\texttt{ls}というカレントディレクトリー下のファイルの一覧を列挙するプログラムが存在する。これを先ほどまでBMIの計算などの作業をしていたディレクトリー下で実行してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+all.h  all.h.gch  bmi  bodymass.txt  convert  data  main.cpp  Makefile  program
+\end{lstlisting}
+
+ファイルの一覧が列挙される。そしてこれはプログラム\texttt{ls}による標準出力だ。標準出力ということは、リダイレクトしてファイルに書き込んだり、パイプで別のプログラムに渡したりできるということだ。
+
+\begin{lstlisting}[style=terminal]
+$ ls > files.txt
+$ ls | ./program
+\end{lstlisting}
+
+標準入出力が扱えれば、ネットワークごしにWebサイトをダウンロードすることもできる。これにはほとんどのGNU/LinuxベースのOSに入っている\texttt{curl}\index{curl@\texttt{curl}}というプログラムを使う。
+
+\begin{lstlisting}[style=terminal]
+$ curl https://example.com
+\end{lstlisting}
+
+プログラム\texttt{curl}は指定されたURLからデータをダウンロードして、標準出力する。標準出力するということは、パイプによって標準入力にできるということだ。
+
+\begin{lstlisting}[style=terminal]
+$ curl https://example.com | ./program
+\end{lstlisting}
+
+読者はC++でネットワークアクセスする方法を知らないが、すでにネットワークアクセスは可能になった。
+
+ほかにも便利なプログラムはたくさんある。プログラミングの学び始めはできることが少なくて退屈になりがちだが、読者はもうファイルの読み書きやネットワークアクセスまでできるようになったのだから、退屈はしないはずだ。

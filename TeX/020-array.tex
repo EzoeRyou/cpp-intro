@@ -1,0 +1,153 @@
+\hyperchapter{ch20}{std::array}{std::array}
+
+\texttt{std::vector<T>}\,を覚えているだろうか。\texttt{T}型の値をいくつでも保持できるクラスだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // int型の値を10個保持するクラス
+    std::vector<int> v(10) ;
+
+    // 0番目の値を1に
+    v.at(0) = 1 ;
+
+    // イテレーターを取る
+    auto i = std::begin(v) ;
+}
+\end{lstlisting}
+
+この章では、\texttt{vector}と似ているクラス、\texttt{std::array<T, N>}\,\index{array@\texttt{array}}を学ぶ。\texttt{array}\index{array@\texttt{array}}は\texttt{T}型の値を\texttt{N}個保持するクラスだ。
+
+その使い方は一見\texttt{vector}と似ている。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // int型の値を10個保持するクラス
+    std::array<int, 10> a ;
+
+    // 0番目の値を1に
+    a.at(0) = 1 ;
+
+(@\ifTombow\pagebreak\fi@)
+    // イテレーターを取る
+    auto i = std::begin(a) ;
+}
+\end{lstlisting}
+
+\texttt{vector}と違う点は、コンパイル時に要素数が固定されるということだ。
+
+\texttt{vector}は実行時に要素数を決めることができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::size_t N{} ;
+    std::cin >> N ;
+
+    // 要素数N
+    std::vector<int> v(N) ;
+}
+\end{lstlisting}
+
+一方、\texttt{array}はコンパイル時に要素数を決める。標準入力から得た値は実行時のものなので、使うことはできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::size_T N{} ;
+    std::cin >> N ;
+
+    // エラー
+    std::array< int, N > a ;
+}
+\end{lstlisting}
+
+\texttt{vector}は実行時に要素数を変更することができる。メンバー関数\texttt{push\_back}は要素数を1増やす。メンバー関数\texttt{resize(sz)}は要素数を\texttt{sz}にする。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 要素数5
+    std::vector<int> v(5) ;
+    // 要素数6
+    v.push_back(1) ;
+    // 要素数2
+    v.resize(2) ;
+}
+\end{lstlisting}
+
+\texttt{array}は\texttt{push\_back}も\texttt{resize}も提供していない。
+
+\texttt{vector}も\texttt{array}もメンバー関数\texttt{at(i)}\index{at@\texttt{at}}\index{array@\texttt{array}!at@\texttt{at}}で\texttt{i}番目の要素にアクセスできる。実は、\texttt{i}番目にアクセスする方法はほかにもある。\texttt{[i]}\index{[]@\texttt{[]}}を使う方法だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 10> a ;
+
+    // どちらも0番目の要素に1を代入
+    a.at(0) = 1 ;
+    a[0] = 1 ;
+
+    // どちらも0番目の要素を標準出力
+    std::cout << a.at(0) ;
+    std::cout << a[0] ;
+}
+\end{lstlisting}
+
+\texttt{at(i)}と\texttt{[i]}の違いは、要素の範囲外にアクセスしたときの挙動だ。\texttt{at(i)}はエラー処理が行われる。\texttt{[i]}は何が起こるかわからない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 10個の要素を持つ
+    // 0番目から9番目までが妥当な範囲
+    std::array<int, 10> a ;
+
+    // エラー処理が行われる
+    // プログラムは終了する
+    a.at(10) = 0 ;
+    // 何が起こるかわからない
+    a[10] = 0 ;
+}
+\end{lstlisting}
+
+この理由は、\texttt{[i]}は要素数が妥当な範囲かどうかを確認する処理を行っていないためだ。その分余計な処理が発生しないが、間違えたときに何が起こるかわからないという危険性がある。通常は\texttt{at(i)}を使うべきだ。
+
+実はこの\texttt{[i]}は\texttt{operator []}\index{[]@\texttt{[]}}というれっきとした演算子だ。演算子のオーバーロードもできる。例えば以下は任意個の要素を持ち、常にゼロを返す\texttt{array}のように振る舞う意味のないクラスだ。
+
+\begin{lstlisting}[language={C++}]
+// 常にゼロを返すクラス
+// 何を書き込んでもゼロを返す
+struct null_array
+{
+    int dummy ;
+    // 引数は無視
+    int & operator [] ( std::size_t )
+    {
+        dummy = 0 ;
+        return dummy ;
+    }
+} ;
+
+int main()
+{
+    null_array a ;
+
+    // 0
+    std::cout << a[0] ;
+    // 0
+    std::cout << a[999] ;
+
+    a[100] = 0 ;
+    // 0
+    std::cout << a[100] ;
+}
+\end{lstlisting}
+
+なぜ\texttt{vector}という実行時に要素数を設定でき実行時に要素数を変更できる便利なクラスがありながら、\texttt{array}のようなコンパイル時に要素数が決め打ちで要素数の変更もできないようなクラスもあるのだろうか。その理由は\texttt{array}と\texttt{vector}はパフォーマンスの特性が異なるからだ。\texttt{vector}はストレージ（メモリー）の動的確保をしている。ストレージの動的確保は実行時の要素数を変更できるのだが、そのために予測不可能な非決定的なパフォーマンス特性を持つ。\texttt{array}はストレージの動的確保を行わない。この結果実行時に要素数を変更することはできないが、予測可能で決定的なパフォーマンス特性を持つ。
+
+その他の\texttt{array}の使い方は、\texttt{vector}とほぼ同じだ。
+
+さて、これから\texttt{array}を実装していこう。実装を通じて読者はC++のクラスとその他の機能を学んでいくことになる。

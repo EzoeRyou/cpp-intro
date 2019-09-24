@@ -1,0 +1,307 @@
+\hyperchapter{ch15}{lvalueリファレンスとconst}{lvalueリファレンスとconst}
+
+\begin{quote}
+\begin{flushright}
+ポップカルチャーリファレンスというのは\\
+流行の要素をさり気なく作品中に取り入れることで、\\
+流行作品を知っている読者の笑いを誘う手法である\\
+--- キャプテン・オブビウス、ポップカルチャーリファレンスについて
+\end{flushright}
+\end{quote}
+
+\hypersection{ch1501}{lvalueリファレンス}
+\index{lvalue@\texttt{lvalue}リファレンス}
+
+変数に変数を代入すると、代入元の値が代入先にコピーされる。代入先の値を変更しても、コピーされた値が変わるだけで、代入元にはいっさい影響がない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 1 ;
+    int b = 2 ;
+
+    b = a ;
+    // b == 1
+
+    b = 3 ;
+    // a == 1
+    // b == 3
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+これは関数も同じだ。
+
+\begin{lstlisting}[language={C++}]
+void assign_3( int x )
+{
+    x = 3 ;
+}
+
+int main()
+{
+    int a = 1 ;
+    assign_3( a ) ;
+
+    // a == 1
+}
+\end{lstlisting}
+
+しかし、ときには変数の値を直接書き換えたい場合がある。このとき\texttt{lvalue}リファレンス（reference）が使える。\texttt{lvalue}リファレンスは変数に\,\texttt{\&}\,\index{\&@\texttt{\&}}を付けて宣言する
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 1 ;
+    int & ref = a ;
+
+    ref = 3 ;
+
+    // a == 3
+    // refはaなので同じく3
+}
+\end{lstlisting}
+
+この例で、変数\texttt{ref}は変数\texttt{a}への参照（リファレンス）\index{さんしよう@参照}\index{りふあれんす@リファレンス}なので、変数\texttt{a}と同じように使える。
+
+\texttt{lvalue}リファレンスは必ず初期化しなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // エラー
+    int & ref ;
+}
+\end{lstlisting}
+
+\texttt{lvalue}リファレンスは関数でも使える。
+
+\begin{lstlisting}[language={C++}]
+void f( int & x )
+{
+    x = 3 ;
+}
+
+int main()
+{
+    int a = 1 ;
+    f( a ) ;
+
+    // a == 3
+}
+\end{lstlisting}
+
+選択ソートで2つの変数の値を交換する必要があったことを覚えているだろうか。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {3,2,1,4,5} ;
+
+    // 0番目と2番目の要素を交換したい
+    auto temp = v.at(0) ;
+    v.at(0) = v.at(2) ;
+    v.at(2) = temp ;
+}
+\end{lstlisting}
+
+いちいち交換のために別の変数\texttt{temp}を作って3回代入を書くのは面倒だ。これを関数にしてしまいたい。
+
+\begin{lstlisting}[language={C++}]
+// 値を交換
+swap( v.at(0), v.at(2) ) ;
+\end{lstlisting}
+
+このような関数\texttt{swap}は普通に書くことはできない。
+
+\begin{lstlisting}[language={C++}]
+// この実装は正しくない
+auto swap = []( auto a, auto b )
+{
+    auto temp = a ;
+    a = b ;
+    b = temp ;
+} ;
+\end{lstlisting}
+
+この実装では、変数は単にコピーされるだけなので、関数の呼び出し元には何の影響もない。
+
+これを\texttt{lvalue}リファレンスに変えると、関数の呼び出し元の変数の値を交換する関数\texttt{swap}が作れる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// lvalueリファレンス
+auto swap = []( auto & a, auto & b )
+{
+    auto temp = a ;
+    a = b ;
+    b = temp ;
+} ;
+\end{lstlisting}
+
+C++の標準ライブラリには\texttt{std::swap}\index{swap@\texttt{swap}}があるので、読者はわざわざこのような関数を自作する必要はない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 1 ;
+    int b = 2 ;
+
+    std::swap( a, b ) ;
+
+    // a == 2
+    // b == 1
+}
+\end{lstlisting}
+
+ところで、この章では一貫して\texttt{lvalue}リファレンスと書いているのに気が付いただろうか。\texttt{lvalue}とは何なのか、\texttt{lvalue}ではないリファレンスはあるのか。その疑問はあとの章で解決する。
+
+\hypersection{ch1502}{const}
+\index{const@\texttt{const}}
+
+値を変更したくない変数は、\texttt{const}を付けることで変更を禁止できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    x = 1 ; // OK、変更できる
+
+    const int y = 0 ;
+    y = 0 ; // エラー、 変更できない。
+}
+\end{lstlisting}
+
+\texttt{const}はちょっと文法が変わっていて混乱する。例えば、\texttt{const int}でも\texttt{int const}でも意味が同じだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 意味は同じ
+    const int x = 0 ;
+    int const y = 0 ;
+}
+\end{lstlisting}
+
+\texttt{const}は\texttt{lvalue}リファレンスと組み合わせることができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+
+    int & ref = x ;
+    // OK
+    ++ref ;
+
+    const int & const_ref = x ;
+
+    // エラー
+    ++const_ref ;
+}
+\end{lstlisting}
+
+\texttt{const}は本当に文法が変わっていて混乱する。\texttt{const int \&}と\texttt{int const \&}は同じ意味だが、\texttt{int \& const}はエラーになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 0 ;
+
+    // OK、意味は同じ
+    const int & b = a ;
+    int const & c = a ;
+
+    // エラー
+    int & const d = a ;
+}
+\end{lstlisting}
+
+これはとても複雑なルールで決まっているので、こういうものだとあきらめて覚えるしかない。
+
+\texttt{const}が付いていない型のオブジェクトを\texttt{const}な\texttt{lvalue}リファレンスで参照することができる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // constの付いていない型のオブジェクト
+    int x = 0 ;
+
+    // OK
+    int & ref = x ;
+    // OK、constは付けてもよい
+    const int & cref = x ;
+}
+\end{lstlisting}
+
+\texttt{const}の付いている型のオブジェクトを\texttt{const}の付いていない\texttt{lvalue}リファレンスで参照することはできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // constの付いている型のオブジェクト
+    const int x = 0 ;
+
+    // エラー、 constがない
+    int & ref = x ;
+
+    // OK、constが付いている
+    const int & cref = x ;
+}
+\end{lstlisting}
+
+\texttt{const}の付いている\texttt{lvalue}リファレンスは何の役に立つのかというと、関数の引数を取るときに役に立つ。
+
+例えば以下のコードは非効率的だ。
+
+\begin{lstlisting}[language={C++}]
+void f( std::vector<int> v )
+{
+    std::cout << v.at(1234) ;
+}
+
+int main()
+{
+    // 10000個の要素を持つvector
+    std::vector<int> v(10000) ;
+
+    f( v ) ;
+}
+\end{lstlisting}
+
+なぜかというと、関数の引数に渡すときに、変数\texttt{v}はコピーされるからだ。
+
+リファレンスを使うと不要なコピーをしなくて済む。
+
+\begin{lstlisting}[language={C++}]
+void f( std::vector<int> & v )
+{
+    std::cout << v.at(1234) ;
+}
+\end{lstlisting}
+
+しかし、リファレンスで受け取ると、うっかり変数を変更してしまった場合、その変更が関数の呼び出し元に反映されてしまう。
+
+\begin{lstlisting}[language={C++}]
+// 値を変更するかもしれない
+void f( std::vector<int> & v ) ;
+
+int main()
+{
+    // 要素数10000のvector
+    std::vector<int> v(10000) ;
+
+    f(v) ;
+
+    // 値は変更されているかもしれない
+}
+\end{lstlisting}
+
+このとき、\texttt{const}な\texttt{lvalue}リファレンスを使うと、引数に取った値を変更しないことを保証できる。
+
+\begin{lstlisting}[language={C++}]
+void f( std::vector<int> const & v ) ;
+\end{lstlisting}
+

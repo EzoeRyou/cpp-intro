@@ -1,0 +1,138 @@
+\hyperchapter{ch06}{デバッグ：\\コンパイル警告メッセージ}{デバッグ：コンパイル警告メッセージ}
+
+やれやれ、条件分岐は難しかった。この辺でもう一度ひと休みして、息抜きとしてデバッグ\index{でばつぐ@デバッグ}の話をしよう。今回はコンパイラーの警告メッセージ（warning messages）\index{けいこくめつせじ@警告メッセージ}についてだ。
+
+コンパイラーはソースコードに文法エラーや意味エラーがあると、エラーメッセージを出すことはすでに学んだ。
+
+コンパイラーがエラーメッセージを出さなかったとき、コンパイラーはソースコードには文法エラーや意味エラーを発見できず、コンパイラーは意味のあるプログラムを生成することができたということを意味する。しかし、コンパイルが通って実行可能なプログラムが生成できたからといって、プログラムにバグがないことは保証できない。
+
+たとえば、変数\texttt{x}と\texttt{y}を足して出力するプログラムを考える。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 1 ;
+    auto y = 2 ;
+
+    std::cout << x + x ;
+}
+\end{lstlisting}
+
+このプログラムにはバグがある。プログラムの仕様は変数\texttt{x}と\texttt{y}を足すはずだったが変数\texttt{x}と\texttt{x}を足してしまっている。
+
+コンパイラーはこのソースコードをコンパイルエラーにはしない。なぜならば上のコードは文法的に正しく、意味的にも正しいコードだからだ。
+
+警告メッセージはこのような疑わしいコードについて、エラーとまではいかないまでも、文字どおり警告を出す機能だ。例えば上のコードをGCCでコンパイルすると以下のような警告メッセージを出す。
+
+\begin{lstlisting}[style=terminal]
+$ make
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+main.cpp: In function ‘int main()’:
+main.cpp:5:10: warning: unused variable ‘y’ [-Wunused-variable]
+     auto y = 2 ;
+          ^
+\end{lstlisting}
+
+すでに説明したように、GCCのメッセージは
+\begin{lstlisting}[style=grammar]
+ソースファイル名:行番号:列番号:メッセージの種類:メッセージの内容
+\end{lstlisting}
+というフォーマットを取る。
+
+このメッセージのフォーマットに照らし合わせると、このメッセージはソースファイル\texttt{main.cpp}の5行目の10列目について何かを警告している。警告はメッセージの種類として\texttt{warning}が使われる。
+
+警告メッセージの内容は、「未使用の変数\,\texttt{'y'}\,\texttt{[-Wunused-variable]}」だ。コード中で\,\texttt{'y'}\,という名前の変数を宣言しているにもかかわらず、使っている場所がない。使わない変数を宣言するのはバグの可能性が高いので警告しているのだ。
+
+\texttt{[-Wunused-variable]}というのはGCCに与えるこの警告を有効にするためのオプション名だ。GCCに\,\texttt{-Wunused-variable}\index{GCC@GCC（GNU Compiler Collection）!-Wunused-variable@\texttt{-Wunused-variable}}というオプションを与えると、未使用の変数を警告するようになる。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -Wunused-variable その他のオプション
+\end{lstlisting}
+
+今回は\,\texttt{-Wall}というすべての警告を有効にするオプションを使っているので、このオプションを使う必要はない。
+
+もう1つ例を出そう。以下のソースコードは変数\texttt{x}の値が\texttt{123}と等しいかどうかを調べるものだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // xの値は0
+    auto x = 0 ;
+
+    // xが123と等しいかどうか比較する
+    if ( x = 123 )
+        std::cout << "x is 123.\n"s ;
+    else
+        std::cout << "x is NOT 123.\n"s ;
+}
+\end{lstlisting}
+
+これを実行すると、\texttt{"x is 123.{\textbackslash}n"}\,と出力される。しかし、変数\texttt{x}の値は\texttt{0}のはずだ。なぜか\texttt{0}と\texttt{123}は等しいと判断されてしまった。いったいどういうことだろう。
+
+この謎は警告メッセージを読むと解ける。
+
+\begin{lstlisting}[style=terminal]
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+main.cpp: In function ‘int main()’:
+main.cpp:5:12: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+     if ( x = 123 )
+          ~~^~~~~
+\end{lstlisting}
+
+\texttt{main.cpp}の5行目の12列目、「真偽値として使われている代入は括弧で囲むべき」とある。これはいったいどういうことか。よく見てみると、演算子が同値比較に使う\,\texttt{==}\,ではなく、\texttt{=}\,だ。\texttt{=}\,は代入演算子だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 0 ;
+
+    // 代入
+    // xの値は1
+    x = 1 ;
+
+    // 同値比較
+    x == 1 ;
+}
+\end{lstlisting}
+
+実は\texttt{if文}の\texttt{条件}にはあらゆる\texttt{式}を書くことができる。代入というのは、実は\texttt{代入式}という式なので、\texttt{if文}の中にも書くことができる。その場合、式の結果の値は代入される変数の値になる。
+
+そして思い出してほしいのは、整数型は\texttt{bool}型に変換されるということだ。\texttt{0}は\texttt{false}、非ゼロは\texttt{true}だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 0 ;
+    // 1はtrue
+    bool b1 = x = 1 ;
+    if ( x = 1 ) ;
+
+    // 0はfalse
+    bool b0 = x = 0 ;
+    if ( x = 0 ) ;
+}
+\end{lstlisting}
+
+つまり、\texttt{"if(x=1)"}\,というのは、\texttt{"if(1)"}\,と書くのと同じで、これは最終的に、\texttt{"if(true)"}\,と同じ意味になる。
+
+警告メッセージの「括弧で囲むべき」というのは、括弧で囲んだ場合、この警告メッセージは出なくなるからだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto x = 0 ;
+
+    if ( (x = 0) )
+        std::cout << "x is 123.\n"s ;
+    else
+        std::cout << "x is NOT 123.\n"s ;
+}
+\end{lstlisting}
+
+このコードをコンパイルしても警告メッセージは出ない。
+
+わざわざ括弧で囲むということは、ちゃんと代入を意図して使っていることがわかっていると意思表示したことになり、結果として警告メッセージはなくなる。
+
+この警告メッセージ単体を有効にするオプションは\,\texttt{-Wparentheses}だ。
+
+警告メッセージは万能ではない。ときにはまったく問題ないコードに対して警告メッセージが出たりする。これは仕方がないことだ。というのもコンパイラーはソースコード中に表現されていない、人間の脳内にある意図を読むことはできないからだ。ただし、警告メッセージにはひと通り目を通して、それが問題ない誤検知であるかどうかを確認することは重要だ。

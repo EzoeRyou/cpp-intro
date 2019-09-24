@@ -1,0 +1,95 @@
+\hypersection{ch3504}{コピーの禁止}
+\index{こぴ@コピー!きんし@禁止}
+
+型によっては、コピーという概念が存在しないものがある。
+
+例えばコピー不可能なシステムのリソースを扱うクラスだ。
+
+具体的にはファイル、スレッド、プロセス、ネットワークソケットといったリソースだ。このようなリソースを管理するクラスを作ったとして、いったいコピーをどうすればいいのだろうか。
+
+コピーできないクラスは\texttt{deleted定義}\index{deletedていぎ@\texttt{deleted}定義}を使ってコピーコンストラクターとコピー代入演算子を消すことができる。
+
+\texttt{deleted定義}は関数の本体\,\texttt{\{...\}}\,の代わりに\,\texttt{= delete}\index{= delete@\texttt{= delete}}を書く。\texttt{deleted定義}されている関数を使うとエラーとなる。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    // コピーコンストラクター
+    X( const X & ) = delete ;
+    // コピー代入演算子
+    X & operator = ( const X & ) = delete ;
+
+    // デフォルトコンストラクター
+    X() { }
+    // ムーブコンストラクター
+    X ( X && ) { }
+    // ムーブ代入演算子
+    X & operator = ( X && ) { }
+} ;
+\end{lstlisting}
+
+このようなクラス\texttt{X}は、コピーできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // デフォルト構築できる
+    X a ;
+    // エラー、 コピーできない
+    X b = a ;
+    b = a ;
+    // OK、ムーブはできる。
+    X c = std::move(a) ;
+}
+\end{lstlisting}
+
+クラス\texttt{X}はコピーコンスラクターとコピー代入演算子が\texttt{deleted定義}されているために、コピーをすることができない。
+
+コピーやムーブが禁止されている型をデータメンバーに持つクラスは、デフォルトのコピーやムーブができなくなる。
+
+\begin{lstlisting}[language={C++}]
+// コピーできない型
+struct Uncopyable
+{
+    Uncopyable(){}
+    Uncopyable( const Uncopyable & ) = delete ;
+    Uncopyable & operator = ( const Uncopyable & ) = delete ; 
+} ;
+
+// デフォルトのコピーができない
+struct X
+{
+    Uncopyable member ;
+} ;
+\end{lstlisting}
+
+\texttt{deleted定義}を使えばムーブも禁止できる。ただし、ムーブを禁止するというのは現実的にはあまり実用性がない。というのも、コピーはムーブでもあるので、コピーを提供している型はムーブとしてコピーを行えばムーブも提供できることになる。
+
+\hypersection{ch3505}{5原則}
+
+C++には「5原則」\index{5げんそく@5原則}\index{C++!5げんそく@5原則}という作法がある。
+
+5原則とは、
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  コピーコンストラクター
+\item
+  コピー代入演算子
+\item
+  ムーブコンストラクター
+\item
+  ムーブ代入演算子
+\item
+  デストラクター
+\end{enumerate}
+
+\hspace{2zw}このうちの1つを独自に定義したならば、残りの4つも定義すべきである。
+
+\vskip 1.0zw
+\noindent
+というものだ。
+
+なぜか。コピーやムーブを独自に定義するということは、デフォルトのコピーやムーブでは足りない何らかの処理をしたいはずだ。その処理には、たいていの場合何らかの破棄の処理が必要で、するとデストラクターも定義しなければならない。
+
+同様に、デストラクターで何らかの独自の処理をするということは、コピーやムーブでも何らかの処理をしたいはずだ。
