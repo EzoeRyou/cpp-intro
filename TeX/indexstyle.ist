@@ -1,0 +1,15 @@
+preamble "\\begin{theindex}\n\\thispagestyle{empty}\n
+\\ifColor
+\\markboth{\\color{BrickRed}{索引}}{\\color{BrickRed}{索引}}
+\\else
+\\markboth{索引}{索引}
+\\fi
+\n"
+
+lethead_flag 1
+symbol "数字・記号"
+letter_head 2
+
+lethead_prefix "\n{\\textsf{\\color[gray]{0.6} ■}~\\sffamily "
+lethead_suffix "}\\par\\nobreak"
+

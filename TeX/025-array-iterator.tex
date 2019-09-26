@@ -1,0 +1,1171 @@
+\hyperchapter{ch25}{arrayのイテレーター}{arrayのイテレーター}
+\index{いてれた@イテレーター}\index{array@\index{array}!いてれた@イテレーター}
+
+\hypersection{ch2501}{イテレーターの中身}
+
+自作の\texttt{array}をイテレーターに対応させる前に、まず\,\texttt{'std::array'}\,のイテレーターについてひと通り調べよう。
+
+イテレーターは\texttt{std::begin/std::end}で取得する。
+\index{begin@\texttt{begin}}\index{end@\texttt{end}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto first = std::begin(a) ;
+    auto last = std::end(a) ;
+}
+\end{lstlisting}
+
+\texttt{std::begin/std::end}は何をしているのか見てみよう。
+
+\begin{lstlisting}[language={C++}]
+namespace std
+{
+    template < typename C >
+    auto begin( C & c )
+    { return c.begin() ; }
+
+    template < typename C >
+    auto begin( C const & c )
+    { return c.begin() ; }
+
+(@\ifTombow\pagebreak\fi@)
+    template < typename C >
+    auto end( C & c )
+    { return c.end() ;}
+
+    template < typename C >
+    auto end( C const & c )
+    { return c.end() ;}
+}
+\end{lstlisting}
+
+なんと、単に引数に対してメンバー関数\texttt{begin/end}を呼び出してその結果を返しているだけだ。
+
+さっそく確かめてみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto iter = a.begin() ;
+    std::cout << *iter ; // 1
+    ++iter ;
+    std::cout << *iter ; // 2
+}
+\end{lstlisting}
+
+確かに動くようだ。
+
+すると自作の\texttt{array}でイテレーターに対応する方法がわかってきた。
+
+\begin{lstlisting}[language={C++}]
+// イテレーターを表現するクラス
+struct array_iterator { } ;
+
+template < typename T, std::size_t N >
+struct array
+{
+    // イテレーター型
+    using iterator = array_iterator ;
+
+    // イテレーターを返すメンバー関数
+    iterator begin() ;
+    iterator end() ;
+
+    // その他のメンバー
+} ;
+\end{lstlisting}
+
+イテレーターに対応するには、おおむねこのような実装になるとみていいだろう。おそらく細かい部分で微調整が必要になるが、いまはこれでよしとしよう。ではイテレーターが具体的に何をするかを見ていこう。
+
+すでに学んだように、イテレーターは\texttt{operator *}\,で参照する要素の値を取得できる。また書き込みもできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto iter = a.begin() ;
+    int x = *iter ; // 1
+    *iter = 0 ;
+    // aは{0,2,3,4,5}
+}
+\end{lstlisting}
+
+問題を簡単にするために、これまでに作った自作の\texttt{array}で最初の要素にアクセスする方法を考えてみよう
+
+\begin{lstlisting}[language={C++}]
+array<int, 5> a = {1,2,3,4,5} ;
+int x = a[0] ; // 1
+a[0] = 0 ;
+\end{lstlisting}
+
+このことから考えると、先頭要素を指すイテレーターは\texttt{operator *}\,\index{\protect{*}@\texttt{\protect{*}}}をオーバーロードして先頭要素をリファレンスで返せばよい。
+
+\begin{lstlisting}[language={C++}]
+struct array_iterator_int_5_begin
+{
+    array<int, 5> & a ;
+
+    array<int, 5>::reference operator *()
+    {
+        return a[0] ;
+    }
+} ;
+\end{lstlisting}
+
+しかし、この実装では\texttt{array<int,5>}\,にしか対応できない。\texttt{array<int,7>}\,や\texttt{array<double, 10>}\,には対応できない。なぜなら、\texttt{array}に渡すテンプレート実引数が違うと、別の型になるからだ。
+
+\texttt{array\_iterator}でさまざまな\texttt{array}を扱うにはどうすればいいのか。テンプレートを使う。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_iterator_begin
+{
+    Array & a ;
+
+    array_iterator_begin( Array & a )
+        : a( a ) { }
+
+    // エラー
+    // Array::referenceは型ではない
+    Array::reference operator *()
+    {
+        return a[0] ;
+    }
+} ;
+\end{lstlisting}
+
+しかしなぜかエラーだとコンパイラーに怒られる。この理由を説明するのはとても難しい。気になる読者は近所のC++グルに教えを請おう。ここでは答えだけを教える。
+
+\texttt{T::Y}において、\texttt{T}がテンプレート引数に依存する名前で、\texttt{Y}がネストされた型名の場合、\texttt{typename}キーワード\index{typename@\texttt{typename}}を付けなければならない。
+
+\begin{lstlisting}[language={C++}]
+template < typename T >
+void f()
+{
+    // typenameが必要
+    typename T::Y x = 0 ;
+}
+
+struct S
+{
+    using Y = int ;
+} ;
+
+int main()
+{
+    // T = S
+    // T::Y = int
+    f<S>() ;
+}
+\end{lstlisting}
+
+わかっただろうか。わからなくても無理はない。この問題を理解するにはテンプレートに対する深い理解が必要だ。理解した暁には読者はC++グルとして崇拝されているだろう。
+
+さしあたって必要なのは\texttt{Array::reference}の前に\texttt{typename}キーワードを付けることだ。
+
+\begin{lstlisting}[language={C++}]
+typename Array::reference
+array_iterator_begin::operator * ()
+{
+    return a[0] ;
+}
+\end{lstlisting}
+
+どうやら最初の要素を読み書きするイテレーターはできたようだ。\texttt{array}側も実装して試してみよう。
+
+\texttt{array}側の実装にはまだ現時点では完全に理解できない黒魔術が必要だ。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+    // 黒魔術1: array
+    using iterator = array_iterator_begin<array> ;
+    iterator begin()
+    // 黒魔術2: *this
+    // 黒魔術3: iterator(*this)
+    { return iterator(*this) ; }
+} ;
+\end{lstlisting}
+
+黒魔術1は\texttt{array\_iterator\_begin<array>}\,の中にある。この\texttt{array}は\texttt{array<T,N>}\,と同じ意味になる。つまり全体としては、\texttt{array\_iterator\_begin<array<T,N{>}{>}}\,と書いたものと同じだ。クラステンプレートの中でクラス名を使うと、テンプレート実引数をそれぞれ指定したものと同じになる。
+
+\begin{lstlisting}[language={C++}]
+template < typename A, typename B, typename C >
+struct S
+{
+    void f()
+    {
+        // S<A,B,C>と同じ
+        S s ;
+    }
+} ;
+\end{lstlisting}
+
+黒魔術2は\,\texttt{*this}\index{\protect{*}this@\texttt{\protect{*}this}}だ。\texttt{*this}はメンバー関数を呼んだクラスのオブジェクトへのリファレンスだ。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+    // *thisはメンバー関数が呼ばれたSのオブジェクト
+    S & THIS() { return *this ; } 
+} ;
+
+int main()
+{
+    S s1 ;
+    
+    s1.THIS().data = 123 ;
+    // 123
+    std::cout << s1.data ;
+
+(@\ifTombow\pagebreak\fi@)
+    S s2 ;
+    s2.THIS().data = 456 ;
+    // 456
+    std::cout << s2.data ;
+}
+\end{lstlisting}
+
+クラスのメンバー関数は対応するクラスのオブジェクトに対して呼ばれる。本来ならばクラスのオブジェクトをリファレンスで取るような形になる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+    void set(int x)
+    {
+        data = x ;
+    }
+} ;
+
+int main()
+{
+    S object ;
+    object.set(42) ;
+}
+\end{lstlisting}
+というコードは、ほぼ同じことを以下のようにも書ける。
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+} ;
+
+void set( S & object, int x )
+{
+    object.data = x ;
+}
+
+int main()
+{
+    S ojbect ;
+    set( object, 42 ) ;
+}
+\end{lstlisting}
+
+クラスの意義は変数と関数を結び付けることだ。このように変数と関数がバラバラではわかりにくいので、メンバー関数という形で\texttt{object.set(...)}のようにわかりやすく呼び出せるし、その際クラス\texttt{S}のオブジェクトは変数\texttt{object}であることが文法上わかるので、わざわざ関数の実引数の形で書くことは省略できるようにしている。
+
+メンバー関数の中で、メンバー関数が呼ばれているクラスのオブジェクトを参照する方法が\,\texttt{*this}だ。
+
+しかしなぜ\,\texttt{*this}なのか。もっとわかりやすいキーワードでもいいのではないか。なぜ\,\texttt{*}\,が付いているのか。この謎を理解するためには、これまたポインターの理解が必要になるが、それは次の章で学ぶ。
+
+黒魔術3は\texttt{iterator(*this)}だ。クラス名に\texttt{()}や\,\texttt{\{\}}\,を続けると、コンストラクターを呼び出した結果のクラスの値を得ることができる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    S() { }
+    S( int ) { }
+    S( int, int ) { }
+} ;
+
+int main()
+{
+    S a = S() ;
+    S b = S(0) ;
+    S c = S(1,2) ;
+
+    S d = S{} ;
+    S e = S{0} ;
+    S f = S{1,2} ;
+}
+\end{lstlisting}
+
+黒魔術の解説が長くなった。本題に戻ろう。
+
+\texttt{array\_iterator\_begin}は先頭の要素しか扱えない。イテレーターで先頭以外の別の要素を扱う方法を思い出してみよう。
+
+イテレーターは\texttt{operator ++}で次の要素を参照する。\texttt{operator {-}{-}}\,で前の要素を参照する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto iter = a.begin() ;
+    *iter ; // 1
+    ++iter ;
+    *iter ; // 2
+    --iter ;
+    *iter ; // 1
+}
+\end{lstlisting}
+
+この\texttt{operator ++}と\texttt{operator {-}{-}}\,はイテレーターへのリファレンスを返す。なぜならば、以下のように書けるからだ。
+
+\begin{lstlisting}[language={C++}]
+*++iter ;
+*++++iter ;
+\end{lstlisting}
+
+以上を踏まえて、自作の\texttt{array\_iterator}の宣言を書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+
+    array_iterator( Array & a )
+        : a( a ) { }
+
+    // 次の要素を指す
+    array_iterator & operator ++() ;
+    // 前の要素を指す
+    array_iterator & operator --() ;
+    
+    // いま参照している要素へのリファレンスを返す
+    Array::reference operator *() ;
+} ;
+\end{lstlisting}
+
+イテレーターの実装で先頭の要素を参照するのは\texttt{a[0]}だった。その次の要素を参照するには\texttt{a[1]}だ。その次の要素は\texttt{a[2]}となり、その前の要素は\texttt{a[1]}だ。
+
+\begin{lstlisting}[language={C++}]
+array<int, 5> a = {1,2,3,4,5} ;
+
+auto iter = a.begin() ; // 最初の要素
+*iter ; // 1
+++iter ; // 次の要素
+*iter ; // 2
+--iter ; // 前の要素、 つまり最初の要素
+*iter ; // 1
+\end{lstlisting}
+
+では最初の要素の前の要素や、最後の要素の次の要素を参照しようとするとどうなるのか。
+
+\begin{lstlisting}[language={C++}]
+auto first = a.begin() ;
+--first ;
+*first ; // 最初の前の要素？
+auto last = a.end() ;
+++last ; //
+*last ; // 最後の次の要素？
+\end{lstlisting}
+
+これはエラーになる。このようなエラーを起こさないように務めるのはユーザーの責任で、イテレーター実装者の責任ではない。しかし、必要であればイテレーターの実装者はこのようなエラーを防ぐような実装もできる。それはあとの章で学ぶ。ここでは、こういう場合が起こることは考えなくてもよいとしよう。
+
+これを考えていくと、イテレーターの実装をどうすればいいのかがわかってくる。
+
+\texttt{array\_iterator}の\texttt{operator *}\,は\texttt{a[i]}を返す。
+
+\begin{lstlisting}[language={C++}]
+typename Array::reference array_iterator::operator *()
+{
+    return a[i] ;
+}
+\end{lstlisting}
+
+\texttt{i}は\texttt{std::size\_t}型のデータメンバーで、イテレーターが現在参照している\texttt{i}番目の要素を記録している。
+
+ということは先ほどの\texttt{array\_iterator}の宣言にはデータメンバー\texttt{i}を追加する修正が必要だ。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+    std::size_t i ;
+
+    array_iterator( Array & a, std::size_t i )
+        : a( a ), i(i) { }
+
+    // いま参照している要素へのリファレンスを返す
+    Array::reference operator *()
+    {
+        return a[i] ;
+    }
+
+    // その他のメンバー
+} ;
+\end{lstlisting}
+
+そして、\texttt{array}側にも新しい\texttt{array\_iterator}への対応が必要になる。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator = array_iterator<array> ;
+
+    // 先頭要素のイテレーター
+    iterator begin()
+    {
+        return array_iterator( *this, 0 ) ;
+    }
+
+    // 最後の次の要素へのイテレーター
+    iterator end()
+    {
+        return array_iterator( *this, N ) ;
+    }
+} ;
+\end{lstlisting}
+
+何度も書くように、インデックスは\texttt{0}から始まる。要素が\(N\)個ある場合、最初の要素は0番目で、最後の要素は\(N-1\)番目だ。
+
+インクリメント演算子\texttt{operator ++}にも対応しよう。
+
+\begin{lstlisting}[language={C++}]
+array_iterator & array_iterator::operator ++()
+{
+    ++i ;
+    return *this ;
+}
+\end{lstlisting}
+
+これで最低限のイテレーターは実装できた。さっそく試してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    array<int,5> a = {1,2,3,4,5} ;
+
+    auto iter = a.begin() ;
+
+    std::cout << *iter ; // 1
+    ++iter ;
+    std::cout << *iter ; // 2
+}
+\end{lstlisting}
+
+実は\texttt{operator ++}\index{\protect{++}@\texttt{\protect{++}}}は2種類ある。前置演算子と後置演算子だ。
+\index{ぜんちえんざんし@前置演算子}\index{えんざんし@演算子!ぜんち@前置〜}
+\index{こうちえんざんし@後置演算子}\index{えんざんし@演算子!こうち@後置〜}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int i = 0 ;
+
+    // 前置
+    std::cout << ++i ;  // 1
+    // 後置
+    std::cout << i++ ;  // 1
+    std::cout << i ;    // 2
+}
+\end{lstlisting}
+
+\texttt{int}型では、前置\texttt{operator ++}はオペランドの値を1加算した値にする。後置\texttt{operator ++}はオペランドの値を1加算するが、式を評価した結果は前のオペランドの値になる。
+
+\begin{lstlisting}[language={C++}]
+++i ; // i+1
+i++ ; // i、ただしiの値はi+1
+\end{lstlisting}
+
+後置\texttt{operator ++}のオーバーロードは以下のように書く。
+
+\begin{lstlisting}[language={C++}]
+struct IntLike
+{
+    int data {} ;
+
+    // 前置
+    IntLike & operator ++()
+    {
+        ++data ;
+        return *this ;
+    }
+    // 後置
+    IntLike operator ++(int)
+    {
+        IntLike copy = *this ;
+        ++*this ;
+        return copy ;
+    }
+} ;
+\end{lstlisting}
+
+このコードは慣れないとわかりにくいが、妥当な理由のあるコードだ。順番に説明しよう。
+
+まず演算子オーバーロードの宣言だ。
+
+\begin{lstlisting}[language={C++}]
+// 前置
+IntLike & operator ++() ;
+// 後置
+IntLike operator ++(int) ;
+\end{lstlisting}
+
+前置はリファレンスを返す。前置演算子の適用結果はさらに変更できるようにするためだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int i { } ;
+
+    ++++i ;
+}
+\end{lstlisting}
+
+もちろん、リファレンスを返さない実装は可能だ。そもそも何も値を返さない\texttt{void}を使うことも可能だ。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void operator ++() { }
+} ;
+\end{lstlisting}
+
+ただし、その場合\texttt{operator ++}に対して通常期待されるコードが書けなくなる。理由がない限り演算子の自然な挙動を目指すべきだ。
+
+前置と後置は区別できる必要がある。C++はその区別の方法として、\texttt{int}型の仮引数を1つ取る\texttt{operator ++}を後置演算子だと認識する文法を採用した。この\texttt{int}型の実引数は前置と後置を区別するためだけのもので、値に意味はない。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void operator ++( int x )
+    {
+        // 値に意味はない。
+        std::cout << x ;
+    }
+} ;
+
+int main()
+{
+    S s ;
+    // 演算子としての使用
+    s++ ;
+    // メンバー関数としての使用
+    s.operator++(123) ;
+}
+\end{lstlisting}
+
+値に意味はないが、演算子として使用した場合、値は\texttt{0}になるというどうでもいい仕様がある。メンバー関数として使用すると好きな値を渡せるというこれまたどうでもいい仕様がある。テストには出ないので覚える必要はない。
+
+前置は自然な挙動のためにリファレンスを返すが、後置はリファレンスではなくコピーした値を返す。
+
+\begin{lstlisting}[language={C++}]
+// 後置
+IntLike IntLike::operator ++(int)
+{
+    // コピーを作る
+    IntLike copy = *this ;
+    // 演算子が呼ばれたオブジェクトをインクリメントする
+    // 前置インクリメント演算子を呼んでいる
+    ++*this ;
+    // 値が変更されていないコピーを返す
+    return copy ;
+}
+\end{lstlisting}
+
+このように実装すると、後置として自然な挙動が実装できる。
+
+\texttt{++*this}は後置インクリメント演算子が呼ばれたオブジェクトに対して前置インクリメント演算子を使用している。わかりにくければ前置インクリメントと同じ処理を書いてもいい。
+
+\begin{lstlisting}[language={C++}]
+IntLike IntLike::operator ++(int)
+{
+    IntLike copy = *this ;
+    // 同じ処理
+    ++data ;
+    return copy ;
+}
+\end{lstlisting}
+
+\texttt{IntLike}のように簡単な処理であればこれでもいいが、もっと複雑な何行もある処理の場合は、すでに実装した前置インクリメントを呼び出した方が楽だ。コードの重複を省けるのでインクリメントの処理を変更するときに、2箇所に同じ変更をしなくても済む。
+
+以上を踏まえて、\texttt{array\_iterator}に後置インクリメント演算子を実装しよう。
+
+\begin{lstlisting}[language={C++}]
+array_iterator array_iterator::operator ++(int)
+{
+    array_iterator copy = *this ;
+    ++*this ;
+    return copy ;
+}
+\end{lstlisting}
+
+デクリメント演算子\texttt{operator {-}{-}}\,の実装はインクリメント演算子\texttt{operator ++}と同じだ。ただ処理がインクリメントではなくデクリメントになっているだけだ。
+\index{{-}{-}@\texttt{{-}{-}}}
+
+\begin{lstlisting}[language={C++}]
+// 前置
+array_iterator & array_iterator::operator --()
+{
+    -- i ;
+    return *this ;
+}
+// 後置
+array_iterator array_iterator::operator --(int)
+{
+    array_iterator copy = *this ;
+    --*this ;
+    return copy ;
+}
+\end{lstlisting}
+
+ここまでくればイテレーターに必要な操作はあと1つ。比較\index{いてれた@イテレーター!ひかく@比較}だ。
+
+イテレーターは同じ要素を指している場合に等しい。つまり、オペレーター\texttt{a}と\texttt{b}が同じ要素を指しているならば、\texttt{a == b}は\texttt{true}で\texttt{a != b}は\texttt{false}だ。違う要素を指しているならば\texttt{a == b}は\texttt{false}で\texttt{a != b}は\texttt{true}だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto a = a.begin() ;
+    auto b = a.begin() ;
+
+    // true
+    bool b1 = (a == b) ;
+    // false
+    bool b2 = (a != b) ;
+    ++a ;
+    // false
+    bool b3 = (a == b) ;
+    // true
+    bool b4 = (a != b) ;
+}
+\end{lstlisting}
+
+イテレーターは比較ができるので、イテレーターが終端に到達するまでループを回すことができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int,5> a = {1,2,3,4,5} ;
+
+            // 変数宣言
+    for (   auto iter = std::begin(a),
+            last = std::end(a) ;
+            // 終了条件
+            iter != last ;
+            // ループごとの処理
+            ++iter )
+    {
+        std::cout << *iter ;
+    }
+}
+\end{lstlisting}
+
+イテレーターは比較ができるので、各種アルゴリズムに渡すことができる。
+
+\texttt{array\_iterator}の比較は、単にデータメンバー\texttt{i}の比較でよい。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+bool array_iterator::operator ==( array_iterator const & right )
+{
+    return i == right.i ;
+}
+bool array_iterator::operator !=( array_iterator const & right )
+{
+    return i != right.i ;
+}
+\end{lstlisting}
+
+これで自作の\texttt{array}と\texttt{array\_iterator}はアルゴリズムに渡せるようになった。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    array<int, 5> a = {1,2,3,4,5} ;
+
+    std::for_each( std::begin(a), std::end(a),
+        [](auto x){ std::cout << x ; } ) ;
+}
+\end{lstlisting}
+
+\hypersection{ch2502}{残りのイテレーターの実装}
+
+\texttt{std::array}や\texttt{std::vector}のイテレーターはとても柔軟にできている。
+
+例えばイテレーター\texttt{i}の参照する要素を3つ進めたい場合を考えよう。
+
+\begin{lstlisting}[language={C++}]
+++i ; // 1
+++i ; // 2
+++i ; // 3
+\end{lstlisting}
+
+これは非効率的だ。もっと効率的なイテレーターの進め方として、\texttt{operator +=}\,がある。
+\index{\protect{+=}@\texttt{\protect{+=}}}
+
+\begin{lstlisting}[language={C++}]
+i += 3 ;
+\end{lstlisting}
+
+\texttt{i += n}はイテレーター\texttt{i}を\texttt{n}回進める。
+
+\texttt{operator +}もある。
+\index{\protect{+}@\texttt{\protect{+}}}
+
+\begin{lstlisting}[language={C++}]
+auto j = i + 3 ;
+\end{lstlisting}
+
+イテレーター\texttt{j}の値はイテレーター\texttt{i}を3つ進めた値になる。イテレーター\texttt{i}の値は変わらない。
+
+実装は簡単だ。データメンバー\texttt{i}に対して同じ計算をする。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+    std::size_t i ;
+
+    array_iterator & operator += ( std::size_t n )
+    {
+        i += n ;
+        return *this ;
+    }
+
+    array_iterator operator + ( std::size_t n ) const
+    {
+        auto copy = *this ;
+        copy += n ;
+        return copy ;
+    }
+} ;
+\end{lstlisting}
+
+\texttt{operator +}はオペランドの値を変更しないので\texttt{const}にできる。
+
+同様に、\texttt{operator -=}\,と\texttt{operator -}\,もある。上を参考に自分で実装してみよう。
+\index{{-}=@\texttt{{-}=}}\index{\protect{-}@\texttt{\protect{-}}}
+
+\texttt{operator +}によって任意の\texttt{n}個先の要素を使うことができるようになったので、イテレーター\texttt{i}の\texttt{n}個先の要素を参照したければ、以下のように\,\texttt{*(i+n)}も書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    std::cout << a[3] ; // 4
+
+    auto i = a.begin() ;
+
+    std::cout << *(i + 3) ; // 4
+}
+\end{lstlisting}
+
+カッコが必要なのは、演算子の評価順序の都合だ。\texttt{*i + 3}は\texttt{(*i) + 3}であり、\texttt{i}の指す要素に対して\,\texttt{+3}される。\texttt{*(i+3)}は\texttt{i}の指す要素の3つ先の要素の値を読む。
+
+イテレーター\texttt{i}の\texttt{n}個先の要素を読み書きするのにいちいち\,\texttt{*(i+n)}と書くのは面倒なので、\texttt{std::array}や\texttt{std::vector}のイテレーターには\texttt{operator []}がある。これを使うと\texttt{i[n]}と書ける。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    std::cout << a[3] ; // 4
+
+    auto i = a.begin() ;
+
+    std::cout << *(i + 3) ; // 4
+}
+\end{lstlisting}
+
+\texttt{operator []}の実装は文字どおり\,\texttt{*(i+n)}と同じことをするだけでよい。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_iterator
+{
+    typename Array::reference
+    operator [] ( std::size_t n ) const
+    {
+        return *( *this + n ) ;
+    }
+
+    // その他のメンバー
+} ;
+\end{lstlisting}
+
+この\texttt{operator []}は、\texttt{array\_iterator}のデータメンバーを変更しないので\texttt{const}修飾できる。
+
+\texttt{*this}というのはこのイテレーターのオブジェクトなので、それに対してすでに実装済みの\texttt{operator +}を適用し、その結果に\texttt{operator *}を適用している。既存の実装を使わない場合、\texttt{return}文は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+return a[i+n] ;
+\end{lstlisting}
+
+こちらの方が一見簡単なように見えるが、\texttt{operator +}\,や\texttt{operator *}\,の実装が複雑な場合、この方法では同じコードを複数の箇所に書かなければならず、コードを修正するときは同じ変更を複数の箇所に行わなければならない。すでに実装したメンバー関数は積極的に使って楽をしていこう。
+
+イテレーターは大小比較ができる。
+
+\begin{lstlisting}[language={C++}]
+a <  b ;
+a <= b ;
+a >  b ;
+a >= b ;
+\end{lstlisting}
+
+イテレーターの大小はどういう意味を持つのか。\texttt{array}のようにイテレーターが線形に順序のある要素を参照している場合で、前の要素を参照しているイテレーターはあとの要素を参照しているイテレーターより小さい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    auto a = std::begin(a) ;
+    auto b = a + 1 ;
+
+    a <  b ; // true
+    a <= b ; // true
+    a >  b ; // false
+    a >= b ; // false
+}
+\end{lstlisting}
+
+自作の\texttt{array}の場合、単にデータメンバー\texttt{i}を比較する。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_iterator
+{
+    Array & a ;
+    std::size_t i ;
+
+    bool operator < ( array_iterator const & right ) const
+    {
+        return i < right.i ;
+    }
+}
+\end{lstlisting}
+
+残りの演算子も同様に実装できる。
+
+\hypersection{ch2503}{constなイテレーター: const\texttt{\_}iterator}
+\index{constないてれた@constなイテレーター}\index{いてれた@イテレーター!constな@constな〜}
+\index{const\_iterator@\texttt{const\_iterator}}\index{いてれた@イテレーター!const\_iterator@\texttt{const\_iterator}}
+
+\texttt{std::array<T,N>}\,は通常のイテレーターである\texttt{std::array<T,N>::iterator}のほかに、\texttt{const}なイテレーターである\texttt{std::array<T,N>::const\_iterator}を提供している。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int,5> a = {1,2,3,4,5} ;
+
+    // iterator
+    std::array<int,5>::iterator iter = a.begin() ;
+(@\ifTombow\pagebreak\fi@)
+    // const_iterator
+    std::array<int,5>::const_iterator const_iter = a.cbegin() ;
+}
+\end{lstlisting}
+
+\texttt{const\_iterator}は\texttt{const iterator}ではない。\texttt{const\_iterator}とはそれ自体が型名だ。\texttt{const}というのは型名を修飾する別の機能だ。
+
+そのため、\texttt{const}の有無の2種類の状態と、\texttt{iterator}, \texttt{const\_iterator}の2つの型を掛け合わせた、以下の型が存在する。
+
+\begin{itemize}
+\item
+  \texttt{iterator}
+\item
+  \texttt{const iterator}
+\item
+  \texttt{const\_iterator}
+\item
+  \texttt{const const\_iterator}
+\end{itemize}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using Array = std::array<int,5> ;
+
+    // iterator 
+    Array::iterator i ;
+    // const iterator
+    const Array::iterator c_i ;
+    // const_iterator
+    Array::const_iterator ci ;
+    // const const_iterator
+    const Array::const_iterator c_ci ;
+}
+\end{lstlisting}
+
+\texttt{const\_iterator}は\texttt{iterator}とは別の型だ。自作の\texttt{array}に実装するならば以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator          = array_iterator<array> ;
+    using const_iterator   = array_const_iterator<array> ;
+} ;
+\end{lstlisting}
+
+それぞれの型に対して、\texttt{const}キーワードを付けた型とそうでない型が存在する。
+
+\texttt{const\_iterator}を得る方法はいくつかある。
+
+\ifTombow\pagebreak\fi
+%\vskip 1.0zw
+\noindent
+\(\bullet\) \textsf{\texttt{const}な\texttt{array}の\texttt{begin}/\texttt{end}を呼び出す}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // constなarray
+    const std::array<int, 5> a = {1,2,3,4,5} ;
+
+    // const_iterator
+    auto i = a.begin() ;
+}
+\end{lstlisting}
+
+\vskip 1.0zw
+\noindent
+\(\bullet\) \textsf{\texttt{cbegin}/\texttt{cend}を呼び出す}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    // const_iterator
+    auto i = a.cbegin() ;
+}
+\end{lstlisting}
+
+\vskip 1.0zw
+\noindent
+\(\bullet\) \textsf{\texttt{iterator}から\texttt{const\_iterator}への変換}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    // iterator
+    Array::iterator i = a.begin() ;
+    // iteratorからconst_iteratorへの変換
+    Array::const_iterator j = i ;
+}
+\end{lstlisting}
+
+\texttt{const}キーワードはすでに学んだように、オブジェクトの値を変更できないようにする機能だ。
+
+なぜ\texttt{const\_iterator}が存在するのか。\texttt{const iterator}ではだめなのか。その理由は、\texttt{const iterator}は値の変更ができないためだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+(@\ifTombow\pagebreak\fi@)
+    // const iterator
+    const Array::iterator iter = a.begin() ;
+
+    // エラー
+    // constなオブジェクトは変更できない
+    ++iter ;
+
+    // Ok
+    // iterは変更していない
+    auto next_iter = iter + 1 ;
+}
+\end{lstlisting}
+
+\texttt{const\_iterator}ならばイテレーター自体の変更はできる。イテレーターが参照する要素の変更はできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    auto citer = a.begin() ;
+
+    // OK
+    // イテレーター自体の変更
+    ++citer ;
+
+    // OK
+    // 要素を変更しない
+    std::cout << *citer ;
+
+    // エラー
+    // 要素を変更している
+    *citer = 0 ;
+}
+\end{lstlisting}
+
+\texttt{const const\_iterator}は\texttt{const\_iterator}の\texttt{const}だ。\texttt{const const\_iterator}は\texttt{const iterator}と同じく、イテレーター自体の変更ができない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    // const const_iterator
+    auto const iter = a.begin() ;
+
+    // エラー
+    // constなオブジェクトは変更できない
+    ++iter ;
+
+    // OK
+    // iterは変更していない
+    auto next_iter = iter + 1 ;
+}
+\end{lstlisting}
+
+\texttt{auto const}もしくは\texttt{const auto}を使うと、変数の型を自動で推定してくれるが、\texttt{const}が付くようになる。
+
+\texttt{const\_iterator}はどう実装するのか。まず\texttt{array}にネストされた型名\texttt{const\_iterator}を追加する。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator = array_iterator<array> ;
+    using const_iterator = array_const_iterator<array> ;
+} ;
+\end{lstlisting}
+
+\texttt{array}に\texttt{const\_iterator}を返す\texttt{cbegin/cend}と、\texttt{const array}のときに\texttt{const\_iterator}を返す\texttt{begin}/\texttt{end}を追加する。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using iterator = array_iterator<array> ;
+    using const_iterator = array_const_iterator<array> ;
+
+    // const arrayのときにconst_iteratorを返す
+    const_iterator begin() const
+    { return const_iterator(*this, 0) ; }
+    const_iterator end() const
+    { return const_iterator(*this, N) ; }
+
+    // 常にconst_iteratorを返す
+    const_iterator cbegin() const
+    { return const_iterator(*this, 0) ; }
+    const_iterator cend() const
+    { return const_iterator(*this, N) ; }
+
+    // その他のメンバー
+} ;
+\end{lstlisting}
+
+あとは\texttt{array\_const\_iterator<array>}\,を実装する。その実装は\texttt{array\_iterator<array>}\,とほぼ同じだ。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_const_iterator
+{
+    Array const & a ;
+    std::size_t i ;
+
+    // コンストラクター
+    array_const_iterator( Array const & a, std::size_t i )
+        : a(a), i(i) { }
+} ;
+\end{lstlisting}
+
+ただし、\texttt{const\_iterator}は\texttt{iterator}から変換できるので、
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using Array = std::array<int,5> ;
+    Array a = {1,2,3,4,5} ;
+
+    // iterator
+    auto i = a.begin() ;
+
+    // iteratorからconst_iteratorへの変換
+    Array::const_iterator j = i ;
+}
+\end{lstlisting}
+
+これに対応するために、\texttt{const\_iterator}のコンストラクターは\texttt{iterator}から変換するためのコンストラクターも持つ。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+struct array_const_iterator
+{
+    Array const & a ;
+    std::size_t i ;
+
+    // array_iteratorからの変換コンストラクター
+    array_const_iterator( typename array_iterator<Array>::iterator const & iter )
+        : a( iter.a ), i( iter.i ) { }
+} ;
+\end{lstlisting}
+
+残りのメンバー関数は\texttt{iterator}とほぼ同じだ。
+
+例えば\texttt{operator ++}は完全に同じだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// iterator版
+array_iterator & array_iterator::operator++()
+{
+    ++i ;
+    return *this ;
+}
+// const_iterator版
+array_const_iterator & array_const_iterator::operator ++()
+{
+    ++i ;
+    return *this ;
+}
+\end{lstlisting}
+
+\texttt{operator *}\,や\texttt{operator []}は\texttt{const}なリファレンスを返す。
+
+\begin{lstlisting}[language={C++}]
+typename Array::const_reference operator *() const
+{
+    return a[i] ;
+}
+
+typename Array::const_reference operator []( std::size_t i ) const
+{
+    return *(*this + i) ;
+}
+\end{lstlisting}
+
+このために、\texttt{array}クラスにもネストされた型名\texttt{const\_reference}を宣言しておく。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using const_reference = T const & ;
+} ;
+\end{lstlisting}
+
+残りは\texttt{iterator}の実装を参考に読者が自分で実装してみよう。

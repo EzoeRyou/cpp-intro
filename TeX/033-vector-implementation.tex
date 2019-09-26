@@ -1,0 +1,1082 @@
+\hyperchapter{ch30}{vectorの実装：基礎}{vectorの実装：基礎}
+\index{vector@\texttt{vector}}
+
+クラス、ポインター、メモリー確保を学んだので、とうとうコンテナーの中でも一番有名な\texttt{std::vector}を実装する用意ができた。しかしその前に、アロケーター\index{あろけた@アロケーター}について学ぶ必要がある。
+
+\texttt{std::vector}は\texttt{std::vector<T>}\,のように要素の型\texttt{T}を指定して使うので、以下のようになっていると思う読者もいるだろう。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+    template < typename T >
+    struct vector ;
+}
+\end{lstlisting}
+
+実際には以下のようになっている。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+    template < typename T, typename allocator = allocator<T> >
+    struct vector ;
+}
+\end{lstlisting}
+
+\texttt{std::allocator<T>}\,\index{allocator@\texttt{allocator}}というのは標準ライブラリのアロケーターだ。アロケーターは生のメモリーの確保と解放をするライブラリだ。デフォルトで\texttt{std::allocator<T>}\,が渡されるので、普段ユーザーはアロケーターを意識することはない。
+
+\texttt{std::vector}は\texttt{malloc}や\texttt{operator new}を直接使わずアロケーターを使ってメモリー確保を行う。
+
+アロケーターはテンプレートパラメーターで指定できる。何らかの理由で独自のメモリー確保を行いたい場合、独自のアロケーターを実装してコンテナーに渡すことができる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// 独自のアロケーター
+template < typename T >
+struct custom_allocator
+{
+    // ...
+} ;
+
+template < typename T >
+using custom_vector = std::vector< T, custom_allocator<T> > ;
+
+int main()
+{
+    custom_vector<int> v ;
+    // 独自のアロケーターを使ったメモリー確保
+    v.push_back(0) ;
+}
+\end{lstlisting}
+
+\hypersection{ch3001}{std::allocator\texttt{<}T\texttt{>}\,の概要}
+
+\texttt{std::allocator<T>}\,は\texttt{T}型を構築できる生のメモリーを確保するための以下のようになっている。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+template<class T> class allocator {
+    // ネストされた型名の宣言
+    using value_type = T;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using propagate_on_container_move_assignment = true_type;
+    using is_always_equal = true_type;
+
+    // コンストラクター
+    // constexprはまだ学んでいない
+    constexpr allocator() noexcept;
+    constexpr allocator(const allocator&) noexcept;
+    template<class U> constexpr allocator(const allocator<U>&) noexcept;
+    ~allocator();
+    // コピー代入演算子
+    allocator& operator=(const allocator&) = default;
+
+    // ここが重要
+    [[nodiscard]] T* allocate(size_t n);
+    void deallocate(T* p, size_t n);
+};
+}
+\end{lstlisting}
+
+\texttt{constexpr}というキーワードがあるが、ここでは気にする必要はない。あとで学ぶ。
+
+重要なのはメモリー確保をする\texttt{allocate}と、メモリー解放をする\texttt{deallocate}だ。
+
+\hypersection{ch3002}{std::allocator\texttt{<}T\texttt{>}\,の使い方}
+
+標準ライブラリのアロケーター、\texttt{std::allocator<T>}\,\index{allocator@\texttt{allocator}}は、\texttt{T}型を構築できる生のメモリーの確保と解放をするライブラリだ。重要なメンバーは以下のとおり。
+
+\begin{lstlisting}[language={C++}]
+// メモリー確保
+[[nodiscard]] T* allocate(size_t n);
+// メモリー解放
+void deallocate(T* p, size_t n);
+\end{lstlisting}
+
+\texttt{allocate(n)}\index{allocate@\texttt{allocate}}は\texttt{T}型の\texttt{n}個の配列を構築できるだけの生のメモリーを確保\index{めもり@メモリー!かくほ@確保}してその先頭へのポインターを返す。
+
+\texttt{deallocate(p, n)}\index{deallocate@\texttt{deallocate}}は\texttt{allocate(n)}で確保されたメモリーを解放\index{めもり@メモリー!かいほう@解放}する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::allocator<std::string> a ;
+    // 生のメモリー確保
+    // std::string [1]分のメモリーサイズ
+    std::string * p = a.allocate(1) ;
+    // メモリー解放
+    a.deallocate( p, 1 ) ;
+}
+\end{lstlisting}
+
+\texttt{allocate}には\texttt{[[nodiscard]]}\index{[[nodiscard]]@\texttt{[[nodiscard]]}}という属性が付いている。これにより戻り値を無視すると警告が出る。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::allocator<int> a ;
+    // 警告、 戻り値が無視されている
+    a.allocate(1) ;
+
+    // OK
+    int * p = a.allocate(1) ;
+}
+\end{lstlisting}
+
+確保されるのが生のメモリーだということに注意したい。実際に\texttt{T}型の値として使うには、\texttt{new}による構築が必要だ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::allocator<std::string> a ;
+    // 生のメモリー確保
+    // std::string [1]分のメモリーサイズ
+    std::string * p = a.allocate(1) ;
+    // 構築
+    std::string * s = new(p) std::string("hello") ;
+    // 明示的なデストラクター呼び出し
+    s->~basic_string() ;
+    // メモリー解放
+    a.deallocate( p, 1 ) ;
+}
+\end{lstlisting}
+
+このように書くのはとても面倒だ。特に\texttt{std::string}の明示的なデストラクター呼び出し\texttt{s->{\textasciitilde}basic\_string}が面倒だ。なぜ\texttt{s->{\textasciitilde}string}ではだめなのか。
+
+実は\texttt{std::string}\index{string@\texttt{string}}は以下のようなクラステンプレートになっている。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+template <
+    typename charT,
+    typename traits     = char_traits<charT>,
+    typename Allocator  = allocator<charT>>
+class basic_string
+{
+    // デストラクター
+    ~basic_string() ;
+} ;
+
+}
+\end{lstlisting}
+
+本当のクラス名は\texttt{basic\_string}\index{basic\_string@\texttt{basic\_string}}なのだ。
+
+普段は使っている\texttt{std::string}というのは、以下のようなエイリアスだ。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+using string = basic_string<char> ;
+}
+\end{lstlisting}
+
+明示的なデストラクター呼び出しにエイリアスは使えないので、本当のクラス名である\texttt{basic\_string}を直接指定しなければならない。
+
+\ifTombow\pagebreak\fi
+この問題はテンプレートで解決できる。
+
+\begin{lstlisting}[language={C++}]
+// 明示的なデストラクター呼び出しをする関数テンプレート
+template < typename T >
+void destroy_at( T * location )
+{
+    location->~T() ;
+}
+\end{lstlisting}
+
+このようにテンプレートで書くことによって、クラス名を意識せずに破棄ができる。
+
+\begin{lstlisting}[language={C++}]
+// 破棄
+destroy_at( s ) ;
+\end{lstlisting}
+
+このようなコードを書くのは面倒なので、標準ライブラリには\texttt{std::destroy\_at}\index{destroy\_at@\texttt{destroy\_at}}がある。また、これらをひっくるめたアロケーターを使うためのライブラリである\texttt{allocator\_traits}がある。
+
+\hypersection{ch3003}{std::allocator\texttt{\_}traits\texttt{<}Alloc\texttt{>}}
+\index{allocator\_traits@\texttt{allocator\_traits}}
+
+\texttt{std::allocator\_traits<Alloc>}\,はアロケーター\texttt{Alloc}を簡単に使うためのライブラリだ。
+
+\texttt{allocator\_traits<Alloc>}\,はアロケーターの型\texttt{Alloc}を指定して使う。
+
+\begin{lstlisting}[language={C++}]
+std::allocator<int> a ;
+int * p = a.allocate(1) ;
+\end{lstlisting}
+と書く代わりに、
+\begin{lstlisting}[language={C++}]
+std::allocator<int> a ;
+int * p = std::allocator_traits< std::allocator<int> >::allocate( a, 1 ) ;
+\end{lstlisting}
+と書く。
+
+これはとても使いづらいので、\texttt{allocator\_traits}のエイリアスを書くとよい。
+
+\begin{lstlisting}[language={C++}]
+std::allocator<int> a ;
+// エイリアス
+using traits = std::allocator_traits< std::allocator<int> > ;
+int * p = traits::allocate( a, 1 ) ;
+\end{lstlisting}
+
+これもまだ書きにくいので、\texttt{decltype}\index{decltype@\texttt{decltype}}を使う。\texttt{decltype(expr)}は式\texttt{expr}の型として使える機能だ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// int型
+decltype(0) a ;
+// double型
+decltype(0.0) b ;
+// int型
+decltype( 1 + 1 ) c ;
+// std::string型
+decltype( "hello"s ) c ;
+\end{lstlisting}
+
+\texttt{decltype}を使うと以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+std::allocator<int> a ;
+// エイリアス
+using traits = std::allocator_traits< decltype(a) > ;
+int * p = traits::allocate( a, 1 ) ;
+\end{lstlisting}
+
+\texttt{allocator\_traits}はアロケーターを使った生のメモリーの確保、解放と、そのメモリー上にオブジェクトを構築、破棄する機能を提供している。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::allocator<std::string> a ;
+    // allocator_traits型
+    using traits = std::allocator_traits<decltype(a)> ;
+
+    // 生のメモリー確保
+    std::string * p = traits::allocate( a, 1 ) ;
+    // 構築
+    std::string * s = traits::construct( a, p, "hello") ;
+    // 破棄
+    traits::destroy( a, s ) ;
+    // メモリー解放
+    traits::deallocate( a, p, 1 ) ;
+}
+\end{lstlisting}
+
+\texttt{T}型の\texttt{N}個の配列を構築\index{はいれつ@配列!こうちく@構築}するには、まず\texttt{N}個の生のメモリーを確保し、
+\begin{lstlisting}[language={C++}]
+std::allocator<std::string> a ;
+using traits = std::allocator_traits<decltype(a)> ;
+std::string * p = traits::allocate( a, N ) ;
+\end{lstlisting}
+\texttt{N}回の構築を行う。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+for ( auto i = p, last = p + N ; i != last ; ++i )
+{
+    traits::construct( a, i, "hello" ) ;
+}
+\end{lstlisting}
+
+破棄\index{はいれつ@配列!はき@破棄}も\texttt{N}回行う。
+
+\begin{lstlisting}[language={C++}]
+for ( auto i = p + N, first = p ; i != first ; --i )
+{
+    traits::destroy( a, i ) ;
+}
+\end{lstlisting}
+
+生のメモリーを破棄する。
+
+\begin{lstlisting}[language={C++}]
+traits::deallocate( a, p, N ) ;
+\end{lstlisting}
+
+\hypersection{ch3004}{簡易vectorの概要}
+\index{かんいvector@簡易\texttt{vector}}\index{vector\texttt{vector}!かんい@簡易〜}
+
+準備はできた。簡易的な\texttt{vector}を実装していこう。以下が本書で実装する簡易\texttt{vector}だ。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+template < typename T, typename Allocator = std::allocator<T> >
+class vector
+{
+private :
+    // データメンバー
+public :
+    // value_typeなどネストされた型名
+    using value_type = T ;
+    // コンストラクター
+    vector( std::size_t n = 0, Allocator a = Allocator() ) ;
+    // デストラクター
+    ~vector() ;
+    // コピー
+    vector( const vector & x ) ;
+    vector & operator =( const vector & x ) ;
+
+    // 要素アクセス
+    void push_back( const T & x ) ;
+    T & operator []( std::size_t i ) noexcept ;
+
+    // イテレーターアクセス
+    iterator begin() noexcept ;
+    iterator end() noexcept ;
+} ;
+\end{lstlisting}
+
+これだけの簡易\texttt{vector}でもかなり便利に使える。
+
+例えば要素数を定めて配列のようにアクセスできる。
+
+\begin{lstlisting}[language={C++}]
+vector v(100) ;
+for ( auto i = 0 ; i != 100 ; ++i )
+    v[i] = i ; 
+\end{lstlisting}
+
+イテレーターも使える。
+
+\begin{lstlisting}[language={C++}]
+std::for_each( std::begin(v), std::end(v),
+    []( auto x ) { std::cout << x ; } ) ;
+\end{lstlisting}
+
+要素を際限なく追加できる。
+
+\begin{lstlisting}[language={C++}]
+std::copy(
+    std::istream_iterator<int>(std::cin), std::istream_iterator<int>(), 
+    std::back_inserter(v) ) ;
+\end{lstlisting}
+
+\hypersection{ch3005}{classとアクセス指定}
+
+簡易\texttt{vector}の概要では、まだ学んでいない機能が使われていた。\texttt{class}\index{class@\texttt{class}}と\texttt{public}\index{public@\texttt{public}}と\texttt{private}\index{private@\texttt{private}}だ。
+
+C++のクラス\index{くらす@クラス}にはアクセス指定\index{あくせすしてい@アクセス指定}\index{くらす@クラス!あくせすしてい@アクセス指定}がある。\texttt{public:}と\texttt{private:}だ。アクセス指定が書かれたあと、別のアクセス指定が現れるまでの間のメンバーは、アクセス指定の影響を受ける。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+public :
+    // publicなメンバー
+    int public_member1 ;
+    int public_member2 ;
+private :
+    // privateなメンバー
+    int private_member1 ;
+    int private_member2 ;
+public :
+    // 再びpublicなメンバー
+    int public_member3 ;    
+} ;
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+\texttt{public}メンバーはクラスの外から使うことができる。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+public :
+    int data_member ;
+    void member_function() { }
+} ;
+
+int main()
+{
+    C c;
+    // クラスの外から使う
+    c.data_member = 0 ;
+    c.member_function() ;
+}
+\end{lstlisting}
+
+\texttt{private}メンバーはクラスの外から使うことができない。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+private :
+    int data_member ;
+    void member_function() ;
+} ;
+
+int main()
+{
+    C c ;
+    // エラー
+    c.data_member = 0 ;
+    // エラー
+    c.member_function() ;
+}
+\end{lstlisting}
+
+コンストラクターもアクセス指定の対象になる。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+public :
+    C(int) { }
+private :
+    C(double) { }
+} ;
+
+(@\ifTombow\pagebreak\fi@)
+int main()
+{
+    // OK
+    C pub(0) ;
+    // エラー
+    C pri(0.0) ;
+}
+\end{lstlisting}
+
+この例では、\texttt{C::C(int)}は\texttt{public}メンバーなのでクラスの外から使えるが、\texttt{C::C(double)}は\texttt{private}メンバーなのでクラスの外からは使えない。
+
+\texttt{private}メンバーはクラスの中から使うことができる。クラスの中であればどのアクセス指定のメンバーからでも使える。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+public :
+    void f()
+    {
+        // ここはクラスの中
+        data_member = 0 ;
+        member_function() ;
+    }
+
+private :
+    int data_member ;
+    void member_function() { }
+} ;
+\end{lstlisting}
+
+\texttt{private}メンバーの目的はクラスの外から使ってほしくないメンバーを守ることだ。例えば以下のようにコンストラクターで\texttt{new}してデストラクターで\texttt{delete}するようなクラスがあるとする。
+
+\begin{lstlisting}[language={C++}]
+class dynamic_int
+{
+private :
+    int * ptr ;
+public :
+    dynamic_int( int value = 0  )
+        : ptr( new int(value) )
+    { }
+    ~dynamic_int()
+    {
+        delete ptr ;
+    }
+} ;
+\end{lstlisting}
+
+もし\texttt{dynamic\_int::ptr}が\texttt{public}メンバーだった場合、以下のようなコードのコンパイルが通ってしまう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    dynamic_int i ;
+    delete i.ptr ;
+    int obj{} ;
+    i.ptr = &obj ;
+}
+\end{lstlisting}
+
+このプログラムが\texttt{dynamic\_int}のデストラクターを呼ぶと、\texttt{main}関数のローカル変数のポインターに対して\texttt{delete}を呼び出してしまう。これは未定義の挙動となる。
+
+外部から使われては困るメンバーを\texttt{private}メンバーにすることでこの問題はコンパイル時にエラーにでき、未然に回避できる。
+
+クラスを定義\index{くらす@クラス!ていぎ@定義}するにはキーワードとして\texttt{struct}\index{struct@\texttt{struct}}もしくは\texttt{class}\index{class@\texttt{class}}を使う。
+
+\begin{lstlisting}[language={C++}]
+struct  foo { } ;
+class   bar { } ;
+\end{lstlisting}
+
+違いはデフォルトのアクセス指定だ。
+
+\texttt{struct}はデフォルトで\texttt{public}となる。
+
+\begin{lstlisting}[language={C++}]
+struct foo
+{
+    // publicメンバー
+    int member ;
+} ;
+\end{lstlisting}
+
+\texttt{class}はデフォルトで\texttt{private}となる。
+
+\begin{lstlisting}[language={C++}]
+class bar
+{
+    // privateメンバー
+    int member ;
+} ;
+\end{lstlisting}
+
+\texttt{struct}と\texttt{class}の違いはデフォルトのアクセス指定だけだ。アクセス指定を明示的に書く場合、違いはなくなる。
+
+\clearpage
+\hypersection{ch3006}{ネストされた型名}
+\index{かためい@型名!ねすとされた@ネストされた〜}
+
+\texttt{std::vector}にはさまざまなネストされた型名がある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using vec = std::vector<int> ;
+    vec v = {1,2,3} ;
+
+    vec::value_type val = v[0] ;
+    vec::iterator i = v.begin() ;
+}
+\end{lstlisting}
+
+自作の簡易\texttt{vector}で\texttt{std::vector}と同じようにネストされた型名を書いていこう。
+
+要素型に関係するネストされた型名。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, typename Allocator = std::allocator<T> >
+class vector
+{
+public :
+    using value_type                = T ;
+    using pointer                   = T *;
+    using const_pointer             = const pointer;
+    using reference                 = value_type & ;
+    using const_reference           = const value_type & ;
+} ;
+\end{lstlisting}
+
+本物の\texttt{std::vector}とは少し異なるが、ほぼ同じだ。要素型が\texttt{value\_type}で、あとは要素型のポインター、\texttt{const}ポインター、リファレンス、\texttt{const}リファレンスがそれぞれエイリアス宣言される。
+
+アロケーター型も\texttt{allocator\_type}\index{allocator\_type@\texttt{allocator\_type}}としてエイリアス宣言される。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, typename Allocator = std::allocator<T> >
+class vector
+{
+public :
+    using allocator_type = Allocator ;
+} ;
+\end{lstlisting}
+
+\texttt{size\_type}\index{size\_type@\texttt{size\_type}}は要素数を表現する型だ。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+void f( std::vector<int> & v )
+{
+    std::vector<int>::size_type s = v.size() ;
+}
+\end{lstlisting}
+
+通常\texttt{std::size\_t}が使われる。
+
+\begin{lstlisting}[language={C++}]
+size_type = std::size_t ;
+\end{lstlisting}
+
+\texttt{difference\_type}\index{difference\_type@\texttt{difference\_type}}はイテレーターの\texttt{difference\_type}と同じだ。これはイテレーター間の距離を表現する型だ。
+
+\begin{lstlisting}[language={C++}]
+void f( std::vector<int> & v )
+{
+    auto i = v.begin() ;
+    auto j = i + 3 ;
+
+    // iとjの距離
+    std::vector<int>::difference_type d = j - i ;
+}
+\end{lstlisting}
+
+通常\texttt{std::ptrdiff\_t}\index{ptrdiff\_t@\texttt{ptrdiff\_t}}が使われる。
+
+\begin{lstlisting}[language={C++}]
+difference_type = std::ptrdiff_t ;
+\end{lstlisting}
+
+イテレーターのエイリアス。
+
+\begin{lstlisting}[language={C++}]
+using iterator                  = pointer ;
+using const_iterator            = const_pointer ;
+using reverse_iterator          = std::reverse_iterator<iterator> ;
+using const_reverse_iterator    = std::reverse_iterator<const_iterator> ;
+\end{lstlisting}
+
+今回実装する簡易\texttt{vector}では、ポインター型をイテレーター型として使う。\texttt{std::vector}の実装がこのようになっている保証はない。
+
+\texttt{reverse\_iterator}と\texttt{const\_reverse\_iterator}はリバースイテレーターだ。
+
+\hypersection{ch3007}{簡易vectorのデータメンバー}
+\index{かんいvector@簡易\texttt{vector}!でためんば@データメンバー}
+
+簡易\texttt{vector}にはどのようなデータメンバーがあればいいのだろうか。以下の4つの情報を保持する必要がある。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  動的確保したストレージへのポインター
+\item
+  現在有効な要素数
+\item
+  動的確保したストレージのサイズ
+\item
+  アロケーター
+\end{enumerate}
+
+これを素直に考えると、ポインター1つ、整数2つ、アロケーター1つの4つのデータメンバーになる。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, typename Allocator = std::allocator<T> >
+class vector
+{
+private :
+    // 動的確保したストレージへのポインター
+    pointer first = nullptr ;
+    // 現在有効な要素数
+    size_type valid_size = nullptr ;
+    // 動的確保したストレージのサイズ
+    size_type allocated_size = nullptr ;
+    // アロケーターの値
+    allocator_type alloc ;
+} ;
+\end{lstlisting}
+
+確かに\texttt{std::vector}はこのようなデータメンバーでも実装できる。しかし多くの実装では以下のようなポインター3つとアロケーター1つになっている。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, typename Allocator = std::allocator<T> >
+class vector
+{
+private :
+    // 先頭の要素へのポインター
+    pointer first ;
+    // 最後の要素の1つ前方のポインター
+    pointer last ;
+    // 確保したストレージの終端
+    pointer reserved_last ;
+    // アロケーターの値
+    allocator_type alloc ;
+} ;
+\end{lstlisting}
+
+このように実装すると、現在有効な要素数は\texttt{last - first}で得られる。確保したストレージのサイズは\texttt{reserved\_last - first}だ。ポインターで持つことによってポインターが必要な場面でポインターと整数の演算を必要としない。
+
+効率的な実装はC++が実行される環境によっても異なるので、すべての環境に最適な実装はない。
+
+\clearpage
+\hypersection{ch3008}{簡単なメンバー関数の実装}
+\index{かんいvector@簡易\texttt{vector}!めんばかんすう@メンバー関数}
+
+簡易\texttt{vector}の簡単なメンバー関数を実装していく。ここでのサンプルコードはすべて簡易\texttt{vector}のクラス定義の中に書いたかのように扱う。例えば
+\begin{lstlisting}[language={C++}]
+void f() { }
+\end{lstlisting}
+とある場合、これは、
+\begin{lstlisting}[language={C++}]
+template < typename T, typename Allocator = std::allocator<T> >
+class vector
+{
+    // その他のメンバーすべて
+public :
+    void f() {}
+} ;
+\end{lstlisting}
+のように書いたものとして考えよう。
+
+\hypersubsection{ch300801}{イテレーター}
+\index{かんいvector@簡易\texttt{vector}!いてれた@イテレーター}
+
+簡易\texttt{vector}は要素の集合を配列のように連続したストレージ上に構築された要素として保持する。したがってイテレーターは単にポインターを返すだけでよい。
+
+まず通常のイテレーター
+\begin{lstlisting}[language={C++}]
+iterator begin() noexcept
+{ return first ; }
+iterator end() noexcept
+{ return last ; }
+\end{lstlisting}
+これは簡単だ。\texttt{iterator}型は実際には\texttt{T *}\,型へのエイリアスだ。このメンバー関数は例外を投げないので\texttt{noexcept}を指定する。
+
+\texttt{vector}のオブジェクトが\texttt{const}の場合、\texttt{begin/end}は\texttt{const\_iterator}が返る。
+\index{かんいvector@簡易\texttt{vector}!begin@\texttt{begin}}\index{かんいvector@簡易\texttt{vector}!end@\texttt{end}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v(1) ;
+    // std::vector<int>::iterator
+    auto i = v.begin() ;
+    // OK、代入可能
+    *i = 0 ;
+    // constなvectorへのリファレンス
+    auto const & cv = v ;
+    // std::vector<int>::const_iterator
+    auto ci = cv.begin() ;
+    // エラー
+    // const_iteratorを参照した先には代入できない
+    *ci = 0 ;
+}
+\end{lstlisting}
+
+これを実現するには、メンバー関数を\texttt{const}修飾する。
+
+\begin{lstlisting}[language={C++}]
+struct Foo
+{
+    // 非const版
+    void f() {}
+    // const版
+    void f() const { }
+} ;
+
+int main()
+{
+    // aは非constなオブジェクト
+    Foo a ;
+    // 非const版が呼ばれる
+    a.f() ;
+    // constなリファレンス
+    const Foo & cref = a ;
+    // const版が呼ばれる
+    cref.f() ;
+}
+\end{lstlisting}
+
+すでに学んだように\texttt{const}修飾は\texttt{this}ポインターを修飾する。オブジェクトの\texttt{const}性によって、適切な方のメンバー関数が呼ばれてくれる。
+
+簡易\texttt{vector}での実装は単に\texttt{const}修飾するだけだ。
+
+\begin{lstlisting}[language={C++}]
+iterator begin() const noexcept
+{ return first ; }
+iterator end() const noexcept
+{ return last ; }
+\end{lstlisting}
+
+\texttt{const}ではない\texttt{vector}のオブジェクトから\texttt{const\_iterator}がほしいときに、わざわざ\texttt{const}なリファレンスに変換するのは面倒なので、\texttt{const\_reference}を返す\texttt{cbegin}/\texttt{cend}もある。
+\index{かんいvector@簡易\texttt{vector}!cbegin@\texttt{cbegin}}\index{かんいvector@簡易\texttt{vector}!cend@\texttt{cend}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v(1) ;
+    // std::vector<int>::const_iterator
+    auto i = v.cbegin() ;
+}
+\end{lstlisting}
+
+この実装はメンバー関数名以外同じだ。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+const_iterator cbegin() const noexcept
+{ return first ; }
+const_iterator cend() const noexcept
+{ return last ; }
+\end{lstlisting}
+
+\texttt{std::vector}にはリバースイテレーターを返すメンバー関数\texttt{rbegin}/\texttt{rend}と\texttt{crbegin}/\texttt{crend}がある。
+\index{かんいvector@簡易\texttt{vector}!rbegin@\texttt{rbegin}}\index{かんいvector@簡易\texttt{vector}!rend@\texttt{rend}}\index{かんいvector@簡易\texttt{vector}!crbegin@\texttt{crbegin}}\index{かんいvector@簡易\texttt{vector}!crend@\texttt{crend}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // イテレーター
+    auto i = v.begin() ;
+    *i ; // 1
+
+    // リバースイテレーター
+    auto r = v.rbegin() ;
+    *r ; // 5
+}
+\end{lstlisting}
+
+\texttt{begin}に対する\texttt{rbegin}/\texttt{rend}の実装は以下のようになる。\texttt{crbegin}/\texttt{crend}は自分で実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+reverse_iterator rbegin() noexcept
+{ return reverse_iterator{ last } ; }
+reverse_iterator rend() noexcept
+{ return reverse_iterator{ first } ; }
+\end{lstlisting}
+
+\texttt{return}文で\texttt{T\{e\}}という形の明示的な型変換を使っている。これには理由がある。
+
+C++では引数が1つしかないコンストラクターを\texttt{変換コンストラクター}として特別に扱う。
+\index{へんかんこんすとらくた@変換コンストラクター}\index{こんすとらくた@コンストラクター!へんかん@変換〜}
+
+例えば以下は数値のように振る舞う\texttt{Number}クラスの例だ。
+
+\begin{lstlisting}[language={C++}]
+class Number
+{
+    Number( int i ) ;
+    Number( double d ) ;
+    Number( std::string s ) ;
+} ;
+\end{lstlisting}
+
+この\texttt{Number}は初期値をコンストラクターで取る。そのとき、\texttt{int}型、\texttt{double}型、はては文字列で数値を表現した\texttt{std::string}型まで取る。この3つのコンストラクターは引数が1つしかないため変換コンストラクターだ。
+
+クラスは変換コンストラクターの引数の型から暗黙に型変換できる。
+
+例えば\texttt{Number}クラスを引数に取る関数があると、
+\begin{lstlisting}[language={C++}]
+void print_number( Number n ) ;
+\end{lstlisting}
+変換コンストラクターの型の値を渡せる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // int型から変換
+    print_number( 123 ) ;
+    // double型から変換
+    print_number( 3.14 ) ;
+    // std::string型から変換
+    print_number( "3.14"s ) ;
+}
+\end{lstlisting}
+
+\texttt{int}や\texttt{double}や\texttt{std::string}は\texttt{Number}ではないが、変換コンストラクターによって暗黙に型変換される。
+
+戻り値として返すときにも変換できる。
+
+\begin{lstlisting}[language={C++}]
+// Number型のゼロを返す
+Number zero()
+{
+    // int型から変換
+    return 0 ;
+}
+\end{lstlisting}
+
+しかし、場合によってはこのような暗黙の型変換\index{あんもくのかたへんかん@暗黙の型変換}を行いたくないこともある。そういう場合、コンストラクターに\texttt{explicit}キーワード\index{explicit@\texttt{explicit}}を付けると、暗黙の型変換を禁止させることができる。
+
+\begin{lstlisting}[language={C++}]
+class Number
+{
+    explicit Number( int i ) ;
+    explicit Number( double d ) ;
+    explicit Number( std::string s ) ;
+} ;
+\end{lstlisting}
+
+実は\texttt{std::reverse\_iterator<Iterator>}\,のコンストラクターにも\texttt{explicit}キーワードが付いている。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+template< typename  Iterator >
+class reverse_iterator
+{
+    constexpr explicit reverse_iterator(Iterator x);
+    // ...
+} ;
+}
+\end{lstlisting}
+
+\texttt{explicit}キーワード付きの変換コンストラクターを持つクラスは、暗黙の型変換ができないので、明示的に型変換しなければならない。
+
+\hypersubsection{ch300802}{容量確認}
+\index{vector@\texttt{vector}!ようりようかくにん@容量確認}
+
+\texttt{std::vector}には容量を確認するメンバー関数がある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    // true、要素数0
+    bool a = v.empty() ;
+    v.push_back(0) ;
+    // false、要素数非ゼロ
+    bool b = v.empty() ;
+    // 1、 現在の要素数
+    auto s = v.size() ;
+    // 実装依存、 追加の動的メモリー確保をせずに格納できる要素の最大数
+    auto c = v.capacity() ;
+}
+\end{lstlisting}
+
+さっそく実装していこう。
+
+\texttt{size}\index{size@\texttt{size}}\index{vector@\texttt{vector}!size@\texttt{size}}は要素数を返す。イテレーターの距離を求めればよい。
+
+\begin{lstlisting}[language={C++}]
+size_type size() const noexcept
+{
+    return end() - begin() ;
+}
+\end{lstlisting}
+
+イテレーターライブラリを使ってもよい。本物の\texttt{std::vector}では以下のように実装されている。
+
+\begin{lstlisting}[language={C++}]
+size_type size() const noexcept
+{
+    return std::distance( begin(), end() ) ;
+}
+\end{lstlisting}
+
+\texttt{empty}\index{empty@\texttt{empty}}\index{vector@\texttt{vector}!empty@\texttt{empty}}は空であれば\texttt{true}、そうでなければ\texttt{false}を返す。「空」というのは要素数がゼロという意味だ。
+
+\begin{lstlisting}[language={C++}]
+bool empty() const noexcept
+{
+    return size() == 0 ;
+}
+\end{lstlisting}
+
+しかし\texttt{size() == 0}というのは、\texttt{begin() == end()}ということだ。なぜならば要素数が0であれば、イテレーターのペアはどちらも終端のイテレーターを差しているからだ。本物の\texttt{std::vector}では以下のように実装されている。
+
+\begin{lstlisting}[language={C++}]
+bool empty() const noexcept
+{
+    return begin() == end() ;
+}
+\end{lstlisting}
+
+\texttt{capacity}\index{capacity@\texttt{capacity}}\index{vector@\texttt{vector}!capacity@\texttt{capacity}}は、追加の動的メモリー確保をせずに追加できる要素の最大数を返す。これを計算するには、動的確保したストレージの末尾の1つ次のポインターであるデータメンバーである\texttt{reserved\_last}\index{reserved\_last@\texttt{reserved\_last}}\index{vector@\texttt{vector}!reserved\_last@\texttt{reserved\_last}}を使う。最初の要素へのポインターである\texttt{first}から\texttt{reserved\_last}までの距離が答えだ。ポインターの距離はイテレーターと同じく引き算する。
+
+\begin{lstlisting}[language={C++}]
+size_type capacity() const noexcept
+{
+    return reserved_last - first ;
+}
+\end{lstlisting}
+
+\hypersubsection{ch300803}{要素アクセス}
+\index{かんいべくた@簡易ベクター!ようそあくせす@要素アクセス}
+
+\hypersubsubsection{ch30080301}{operator \texttt{[]}}
+\index{[]@\texttt{[]}}\index{かんいべくた@簡易ベクター![]@\texttt{[]}}
+
+\texttt{std::vector}の\texttt{operator []}相当のものを簡易\texttt{vector}にも実装しよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    v[1] ; // 2
+    v[3] ; // 4
+}
+\end{lstlisting}
+
+\texttt{operator []}は非\texttt{const}版と\texttt{const}版の2種類がある。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+reference operator []( size_type i )
+{ return first[i] ; }
+const_reference operator []( size_type i ) const
+{ return first[i] ; }
+\end{lstlisting}
+
+\vskip -1.0zw
+\hypersubsubsection{ch30080302}{at}
+\index{at@\texttt{at}}\index{かんいべくた@簡易ベクター!at@\texttt{at}}
+
+メンバー関数\texttt{at(i)}は\texttt{operator [](i)}と同じだが、範囲外のインデックスを指定した場合、\texttt{std::out\_of\_range}が例外として投げられる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    try {
+        // 有効なインデックスはv[0]からv[4]まで
+        std::vector<int> v = {1,2,3,4,5} ;
+        v[0] = 0 ; // OK
+        v[3] = 0 ; // OK
+        v[5] = 0 ; // エラー
+    } catch( std::out_of_range e )
+    {
+        std::cout << e.what() ;
+    }
+}
+\end{lstlisting}
+
+実装はインデックスを\texttt{size()}と比較して、範囲外であれば\texttt{std::out\_of\_range}を\texttt{throw}する。\texttt{operator []}と同じく、非\texttt{const}版と\texttt{const}版がある。
+
+\begin{lstlisting}[language={C++}]
+reference at( size_type i )
+{
+    if ( i >= size() )
+        throw std::out_of_range( "index is out of range." ) ;
+
+    return first[i] ;
+}
+const_reference at( size_type i ) const
+{
+    if ( i >= size() )
+        throw std::out_of_range( "index is out of range." ) ;
+
+    return first[i] ;
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\else{\vskip -1.0zw}\fi
+\hypersubsubsection{ch30080303}{front/back}
+\index{front@\texttt{front}}\index{かんいべくた@簡易ベクター!front@\texttt{front}}\index{back@\texttt{back}}\index{かんいべくた@簡易ベクター!back@\texttt{back}}
+
+\texttt{front()}は先頭要素へのリファレンスを返す。
+
+\texttt{back()}は末尾の要素へのリファレンスを返す
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    v.front() ; // 1
+    v.back() ; // 5
+}
+\end{lstlisting}
+
+これにも\texttt{const}版と非\texttt{const}版がある。\texttt{vector}の\texttt{last}が最後の要素の次のポインターを指していることに注意。
+
+\begin{lstlisting}[language={C++}]
+reference front()
+{ return first ; }
+const_reference front() const
+{ return first ; }
+reference back()
+{ return last - 1 ; }
+const_reference back() const
+{ return last - 1 ; }
+\end{lstlisting}
+
+\vskip -1.0zw
+\hypersubsubsection{ch30080304}{data}
+\index{data@\texttt{data}}\index{かんいべくた@簡易ベクター!data@\texttt{data}}
+
+\texttt{data()}は先頭の要素へのポインターを返す。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+    int * ptr = v.data() ;
+    *ptr ; // 1
+}
+\end{lstlisting}
+
+実装は\texttt{first}を返すだけだ。
+
+\begin{lstlisting}[language={C++}]
+pointer data() noexcept
+{ return first ; }
+const_pointer data() const noexcept
+{ return first ; }
+\end{lstlisting}
+

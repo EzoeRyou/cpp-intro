@@ -1,0 +1,278 @@
+\hypersection{ch2701}{意味上のポインター}
+\index{ぽいんた@ポインター!いみじようの@意味上の〜}
+
+\hypersubsection{ch270101}{リファレンスと同じ機能}
+
+ポインターはオブジェクトを参照\index{さんしよう@参照}するための機能だ。この点ではリファレンス\index{りふあれんす@リファレンス}と同じ機能を提供している。
+
+リファレンスを覚えているだろうか。\texttt{T}型へのリファレンスは\texttt{T}型のオブジェクトそのものではなく、\texttt{T}型のオブジェクトへの参照だ。リファレンスへの操作は、参照したオブジェクトへの操作になる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // int型のオブジェクト
+    int object = 0 ;
+
+    // オブジェクトを変更
+    object = 123 ;
+
+    // 123
+    std::cout << object ;
+
+    // T型へのリファレンス
+    // objectを参照する
+    int & reference = object ;
+
+    // objectが変更される
+    reference = 456 ;
+
+    // 456
+    std::cout << object ;
+
+    // referenceはobjectを参照している
+    object = 789 ;
+
+    // 参照するobjectの値
+    // 789
+    std::cout << reference ;
+}
+\end{lstlisting}
+
+リファレンスは宣言と同時に初期化する。リファレンスの参照先をあとから変えることはできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+
+    // rはxを参照する
+    int & r = x ;
+
+    int y = 1 ;
+
+    // xに1が代入される
+    r = y ;
+}
+\end{lstlisting}
+
+最後の\texttt{r = y ;}はリファレンス\texttt{r}の参照先を\texttt{y}に変えるという意味ではない。リファレンス\texttt{r}の参照先に\texttt{y}の値を代入するという意味だ。
+
+ポインターはリファレンスに似ている。並べてみるとほとんど同じ意味だ。
+
+\begin{itemize}
+\item
+  \texttt{T}型へのリファレンスは\texttt{T}型のオブジェクトを参照する
+\item
+  \texttt{T}型へのポインターは\texttt{T}型のオブジェクトを参照する
+\end{itemize}
+
+\texttt{T}型へのリファレンス型が\texttt{T \&}\,であるのに対し、\texttt{T}型へのポインター型は\texttt{T *}\,だ。
+\index{りふあれんすがた@リファレンス型}\index{\&@\texttt{\&}}\index{ぽいんた@ポインター!りふあれんすがた@リファレンス型}\index{ぽいんた@ポインター!\&@\texttt{\&}}
+\index{ぽいんたがた@ポインター型}\index{\protect{*}@\texttt{\protect{*}}}\index{ぽいんた@ポインター!ぽいんたがた@ポインター型}\index{ぽいんた@ポインター!*@\texttt{*}}
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// intへのリファレンス型
+using ref_type = int & ;
+// intへのポインター型
+using ptr_type = int * ;
+\end{lstlisting}
+
+リファレンスの初期化は、単に参照したい変数名をそのまま書けばよかった。
+
+\begin{lstlisting}[language={C++}]
+int object { } ;
+int & reference = object ;
+\end{lstlisting}
+
+ポインターの場合、参照したい変数名に、\texttt{\&}\,を付ける必要がある。
+
+\begin{lstlisting}[language={C++}]
+int object { } ;
+int * pointer = &object ;
+\end{lstlisting}
+
+リファレンスを経由してリファレンスが参照するオブジェクトを操作するには、単にリファレンス名を使えばよかった。
+
+\begin{lstlisting}[language={C++}]
+// 書き込み
+reference = 0
+// 読み込み
+int read = reference ;  
+\end{lstlisting}
+
+ポインターの場合、ポインター名に\,\texttt{*}\,を付ける必要がある。
+
+\begin{lstlisting}[language={C++}]
+// 書き込み
+*pointer = 0 ;
+// 読み込み
+int read = *pointer ;
+\end{lstlisting}
+
+ポインター名をそのまま使った場合、それは参照先のオブジェクトの値ではなく、ポインターという値になる。
+
+\begin{lstlisting}[language={C++}]
+// オブジェクト
+int object { } ;
+
+// オブジェクトのポインター値で初期化
+int * p1 = &object
+
+// p1のポインター値で代入
+// つまりobjectを参照する
+int * p2 = p1 ;
+\end{lstlisting}
+
+このように比較すると、ポインターはリファレンスと同じ機能を提供していることがわかる。実際、リファレンスというのはポインターのシンタックスシュガーにすぎない。ポインターの機能を制限して、文法をわかりやすくしたものだ。
+
+\hypersubsection{ch270102}{リファレンスと違う機能}
+
+リファレンスがポインターの機能制限版だというのであれば、ポインターにあってリファレンスにはない機能は何だろうか。代入と、何も参照しない状態だ。
+
+\hypersubsection{ch270103}{代入}
+\index{ぽいんた@ポインター!だいにゆう@代入}
+
+リファレンスは代入ができないが、ポインターは代入ができる。
+
+\begin{lstlisting}[language={C++}]
+int x { } ;
+int y { } ;
+
+int & reference = x ;
+// xにyの値を代入
+// リファレンスの参照先は変わらない
+reference = y ;
+
+int * pointer = &x ;
+// pointerの参照先をyに変更
+pointer = &y ;
+\end{lstlisting}
+
+\hypersubsection{ch270104}{何も参照しない状態}
+
+リファレンスは必ず初期化しなければならない。
+
+\begin{lstlisting}[language={C++}]
+// エラー、 初期化されていない
+int & reference ; 
+\end{lstlisting}
+
+そのため、リファレンスは常にオブジェクトを参照している。
+
+ポインターは初期化しなくてもよい。
+\index{ぽいんた@ポインター!しよきか@初期化}
+
+\begin{lstlisting}[language={C++}]
+int * pointer ;
+\end{lstlisting}
+
+この場合、具体的に何かを参照していない状態になる。この場合にポインターの値はどうなるかはわからない。初期化のない整数の値がわからないのと同じだ。
+
+\begin{lstlisting}[language={C++}]
+// 値はわからない
+int data ;
+\end{lstlisting}
+
+わからない値の整数を読んだ結果は未定義\index{みていぎ@未定義}\index{ぽいんた@ポインター!みていぎ@未定義}だ。書くことはできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 値はわからない
+    int data ; 
+
+    // 未定義
+    std::cout << data ;
+
+    // OK
+    data = 0 ;
+}
+\end{lstlisting}
+
+このプログラムは未定義動作を含むので、プログラム全体がどのように実行されるかも未定義だ。
+
+そしてここからがポインターの恐ろしいところだが、ポインターの場合にもこのわからない値は発生する。わからない値を持ったポインターの参照先への読み書きは未定義の挙動を引き起こす。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int * pointer ;
+
+    // 未定義の挙動
+    std::cout << *pointer ;
+
+    // 未定義の挙動
+    *pointer = 123 ;
+}
+\end{lstlisting}
+
+なぜ未定義の挙動になるかというと、わからない値のポインターは、たまたまどこかの妥当なオブジェクトを参照してしまっているかもしれないからだ。
+
+未定義の挙動は恐ろしい。未定義の挙動が発生した場合、何が起こっても文句は言えない。なぜならばその挙動は本来存在するはずがないのだから。上のプログラムはコンパイル時にエラーになるかもしれないし、実行時にエラーになるかもしれない。いや、もっとひどいことにはエラーにならないかもしれない。そして人生、宇宙、すべてのものの答えと、あろうことか答えに対する質問まで出力するかもしれない。
+
+\hypersubsection{ch270105}{明示的に何も参照しないポインター: nullptr}
+\index{nullptr@\texttt{nullptr}}
+
+ポインターを未初期化にしていると、よくわからない値になってしまう。そのため、何も参照していないことを明示的に示すためのポインターの値、nullポインター値\index{nullぽいんたち@nullポインター値}がある。\texttt{nullptr}だ。
+
+\begin{lstlisting}[language={C++}]
+int * pointer = nullptr ;
+\end{lstlisting}
+
+\texttt{nullptr}はどんな型へのポインターに対しても、何も参照していない値となる。
+
+\begin{lstlisting}[language={C++}]
+// doubleへのポインター
+double * p1 = nullptr ;
+
+// std::stringへのポインター
+std::string * p2 = nullptr ;
+\end{lstlisting}
+
+C言語とC++では歴史的な理由で、\texttt{nullptr}のほかにも\texttt{NULL}\index{NULL@\texttt{NULL}}もnullポインター値
+\begin{lstlisting}[language={C++}]
+int * pointer = NULL ;
+\end{lstlisting}
+C++ではさらに歴史的な理由で、\texttt{0}もnullポインター値として扱う。
+\begin{lstlisting}[language={C++}]
+int * pointer = 0 ;
+\end{lstlisting}
+
+ただし、nullポインター値が実際に0である保証はない。ポインターの値についてはあとで詳しく扱う。
+
+\hypersubsection{ch270106}{無効な参照先の作り方}
+
+ポインターやリファレンスによって参照先が参照される時点では有効だったが、後に無効になる参照先を作ることができてしまう。
+
+例えば以下のコードだ。
+
+\begin{lstlisting}[language={C++}]
+int * f()
+{
+    // 寿命は関数
+    int variable {} ;
+
+    return &variable ;
+}
+
+int main()
+{
+    int * ptr = f() ;
+    // エラー
+    int read = *ptr ;
+}
+\end{lstlisting}
+
+このコードの問題は、関数\texttt{f}の中の変数\texttt{variable}の寿命は関数\texttt{f}の中だけで、呼び出し元に戻ったときには寿命が尽きるというところにある。変数\texttt{variable}へのポインターは変数\texttt{variable}の寿命が尽きたあとも存在してしまうので、存在しないオブジェクトにポインター経由でアクセスしようとしてエラーになる。
+
+同じ問題はリファレンスでも起きるが、ポインターの方がこの問題を起こしやすい。
+
+\begin{lstlisting}[language={C++}]
+int & f()
+{
+    int variable {} ;
+    return variable ;
+}
+\end{lstlisting}
+

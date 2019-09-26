@@ -1,0 +1,690 @@
+\hyperchapter{ch37}{自作の数値クラスで\\演算をムーブに対応する方法}{自作の数値クラスで演算をムーブに対応する方法}
+
+自作の数値計算をするクラスを実装するとしよう。無限精度整数、ベクトル、行列など、自作のクラスで実装したい数値と演算は世の中にたくさんある。
+\index{すうちけいさんくらす@数値計算クラス}\index{くらす@クラス!すうちけいさん@数値計算〜}
+
+そのとき、数値の状態を表現するためにストレージを動的確保するとしよう。ここでは例のため、とても簡単な整数型を考える。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+    int * ptr ;
+} ;
+\end{lstlisting}
+
+\hypersection{ch3701}{基本の実装}
+
+まずは基本となるコンストラクターとデストラクター、コピー、ムーブを実装しよう。
+
+\begin{lstlisting}[language={C++}]
+struct Integer
+{
+    int * ptr ;
+public :
+    explicit Integer( int value = 0 )
+        : ptr ( new int(value) ) { }
+    ~Integer( )
+    { delete ptr ; } 
+
+(@\ifTombow\pagebreak\fi@)
+    // コピー
+    Integer( const Integer & r )
+        : ptr( new int( *r.ptr ) ) { }
+    Integer & operator = ( const Integer & r )
+    {
+        if ( this != &r )
+            *ptr = *r.ptr ;
+        return *this ;
+    }
+
+    // ムーブ
+    Integer( Integer && r )
+        : ptr( r.ptr )
+    { r.ptr = nullptr ; }
+    Integer operator =( Integer && r )
+    {
+        delete ptr ;
+        ptr = r.ptr ;
+        r.ptr = nullptr ;
+        return *this ;
+    }
+} ;
+\end{lstlisting}
+
+コンストラクターは動的確保をする。デストラクターは解放する。コピーは動的確保をする。ムーブは所有権の移動をする。とてもよくあるクラスの実装だ。
+
+実用的には\texttt{std::unique\_ptr<int>}\,を使うべきだが、低級な処理を説明するためにあえて生のポインターを使っている。
+
+今回のコピー代入演算子は単に値をコピーしているが、コピー元とコピー先で確保したストレージのサイズが異なるような型、たとえば無限精度整数や動的なサイズのベクトルや行列などの場合は、コピー代入演算子でもコピー先のストレージを破棄してコピー元と同じサイズのストレージを確保するなどの処理が必要な場合もある。
+\index{ぎようれつくらす@行列クラス}\index{くらす@クラス!ぎようれつ@行列〜}
+
+\begin{lstlisting}[language={C++}]
+// 行列クラス
+class matrix
+{
+    // オブジェクトごとにサイズが異なる
+    unique_ptr<double> ptr ;
+    std::size_t rows ;
+    std::size_t columns ;
+public :
+    // コピー代入演算子
+    matrix & operator = ( const matrix & r )
+    {
+        // 自分自身への代入
+        if ( this == &r )
+            return *this ;
+
+        // 行列のサイズが同じかどうか確認
+        if ( rows == r.rows && columns == r.columns )
+        {
+            // コピー元の行列の値をコピー先にコピー
+            // コピー先のストレージはそのまま使える
+        }
+        else
+        {
+            // コピー先のストレージを解放
+            // コピー先はコピー元の行列サイズと同じストレージを確保
+            // 値をコピー
+        }
+    }
+} ;
+\end{lstlisting}
+
+\hypersection{ch3702}{複合代入演算子}
+\index{ふくごうだいにゆうえんざんし@複合代入演算子}\index{えんざんし@演算子!ふくごうだいにゆう@複合代入〜}
+
+複合代入演算子というのは、\texttt{operator +=}\,や\texttt{operator -=}\,のような演算子だ。これはコピー代入演算子と同じように実装できる。違いは代入の結果、演算をするだけだ。
+\index{\protect{+=}@\texttt{\protect{+=}}}\index{-=@\texttt{-=}}
+
+クラス\texttt{Integer}の場合、演算の結果ストレージのサイズが変わるということはないので、愚直な実装で済む。
+
+\begin{lstlisting}[language={C++}]
+Integer & operator +=( const Integer & r )
+{
+    *ptr += *r.ptr ;
+    return *this ;
+}
+
+Integer & operator -=( const Integer & r )
+{
+    *ptr -= *r.ptr ;
+    return *this ;
+}
+\end{lstlisting}
+
+複合代入演算子をムーブ代入演算子として実装する理由は、通常はない。
+
+\clearpage
+\hypersection{ch3703}{単項演算子}
+\index{たんこうえんざんし@単項演算子}\index{えんざんし@演算子!たんこう@単項〜}
+
+演算を表現するクラスでオーバーロードしたい単項演算子には\texttt{operator +}\,と\texttt{operator -}\,がある。特に\texttt{operator -}\,は実用上の意味があるので実装してみよう。
+\index{\protect{+}@\texttt{\protect{+}}}\index{\protect{-}@\texttt{\protect{-}}}
+
+\begin{lstlisting}[language={C++}]
+Integer a(10) ;
+auto b = -a ;
+// これは二項演算子 operator +の結果に
+// 単項演算子operator -を適用
+auto c = -(a + a) ;
+\end{lstlisting}
+
+\texttt{*this}\index{\protect{*}this@\texttt{\protect{*}this}}が\texttt{lvalue}の場合の単項演算子の実装は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+Integer operator -() const
+{
+    Integer result( -*ptr ) ;
+    return result ;
+}
+
+// operator +()の実装は省略
+\end{lstlisting}
+
+単項演算子\texttt{operator -}\,は\,\texttt{*this}を書き換えない。負数にした値のコピーを返す。
+
+変数\texttt{result}は\texttt{return文}\index{return@\texttt{return}文}のあとは使われないので、\texttt{return std::move(result)} と書くこともできる。しかし、そのように書く必要はない。というのも\texttt{return文}は特別な扱いを受けているので、関数の中の変数を\texttt{return}した場合、自動でムーブが行われるからだ。もちろん、\texttt{std::move}を明示的に書いてもよい。
+
+単項演算子\texttt{operator -}\,は\,\texttt{*this}が\texttt{lvalue}のときには上のように実装するしかない。しかしこの実装は非効率的だ。なぜならば、コードを読めばわかるように、追加の一時変数が生成され、追加の動的メモリー確保が行われるからだ。
+
+そのため、もしクラス\texttt{Integer}がコピーしか実装していない場合、
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto b = -a ;
+\end{lstlisting}
+というコードは、
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto b = a ;
+b.make_it_negative() ; 
+\end{lstlisting}
+のような現在の値をそのまま負数にするメンバー関数\texttt{make\_it\_negative}を実装して使った方が効率がよくなる。
+
+\begin{lstlisting}[language={C++}]
+class Integer 
+{
+    int * ptr ;
+public :
+    void make_it_negative()
+    {
+        *ptr = -*ptr ;
+    }
+} ;
+\end{lstlisting}
+
+幸い、クラス\texttt{Integer}はムーブコンストラクターを実装しているので、
+\begin{lstlisting}[language={C++}]
+auto b = -a ;
+\end{lstlisting}
+というコードは、式\,\texttt{-a}によって生成された一時オブジェクトが変数\texttt{b}にムーブされる。
+
+しかし、
+\begin{lstlisting}[language={C++}]
+auto c = -(a + a) ;
+\end{lstlisting}
+というコードは依然として非効率的になる。まだ二項演算子\texttt{operator +}は実装していないが、これは、
+\begin{lstlisting}[language={C++}]
+auto temp1 = a + a ;
+auto temp2 = -temp1 ;
+auto c = temp2 ;
+\end{lstlisting}
+になるからだ。すると以下のように書いた方が効率がよくなる。
+
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto c = a ;
+c += a ;
+c.make_it_negative() ;
+\end{lstlisting}
+
+こんなコードを書くのは面倒だ。単に\,\texttt{-(a+a)}と書いて効率的に動いてほしい。そのために単項演算子\texttt{operator -}\,をムーブに対応させる。
+
+単項演算子はクラスのメンバー関数として実装する。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+public ;
+    Integer operator -() const ;
+} ;
+\end{lstlisting}
+
+これが非メンバー関数ならば、単に\texttt{rvalue}リファレンスを取ればよい。
+
+\begin{lstlisting}[language={C++}]
+Integer negate( Integer && object ) ;
+\end{lstlisting}
+
+メンバー関数の場合、\texttt{object}に相当するのは\,\texttt{*this}だ。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+public :
+    // *thisがobjectに相当する
+    Integer negate() ;
+} ;
+\end{lstlisting}
+
+\texttt{this}がポインターになっているのは歴史的な都合で、本来はリファレンスになっているべきだった。メンバー関数は以下のような隠し引数があるものとして考えるとよい。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+public :
+    // 隠し引数
+    Integer negate( Integer & THIS )
+    {
+        Integer * this = &THIS ;
+    }
+} ;
+\end{lstlisting}
+
+もちろん、このような隠し引数\texttt{THIS}をC++のプログラムから参照する方法はない。あくまでも参考のためのコードだ。
+
+メンバー関数を\texttt{const}修飾するというのは、
+\begin{lstlisting}[language={C++}]
+class Integer 
+{
+public :
+    Integer negate() const ;
+} ;
+\end{lstlisting}
+この隠し引数を\texttt{const}修飾\index{const@\texttt{const}修飾}するのと同じだ。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+public :
+    Integer negate( const Integer & THIS )
+    {
+        const Integer * this = &THIS ;
+        // ...
+    }
+} ;
+\end{lstlisting}
+
+これによって\texttt{const}修飾の有無でメンバー関数を呼び分けられる。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    void f() ;
+    void f() const ; 
+} ;
+
+int main()
+{
+    X x ;
+    x.f() ; // 非const
+    const X & cx = x ;
+    cx.f() ; // const
+}
+\end{lstlisting}
+
+C++には\texttt{const}修飾と同様に、「リファレンス修飾」\index{りふあれんすしゆうしよく@リファレンス修飾}という機能がある。これを使えば隠し引数に\texttt{lvalue}/\texttt{rvalue}リファレンスの修飾ができる。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    // lvalueリファレンス修飾子
+    void f() & ;
+    // rvalueリファレンス修飾子
+    void f() && ; 
+} ;
+
+int main()
+{
+    X lvalue ;
+    // lvalueリファレンス
+    lvalue.f() ;
+    // rvalueリファレンス
+    std::move(lvalue).f() ;
+}
+\end{lstlisting}
+
+これは実質的以下のような隠し引数があるものと考えてよい。もちろん隠し引数を使うことはできない。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    // lvalueリファレンス
+    void f( X & THIS )
+    {
+        X * this = &THIS ;
+    }
+    void f( X && THIS )
+    {
+        X * this = &THIS ;
+    }
+} ;
+\end{lstlisting}
+
+\texttt{void f() \&\&}\,のメンバー関数の中では、\texttt{*this}は\texttt{lvalue}だ。\texttt{rvalue}リファレンスの変数は\texttt{lvalue}であることを思い出そう。
+
+\begin{lstlisting}[language={C++}]
+void f( int & ) ;
+void f( int && ) ;
+
+int main()
+{
+    int lvalue {} ;
+    int && rvalue = std::move(lvalue) ;
+    // int &を呼び出す
+    // rvalueリファレンスの変数はlvalue
+    f( rvalue ) ;
+}
+\end{lstlisting}
+
+クラスでメンバー関数にリファレンス修飾子を書かなかった場合、\texttt{lvalue}リファレンス修飾子を書いたものとみなされる。
+\index{りふあれんすしゆうしよくし@リファレンス修飾子}
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    // lvalueリファレンス
+    void f() ;
+} ;
+\end{lstlisting}
+
+もしメンバー関数にリファレンス修飾子を書いた場合、同じ名前のすべてのメンバー関数にリファレンス修飾子を書かなければならない。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    // エラー、 リファレンス修飾子がない
+    void f() ;
+    void f() & ;
+
+    // OK、リファレンス修飾子がある
+    void g() & ;
+    void g() && ;
+
+    // OK リファレンス修飾子を使っていない
+    // デフォルトでlvalueリファレンス修飾子
+    void h() ;
+} ;
+\end{lstlisting}
+
+リファレンス修飾子を使い、\texttt{*this}が\texttt{lvalue}と\texttt{rvalue}の場合で実装を分けることができる。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+    int * ptr ;
+public :
+    // lvalue版
+    Integer operator -() const &
+    {
+        auto result = ( -*ptr ) ;
+        return result ;
+    }
+    // rvalue版
+    Integer operator -() &&
+    {
+        auto result = std::move(*this) ;
+        *result.ptr = -*result.ptr ;
+        return result ;
+    }
+} ;
+\end{lstlisting}
+
+\texttt{rvalue}リファレンス修飾子を使った単項演算子\texttt{operator -}\,の実装は、\texttt{*this}自身が\texttt{rvalue}であるので、自分自身をムーブしている。ムーブ以降、\texttt{this->ptr}は\texttt{nullptr}になる。なぜならば、\texttt{Integer}のムーブ代入演算子がそのような実装になっているからだ。
+
+\begin{lstlisting}[language={C++}]
+/// 上で示したのと同じムーブ代入演算子の抜粋
+Integer operator =( Integer && r )
+{
+    delete ptr ;
+    ptr = r.ptr ;
+    // ムーブ元のポインターをnullptrにする
+    r.ptr = nullptr ;
+    return *this ;
+}
+\end{lstlisting}
+
+\hypersection{ch3704}{二項演算子}
+\index{にこうえんざんし@二項演算子}\index{えんざんし@演算子!にこう@二項〜}
+
+せっかく数値を表現するクラスなのだから二項演算子を使った演算がしたい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    Integer a(1) ;
+    Integer b(2) ;
+    Integer c = a + b ;
+}
+\end{lstlisting}
+
+これをどうやって実装するのかというと、\texttt{operator +}演算子\index{\protect{+}@\texttt{\protect{+}}}のオーバーロードで実装する。
+\index{おばろど@オーバーロード}\index{えんざんし@演算子!おばろど@オーバーロード}
+
+演算子のオーバーロードはメンバー関数による方法と、非メンバー関数による方法がある。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    // メンバー関数
+    X operator +( const X & r ) ;
+} ;
+
+// 非メンバー関数
+X operator +( const X & l, const X & r ) ;
+\end{lstlisting}
+
+\texttt{operator =}\,のような特殊な演算子以外は、どちらの方法で書いてもいい。メンバー関数として書いた場合、第一引数は\,\texttt{*this}に、第二引数が関数の引数\texttt{r}になる。
+
+例えば以下のようなコードで、
+\begin{lstlisting}[language={C++}]
+X a ;
+X b ;
+a + b ;
+\end{lstlisting}
+メンバー関数の場合、\texttt{*this}は\texttt{a}、\texttt{r}は\texttt{b}になる。
+
+非メンバー関数の場合、\texttt{l}は\texttt{a}は、\texttt{r}は\texttt{b}になる。
+
+\hypersubsection{ch370401}{ムーブしない実装}
+\index{にこうえんざんし@二項演算子!むぶしない@ムーブしない〜}
+
+二項演算子のオペランドがどちらも\texttt{lvalue}であった場合はムーブができないので、引数は\texttt{const}な\texttt{lvalue}リファレンスで受け取り、\texttt{prvalue}を返す。
+
+メンバー関数の場合の実装は以下のようになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+    int * ptr ;
+public :
+    // 省略...
+
+    Integer operator +( const Integer & r ) const
+    { return Integer( *ptr + *r.ptr ) ; } 
+} ;
+\end{lstlisting}
+
+非メンバー関数の場合は、\texttt{Integer::ptr}が\texttt{private}メンバーであることが問題になる。
+
+\begin{lstlisting}[language={C++}]
+Integer operator + ( const Integer & l, const Integer & r )
+{
+    // エラー、 Integer::ptrはprivateメンバー
+    return Integer( *l.ptr + *r.ptr ) ;
+}
+\end{lstlisting}
+
+これを解決するための方法はいくつかある。
+
+\vskip 1.0zw
+\noindent
+\textsf{1. クラスのメンバー関数として処理を実装し、そのメンバー関数を呼び出す方法}
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+    int * ptr ;
+public :
+    Integer plus( const Integer & r ) const
+    { return Integer( *ptr + r.ptr ) ; }
+} ;
+
+Integer operator + ( const Integer & l, const Integer & r )
+{
+    return l.plus( r ) ;
+}
+\end{lstlisting}
+
+\vskip 1.0zw
+\noindent
+\textsf{2. \texttt{friend}宣言する方法}
+
+クラスが別のクラスや関数を\texttt{friend}宣言\index{friend@\texttt{friend}}すると、その関数はクラスの\texttt{private}なメンバーを使えるようになる。
+
+\begin{lstlisting}[language={C++}]
+class X
+{
+    int member ;
+    // friend宣言
+    friend int get_member( const X & ) ;
+} ;
+
+int get_member( const X & obj )
+{
+    // OK、friendなので使える
+    return obj.member ;
+}
+\end{lstlisting}
+
+これを使うと、以下のように\texttt{friend}宣言すれば、動かなかった非メンバー関数による\texttt{operator +}のオーバーロードが動くようになる。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+    friend Integer operator +( const Integer &, const Integer & ) ;
+} ;
+\end{lstlisting}
+
+\hypersubsection{ch370402}{ムーブをしたくなる状況}
+\index{にこうえんざんし@二項演算子!むぶする@ムーブする〜}
+
+上の二項演算子の実装だけで、クラス\texttt{Integer}は加算ができるようになった。ただし、効率がよくない。
+
+例えば以下のようなコードを考えよう。
+
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto b = a + a + a ;
+\end{lstlisting}
+
+これはどのように評価されるかというと、\texttt{a+a+a}は、\texttt{(a+a)+a}となり、\texttt{(a+a)}を評価した結果の一時オブジェクトが生成され、その一時オブジェクトを仮に\texttt{temp}と呼ぶと、\texttt{temp+a}される。
+
+結果として、以下のようなコードと同じになる。
+
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto temp = a + a ;
+auto b = temp + a ;
+\end{lstlisting}
+
+ムーブを実装していない場合、以下のように書いた方が効率がよくなる。
+
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto b = a ;
+b += a ;
+b += a ;
+\end{lstlisting}
+
+このようなコードは面倒だ。できれば\texttt{a + a + a}と書きたい。
+
+\ifTombow\pagebreak\fi
+二項演算子は\texttt{operator +}だけではない。
+
+\begin{lstlisting}[language={C++}]
+auto result = a + b - c * d / e ;
+\end{lstlisting}
+のようなコードも書きたい。これを効率化のために、
+\begin{lstlisting}[language={C++}]
+auto result = a;
+a += b ;
+auto temp = c ;
+temp *= d ;
+temp /= e ;
+result -= temp ;
+\end{lstlisting}
+のように書かなければならないとしたら悲惨だ。
+
+\texttt{a+a+a}のような式が効率的に動くためには、二項演算子で\texttt{lvalue}/\texttt{rvalue}リファレンスを取り、\texttt{rvalue}リファレンスの場合はムーブするコードを書く。\texttt{rvalue}からは所有権を横取りしてもよいからだ。
+
+二項演算子は引数が2つあり、それぞれに\texttt{lvalue}/\texttt{rvalue}があるので、4通りのオーバーロードを書かなければならない。
+
+非メンバー関数で実装するには、以下のように宣言を書く。
+
+\begin{lstlisting}[language={C++}]
+class Integer 
+{
+    friend integer operator + ( const Integer & l, const Integer & r ) ;
+    friend integer operator + ( Integer && l, const Integer & r ) ;
+    friend integer operator + ( const Integer & l, Integer && r ) ;
+    friend integer operator + ( Integer && l, Integer && r ) ;
+} ;
+
+// lvalue + lvalue
+Integer operator + ( const Integer & l, const Integer & r ) ;
+// rvalue + lvalue
+Integer operator + ( Integer && l, const Integer & r ) ;
+// lvalue + rvalue
+Integer operator + ( const Integer & l, Integer && r ) ;
+// rvalue + rvalue
+Integer operator + ( Integer && l, Integer && r ) ;
+\end{lstlisting}
+
+具体的な実装としては、まず\texttt{rvalue}リファレンスで束縛したリファレンスを関数のローカル変数にムーブしたあとで、その変数を\texttt{return}する。
+
+\ifTombow\pagebreak\fi
+第一引数が\texttt{rvalue}の場合は、以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+Integer operator + ( Integer && l, const Integer & r )
+{
+    auto result = std::move(l) ;
+    result += r ;
+    return result ;    
+}
+\end{lstlisting}
+
+第一引数は\texttt{rvalue}なので、ムーブしてもよい。
+
+先ほども説明したように、\texttt{'return文'}\,\index{return@\texttt{return}文}が関数のローカル変数を返すときは自動でムーブしてくれる。もちろん\,\texttt{'return std::move(result)'}\,と書いてもよい。
+
+第二引数が\texttt{rvalue}の場合は、ムーブすべきオブジェクトが第二引数になる。
+
+\begin{lstlisting}[language={C++}]
+Integer operator + ( const Integer & l, Integer && r )
+{
+    auto result = std::move(r) ;
+    result += l ;
+    return result ;    
+}
+\end{lstlisting}
+
+この実装はすべてに使えるわけではない。加算の場合は、一般に交換法則を満たすことが期待できる。つまり、
+\[ a + b = b + a \]
+であることが期待できるが、除算演算子\texttt{operator /}\,は交換法則を満たさない。今回の\texttt{Integer}のような簡単な作りのクラスならば実装できるが、クラスの実装と演算次第では第二引数のみが\texttt{rvalue}の場合にはムーブできない場合もあるだろう。そういう場合には実装しなくてもよい。実装できないものは実装しないのが正しい。
+
+第一引数、第二引数のいずれかが\texttt{rvalue}であるときにムーブする演算子のオーバーロードを両方とも実装した場合、両方の引数が\texttt{rvalue}である場合のオーバーロードも実装しなければならない。
+
+第一引数、第二引数が両方共\texttt{rvalue}である場合というのは、例えば以下のような場合だ。
+
+\begin{lstlisting}[language={C++}]
+Integer a ;
+auto b = (a + a) + (a + a) ;
+\end{lstlisting}
+
+\texttt{a+a}を評価した結果は\texttt{rvalue}だ。この式では\texttt{rvalue}と\texttt{rvalue}を\texttt{operator +}に渡しているので、引数は両方とも\texttt{rvalue}になる。
+
+もし、\texttt{rvalue + lvalue}と\texttt{lvalue + rvalue}に対応する演算子しかオーバーロードしていない場合、関数呼び出しが曖昧になってしまう。そこで、\texttt{rvalue + rvalue}の演算子オーバーロードも書く。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+Integer operator +( Integer && l, Integer && r )
+{
+    return std::move(l) + r ;
+} ;
+\end{lstlisting}
+
+この実装は単に\texttt{rvalue + lvalue}の演算子オーバーロードに実際の処理を丸投げしている。変数\texttt{r}はここでは\texttt{lvalue}だ。何度も言うように\texttt{rvalue}を束縛した\texttt{rvalue}リファレンスの変数は\texttt{lvalue}だ。ここでは第一引数をムーブし、第二引数は\texttt{lvalue}として扱っている。
+
+メンバー関数で実装する場合、二項演算子の第一引数は\,\texttt{*this}、第二引数がメンバー関数の第一引数になる。
+
+\begin{lstlisting}[language={C++}]
+class Integer
+{
+public :
+    // lvalue + lvalue
+    Integer operator + ( const Integer & r ) const & ;
+    // rvalue + lvalue
+    Integer operator + ( const Integer & r ) && ;
+    // lvalue + rvalue
+    Integer operator + ( Integer && r ) const & ;
+    // rvalue + rvalue
+    Integer operator + ( Integer && r ) && ;
+} ;
+\end{lstlisting}
+
+\texttt{a + b}のとき、\texttt{*this}が\texttt{a}、\texttt{r}が\texttt{b}だ。あとの実装は非メンバー関数の場合と変わらない。
+
+例えばメンバー関数で\texttt{rvalue + lvalue}の実装は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+Integer Integer::operator +( const Integer & r ) &&
+{
+    auto result = std::move(*this) ;
+    result += r ;
+    return result ;
+}
+\end{lstlisting}
+

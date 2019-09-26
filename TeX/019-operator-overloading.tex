@@ -1,0 +1,997 @@
+\hyperchapter{ch19}{より自然に振る舞うクラス}{より自然に振る舞うクラス}
+
+整数型の\texttt{int}について考えてみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 1 ;
+    int b = a + a ;
+    int c = a + b ;
+}
+\end{lstlisting}
+
+同様のことを、前章の分数クラスで書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+} ;
+
+fractional add( fractional & l, fractional & r )
+{
+    // 分母が同じなら
+    if ( l.denom == r.denom )
+        // 単に分子を足す
+        return fractional{ l.num + r.num, l.denom } ;
+
+    // 分母を合わせて分子を足す
+    return fractional{ l.num * r.denom + r.num * l.denom, l.denom * r.denom } ;
+}
+
+int main()
+{
+    fractional a{1,1} ;
+    fractional b = add(a, a) ;
+    fractional c = add(a, b) ;
+}
+\end{lstlisting}
+
+これは読みにくい。できれば以下のように書きたいところだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    fractional a = 1 ;
+    fractional b = a + a ;
+    fractional c = a + b ;
+}
+\end{lstlisting}
+
+C++ではクラスをこのように自然に振る舞わせることができる。
+
+\hypersection{ch1901}{より自然な初期化}
+
+\texttt{int}型は初期化にあたって値を設定できる。
+
+\begin{lstlisting}[language={C++}]
+int a = 0 ;
+int b(0) ;
+int c{0} ;
+\end{lstlisting}
+
+\texttt{クラス}でこのような初期化をするには、\texttt{コンストラクター}を書く。
+\index{こんすとらくた@コンストラクター}\index{くらす@クラス!こんすとらくた@コンストラクター}\index{くらす@クラス!しよきか@初期化}
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    // コンストラクター
+    fractional( int num )
+        : num(num), denom(1)
+    { }
+} ;
+
+int main()
+{
+    fractional a = 1 ;
+    fractional b = 2 ;
+}
+\end{lstlisting}
+
+\texttt{コンストラクター}は\texttt{クラス}の\texttt{特殊なメンバー関数}として定義する。\texttt{メンバー関数}としての\texttt{コンストラクター}は、名前がクラス名で、戻り値の型は記述しない。
+
+\begin{lstlisting}[style=grammar]
+struct class_name
+{
+    // コンストラクター
+    class_name() { }
+} ;
+\end{lstlisting}
+
+\texttt{コンストラクター}は\texttt{データメンバー}の初期化に特別な文法を持っている。関数の本体の前にコロンを書き、データメンバー名をそれぞれカンマで区切って初期化する。
+\index{くらす@クラス!しよきか@初期化}\index{こんすとらくた@コンストラクター!しよきか@初期化}
+
+\begin{lstlisting}[style=grammar]
+struct class_name
+{
+    int data_member ;
+
+    class_name( int value )
+        : data_member(value)
+    { }
+    
+} ;
+\end{lstlisting}
+
+このとき、引数名とデータメンバー名が同じでもよい。
+
+\begin{lstlisting}[style=grammar]
+struct class_name
+{
+    int x ;
+    class_name( int x )
+        : x(x) { }
+} ;
+\end{lstlisting}
+
+\texttt{x(x)}の最初の\texttt{x}は\texttt{class\_name::x}として、次の\texttt{x}は引数名の\texttt{x}として認識される。そのためこのコードは期待どおりに動く。
+
+\texttt{コンストラクター}の特別なメンバー初期化を使わずに、\texttt{コンストラクター}の関数の本体で\texttt{データメンバー}を変更してもよい。
+
+\begin{lstlisting}[style=grammar]
+struct class_name
+{
+    int x ;
+    class_name( int x )
+    {
+        class_name::x = x ;
+    }
+} ;
+\end{lstlisting}
+
+この場合、\texttt{x}は関数の本体が実行される前に一度初期化され、その後、値を代入されるという挙動の違いがある。
+
+コンストラクターはクラスが初期化されるときに実行される。例えば以下のプログラムを実行すると、
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    S a(1) ;
+    S b(2) ;
+    S c(3) ;
+}
+\end{lstlisting}
+以下のように出力される。
+\begin{lstlisting}[style=terminal]
+123
+\end{lstlisting}
+
+\texttt{コンストラクター}のついでに\texttt{デストラクター}\index{ですとらくた@デストラクタ}\index{くらす@クラス!ですとらくた@デストラクタ}も学んでおこう。\texttt{コンストラクター}はクラスのオブジェクトが初期化されるときに実行されるが、\texttt{デストラクター}はクラスのオブジェクトが破棄\index{くらす@クラス!はき@破棄}されるときに実行される。
+
+\texttt{デストラクター}の宣言は\texttt{コンストラクター}と似ている。違う点は、クラス名の前にチルダ文字を書くところだ。
+
+\begin{lstlisting}[style=grammar]
+struct S
+{
+    // デストラクター
+    ~S()
+    {
+        // オブジェクトの破棄時に実行される
+    }
+} ;
+\end{lstlisting}
+
+関数のローカル変数は、ブロックスコープを抜ける際に破棄される。破棄は構築の逆順に行われる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a ;
+    {
+        int b ;
+    // bが破棄される
+    }
+    int c ;
+// cが破棄される
+// aが破棄される
+}
+\end{lstlisting}
+
+さっそく初期化時と終了時に標準出力をするクラスで確かめてみよう。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int n ;
+    S( int n )
+        : n(n)
+    {
+        std::cout << "constructed: "s << n << "\n"s ;
+    }
+
+    ~S()
+    {
+        std::cout << "destructed: "s << n << "\n"s ;
+    }
+} ;
+\end{lstlisting}
+
+このクラスを以下のように使うと、
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    S a(1) ;
+    { S b(2) ; }
+    S c(3) ;
+}
+\end{lstlisting}
+以下のように出力される。
+\begin{lstlisting}[style=terminal]
+constructed: 1
+constructed: 2
+destructed: 2
+constructed: 3
+destructed: 3
+destructed: 1
+\end{lstlisting}
+
+この出力は以下のような意味だ。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \texttt{a}が構築される
+\item
+  \texttt{b}が構築される
+\item
+  \texttt{b}が破棄される
+\item
+  \texttt{c}が構築される
+\item
+  \texttt{c}が破棄される
+\item
+  \texttt{a}が破棄される
+\end{enumerate}
+
+\texttt{b}はブロックスコープの終わりに達したので\texttt{a}の構築のあと、\texttt{c}の構築の前に破棄される。破棄は構築の逆順で行われるので、\texttt{a}よりも先に\texttt{c}が破棄される。
+
+\texttt{コンストラクター}と\texttt{デストラクター}は戻り値を返さないので、\texttt{return文}には値を書かない。
+\index{こんすとらくた@コンストラクター!もどりち@戻り値}\index{ですとらくた@デストラクター!もどりち@戻り値}\index{return@\texttt{return}文}
+
+\begin{lstlisting}[language={C++}]
+struct class_name
+{
+    class_name()
+    {
+        return ;
+    }
+} ;
+\end{lstlisting}
+
+\texttt{コンストラクター}は複数の引数\index{こんすとらくた@コンストラクター!ひきすう@引数}を取ることもできる。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    fractional( int num )
+        : num(num), denom(1)
+    { }
+
+    fractional( int num, int denom )
+        : num(num), denom(denom)
+    { }
+} ;
+
+int main()
+{
+    // fractional(int)が呼ばれる
+    fractional a = 1 ;
+
+    // fractional(int,int)が呼ばれる
+    fractional b(1, 2) ;
+    fractional c{1, 2} ;
+}
+\end{lstlisting}
+
+複数の引数を取るコンストラクターを呼び出すには\,\texttt{"="}\,は使えない。\texttt{"()"}\,か\,\texttt{"\{\}"}\,を使う必要がある。
+
+上のコードを見ると、コンストラクターは引数の数以外にやっていることはほとんど同じだ。こういう場合、コンストラクターを1つにする方法がある。
+
+実はコンストラクターに限らず、関数は\texttt{デフォルト実引数}\index{でふおるとじつひきすう@デフォルト実引数}を取ることができる。書き方は仮引数に\,\texttt{"="}\,で値を書く。
+\index{かんすう@関数!でふおるとじつひきすう@デフォルト実引数}\index{こんすとらくた@コンストラクター!でふおるとじつひきすう@デフォルト実引数}
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+void f( int x = 0 )
+{ }
+
+int main()
+{
+    f() ;  // f(0)
+    f(1) ; // f(1)
+}
+\end{lstlisting}
+
+\texttt{デフォルト実引数}を指定した関数の仮引数に実引数を渡さない場合、\texttt{デフォルト実引数}で指定した値が渡される。
+
+ところで、\texttt{仮引数}\index{かりひきすう@仮引数}\index{かんすう@関数!かりひきすう@仮引数}、\texttt{実引数}\index{じつひきすう@実引数}\index{かんすう@関数!じつひきすう@実引数}という聞き慣れない言葉が出てきた。これは関数の引数を区別するための言葉だ。\texttt{仮引数}は関数の宣言の引数。実引数は関数呼び出しのときに引数に渡す値のことを意味する。
+
+\begin{lstlisting}[language={C++}]
+// xは仮引数
+void f( int x ) { }
+
+int main()
+{
+    // 123は仮引数xに対する実引数
+    f( 123 ) ;
+}
+\end{lstlisting}
+
+\texttt{デフォルト実引数}は関数の実引数の一部を省略できる。
+
+ただし、\texttt{デフォルト実引数}を使った以後の仮引数には、すべて\texttt{デフォルト実引数}がなければならない。
+
+\begin{lstlisting}[language={C++}]
+// OK
+void f( int x, int y = 0, int z = 0 ) { }
+// エラー
+// zにデフォルト実引数がない
+void g( int x, int y = 0, int z ) { }
+\end{lstlisting}
+
+\texttt{デフォルト実引数}で途中の引数だけ省略することはできない。
+
+\begin{lstlisting}[language={C++}]
+void f( int x = 0, int y = 0, int z = 0) { }
+
+int main()
+{
+    // エラー
+    f( 1, , 2 ) ;
+}
+\end{lstlisting}
+
+\texttt{デフォルト実引数}を使うと、コンストラクターを1つにできる。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    fractional( int num, int denom = 1 )
+        : num(num), denom(denom)
+    { }
+} ;
+
+int main()
+{
+    fractional a = 1 ;
+    fractional b(1,2) ;
+    fractional c{1,2} ;
+}
+\end{lstlisting}
+
+コンストラクターの数を減らす方法はもう1つある。\texttt{デリゲートコンストラクター}\index{でりげとこんすとらくた@デリゲートコンストラクター}\index{こんすとらくた@コンストラクター!でりげと@デリゲート〜}だ。
+
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+    fractional( int num, int denom )
+        : num(num), denom(denom)
+    { }
+
+    // デリゲートコンストラクター
+    fractional( int num )
+        : fractional( num, 1 )
+    { }
+} ;
+\end{lstlisting}
+
+\texttt{デリゲートコンストラクター}は初期化処理を別のコンストラクターにデリゲート（丸投げ）する。丸投げ先のコンストラクターの初期化処理が終わり次第、デリゲートコンストラクターの関数の本体が実行される。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    S()
+        : S(1)
+    {
+        std::cout << "delegating constructor\n" ;
+    }
+
+    S( int n )
+    {
+        std::cout << "constructor\n" ;
+    }
+} ;
+
+int main()
+{
+    S s ;
+}
+\end{lstlisting}
+
+このプログラムを実行すると、以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+constructor
+delegating constructor
+\end{lstlisting}
+
+まず\,\texttt{"S()"}\,が呼ばれるが、処理を\,\texttt{"S(int)"}\,にデリゲートする。\texttt{"S(int)"}\,の処理が終わり次第\,\texttt{"S()"}\,の関数の本体が実行される。そのためこのような出力になる。
+
+コンストラクターを減らすのはよいが、減らしすぎても不便だ。以下の例を見てみよう。
+
+\begin{lstlisting}[language={C++}]
+struct A { } ;
+struct B { B(int) { } } ;
+
+int main()
+{
+    A a ; // OK
+    B b ; // エラー
+}
+\end{lstlisting}
+
+クラス\texttt{A}の変数は問題ないのに、クラス\texttt{B}の変数はエラーになる。これはクラス\texttt{B}には引数を取らないコンストラクターがないためだ。
+
+クラス\texttt{B}に引数を必要としないコンストラクターを書くと、具体的に引数を渡さなくても初期化ができるようになる。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+struct B
+{
+    B() { }
+    B( int x ) { }
+} ;
+
+int main()
+{
+    B b ; // OK
+}
+\end{lstlisting}
+
+もしくは、デフォルト引数を使ってもよい。
+
+\begin{lstlisting}[language={C++}]
+struct B
+{
+    B( int x = 0 ) { }
+} ;
+\end{lstlisting}
+
+もちろん、ユーザーが値を指定しなければならないようなクラスは値を指定するべきだ。
+
+\begin{lstlisting}[language={C++}]
+// 人間クラス
+// 必ず名前が必要
+struct person
+{
+    std::string name
+    person( std::string name )
+        : name(name) { }
+} ;
+\end{lstlisting}
+
+\hypersection{ch1902}{自然な演算子}
+
+\texttt{int}型は\,\texttt{+-*/}\,といった演算子を使うことができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 1 ;
+    int b = 1 ;
+    a + b ;
+    a - b ;
+    a * b ;
+    a / b ;
+}
+\end{lstlisting}
+
+クラスも演算子を使った自然な記述ができる。クラスを演算子に対応させることを、\texttt{演算子のオーバーロード}\index{えんざんし@演算子!おばろど@オーバーロード}という。
+
+分数クラスの足し算を考えよう。
+
+\begin{itemize}
+\item
+  分母が同じならば分子を足す
+\item
+  分母が異なるならば互いの分母を掛けて、分母をそろえて足す
+\end{itemize}
+
+コードにすると以下のようになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+struct fractional
+{
+    int num ;
+    int denom ;
+
+// コンストラクターなど
+} ;
+
+fractional add( fractional & l, fractional & r )
+{
+    // 分母が同じなら
+    if ( l.denom == r.denom )
+        // 単に分子を足す
+        return fractional{ l.num + r.num, l.denom } ;
+
+    // 分母を合わせて分子を足す
+    return fractional{ l.num * r.denom + r.num * l.denom, l.denom * r.denom } ;
+}
+\end{lstlisting}
+
+しかし、この関数\texttt{add}を使ったコードは以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    fractional a{1,2} ;
+    fractional b{1,3} ;
+
+    auto c = add(a, b) ;
+}
+\end{lstlisting}
+
+これはわかりにくい。できれば、以下のように書きたい。
+
+\begin{lstlisting}[language={C++}]
+auto c = a + b ;
+\end{lstlisting}
+
+C++では演算子\index{えんざんし@演算子}は関数として扱うことができる。演算子の名前は\texttt{operator op}で、例えば\,\texttt{+演算子}の名前は\texttt{operator +}になる。
+
+関数\texttt{operator +}は引数を2つ取り、戻り値を返す関数だ。
+\index{\protect{+}@\texttt{\protect{+}}}
+
+\begin{lstlisting}[language={C++}]
+fractional operator +( fractional & l, fractional & r )
+{
+    // 分母が同じなら
+    if ( l.denom == r.denom )
+        // 単に分子を足す
+        return fractional{ l.num + r.num, l.denom } ;
+    else
+(@\ifTombow\pagebreak\fi@)
+        // 分母を合わせて分子を足す
+        return fractional{ l.num * r.denom + r.num * l.denom, l.denom * r.denom } ;
+}
+\end{lstlisting}
+
+このように\texttt{operator +}を書くと、以下のようなコードが書ける。
+
+\begin{lstlisting}[language={C++}]
+auto c = a + b ;
+\end{lstlisting}
+
+同様に、引き算は\texttt{operator -}、掛け算は\texttt{operator *}、割り算は\texttt{operator /}\,だ。
+\index{\protect{-}@\texttt{\protect{-}}}\index{\protect{*}@\texttt{\protect{*}}}\index{/@\texttt{/}}
+
+以下に関数の宣言を示すので実際に分数の計算を実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+fractional operator -( fractional & l, fractional & r ) ;
+fractional operator *( fractional & l, fractional & r ) ;
+fractional operator /( fractional & l, fractional & r ) ;
+\end{lstlisting}
+
+引き算は足し算とほぼ同じだ。
+
+\begin{lstlisting}[language={C++}]
+fractional operator -( fractional & l, fractional & r )
+{
+    // 分母が同じ
+    if ( l.denom == r.denom )
+        return fractional{ l.num - r.num, l.denom } ;
+    else
+        return fractional{ l.num * r.denom - r.num * l.denom, l.denom * r.denom } ;
+}
+\end{lstlisting}
+
+掛け算と割り算は楽だ。
+
+\begin{lstlisting}[language={C++}]
+fractional operator *( fractional & l, fractional & r )
+{
+    return fractional{ l.num * r.num, l.denom * r.denom } ;
+}
+
+fractional operator /( fractional & l, fractional & r )
+{
+    return fractional{ l.num * r.denom, l.denom * r.num } ;
+}
+\end{lstlisting}
+
+\clearpage
+\hypersection{ch1903}{演算子のオーバーロード}
+\index{えんざんし@演算子!おばろど@オーバーロード}
+
+\hypersubsection{ch190301}{二項演算子}
+\index{にこうえんざんし@二項演算子}\index{えんざんし@演算子!にこう@二項〜}
+
+C++にはさまざまな演算子があるが、多くが\texttt{二項演算子}と呼ばれる演算子だ。\texttt{二項演算子}は2つの引数を取り、値を返す。
+
+\begin{lstlisting}[language={C++}]
+a + b ;
+a - b ;
+a * b ;
+a / b ;
+\end{lstlisting}
+
+このような演算子は\texttt{operator +}のように、キーワード\texttt{operator}に続いて演算子の文字を書くことで、関数名とする。あとは通常の関数と変わらない。
+
+\begin{lstlisting}[language={C++}]
+struct S { } ;
+
+S add( S a, S b ) ;
+S operator + ( S a, S b ) ;
+\end{lstlisting}
+
+戻り値の型は何でもよい。
+
+\begin{lstlisting}[language={C++}]
+struct S { } ;
+
+int operator +( S, S ) { return 0 ; }
+void operator -( S, S ) { }
+
+int main()
+{
+    S s ;
+    int x = s + s ;
+    s - s ; // 戻り値はない
+}
+\end{lstlisting}
+
+演算子としてではなく、関数と同じように呼び出すこともできる。
+
+\begin{lstlisting}[language={C++}]
+struct S { } ;
+
+// S f( S, S )のようなもの
+S operator + ( S, S ) { }
+
+int main()
+{
+    S s ;
+    // f(s,s)のようなもの
+    operator +(s,s) ;
+}
+\end{lstlisting}
+
+\texttt{演算子のオーバーロード}では、少なくとも1つのユーザー定義された型がなければならない。つまり以下のような演算子のオーバーロードはできないということだ。
+
+\begin{lstlisting}[language={C++}]
+int operator +( int, int ) ;
+int operator +( int, double ) ;
+\end{lstlisting}
+
+二項演算子には\texttt{オペランド}\index{おぺらんど@オペランド}と呼ばれる式を取る。
+
+\begin{lstlisting}[language={C++}]
+a + b ;
+\end{lstlisting}
+
+この場合、二項演算子\texttt{operator +}には\texttt{a}, \texttt{b}という2つのオペランドがある。
+
+二項演算子をオーバーロードする場合、最初の引数が最初のオペランド、次の引数が次のオペランドに対応する。
+
+\begin{lstlisting}[language={C++}]
+struct X { } ;
+struct Y { } ;
+
+void operator +( X, Y ) { }
+
+int main()
+{
+    X x ;
+    Y y ;
+
+    // OK
+    x + y ;
+
+    // エラー
+    // operator +(Y,X)は存在しない
+    y + x ;
+}
+\end{lstlisting}
+
+そのため、上の例で\,\texttt{"x+y"}\,と\,\texttt{"y+x"}\,を両方使いたい場合は、
+\begin{lstlisting}[language={C++}]
+void operator +(Y,X) { }
+\end{lstlisting}
+も必要だ。
+
+\ifTombow\pagebreak\fi
+現実のコードでは、二項演算子のオーバーロードは以下のように書くことが多い。
+
+\begin{lstlisting}[language={C++}]
+struct S { } ;
+
+// 引数名はさまざま
+S operator +( S const & left, S const & right )
+{
+
+}
+\end{lstlisting}
+
+\texttt{const \&}\index{const \&@\texttt{const \&}}という特別な書き方をする。\texttt{\&}についてはすでに学んだように、リファレンスだ。リファレンスを使うことによって値をコピーせずに効率的に使うことができる。
+
+\texttt{const}というのは値を変更しない変数を宣言する機能だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    x = 1 ; // OK
+
+    int const y = 0 ;
+    y = 0 ; // エラー
+}
+\end{lstlisting}
+
+\texttt{const}を付けると値を変更できなくなる。
+
+一般に\texttt{operator +}のような演算子は、オペランドに渡した変数を書き換えない処理をすることが期待されている。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a = 1 ;
+    int b = 1 ;
+
+    // a, bは書き換わらない
+    int c = a + b ;
+}
+\end{lstlisting}
+
+もちろん、\texttt{operator +}をオーバーロードして引数をリファレンスで取り、値を書き換えるような処理を書くこともできる。ただ、通常はそのような処理をすることはない。
+
+しかし、処理の効率のためにリファレンスは使いたい。
+
+そのようなときに、\texttt{const}かつリファレンスを使うと、効率的で値の変更ができないコードが書ける。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+struct IntLike{ int data ;} ;
+
+IntLike operator + ( IntLike const & l, IntLike const & r )
+{
+    return IntLike{ l.data + r.data }
+}
+\end{lstlisting}
+
+\texttt{const}リファレンスの変数をうっかり書き換えてしまった場合、コンパイラーが検出してくれるので、バグを未然に発見することができる。
+
+\hypersubsection{ch190302}{単項演算子}
+\index{たんこうえんざんし@単項演算子}\index{えんざんし@演算子!たんこう@単項〜}
+
+\texttt{単項演算子}はオペランドを1つしか取らない演算子のことだ。
+
+\texttt{単項演算子}についてはまだ説明していないものも多い。例えば、\texttt{operator +}\index{\protect{+}@\texttt{\protect{+}}}や\texttt{operator -}\index{\protect{-}@\texttt{\protect{-}}}\,がある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 1 ;
+    +x ; //  1: operator +
+    -x ; // -1: operator -
+}
+\end{lstlisting}
+
+\texttt{単項演算子}は引数を1つしか取らない関数として書く。
+
+\begin{lstlisting}[language={C++}]
+struct IntLike{ int data ;} ;
+
+IntLike operator +( IntLike const & obj )
+{
+    return obj ;
+}
+
+IntLIke operator -( IntLike const & obj )
+{
+    return IntLike{ -obj.data } ;
+}
+\end{lstlisting}
+
+\clearpage
+\hypersubsection{ch190303}{インクリメント/デクリメント}
+
+\texttt{インクリメント演算子}と\texttt{デクリメント演算子}はやや変わっている。この演算子には、オペランドの前に書く前置演算子（\,\texttt{++i}\,）と、あとに書く後置演算子（\,\texttt{i++}\,）がある。
+\index{いんくりめんとえんざんし@インクリメント演算子}\index{えんざんし@演算子!いんくりめんと@インクリメント〜}
+\index{でくりめんとえんざんし@デクリメント演算子}\index{えんざんし@演算子!でくりめんと@デクリメント〜}
+\index{ぜんちえんざんし@前置演算子}\index{えんざんし@演算子!ぜんち@前置〜}
+\index{こうちえんざんし@後置演算子}\index{えんざんし@演算子!こうち@後置〜}
+\index{\protect{++}@\texttt{\protect{++}}}
+\index{{-}{-}@\texttt{{-}{-}}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int i = 0 ;
+    ++i ;
+    i++ ;
+
+    --i ;
+    i-- ;
+}
+\end{lstlisting}
+
+前置演算子を評価すると、演算子を評価したあとの値になる。
+
+\begin{lstlisting}[language={C++}]
+int i = 0 ;
+++i ;   // 1
+i ;     // 1
+\end{lstlisting}
+
+一方、後置演算子を評価すると、演算子を評価する前の値になる。
+
+\begin{lstlisting}[language={C++}]
+int i = 0 ;
+i++ ;   // 0
+i ;     // 1
+\end{lstlisting}
+
+さらに前置演算子を評価した結果はリファレンスになるので代入やさらなる演算子の適用ができる。
+
+\begin{lstlisting}[language={C++}]
+int i = 0 ;
+++i = 0 ;   // iは0
+++++i ;     // iは2
+
+i++ = 0 ;   // エラー
+i++++ ;     // エラー
+\end{lstlisting}
+
+インクリメントとデクリメントの前置演算子は、単項演算子と同じ方法で書くことができる。
+\index{ぜんちえんざんし@前置演算子}\index{えんざんし@演算子!ぜんち@前置〜}
+
+\begin{lstlisting}[language={C++}]
+struct IntLike { int data ; } ;
+
+IntLike & operator ++( IntLike & obj )
+{
+    ++obj.data ;
+    return obj ;
+}
+IntLike & operator --( IntLike & obj )
+{
+    --obj.data ;
+    return obj ;
+}
+\end{lstlisting}
+
+引数を変更するので\texttt{const}ではないリファレンスを使う。戻り値は引数をそのままリファレンスで返す。
+
+もちろん、この実装はインクリメントとデクリメントの挙動を自然に再現したい場合の実装だ。以下のような挙動を実装することも可能だ。
+
+\begin{lstlisting}[language={C++}]
+struct S { } ;
+
+void operator ++( S const & s )
+{
+    std::cout << "increment!\n" ;
+}
+
+int main()
+{
+
+    S s ;
+    ++s ;
+}
+\end{lstlisting}
+
+演算子のオーバーロードは演算子の文法で関数を呼べるという機能で、その呼び出した結果の関数が何をしようとも自由だからだ。
+
+後置演算子は少し変わっている。以下が後置演算子の実装だ。
+\index{こうちえんざんし@後置演算子}\index{えんざんし@演算子!こうち@後置〜}
+
+\begin{lstlisting}[language={C++}]
+struct IntLike { int data ; } ;
+
+IntLike operator ++( IntLike & obj, int )
+{
+    auto temp = obj ;
+    ++obj.data ;
+    return temp ;
+}
+IntLike operator --( IntLike & obj, int )
+{
+    auto temp = obj ;
+    --obj.data ;
+    return temp ;
+}
+\end{lstlisting}
+
+後置演算子は2つ目の引数として\texttt{int}型を取る。この引数はダミーで前置演算子と後置演算子を区別する以外の意味はない。意味はないので引数名は省略している。
+
+\begin{lstlisting}[language={C++}]
+struct S { } ;
+
+// 前置演算子
+void operator ++( S ) ;
+// 後置演算子
+void operator ++( S, int ) ;
+\end{lstlisting}
+
+後置演算子はオペランドである引数を変更するが、戻り値は変更する前の値だ。なので変更前の値をまずコピーしておき、そのコピーを返す。
+
+\hypersubsection{ch190304}{メンバー関数での演算子のオーバーロード}
+
+実は演算子のオーバーロードはメンバー関数で書くことも可能だ。
+
+例えば、
+\begin{lstlisting}[language={C++}]
+S s ;
+s + s ;
+\end{lstlisting}
+を可能にするクラス\texttt{S}に対する\texttt{operator +}は、
+\index{\protect{+}@\texttt{\protect{+}}}
+\begin{lstlisting}[language={C++}]
+struct S { }
+S operator + ( S const &, S const & ) ;
+\end{lstlisting}
+でも実装できるが、メンバー関数としても実装できる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    S operator +( S const & right )
+    {
+        return S{} ;
+    }
+} ;
+\end{lstlisting}
+
+演算子のオーバーロードをメンバー関数で書く場合、最初のオペランドがメンバー関数の属するクラスのオブジェクト、2つ目のオペランドが1つ目の引数になる。
+
+\begin{lstlisting}[language={C++}]
+struct IntLike
+{
+    int data ;
+
+    IntLike operator +( IntLike const & right )
+    {
+        return IntLike { data + right.data } ;
+    }
+} ;
+
+int main()
+{
+    IntLike a(1) ;
+    IntLike b(2) ;
+
+    IntLike c = a + b ;
+}
+\end{lstlisting}
+
+この場合、メンバー関数は変数\texttt{a}に対して呼ばれ、変数\texttt{b}が\texttt{right}となる。
+
+普通のメンバー関数のように呼ぶこともできる。
+
+\begin{lstlisting}[language={C++}]
+IntLike c = a.operator +( b ) ;
+\end{lstlisting}
+
+一見戸惑うかもしれないが、これは普通のメンバー関数呼び出しと何ら変わらない。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void plus( S const & other ) { }
+    void operator +( S const & other ) { }
+} ;
+
+int main()
+{
+    S a ;
+    S b ;
+
+    // これはメンバー関数呼び出し
+    a.plus(b) ;
+    // これもメンバー関数呼び出し
+    a.operator +(b) ;
+    // 同じくメンバー関数呼び出し
+    a + b ;
+}
+\end{lstlisting}
+
+演算子のオーバーロードはフリー関数とメンバー関数のどちらで実装すればいいのだろうか。答えはどちらでもよい。ただし、ごく一部の演算子はメンバー関数でしか実装できない。
+
+こうして、この章の冒頭にある演算子を使った自然な四則演算の記述が、自作のクラスでも可能になる。

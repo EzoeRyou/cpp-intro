@@ -1,0 +1,885 @@
+\hyperchapter{ch42}{デバッガー}{デバッガー}
+\index{でばつが@デバッガー}
+
+読者は複雑なコードを書く際に間違ったコードを書くことだろう。間違ったコードは直せばよい。問題はどこが間違っているのかわからない場合だ。
+
+例えば以下のコードは\texttt{1}から\texttt{10}までの整数を標準出力するはずのプログラムだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    for ( int i = 1 ; i < 10 ; ++i )
+        std::cout << i ;
+}
+\end{lstlisting}
+
+しかし実際に実行してみると、\texttt{1}から\texttt{9}までの整数しか標準出力しない。なぜだろうか。
+
+読者の中にはコード中の問題のある箇所に気が付いた人もいるだろう。これはたったの5行のコードで、問題の箇所も1箇所だ。これが数百行、数千行になり、関数やクラスを複雑に使い、問題の原因は複数の箇所のコードの実行が組み合わさった結果で、しかも自分で書いたコードなので正しく書いたはずだという先入観がある場合、たとえコードとしてはささいな間違いであったとしても、発見は難しい。
+
+こういうとき、実際にコードを1行ずつ実行したり、ある時点でプログラムの実行を停止させて変数の値を見たりしたいものだ。
+
+そんな夢を実現するのがデバッガーだ。この章ではデバッガーとしてGDB（GNUプロジェクトデバッガー）\index{GDB}の使い方を学ぶ。
+
+GDBで快適にデバッグするには、プログラムをコンパイルするときにデバッグ情報を出力する必要がある。そのためには、GCCに\,\texttt{-g}\index{GCC@GCC（GNU Compiler Collection）!-g@\texttt{-g}}オプションを付けてプログラムをコンパイルする。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -g -o program program.cpp
+\end{lstlisting}
+
+本書の始めに作った入門用の\texttt{Makefile}を使う場合は、\texttt{\$gcc\_options}に\,\texttt{-g}を加えることになる。
+
+\begin{lstlisting}[style=terminal]
+gcc_options = -std=c++17 -Wall --pedantic-error -g
+\end{lstlisting}
+
+コンパイラーのオプションを変更したあとは、\texttt{make clean}を実行してコンパイル済みヘッダーファイルを生成し直す必要がある。
+
+\begin{lstlisting}[style=terminal]
+$ make clean
+\end{lstlisting}
+
+\hypersection{ch4201}{GDBのチュートリアル}
+\index{GDB}
+
+では具体的にデバッガーを使ってみよう。以下のようなソースファイルを用意する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int val = 0 ;
+    val = 10 ;
+    val += 1 ;
+    val *= 2 ;
+    val *= 2 ;
+    val /= 4 ;
+}
+\end{lstlisting}
+
+このプログラムをコンパイルする。
+
+\begin{lstlisting}[style=terminal]
+$ g++ -g program.cpp -o program
+\end{lstlisting}
+
+GDBを使ってプログラムのデバッグを始めるには、GDBのオプションとして\,\texttt{-g}\,\index{GCC@GCC（GNU Compiler Collection）!-g@\texttt{-g}}オプション付きでコンパイルしたプログラムのファイル名を指定する。
+
+\begin{lstlisting}[style=terminal]
+$ gdb program
+\end{lstlisting}
+
+すると以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+GNU gdb (Ubuntu 8.2-0ubuntu1) 8.2
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from program...done.
+(gdb) 
+\end{lstlisting}
+
+大量のメッセージに戸惑うかもしれないが、最後の行以外はGDBのライセンス表記やドキュメントだ。細部は環境ごとに異なる。
+
+ここで重要なのは最後の行だ。
+
+\begin{lstlisting}[style=terminal]
+(gdb)
+\end{lstlisting}
+
+ここにGDBのコマンドを入力する。ヘルプを表示するコマンド\,\texttt{help}\,\index{DGB!help\texttt{help}}と入力してみよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) help
+\end{lstlisting}
+
+ヘルプメッセージが表示される。あるコマンドのヘルプを見たい場合は\,\texttt{help コマンド}\,と入力する。いまから使う予定のコマンドである\,\texttt{list}\,\index{GDB!list@\texttt{list}}のヘルプを見てみよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) help list
+\end{lstlisting}
+
+\texttt{list}\,コマンドは現在のソースファイルの前後10行を表示する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) list
+1   int main()
+2   {
+3       int val = 0 ;
+4       val = 10 ;
+5       val += 1 ;
+6       val *= 2 ;
+7       val *= 2 ;
+8       val /= 4 ;
+9   }
+\end{lstlisting}
+
+さっそく実行してみよう。実行するコマンドは\,\texttt{run}\,\index{GDB!run@\texttt{run}}だ。
+
+\begin{lstlisting}[style=terminal]
+(gdb) run
+Starting program: 実行可能ファイルへのパス
+[Inferior 1 (process PID) exited normally]
+\end{lstlisting}
+
+\texttt{run}\,コマンドを使うとデバッガーはプログラムを実行する。
+
+プログラムの実行を特定の場所で止めるには\,\texttt{break}\,\index{GDB!break@\texttt{break}}コマンドを使ってブレイクポイントを設定する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) help break
+\end{lstlisting}
+
+\texttt{break}\,コマンドには関数や行番号を指定できる。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break main
+(gdb) break 4
+(gdb) break 5
+\end{lstlisting}
+
+これで、\texttt{main}関数、4行目、5行目にブレイクポイントを設定した。さっそくもう一度最初から実行してみよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) run
+Starting program: プログラムへのファイルパス
+
+Breakpoint 1, main () at main.cpp:3
+3       int val = 0 ;
+\end{lstlisting}
+
+\texttt{main}関数にブレイクポイントを設定したので、プログラムは\texttt{main}関数が呼ばれたところ、最初のコードである3行目を実行する手前で止まる。
+
+プログラムの実行を再開するには\,\texttt{continue}\,\index{GDB!continue@\texttt{continue}}コマンドを使う。
+
+\begin{lstlisting}[style=terminal]
+(gdb) continue
+Continuing.
+
+Breakpoint 2, main () at main.cpp:4
+4       val = 10 ;
+\end{lstlisting}
+
+4行目にブレイクポイントを設定したので、4行目を実行する手前で止まる。
+
+この時点で、変数\texttt{val}が初期化され、その値は0になっているはずだ。確かめてみよう。変数の値を調べるには\,\texttt{print}\,\index{GDB!print@\texttt{print}}コマンドを使う。
+
+\begin{lstlisting}[style=terminal]
+(gdb) print val
+$1 = 0
+\end{lstlisting}
+
+値が\texttt{0}になっていることが確認できた。実行を再開しよう。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=terminal]
+(gdb) continue
+Continuing.
+
+Breakpoint 3, main () at main.cpp:5
+5       val += 1 ;
+\end{lstlisting}
+
+4行目を実行し、5行目のブレイクポイントで止まる。4行目を実行したということは、変数\,\texttt{val}\,の値は\texttt{10}になっているはずだ。もう一度\,\texttt{print}\,コマンドで調べてみよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) print val
+$2 = 10
+\end{lstlisting}
+
+値は\texttt{10}だ。GDBは\texttt{print}の結果の履歴を記録している。\texttt{\$1}や\,\texttt{\$2}というのはその記録を参照するための名前だ。その値は\,\texttt{print}\,コマンドで確認できる。
+
+\begin{lstlisting}[style=terminal]
+(gdb) print $1
+$3 = 0
+(gdb) print $2
+$4 = 10
+\end{lstlisting}
+
+現在、プログラムは5行目を実行する手前で止まっている。このまま\,\texttt{continue}\,コマンドを使うとプログラムの終了まで実行されてしまう。もう一度1行だけ実行するには\,\texttt{break 6}\,で6行目にブレイクポイントを設定すればよいのだが、次の1行だけ実行したいときにいちいちブレイクポイントを設定するのは面倒だ。
+
+そこで使うのが\,\texttt{step}\,だ。次の5行目を実行すると、変数\texttt{val}の値は\texttt{11}になっているはずだ。
+
+\begin{lstlisting}[style=terminal]
+(gdb) step
+6       val *= 2 ;
+(gdb) print val
+$5 = 11
+\end{lstlisting}
+
+さて、残りの行も\texttt{step}して実行を1行ずつ確かめてみよう。
+
+GDBの基本的な使い方を覚えたので、これから詳細な使い方を学んでいく。
+
+\clearpage
+\hypersection{ch4202}{プログラムの実行}
+
+GDBでプログラムをデバッグするには、GDBの起動時にプログラムのオプションとしてプログラムのファイル名を指定する。プログラムのファイル名が\,\texttt{program}\,の場合、以下のようにする。
+
+\begin{lstlisting}[style=terminal]
+$ ls
+program
+$ gdb program
+\end{lstlisting}
+
+起動したGDBでプログラムを実行するには、\texttt{run}\,\index{GDB!run@\texttt{run}}コマンドを使う。
+
+\begin{lstlisting}[style=terminal]
+(gdb) run
+\end{lstlisting}
+
+このとき、プログラムにオプションを指定したい場合は\,\texttt{run}\,に続けて記述する。例えばプログラムの標準出力を\,\texttt{out.txt}\,にリダイレクトしたいときは以下のようにする。
+
+\begin{lstlisting}[style=terminal]
+(gdb) run > out.txt
+\end{lstlisting}
+
+\hypersection{ch4203}{プログラムの停止方法}
+
+デバッガーの機能として一番わかりやすいのが、実行中のプログラムを一時停止させる機能だ。
+
+\hypersubsection{ch420301}{ブレイクポイント}
+\index{ぶれいくぽいんと@ブレイクポイント}
+
+コマンド\,\texttt{break}\,\index{GDB!break@\texttt{break}}はブレイクポイントを設定する。プログラムの実行がブレイクポイントに達した場合、GDBはブレイクポイントの直前でプログラムの実行を中断する。
+
+ブレイクポイントを設定する場所は\,\texttt{break}\,コマンドへの引数で指定する。省略して\,\texttt{b}\,\index{GDB!b@\texttt{b}}だけでもよい。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break 場所
+(gdb) b 場所
+\end{lstlisting}
+
+場所として使えるのは行番号と関数名だ。
+
+\hypersubsubsection{ch42030101}{行番号へのブレイクポイント}
+
+現在のソースファイルの123行目にブレイクポイントを設定する場合は以下のように書く。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break 123
+\end{lstlisting}
+
+ソースファイルが複数ある場合は、
+\begin{lstlisting}[style=terminal]
+(gdb) break ファイル名:行番号
+\end{lstlisting}
+と書く。例えば\,\texttt{foo.cpp}\,の8行目にブレイクポイントを仕掛ける場合は、
+\begin{lstlisting}[style=terminal]
+(gdb) break foo.cpp:8
+\end{lstlisting}
+と書く。
+
+\hypersubsubsection{ch42030102}{ブレイクポイントの確認}
+
+設定したブレイクポイントの一覧は、\texttt{info breakpoints}\,\index{GDB!info breakpoints@\texttt{info breakpoints}}コマンドで確認できる。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break 5
+Breakpoint 1 at 0x1150: file main.cpp, line 5.
+(gdb) break 6
+Breakpoint 2 at 0x1157: file main.cpp, line 6.
+(gdb) break 7
+Breakpoint 3 at 0x115b: file main.cpp, line 7.
+(gdb) info breakpoints 
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0x0000000000001150 in main() at main.cpp:5
+2       breakpoint     keep y   0x0000000000001157 in main() at main.cpp:6
+3       breakpoint     keep y   0x000000000000115b in main() at main.cpp:7
+\end{lstlisting}
+
+これは5, 6, 7行目にそれぞれブレイクポイントを設定したあとの\,\texttt{info breakpoints}\,の結果だ。
+
+この表の意味は、左から番号（Num, Number）、種類（Type）、中断後の処理（Disposition）, 有効/無効（Enb, Enable/Disable）、アドレス（Address）, 内容（What）となっている。
+
+ブレイクポイントには作成された順番に番号が振られる。ブレイクポイントの設定を変えるには、この番号でブレイクポイントを参照する。
+
+ブレイクポイントには3種類ある。普通のブレイクポイントである\texttt{breakpoint}のほかに、特殊なブレイクポイントであるウォッチポイント（watchpoint）\index{うおつちぽいんtp@ウォッチポイント}、キャッチポイント（catchpoint）\index{きやついちぽいんと@キャッチポイント}がある。
+
+中断後の処理と有効/無効の切り替えはあとで説明する。
+
+アドレスというのはブレイクポイントを設定した場所に該当するプログラムのコード部分であり、本書では解説しない。
+
+内容はブレイクポイントを設定した場所の情報だ。
+
+\hypersubsubsection{ch42030103}{ブレイクポイントの削除}
+
+ブレイクポイントを削除するには\,\texttt{delete}\,\index{GDB!delete@\texttt{delete}}コマンドを使う。削除するブレイクポイントは番号で指定する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) delete 1
+\end{lstlisting}
+
+番号を指定しないとすべてのブレイクポイントを削除することができる。
+
+\begin{lstlisting}[style=terminal]
+(gdb) delete
+Delete all breakpoints? (y or n) y
+(gdb) info breakpoints
+No breakpoints or watchpoints.
+\end{lstlisting}
+
+\hypersubsubsection{ch42030104}{ブレイクポイントの有効/無効}
+
+ブレイクポイントは有効/無効を切り替えることができる。
+
+ブレイクポイントを無効化するには\,\texttt{disable}\,\index{GDB!disable@\texttt{disable}}コマンドを使う。
+
+\begin{lstlisting}[style=terminal]
+(gdb) disable 1
+\end{lstlisting}
+
+ブレイクポイントを有効化するには\,\texttt{enable}\,\index{GDB!enable@\texttt{enable}}コマンドを使う。
+
+\begin{lstlisting}[style=terminal]
+(gdb) enable 1
+\end{lstlisting}
+
+ブレイクポイントは発動したあとに自動で無効化させることができる。
+
+\texttt{enable [breakpoints] once}\index{GDB!enable once@\texttt{enable onece}}コマンドで、ブレイクポイントが一度発動すると自動的に無効化されるブレイクポイントを設定できる。
+
+\begin{lstlisting}[style=terminal]
+(gdb) enable 1 once
+\end{lstlisting}
+
+このコマンドは、ブレイクポイント番号1が一度発動したら自動的に無効化する設定をする。
+
+ブレイクポイントは\(n\)回発動したあとに自動的に無効化することもできる。そのためのコマンドは\,\texttt{enable [breakpoints] count n}\,\index{GDB!enable count@\texttt{enable count}}だ。
+
+\begin{lstlisting}[style=terminal]
+(gdb) enable 1 count 10
+\end{lstlisting}
+
+上のコマンドは、ブレイクポイント番号1が10回発動したら自動的に無効化されるよう設定している。
+
+\hypersubsubsection{ch42030105}{関数名へのブレイクポイント}
+
+ブレイクポイントの場所として関数名を書くと、その関数名が呼び出されたあと、関数の本体の1行目が実行されるところにブレイクポイントが設定される。
+
+現在のソースファイルの関数\texttt{main}にブレイクポイントを設定する場合は以下のように書く。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break main
+\end{lstlisting}
+
+ソースファイルが複数ある場合は、
+\begin{lstlisting}[style=terminal]
+(gdb) ファイル名:関数名
+\end{lstlisting}
+と書く。
+
+C++では異なる引数で同じ名前の関数が使える。
+
+\begin{lstlisting}[language={C++}]
+void f() { }
+void f(int) { }
+void f(double) { }
+
+int main()
+{
+    f() ;
+    f(0) ;
+    f(0.0) ;
+}
+\end{lstlisting}
+
+このようなプログラムで関数\texttt{f}にブレイクポイントを設定すると、\texttt{f}という名前の関数すべてにブレイクポイントが設定される。
+
+ブレイクポイントの一覧を表示する\,\texttt{info breakpoints}\,\index{GDB!info breakpoints@\texttt{info breakpoints}}コマンドで確かめてみよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break f
+Breakpoint 1 at 0x1149: f. (3 locations)
+(gdb) info breakpoints 
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   <MULTIPLE>         
+1.1                         y     0x0000000000001149 in f() at main.cpp:1
+1.2                         y     0x0000000000001153 in f(int) at main.cpp:2
+1.3                         y     0x000000000000115f in f(double) at main.cpp:3
+\end{lstlisting}
+
+関数名\texttt{f}に該当するすべての関数に、ブレイクポイント番号1としてブレイクポイントが設定される。関数にはそれぞれサブの番号が振られる。
+
+この状態でブレイクポイント番号1を削除すると、1.1, 1.2, 1.3はすべて削除される。
+
+\begin{lstlisting}[style=terminal]
+(gdb) delete 1
+(gdb) info breakpoints
+No breakpoints or watchpoints.
+\end{lstlisting}
+
+もし、オーバーロードされた同名の関数のうちの一部だけにブレイクポイントを仕掛けたい場合、曖昧性を解決するメニューを表示する設定にすることで、一部の関数だけを選ぶことができる。メニューを表示する設定にするには、
+\begin{lstlisting}[style=terminal]
+(gdb) set multiple-symbols ask
+\end{lstlisting}
+というコマンドを使う。これ以降の\texttt{break}コマンドが名前が曖昧であることを検出した場合、以下のようなメニューを表示する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break f
+[0] cancel
+[1] all
+[2] run.cpp:f()
+[3] run.cpp:f(double)
+[4] run.cpp:f(int)
+>
+\end{lstlisting}
+
+ここで\texttt{0}を入力するとキャンセル。\texttt{1}を入力するとすべての関数にブレイクポイントを設定する。
+
+特定の関数だけにブレイクポイントを設定したい場合、その関数に対応する番号を入力する。例えば、\texttt{f()}と\texttt{f(int)}だけにブレイクポイントを設定したい場合は、
+\begin{lstlisting}[style=terminal]
+> 2 4
+\end{lstlisting}
+と入力する。
+
+\hypersubsection{ch420302}{条件付きブレイクポイント}
+
+\begin{lstlisting}[style=terminal]
+(gdb) break ... if 条件
+\end{lstlisting}
+と入力すると、\texttt{条件}が\texttt{true}となるときのみブレイクポイントが発動する。
+\index{GDB!break if@\texttt{break if}}
+
+例えば以下のようなコードで、
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int i { } ;
+    while ( i != 1000 )
+    {
+        ++i ;
+        std::cout << i ;
+    }
+}
+\end{lstlisting}
+以下のように7行目に変数\texttt{i}が\texttt{500}に等しい条件を設定すると
+\begin{lstlisting}[style=terminal]
+(gdb) break 7 if i == 500
+\end{lstlisting}
+変数\texttt{i}が\texttt{500}でありかつ7行目が実行される直前でブレイクポイントが発動する。
+
+\hypersection{ch4204}{プログラムの実行再開とステップ実行}
+
+以下のようなプログラムがあるとする。
+
+\begin{lstlisting}[language={C++}]
+int f( int x )
+{
+    return x + 1 ;
+}
+
+int main()
+{
+    int i = 0 ;
+    i = f(i) ;
+    i = f(i) ;
+    i = f(i) ;
+}
+\end{lstlisting}
+
+このプログラムを\texttt{main}関数から1行ずつ実行してその挙動を確かめたい。その場合に、すべての行にブレイクポイントを設定するのは面倒だ。GDBではこのような場合に、現在中断している場所から1行だけ実行する方法がある。
+
+\hypersubsection{ch420401}{実行再開(continue)}
+\index{GDB!continue@\texttt{continue}}
+
+\texttt{continue}コマンドは実行を再開する。省略して\texttt{c}\index{GDB!c@\texttt{c}}でもよい
+
+\begin{lstlisting}[style=terminal]
+(gdb) continue
+(gdb) c
+\end{lstlisting}
+
+実行を再開すると、次のブレイクポイントが発動するか、プログラムが終了するまで実行が続く。
+
+\hypersubsection{ch420402}{ステップ実行(step)}
+\index{GDB!step@\texttt{step}}
+
+\texttt{step}コマンドは現在実行が中断している場所から、ソースファイルで1行分の実行をして中断する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) step
+(gdb) s
+\end{lstlisting}
+
+\texttt{step}コマンドは省略して\texttt{s}\index{GDB!s@\texttt{s}}でもよい。
+
+先ほどのソースファイルで、まず\texttt{main}関数にブレイクポイントを設定して実行すると、
+\begin{lstlisting}[style=terminal]
+(gdb) break main
+(gdb) run
+\end{lstlisting}
+\texttt{main}関数に入った直後で実行が中断する。
+
+\begin{lstlisting}[style=terminal]
+int main()
+{
+>>  int i = 0 ;
+    i = f(i) ;
+    i = f(i) ;
+...
+\end{lstlisting}
+
+この状態で\texttt{step}コマンドを使うと
+\begin{lstlisting}[style=terminal]
+(gdb) step
+\end{lstlisting}
+1行分にあたる実行が行われ、また中断される。
+
+\begin{lstlisting}[style=terminal]
+int main()
+{
+    int i = 0 ;
+>>  i = f(i) ;
+    i = f(i) ;
+...
+\end{lstlisting}
+
+もう一度\texttt{step}コマンドを使うと、今度は関数\texttt{f}の中で実行が中断する。
+
+\begin{lstlisting}[style=terminal]
+int f( int x )
+{
+>>  return x + 1 ;
+}
+
+int main()
+...
+\end{lstlisting}
+
+このまま\texttt{step}コマンドを続けていくと、また\texttt{main}関数に戻り、また次の行が実行され、また関数\texttt{f}が実行される。
+
+1行ずつ実行するのではなく\(n\)行実行したい場合は、\texttt{step}コマンドに\(n\)を指定する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) step n
+\end{lstlisting}
+
+するとソースファイルの\(n\)行分実行される。例えば以下のように書くと、
+\begin{lstlisting}[style=terminal]
+(gdb) step 3
+\end{lstlisting}
+3行分実行される。
+
+\hypersubsection{ch420403}{ネクスト実行(next)}
+\index{GDB!next@\texttt{next}}
+
+\texttt{step}コマンドはソースファイルの1行分を実行してくれるが、途中に関数呼び出しが入る場合、その関数のソースファイルがある場合はその関数の中も1行とカウントする。\texttt{next}コマンドは現在実行が中断しているソースファイルの次の行を1行として扱い、次の行まで実行して中断する。
+
+例えばプログラムが以下の状態で中断しているとする。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[style=terminal]
+int main()
+{
+    int i = 0 ;
+>>  i = f(i) ;
+    i = f(i) ;
+...
+\end{lstlisting}
+
+このまま\texttt{step}コマンドを実行すると、関数\texttt{f}の中の1行で実行が中断する。一方\texttt{next}コマンドを使うと、
+\begin{lstlisting}[style=terminal]
+(gdb) next
+\end{lstlisting}
+現在止まっているソースファイルの次の1行の手前まで実行して中断する。途中の関数呼び出しはすべて実行される。
+
+\begin{lstlisting}[style=terminal]
+int main()
+{
+    int i = 0 ;
+    i = f(i) ;
+>>  i = f(i) ;
+...
+\end{lstlisting}
+
+\texttt{step}コマンドと同じく、\texttt{next}コマンドも\(n\)行分一度に実行することができる。
+
+\begin{lstlisting}[style=terminal]
+(gdb) next n
+\end{lstlisting}
+
+\hypersubsection{ch420404}{関数から抜けるまで実行(finish)}
+\index{GDB!finish@\texttt{finish}}
+
+\texttt{finish}コマンドは現在の関数から\texttt{return}するまで実行する。
+
+\clearpage
+\hypersection{ch4205}{バックトレース}
+
+バックトレースは中断しているプログラムの情報を得るとても強力なコマンドだ。
+
+\begin{lstlisting}[style=terminal]
+(gdb) backtrace
+(gdb) bt
+\end{lstlisting}
+
+バックトレースを表示するには\texttt{backtrace}\index{GDB!backtrace@\texttt{backtrace}}もしくは\texttt{bt}\index{GDB!bt@\texttt{bt}}というコマンドを使う。
+
+例えば以下のようなソースファイルがある。
+
+\begin{lstlisting}[language={C++}]
+void f() { }
+
+void apple() { f() ; } 
+void banana() { f() ; } 
+void cherry() { apple() ; } 
+
+int main()
+{
+    f() ;
+    apple() ;
+    banana() ;
+    cherry() ;
+}
+\end{lstlisting}
+
+ここで関数\texttt{f}に注目してみよう。関数\texttt{f}はさまざまな関数から呼ばれる。関数\texttt{main}から呼ばれるし、関数\texttt{apple}や\texttt{banana}からも呼ばれる。特に、関数\texttt{cherry}は関数\texttt{apple}を呼び出すので、間接的に関数\texttt{f}を呼ぶ。
+
+関数\texttt{f}にブレイクポイントを仕掛けて実行してみよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break f
+(gdb) run
+(gdb) continue
+(gdb) continue
+(gdb) continue
+(gdb) continue
+\end{lstlisting}
+
+関数\texttt{f}が呼ばれるたびに実行が中断するが、関数\texttt{f}がどこから呼ばれたのかがわからない。
+
+こういうときにバックトレースが役に立つ。
+
+上のコマンドを実行しながら、関数\texttt{f}のブレイクポイントが発動するたびに、\texttt{backtrace}コマンドを入力してみよう。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=terminal]
+(gdb) break f
+(gdb) run
+(gdb) backtrace
+#0  f () at main.cpp:2
+#1  0x0000555555556310 in main () at main.cpp:10
+\end{lstlisting}
+
+\texttt{\#0}がバックトレースの最も深い現在のスタックフレームだ。これは関数\texttt{f}でソースファイル\texttt{main.cpp}の2行目だ。\texttt{\#1}が\,\texttt{\#0}の上のスタックフレームで、これは関数\texttt{main}で10行目にある。
+
+実行を再開して、次の関数\texttt{f}のバックトレースを見よう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) continue
+(gdb) backtrace
+#0  f () at main.cpp:2
+#1  0x00005555555562ec in apple () at main.cpp:4
+#2  0x0000555555556315 in main () at main.cpp:11
+\end{lstlisting}
+
+今回はスタックフレームが3つある。最も外側のスタックフレームは関数\texttt{main}で、そこから関数\texttt{apple}が呼び出され、そして関数\texttt{f}が呼び出される。
+
+さらに進めよう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) continue
+(gdb) backtrace
+#0  f () at main.cpp:2
+#1  0x00005555555562f8 in banana () at main.cpp:5
+#2  0x000055555555631a in main () at main.cpp:12
+\end{lstlisting}
+
+今度は\texttt{main}→\texttt{banana}→\texttt{f}になった。次はどうだろうか。
+
+\begin{lstlisting}[style=terminal]
+(gdb) continue
+(gdb) backtrace
+#0  f () at main.cpp:2
+#1  0x00005555555562ec in apple () at main.cpp:4
+#2  0x0000555555556304 in cherry () at main.cpp:6
+#3  0x000055555555631f in main () at main.cpp:13
+\end{lstlisting}
+
+最後は\texttt{main}→\texttt{cherry}→\texttt{apple}→\texttt{f}だ。
+
+このようにバックトレースを使うことでプログラムの状態を調べることができる。
+
+\clearpage
+\hypersection{ch4206}{変数の値を確認}
+
+変数の値を確認するには\texttt{print}\index{GDB!print@\texttt{print}}コマンドを使う。
+
+\begin{lstlisting}[style=terminal]
+(gdb) print 式
+\end{lstlisting}
+
+\texttt{print}コマンドは式を評価した結果を出力する。
+
+例えば以下のようなソースファイルがある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 1 ;
+    x += 1 ;
+    x *= 2 ;
+}
+\end{lstlisting}
+
+この変数\texttt{x}の値を見ていこう。
+
+まず変数\texttt{x}が初期化されるところまで実行する。
+
+\begin{lstlisting}[style=terminal]
+(gdb) break main
+(gdb) run
+(gdb) step
+(gdb) print x
+$1 = 1
+\end{lstlisting}
+
+1行ずつ実行して値を見ていこう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) step
+(gdb) print x
+$2 = 2
+(gdb) step
+(gdb) print x
+$3 = 4
+\end{lstlisting}
+
+\texttt{print 式}コマンドで注意すべき点としては、\texttt{式}の副作用もプログラムに反映されるということだ。例えば以下のように変数\texttt{x}を変更する式も使えるし、変数\texttt{x}は実際に変更されてしまう。
+
+\begin{lstlisting}[style=terminal]
+(gdb) print ++x
+(gdb) print x = 0
+\end{lstlisting}
+
+式では関数まで呼べてしまう。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+void hello()
+{
+    std::cout << "hello"
+}
+
+int main() { }
+\end{lstlisting}
+
+このプログラムは関数\texttt{hello}を呼ばないし標準出力には何も出力しない。しかしこのプログラムをGDBでロードし、\texttt{main}関数にブレイクポイントを設定してから実行し、ブレイクポイントが発動したら\texttt{print hello()}コマンドを使ってみると、
+
+\begin{lstlisting}[style=terminal]
+(gdb) break main
+(gdb) run
+(gdb) print hello()
+\end{lstlisting}
+
+なんと関数\texttt{hello}が呼び出され、標準出力に\,\texttt{hello}\,と出力されるではないか。
+
+\texttt{print}コマンドの式のもたらす副作用には注意しよう。
+
+\hypersection{ch4207}{シグナルによるプログラムの中断}
+\index{しぐなる@シグナル}\index{GDB!しぐなる@シグナル}
+
+プログラムはさまざまな理由によりシグナルを出して実行を強制的に終了する。このシグナルはGDBによってトラップされ、ブレイクポイントと同じくプログラムの中断として扱われる。
+
+プログラムが実行を終了するようなシグナルは、プログラムの不具合によって生じる。具体的な不具合は実行環境に依存するが、たいていの環境で動く不具合は、nullポインターを経由した間接アクセスと、ゼロ除算だ。
+
+\begin{lstlisting}[language={C++}]
+// nullポインターを経由した間接アクセス
+int * ptr = nullptr ;
+*ptr = 0 ;
+// ゼロ除算
+1 / 0 ;
+\end{lstlisting}
+
+実際にそのようなプログラムを作ってGDBで実行し、プログラムが中断されることを確認してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x { } ;
+    std::cin >> x ;
+    std::cout << 1 / x ;
+}
+\end{lstlisting}
+
+このプログラムはユーザーが標準入力から\texttt{0}を入力するとゼロ除算となり強制的に終了する。GDBで実行してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ gdb program
+(gdb) run
+Starting program:
+0
+
+Program received signal SIGFPE, Arithmetic exception.
+0x0000555555556336 in main () at main.cpp:5
+5       std::cout << 1 / x ;
+\end{lstlisting}
+
+ちょうどゼロ除算を起こした箇所でプログラムの実行が中断する。
+
+このとき中断した状態でプログラムのさまざまな状態を観測できる。例えばバックトレースを表示したり、変数の値を確認したりできる。
+
+\hypersection{ch4208}{コアダンプを使ったプログラムの状態の確認}
+\index{こあだんぷ@コアダンプ}
+
+プログラムがシグナルによって強制的に終了したときに、たまたまデバッガーで動かしていたならばプログラムの状態を調べられる。しかし都合よくデバッガーで実行していない場合はどうすればいいのか。
+
+まずプログラムを普通に実行してみよう。
+
+\begin{lstlisting}[style=terminal]
+$ program
+0
+Floating point exception (core dumped)
+\end{lstlisting}
+
+\texttt{core dumped}という文字が気になる。プログラムはシグナルで強制的に実行を終了するときコアファイルをダンプする。このファイル名は通常\texttt{core}だ。通常はカレントディレクトリーに\texttt{core}\index{core@\texttt{core}}という名前のファイルが生成されているはずだ。
+
+もしカレントディレクトリーに\texttt{core}という名前のファイルがない場合、以下のコマンドを実行する。
+
+\begin{lstlisting}[style=terminal]
+$ ulimit -c unlimited
+\end{lstlisting}
+
+これにより\texttt{core}ファイルが生成されるようになる。
+
+すでにコアファイルが存在する場合に上書きされるかどうかは環境により異なる。昔のコアファイルがいらないのであれば消しておこう。
+
+\begin{lstlisting}[style=terminal]
+$ rm ./core
+$ ./program
+0
+Floating point exception (core dumped)
+$ find core
+core
+\end{lstlisting}
+
+このコアファイルはデバッガーに読み込ませることで、プログラムが強制的に終了するに至った瞬間のプログラムの状態を調べるのに使える。
+
+使い方はGDBにプログラムファイルと一緒に指定するだけだ。
+
+\begin{lstlisting}[style=terminal]
+$ gdb program core
+...
+Core was generated by `./program'.
+Program terminated with signal SIGFPE, Arithmetic exception.
+#0  0x000055dcbfd3d336 in main () at main.cpp:5
+5       std::cout << 1 / x ;
+(gdb) backtrace
+#0  0x000055dcbfd3d336 in main () at main.cpp:5
+(gdb) print x
+$1 = 0
+\end{lstlisting}
+
+デバッガーはとても役に立つ。本書では少しだけしか解説しなかったが、このほかにも強力な機能がたくさんある。

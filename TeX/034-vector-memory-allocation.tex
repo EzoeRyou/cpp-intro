@@ -1,0 +1,946 @@
+\hyperchapter{ch31}{vectorの実装：メモリー確保}{vectorの実装：メモリー確保}
+\index{vector@\texttt{vector}!めもりかくほ@メモリー確保}
+
+\hypersection{ch3101}{メモリー確保と解放の起こるタイミング}
+
+\texttt{std::vector}はどこでメモリーを確保と解放しているのだろうか。
+
+デフォルト構築すると空になる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    v.empty() ; // true
+}
+\end{lstlisting}
+
+コンストラクターに要素数を渡すことができる。
+\index{vector@\texttt{vector}!ようそすう@要素数}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v(100) ;
+    v.size() ; // 100
+}
+\end{lstlisting}
+
+すると\texttt{std::vector}は指定した要素数の有効な要素を持つ。
+
+コンストラクターに要素数と初期値を渡すことができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v(100, 123) ;
+    v[0] ; // 123
+    v[12] ; // 123
+    v[68] ; // 123
+}
+\end{lstlisting}
+
+すると、指定した要素数で、要素の値はすべて初期値になる。
+
+\texttt{vector}のオブジェクトを構築したあとでも、メンバー関数\texttt{resize(size)}で要素数を\texttt{size}個にできる。
+\index{resize@\texttt{resize}}\index{vector@\texttt{vector}!resize@\texttt{resize}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    v.resize(10) ;
+    v.size() ; // 10
+    // 減らす
+    v.resize(5) ;
+    v.size() ; // 5
+}
+\end{lstlisting}
+
+\texttt{resize}で要素数が増える場合、増えた要素の初期値も指定できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    v.resize(3, 123) ;
+    // vは{123,123,123}
+}
+\end{lstlisting}
+
+\texttt{resize}で要素数が減る場合、末尾が削られる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    v.resize(3) ;
+    // vは{1,2,3}
+}
+\end{lstlisting}
+
+メンバー関数\texttt{push\_back(value)}を呼び出すと要素数が1増え、要素の末尾の要素が値\texttt{value}になる。
+\index{push\_back@\texttt{push\_back}}\index{vector@\texttt{vector}!push\_back@\texttt{push\_back}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    // vは{}
+    v.push_back(1) ;
+(@\ifTombow\pagebreak\fi@)
+    // vは{1}
+    v.push_back(2) ;
+    // vは[1,2}
+    v.push_back(3) ;
+    // vは{1,2,3}
+}
+\end{lstlisting}
+
+\texttt{reserve(size)}は少なくとも\texttt{size}個の要素が追加の動的メモリー確保なしで追加できるようにメモリーを予約する。
+\index{reserve@\texttt{reserve}}\index{vector@\texttt{vector}!reserve@\texttt{reserve}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    // 少なくとも3個の要素を追加できるように動的メモリー確保
+    v.reserve(3) ;
+    v.size() ; // 0
+    v.capacity() ; // 3以上
+
+    // 動的メモリー確保は発生しない
+    v.push_back(1) ;
+    v.push_back(2) ;
+    v.push_back(3) ;
+    // 動的メモリー確保が発生する可能性がある。
+    v.push_back(3) ;
+}
+\end{lstlisting}
+
+\texttt{clear()}は要素数を0にする。
+\index{clear@\texttt{clear}}\index{vector@\texttt{vector}!clear@\texttt{clear}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+    v.clear() ;
+    v.size() ; // 0
+}
+\end{lstlisting}
+
+この章ではここまでの実装をする。
+
+\clearpage
+\hypersection{ch3102}{デフォルトコンストラクター}
+
+簡易\texttt{vector}のデフォルトコンストラクターは何もしない。
+
+\begin{lstlisting}[language={C++}]
+vector( ) { }
+\end{lstlisting}
+
+何もしなくてもポインターはすべて\texttt{nullptr}で初期化され、アロケーターもデフォルト構築されるからだ。
+
+これで簡易\texttt{vector}の変数を作れるようになった。ただしまだ何もできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    vector<int> v ;
+    // まだ何もできない。
+}
+\end{lstlisting}
+
+\hypersection{ch3103}{アロケーターを取るコンストラクター}
+\index{こんすとらくた@コンストラクター}\index{vector@\texttt{vector}!こんすとらくた@コンストラクター}
+
+\texttt{std::vector}のコンストラクターは最後の引数にアロケーターを取れる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::allocator<int> alloc ;
+    // 空
+    std::vector<int> v1(alloc) ;
+    // 要素数5
+    std::vector<int> v2(5, alloc) ;
+    // 要素数5で初期値123
+    std::vector<int> v3(5, 123, alloc) ;
+}
+\end{lstlisting}
+
+これを実装するには、アロケーターを取ってデータメンバーにコピーするコンストラクターを書く。
+
+\begin{lstlisting}[language={C++}]
+vector( const allocator_type & alloc ) noexcept
+    : alloc( alloc )
+{ }
+\end{lstlisting}
+
+ほかのコンストラクターはこのコンストラクターにまずデリゲートすればよい。
+
+\begin{lstlisting}[language={C++}]
+vector()
+    : vector( allocator_type() )
+{ }
+
+vector( size_type size, const allocator_type & alloc = allocator_type() )
+    : vector( alloc )
+{ /* 実装 */ }
+vector( size_type size, const_reference value, const allocator_type & alloc = allocator_type() )
+    : vector( alloc )
+{ /* 実装 */ }
+\end{lstlisting}
+
+\hypersection{ch3104}{要素数と初期値を取るコンストラクターの実装}
+\index{resize@\texttt{resize}}\index{vector@\texttt{vector}!resize@\texttt{resize}}
+
+要素数と初期値を取るコンストラクターは\texttt{resize}を使えば簡単に実装できる。
+
+\begin{lstlisting}[language={C++}]
+vector( size_type size, const allocator_type & alloc )
+    : vector( alloc )
+{
+    resize( size ) ;
+}
+vector( size_type size, const_reference value, const allocator_type & alloc )
+    : vector( alloc )
+{
+    resize( size, value ) ;
+}
+\end{lstlisting}
+
+しかしこれは実装を\texttt{resize}に丸投げしただけだ。\texttt{resize}の実装をする前に、実装を楽にするヘルパー関数を実装する。
+
+\hypersection{ch3105}{ヘルパー関数}
+\index{へるぱかんすう@ヘルパー関数}\index{vector@\texttt{vector}!へるぱかんすう@ヘルパー関数}
+
+ここでは\texttt{vector}の実装を楽にするためのヘルパー関数をいくつか実装する。このヘルパー関数はユーザーから使うことは想定しないので、\texttt{private}メンバーにする。
+
+\begin{lstlisting}[language={C++}]
+// 例
+struct vector
+{
+private :
+    // ユーザーからは使えないヘルパー関数
+    void helper_function() ;
+public :
+    // ユーザーが使える関数
+    void func()
+    {
+        // ヘルパー関数を使って実装
+        helper_function() ;
+    }
+} ;
+\end{lstlisting}
+
+\hypersubsection{ch310501}{ネストされた型名traits}
+\index{あろけた@アロケーター}\index{allocator\_traits@\texttt{allocator\_traits}}\index{vector@\texttt{vector}!allocator\_traits@\texttt{allocator\_traits}}
+
+アロケーターは\texttt{allocator\_traits}を経由して使う。実際のコードはとても冗長になる。
+
+\begin{lstlisting}[language={C++}]
+template < typename Allocator >
+void f( Allocator & alloc )
+{
+    std::allocator_traits<Allocator>::allocate( alloc, 1 ) ;
+}
+\end{lstlisting}
+
+この問題はエイリアス名を使えば解決できる。
+
+\begin{lstlisting}[language={C++}]
+private :
+    using traits = std::allocator_traits<allocator_type> ;
+
+    template < typename Allocator >
+    void f( Allocator & alloc )
+    {
+        traits::allocate( alloc, 1 ) ;
+    }
+\end{lstlisting}
+
+\hypersubsection{ch310502}{allocate/deallocate}
+\index{allocate@\texttt{allocate}}\index{vector@\texttt{vector}!allocate@\texttt{allocate}}\index{deallocate@\texttt{deallocate}}\index{vector@\texttt{vector}!deallocate@\texttt{deallocate}}
+
+\texttt{allocate(n)}はアロケーターから\texttt{n}個の要素を格納できる生のメモリーの動的確保をして先頭要素へのポインターを返す。
+
+\texttt{deallocate(ptr)}はポインター\texttt{ptr}を解放する。
+
+\begin{lstlisting}[language={C++}]
+private: 
+    pointer allocate( size_type n )
+    { return traits::allocate( alloc, n ) ; }
+    void deallocate( )
+    { traits::deallocate( alloc, first, capacity() ) ; }
+\end{lstlisting}
+
+\hypersubsection{ch310503}{construct/destroy}
+\index{construct@\texttt{construct}}\index{vector@\texttt{vector}!construct@\texttt{construct}}\index{destroy@\texttt{destroy}}\index{vector@\texttt{vector}!destroy@\texttt{destroy}}
+
+\texttt{construct(ptr)}は生のメモリーへのポインター\texttt{ptr}に\texttt{vector}の\texttt{value\_type}型の値をデフォルト構築する。
+
+\texttt{construct(ptr, value)}は生のメモリーへのポインター\texttt{ptr}に値\texttt{value}のオブジェクトを構築する。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+    void construct( pointer ptr )
+    { traits::construct( alloc, ptr ) ; }
+    void construct( pointer ptr, const_reference value )
+    { traits::construct( alloc, ptr, value ) ; }
+    // ムーブ用
+    void construct( pointer ptr, value_type && value )
+    { traits::construct( alloc, ptr, std::move(value) ) ; }
+\end{lstlisting}
+
+ムーブ用の\texttt{construct}についてはまだ気にする必要はない。この理解には、まずムーブセマンティクスを学ぶ必要がある。
+
+\texttt{destroy(ptr)}は\texttt{ptr}の指すオブジェクトを破棄する。
+
+\begin{lstlisting}[language={C++}]
+private :
+    void destroy( pointer ptr )
+    { traits::destroy( alloc, ptr ) ; }
+\end{lstlisting}
+
+\hypersubsection{ch310504}{destroy\texttt{\_}until}
+\index{destroy\_until@\texttt{destroy\_until}}\index{vector@\texttt{vector}!destroy\_until@\texttt{destroy\_until}}
+
+\texttt{destroy\_until(rend)}は、\texttt{vector}が保持する\texttt{rbegin()}からリバースイテレーター\texttt{rend}までの要素を破棄する。リバースイテレーターを使うので、要素の末尾から先頭に向けて順番に破棄される。なぜ末尾から先頭に向けて要素を破棄するかというと、C++では値の破棄は構築の逆順で行われるという原則があるからだ。
+
+\begin{lstlisting}[language={C++}]
+private :
+    void destroy_until( reverse_iterator rend )
+    {
+        for ( auto riter = rbegin() ; riter != rend ; ++riter, --last )
+        {
+            destroy( &*riter ) ;
+        }
+    }
+\end{lstlisting}
+
+\texttt{\&*riter}はやや泥臭い方法だ。簡易\texttt{vector<T>}\,の\texttt{iterator}は単なる\texttt{T *}\,だが、\texttt{riter}はリバースイテレーターなのでポインターではない。ポインターを取るために\,\texttt{*riter}でまず\texttt{T \&}を得て、そこに\,\texttt{\&}\,を適用することで\texttt{T *}\,を得ている。
+
+破棄できたら有効な要素数を減らすために\,\texttt{{-}{-}last}する。
+
+\clearpage
+\hypersection{ch3106}{clear}
+\index{clear@\texttt{clear}}\index{vector@\texttt{vector}!clear@\texttt{clear}}
+
+\texttt{clear()}はすべての要素を破棄する。
+
+\begin{lstlisting}[language={C++}]
+void clear() noexcept
+{
+    destroy_until( rend() ) ;
+}
+\end{lstlisting}
+
+先ほど実装した\texttt{destroy\_until(rend)}にリバースイテレーターの終端を渡せばすべての要素が破棄される。
+
+\hypersection{ch3107}{デストラクター}
+\index{ですとらくた@デストラクター}\index{vector@\texttt{vector}!ですとらくた@デストラクター}
+
+ヘルパー関数を組み合わせることでデストラクターが実装できるようになった。
+
+\texttt{std::vector}のデストラクターは、
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  要素を末尾から先頭に向かう順番で破棄
+\item
+  生のメモリーを解放する
+\end{enumerate}
+
+この2つの処理はすでに実装した。デストラクターの実装は単にヘルパー関数を並べて呼び出すだけでよい。
+
+\begin{lstlisting}[language={C++}]
+~vector()
+{
+    // 1. 要素を末尾から先頭に向かう順番で破棄
+    clear() ;
+    // 2. 生のメモリーを解放する
+    deallocate() ;    
+}         
+\end{lstlisting}
+
+\hypersection{ch3108}{reserveの実装}
+\index{reserve@\texttt{reserve}}\index{vector@\texttt{vector}!reserve@\texttt{reserve}}
+
+\texttt{reserve}の実装は生の動的メモリーを確保してデータメンバーを適切に設定する。
+
+ただし、いろいろと考慮すべきことが多い。
+
+現在の\texttt{capacity}より小さい要素数が\texttt{reserve}された場合、無視してよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 要素数5
+    std::vector<int> v = {1,2,3,4,5} ;
+(@\ifTombow\pagebreak\fi@)
+    // 3個の要素を保持できるよう予約
+    v.reserve( 3 ) ;
+    // 無視する
+}
+\end{lstlisting}
+
+すでに指定された要素数以上に予約されているからだ。
+
+動的メモリー確保が行われていない場合、単に動的メモリー確保をすればよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    // おそらく動的メモリー確保
+    v.reserve( 10000 ) ;
+}
+\end{lstlisting}
+
+「おそらく」というのは、C++の規格は\texttt{vector}のデフォルトコンストラクターが予約するストレージについて何も言及していないからだ。すでに要素数10000を超えるストレージが予約されている実装も規格準拠だ。本書で実装している\texttt{vector}は、デフォルトコンストラクターでは動的メモリー確保をしない実装になっている。
+
+有効な要素が存在する場合、その要素の値は引き継がなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 要素数3
+    std::vector<int> v = {1,2,3} ;
+    // 1万個の要素を保持できるだけのメモリーを予約
+    v.reserve( 10000 ) ;
+    // vは{1,2,3}
+}
+\end{lstlisting}
+
+つまり動的メモリー確保をしたあとに、既存の要素を新しいストレージにコピーしなければならないということだ。
+
+まとめよう。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  すでに指定された要素数以上に予約されているなら何もしない
+\item
+  まだ動的メモリー確保が行われていなければ動的メモリー確保をする
+\item
+  有効な要素がある場合は新しいストレージにコピーする
+\end{enumerate}
+
+古いストレージから新しいストレージに要素をコピーするとき、古いストレージと新しいストレージが一時的に同時に存在しなければならない。
+
+疑似コード風に記述すると以下のようになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+template < typename T >
+void f()
+{
+    // すでに動的確保した古いストレージ
+    auto old_ptr = new T ;
+
+    // いま構築した新しいストレージ
+    auto new_ptr = new T ;
+    // 古いストレージから新しいストレージにコピー
+    // *new_ptr = *old_ptr ;
+    // 古いストレージを解放
+    delete old_value ;
+}
+\end{lstlisting}
+
+このとき、\texttt{T}型がコピーの最中に例外を投げると、後続の\texttt{delete}が実行されなくなる。この問題に対処して例外安全にするために、C++20に入る見込みの標準ライブラリ、\texttt{std::scope\_exit}\index{scope\_exit@\texttt{scope\_exit}}を使う。
+
+\begin{lstlisting}[language={C++}]
+template < typename T >
+void f()
+{
+    // すでに動的確保した古いストレージ
+    auto old_ptr = new T ;
+
+    // いま構築した新しいストレージ
+    auto new_ptr = new T ;
+
+    // 関数fを抜けるときに古いストレージを解放する。
+    std::scope_exit e( [&]{ delete old_ptr ; } ) ;
+
+    // 古いストレージから新しいストレージにコピー
+    // *new_ptr = *old_ptr ;
+
+    // 変数eの破棄に伴って古いストレージが解放される
+}
+\end{lstlisting}
+
+これを踏まえて\texttt{reserve}を実装する。
+
+\begin{lstlisting}[language={C++}]
+void reserve( size_type sz )
+{
+    // すでに指定された要素数以上に予約されているなら何もしない
+    if ( sz <= capacity() )
+        return ;
+
+    // 動的メモリー確保をする
+    auto ptr = allocate( sz ) ;
+
+    // 古いストレージの情報を保存
+    auto old_first = first ;
+    auto old_last = last ;
+    auto old_capacity = capacity() ;
+
+    // 新しいストレージに差し替え
+    first = ptr ;
+    last = first ;
+    reserved_last = first + sz ;
+
+    // 例外安全のため
+    // 関数を抜けるときに古いストレージを破棄する
+    std::scope_exit e( [&]{
+        traits::deallocate( alloc, old_first, old_capacity  ) ;
+    } ) ;
+
+    // 古いストレージから新しいストレージに要素をコピー構築
+    // 実際にはムーブ構築
+    for ( auto old_iter = old_first ; old_iter != old_last ; ++old_iter, ++last )
+    {
+        // このコピーの理解にはムーブセマンティクスの理解が必要
+        construct( last, std::move(*old_iter) ) ;
+    }
+
+    // 新しいストレージにコピーし終えたので
+    // 古いストレージの値は破棄
+    for (   auto riter = reverse_iterator(old_last), rend = reverse_iterator(old_first) ;
+            riter != rend ; ++riter )
+    {
+        destroy( &*riter ) ;
+    }
+    // scope_exitによって自動的にストレージが破棄される
+}
+\end{lstlisting}
+
+ここではまだ学んでいないムーブの概念が出てくる。これはムーブセマンティクスの章で詳しく学ぶ。
+
+\clearpage
+\hypersection{ch3109}{resize}
+\index{resize@\texttt{resize}}\index{vector@\texttt{vector}!resize@\texttt{resize}}
+
+\texttt{resize(sz)}は要素数を\texttt{sz}個にする。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 要素数0
+    std::vector<int> v ;
+    // 要素数10
+    v.resize(10) ;
+    // 要素数5
+    v.resize(5)
+    // 要素数変わらず
+    v.resize(5)
+}
+\end{lstlisting}
+
+\texttt{resize}は呼び出し前より要素数を増やすことも減らすこともある。また変わらないこともある。
+
+要素数が増える場合、増えた要素数の値はデフォルト構築された値になる。
+
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    X() { std::cout << "default constructed.\n" ; }
+} ;
+
+int main()
+{
+    std::vector<X> v ;
+    v.resize(5) ;
+}
+\end{lstlisting}
+
+このプログラムを実行すると、\texttt{"default constructed.{\textbackslash}n"}\,は5回標準出力される。
+
+\texttt{resize(sz, value)}は\texttt{resize}を呼び出した結果要素が増える場合、その要素を\texttt{value}で初期化する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+    v.resize(5, 4) ;
+    // vは{1,2,3,4,4} 
+}
+\end{lstlisting}
+
+要素数が減る場合、要素は末尾から順番に破棄されていく。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+struct X
+{
+    ~X()
+    { std::cout << "destructed.\n"s ; }
+} ;
+
+int main()
+{
+    std::vector<X> v(5) ;
+    v.resize(2) ;
+    std::cout << "resized.\n"s ;
+}
+\end{lstlisting}
+
+このプログラムを実行すると、以下のように出力される。
+
+\begin{lstlisting}[style=terminal]
+destructed.
+destructed.
+destructed.
+resized.
+destructed.
+destructed.
+\end{lstlisting}
+
+最初の\texttt{v.resize(2)}で、\texttt{v[4], v[3], v[2]}が書いた順番で破棄されていく。\texttt{main}関数を抜けるときに残りの\texttt{v[1], v[0]}が破棄される。
+
+\texttt{resize(sz)}を呼び出したときに\texttt{sz}が現在の要素数と等しい場合は何もしない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 要素数5
+    std::vector<int> v(5) ;
+    v.resize(5) ; // 何もしない   
+}
+\end{lstlisting}
+
+まとめると\texttt{resize}は以下のように動作する。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  現在の要素数より少なくリサイズする場合、末尾から要素を破棄する
+\item
+  現在の要素数より大きくリサイズする場合、末尾に要素を追加する
+\item
+  現在の要素数と等しくリサイズする場合、何もしない
+\end{enumerate}
+
+\ifTombow\pagebreak\fi
+実装しよう。
+
+\begin{lstlisting}[language={C++}]
+    void resize( size_type sz )
+    {
+        // 現在の要素数より少ない
+        if ( sz < size() )
+        {
+            auto diff = size() - sz ;
+            destroy_until( rbegin() + diff ) ;
+            last = first + sz ;
+        }
+        // 現在の要素数より大きい
+        else if ( sz > size() )
+        {
+            reserve( sz ) ;
+            for ( ; last != reserved_last ; ++last )
+            {
+                construct( last ) ;
+            }
+        }
+    }
+\end{lstlisting}
+
+要素を破棄する場合、破棄する要素数だけ末尾から順番に破棄する。
+
+要素を増やす場合、\texttt{reserve}を呼び出してメモリーを予約してから、追加の要素を構築する。
+
+\texttt{sz == size()}の場合は、どちらの\texttt{if}文の条件にも引っかからないので、何もしない。
+
+\texttt{size(sz, value)}は、追加の引数を取るほか、\texttt{construct(iter)}の部分が\texttt{constrcut(iter, value)}に変わるだけだ。
+
+\begin{lstlisting}[language={C++}]
+void resize( size_type sz, const_reference value )
+{
+    // ...
+            construct( iter, value ) ;
+    // ...
+}
+\end{lstlisting}
+
+これで自作の\texttt{vector}はある程度使えるようになった。コンストラクターで要素数を指定できるし、リサイズもできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    vector<int> v(10, 1) ;
+    v[2] = 99 ;
+    v.resize(5) ;
+    // vは{1,1,99,1,1}
+}
+\end{lstlisting}
+
+\hypersection{ch3110}{push\texttt{\_}back}
+\index{push\_back@\texttt{push\_back}}\index{vector@\texttt{vector}!push\_back@\texttt{push\_back}}
+
+\texttt{push\_back}は\texttt{vector}の末尾に要素を追加する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    // vは{}
+    v.push_back(1) ;
+    // vは{1}
+    v.push_back(2) ;
+    // vは{1,2}
+}
+\end{lstlisting}
+
+\texttt{push\_back}の実装は、末尾の予約された未使用のストレージに値を構築する。もし予約された未使用のストレージがない場合は、新しく動的メモリー確保する。
+
+追加の動的メモリー確保なしで保持できる要素の個数はすでに実装した\texttt{capacity()}で取得できる。\texttt{push\_back}は要素を1つ追加するので、\texttt{size() + 1 <= capacity()}ならば追加の動的メモリー確保はいらない。逆に、\texttt{size() + 1 > capacity()}ならば追加の動的メモリー確保をしなければならない。追加の動的メモリー確保はすでに実装した\texttt{reserve}を使えばよい。
+
+\begin{lstlisting}[language={C++}]
+void push_back( const_reference value ) 
+{
+    // 予約メモリーが足りなければ拡張
+    if ( size() + 1 > capacity() )
+    {
+        // 1つだけ増やす
+        reserve( size() + 1 ) ;
+    }
+
+    // 要素を末尾に追加
+    construct( last, value ) ;
+    // 有効な要素数を更新
+    ++last ;
+}
+\end{lstlisting}
+
+これは動く。ただし、効率的ではない。自作の\texttt{vector}を使った以下のような例を見てみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 要素数10000
+    vector<int> v(1000) ;
+(@\ifTombow\pagebreak\fi@)
+    // 10001個分のメモリーを確保する
+    // 10000個の既存の要素をコピーする
+    v.push_back(0) ;
+    // 10002個分のメモリーを確保する
+    // 10001個の既存の要素をコピーする
+    v.push_back(0) ;
+}
+\end{lstlisting}
+
+たった1つの要素を追加するのに、毎回動的メモリー確保と既存の全要素のコピーをしている。これは無駄だ。
+
+\texttt{std::vector}は\texttt{push\_back}で動的メモリー確保が必要な場合、\texttt{size()+1}よりも多くメモリーを確保する。こうすると、\texttt{push\_back}を呼び出すたびに毎回動的メモリー確保と全要素のコピーを行う必要がなくなるので、効率的になる。
+
+ではどのくらい増やせばいいのか。10個ずつ増やす戦略は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+void push_back( const_reference value ) 
+{
+    // 予約メモリーが足りなければ拡張
+    if ( size() + 1 > capacity() )
+    {
+        // 10個増やす
+        reserve( capacity() + 10 ) ;
+    }
+    construct( last, value ) ;
+    ++last ;
+}
+\end{lstlisting}
+
+しかしこの場合、以下のようなコードで効率が悪い。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v ;
+    for ( auto i = 0 ; i != 10000 ; ++i )
+    {
+        v.push_back(i) ;
+    }
+}
+\end{lstlisting}
+
+10個ずつ増やす戦略では、この場合に1000回の動的メモリー確保と全要素のコピーが発生する。
+
+上のような場合、\texttt{vector}の利用者が事前に\texttt{v.reserve(10000)}とすれば効率的になる。しかし、コンパイル時に要素数がわからない場合、その手も使えない。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> inputs ;
+    // 要素数は実行時にしかわからない
+    // 10万個の入力が行われるかもしれない
+    std::copy(
+        std::ostream_iterator<int>(std::cin),
+        std::ostream_iterator<int>(),
+        std::back_inserter(inputs) ) ;
+}
+\end{lstlisting}
+
+よくある実装は、現在のストレージサイズの2倍のストレージを確保する戦略だ。
+
+\begin{lstlisting}[language={C++}]
+void push_back( const_reference value ) 
+{
+    // 予約メモリーが足りなければ拡張
+    if ( size() + 1 > capacity() )
+    {
+        // 現在のストレージサイズ
+        auto c = size() ;
+        // 0の場合は1に
+        if ( c == 0 )
+            c = 1 ;
+        else
+            // それ以外の場合は2倍する
+            c *= 2 ;
+
+        reserve( c ) ;
+    }
+    construct( last, value ) ;
+    ++last ;
+}
+\end{lstlisting}
+
+\texttt{size()}は\texttt{0}を返す場合もあるということに注意。単に\texttt{reserve(size()*2)}としたのでは\texttt{size() == 0}のときに動かない。
+
+\hypersubsection{ch311001}{shrink\texttt{\_}to\texttt{\_}fit}
+\index{shrink\_to\_fit@\texttt{shrink\_to\_fit}}\index{vector@\texttt{vector}!shrink\_to\_fit@\texttt{shrink\_to\_fit}}
+
+\texttt{shrink\_to\_fit()}は\texttt{vector}が予約しているメモリーのサイズを実サイズに近づけるメンバー関数だ。
+
+本書で実装してきた自作の\texttt{vector}は、\texttt{push\_back}時に予約しているメモリーがなければ、現在の要素数の2倍のメモリーを予約する実装だった。すると以下のようなコードで、
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    vector<int> v ;
+    std::copy( std::istream_iterator<int>(std::cin), std::istream_iterator<int>(),
+        std::back_inserter(v) ) ;
+}
+\end{lstlisting}
+ユーザーが4万個の\texttt{int}型の値を入力した場合、65536個の\texttt{int}型の値を保持できるだけのメモリーが確保されてしまい、差し引き\texttt{sizeof(int) * 25536}バイトのメモリーが未使用のまま確保され続けてしまう。
+
+メモリー要件の厳しい環境ではこのようなメモリーの浪費を避けたい。しかし、実行時にユーザーから任意の個数の入力を受けるプログラムを書く場合には、\texttt{push\_back}を使いたい。
+
+こういうとき、\texttt{shrink\_to\_fit}は\texttt{vector}が予約するメモリーを切り詰めて実サイズに近くする、かもしれない。「かもしれない」というのは、C++の標準規格は\texttt{shrink\_to\_fit}が必ずメモリーの予約サイズを切り詰めるよう規定してはいないからだ。
+
+自作の\texttt{vector}では必ず切り詰める実装にしてみよう。
+
+まず予約するメモリーを切り詰めるとはどういうことか。現在予約しているメモリーで保持できる最大の要素数は\texttt{capacity()}で得られる。実際に保持している要素数を返すのは\texttt{size()}だ。すると\texttt{size() == capacity()}になるようにすればいい。
+
+\begin{lstlisting}[language={C++}]
+vector<int> v ;
+// ...
+v.shrink_to_fit() ;
+v.size() == v.capacity() ; // trueにする
+\end{lstlisting}
+
+\texttt{shrink\_to\_fit()}を呼んだとき、すでに\texttt{size() == capacity()}が\texttt{true}である場合は、何もしなくてもよい。
+
+それ以外の場合は、現在の有効な要素数分の新しいストレージを確保し、現在の値を新しいストレージにコピーし、古いメモリーは破棄する。
+
+\begin{lstlisting}[language={C++}]
+void shrink_to_fit()
+{
+    // 何もする必要がない
+    if ( size() == capacity() )
+        return ;
+
+    // 新しいストレージを確保
+    auto ptr = allocate( size() ) ;
+    // コピー
+    auto current_size = size() ;
+    for (   auto raw_ptr = ptr, iter = begin(), iter_end = end() ;
+            iter != iter_end ; ++iter, ++raw_ptr )
+    {
+        construct( raw_ptr, *iter ) ;
+    }
+    // 破棄
+    clear() ;
+    deallocate() ;
+    // 新しいストレージを使う
+    first = ptr ;
+    last = ptr + current_size ;
+    reserved_last = last ;
+}
+\end{lstlisting}
+
+この実装は\texttt{reserve}と似ている。
+
+\hypersection{ch3111}{vectorのその他のコンストラクター}
+
+\hypersubsection{ch311101}{イテレーターのペア}
+
+\texttt{std::vector}はイテレーターのペアを取り、その参照する値で要素を初期化できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a {1,2,3,4,5} ;
+    std::vector<int> v( std::begin(a), std::end(a) ) ;
+    // vは{1,2,3,4,5}
+}
+\end{lstlisting}
+
+これはすでに実装したメンバー関数を使えば簡単に実装できる。
+
+\begin{lstlisting}[language={C++}]
+template < typename InputIterator >
+vector( InputIterator first, InputIterator last, const Allocator & = Allocator() )
+{
+    reserve( std::distance( first, last ) ;
+    for ( auto i = first ; i != last ; ++i )
+    {
+        push_back( *i ) ;
+    }
+}
+\end{lstlisting}
+
+\clearpage
+\hypersubsection{ch311102}{初期化リスト}
+
+\texttt{std::vector}は配列のように初期化できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+}
+\end{lstlisting}
+
+このような初期化を\textsf{リスト初期化}と呼ぶ。
+
+リスト初期化に対応するためには、\texttt{std::initializer\_list<T>}\,を引数に取るコンストラクターを追加する。
+
+ \ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+template < typename T, Allocator = std::allocator<T> >
+{
+// コンストラクター
+vector( std::initializer_list<value_type> init, const Allocator & = Allocator() ) ; 
+    // 省略...
+} ;
+\end{lstlisting}
+
+\texttt{std::initializer\_list<T>}\,は\texttt{T}型の要素を格納する標準ライブラリで、\texttt{\{a,b,c,...\}}\,のようなリスト初期化で構築することができる。
+
+\begin{lstlisting}[language={C++}]
+std::initializer_list<int> init = {1,2,3,4,5} ;
+\end{lstlisting}
+
+\texttt{std::initializer\_list}は\texttt{begin}/\texttt{end}によるイテレーターを提供しているので、すでに実装したコンストラクターにデリゲートすればよい。
+
+\begin{lstlisting}[language={C++}]
+vector( std::initializer_list<value_type> init, const Allocator & alloc = Allocator() ) ; 
+    : vector( std::begin(init), std::end(init), alloc )
+{ }
+\end{lstlisting}

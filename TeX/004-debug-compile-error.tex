@@ -1,0 +1,419 @@
+\hyperchapter{ch04}{デバッグ：\\コンパイルエラーメッセージの読み方}{デバッグ：コンパイルエラーメッセージの読み方}
+
+やれやれ疲れた。この辺でひと休みして、デバッグ\index{でばつぐ@デバッグ}について考えよう。まずはコンパイルエラー\index{こんぱいるえら@コンパイルエラー}についてだ。
+
+プログラムにはさまざまなバグ\index{ばぐ@バグ}があるが、コンパイルエラーは最も簡単なバグだ。というのも、プログラムのバグの存在が実行前に発覚したわけだから、手間が省ける。もしコンパイルエラーにならない場合、実行した結果から、バグがあるかどうかを判断しなければならない。
+
+読者の中には、せっかく書いたソースコードをコンパイルしたらコンパイルエラーが出たので、運が悪かったとか、失敗したとか、怒られてつらい気持ちになったなどと感じることがあるかもしれない。しかしそれは大違いだ。コンパイラーによって読者はプログラムを実行することなくバグが発見できたのだから、読者は運が良かった、大成功した、褒められて最高の気持ちになったと感じるべきなのだ。
+
+さあ皆さんご一緒に、
+
+\begin{itemize}
+\item
+  コンパイルエラーは普通
+\item
+  コンパイルエラーが出たらありがとう
+\item
+  コンパイルエラーが出たら大喜び
+\end{itemize}
+
+熟練のプログラマーは自分の書いたコードがコンパイルエラーを出さずに一発でコンパイルが通った場合、逆に不安になるくらいだ。
+
+もしバグがあるのにコンパイルエラーが出なければ、バグの存在に気が付かないまま、読者の書いたソフトウェアは広く世の中に使われ、10年後、20年後に最もバグが発見されてほしくない方法で発見されてしまうかもしれない。すなわち、セキュリティ上問題となる脆弱性という形での発覚だ。しかし安心してほしい。いま読者が出したコンパイルエラーによって、そのような悲しい未来の可能性は永久に排除されたのだ。コンパイルエラーはどんどん出すとよい。
+
+コンパイルエラーの原因は2つ。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  文法エラー
+\item
+  意味エラー
+\item
+  コンパイラーのバグ
+\end{enumerate}
+
+3つだった。コンパイルエラーの原因は3つ。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  文法エラー
+\item
+  意味エラー
+\item
+  コンパイラーのバグ
+\item
+  コンピューターの故障
+\end{enumerate}
+
+4つだった。ただ、3.と4.はめったにないから無視してよい。
+
+\hypersection{ch0401}{文法エラー}
+
+文法エラー\index{ぶんぽうえら@文法エラー}とは、C++というプログラミング言語の文法に従っていないエラーのことだ。これはC++として解釈できないので、当然エラーになる。
+
+よくある文法エラーとしては、文末のセミコロンを打ち忘れたものがある。例えば以下のコードには間違いがある。
+
+\begin{lstlisting}[language=c++]
+int main()
+{
+    auto x = 1 + 1 
+    auto y = x + 1 ;
+}
+\end{lstlisting}
+
+これをコンパイルすると以下のようにコンパイルエラーメッセージが出力される。
+
+\begin{lstlisting}[style=terminal]
+$ make
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+main.cpp: In function ‘int main()’:
+main.cpp:4:5: error: expected ‘,’ or ‘;’ before ‘auto’
+     auto y = x + 1 ;
+     ^~~~
+main.cpp:3:10: warning: unused variable ‘x’ [-Wunused-variable]
+     auto x = 1 + 1
+          ^
+Makefile:4: recipe for target 'program' failed
+make: *** [program] Error 1
+\end{lstlisting}
+
+コンパイラーのメッセージを読み慣れていない読者はここで考えることを放棄してコンピューターの電源を落とし家を出て街を徘徊し夕日を見つめて人生、宇宙、すべてについての究極の質問への答えを模索してしまうことだろう。
+
+しかし恐れるなかれ。コンパイラーのエラーメッセージを読み解くのは難しくない。
+
+まず最初の2行を見てみよう。
+
+\begin{lstlisting}[style=terminal]
+$ make
+g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
+\end{lstlisting}
+
+1行目はシェルに\texttt{make}を実行させるためのコマンド、2行目は\texttt{make}が実行したレシピの中身だ。これはコンパイラーによるメッセージではない。
+
+3行目からはコンパイラーによる出力だ。
+
+\begin{lstlisting}[style=terminal]
+main.cpp: In function ‘int main()’:
+\end{lstlisting}
+
+コンパイラーはソースファイル\texttt{main.cpp}の中の、\texttt{int main()}という関数について、特に言うべきことがあると主張している。
+
+言うべきこととは以下だ。
+
+\begin{lstlisting}[style=terminal]
+main.cpp:4:5: error: expected ‘,’ or ‘;’ before ‘auto’
+     auto y = x + 1 ;
+     ^~~~
+\end{lstlisting}
+
+GCCというコンパイラーのエラーメッセージは、以下のフォーマットを採用している。
+
+\begin{lstlisting}[style=grammar]
+ソースファイル名:行番号:列番号: メッセージの種類: メッセージの内容
+\end{lstlisting}
+
+ここでのメッセージの種類は\texttt{error}、つまりこのメッセージはエラーを伝えるものだ。
+
+ソースファイル名は\texttt{main.cpp}、つまりエラーは\texttt{main.cpp}の中にあるということだ。
+
+行番号というのは、最初の行を1行目とし、改行ごとにインクリメントされていく。今回のソースファイルの場合、以下のようになる。
+
+\begin{lstlisting}[language=c++]
+1 int main()
+2 {
+3     auto x = 1 + 1 
+4     auto y = x + 1 ;
+5 }
+\end{lstlisting}
+
+もし読者が素晴らしいテキストエディターであるVimを使っている場合、\texttt{:set nu}すると行番号を表示できる。
+
+その上でエラーメッセージの行番号を確認すると\texttt{4}とある。つまりコンパイラーは4行目に問題があると考えているわけだ。
+
+4行目を確認してみよう。
+
+\begin{lstlisting}[language=c++]
+    auto y = x + 1 ;
+\end{lstlisting}
+
+何の問題もないように見える。さらにエラーメッセージを読んでみよう。
+
+列番号が\texttt{5}となっている。列番号というのは、行頭からの文字数だ。最初の文字を1文字目とし、文字ごとにインクリメントされていく。
+
+\begin{lstlisting}[language=c++]
+123456789...
+    auto y = x + 1 ;
+\end{lstlisting}
+
+4行目は空白文字を4つ使ってインデントしているので、\texttt{auto}の\texttt{a}の列番号は\texttt{5}だ。ここに問題があるのだろうか。何も問題がないように見える。
+
+この謎を解くためには、メッセージの内容を読まなければならない。
+
+\begin{lstlisting}[style=terminal]
+expected ‘,’ or ‘;’ before ‘auto’
+     auto y = x + 1 ;
+     ^~~
+\end{lstlisting}
+
+これは日本語に翻訳すると以下のようになる。
+
+\begin{lstlisting}[style=terminal]
+‘auto’の前に','か';'があるべき
+     auto y = x + 1 ;
+     ^~~
+\end{lstlisting}
+
+1行目はエラー内容をテキストで表現したものだ。これによると、\texttt{'auto'}\,の前に\,\texttt{','}\,か\,\texttt{';'}\,があるべきとあるが、やはりまだわからない。
+
+2行目は問題のある箇所のソースコードを部分的に抜粋したもので、3行目はそのソースコードの問題のある文字を視覚的にわかりやすく示しているものだ。
+
+ともかく、コンパイラーの指示に従って\,\texttt{'auto'}\,の前に\,\texttt{','}\,を付けてみよう。
+
+\begin{lstlisting}[language=c++]
+    ,auto y = x + 1 ;
+\end{lstlisting}
+
+これをコンパイルすると、また違ったエラーメッセージが表示される。
+
+\begin{lstlisting}[style=terminal]
+main.cpp: In function ‘int main()’:
+main.cpp:4:6: error: expected unqualified-id before ‘auto’
+     ,auto y = x + 1 ;
+      ^~~~
+\end{lstlisting}
+
+では\,\texttt{';'}\,ならばどうか。
+
+\begin{lstlisting}[language=c++]
+    ;auto y = x + 1 ;
+\end{lstlisting}
+
+これはコンパイルが通るようだ。
+
+しかしなぜこれでコンパイルが通るのだろう。そのためには、コンパイラーが問題だとした行の1つ上の行を見る必要がある。
+
+\begin{lstlisting}[language=c++]
+    auto x = 1 + 1
+    auto y = x + 1 ;
+\end{lstlisting}
+
+コンパイラーにとって、改行は空白文字と同じくソースファイル中の意味のあるトークン（キーワードや名前や記号）を区切る文字でしかない。コンパイラーにとって、このコードは実質以下のように見えている。
+
+\begin{lstlisting}[language=c++]
+auto x=1+1 auto y=x+1;
+\end{lstlisting}
+
+\texttt{"1 auto"}\,というのは文法エラーだ。なのでコンパイラーは文法エラーが発覚する最初の文字である\,\texttt{'auto'}\,の\,\texttt{'a'}\,を指摘したのだ。
+
+人間にとって自然になるように修正すると、コンパイラーが指摘した行の1つ上の行の行末に\,\texttt{';'}\,を追加すべきだ。
+
+\begin{lstlisting}[language=c++]
+    auto x = 1 + 1 ;
+    auto y = x + 1 ;
+\end{lstlisting}
+
+さて、問題自体は解決したわけだが、残りのメッセージも見ていこう。
+
+\begin{lstlisting}[style=terminal]
+main.cpp:3:10: warning: unused variable ‘x’ [-Wunused-variable]
+     auto x = 1 + 1
+\end{lstlisting}
+
+これはコンパイラーによる警告メッセージ\index{けいこくめつせじ@警告メッセージ}だ。警告メッセージについて詳しくは、デバッグ：警告メッセージの章で解説する。
+
+\begin{lstlisting}[style=terminal]
+Makefile:4: recipe for target 'program' failed
+make: *** [program] Error 1
+\end{lstlisting}
+
+これはGNU Makeによるメッセージだ。GCCがソースファイルを正しくコンパイルできず、実行が失敗したとエラーを返したので、レシピの実行が失敗したことを伝えるメッセージだ。
+
+プログラムはどうやってエラーを通知するのか。\texttt{main}関数の戻り値によってだ。\texttt{main}関数は関数であるので、戻り値がある。\texttt{main}関数の戻り値は\texttt{int}型だ。
+
+\begin{lstlisting}[language={C++}]
+// 戻り値の型
+int
+// main関数の残りの部分
+main() { }
+\end{lstlisting}
+
+\texttt{main}関数が何も値を返さない場合、\texttt{return 0}したものとみなされる。\texttt{main}関数が\texttt{0}もしくは\texttt{EXIT\_SUCCESS}\index{EXIT\_SUCCESS@\texttt{EXIT\_SUCCESS}}を返した場合、プログラムの実行の成功を通知したことになる。
+
+\begin{lstlisting}[language={C++}]
+// 必ず実行が成功したと通知するプログラム
+int main()
+{
+    return 0 ;
+}
+\end{lstlisting}
+
+プログラムの実行が失敗した場合、\texttt{main}関数は\texttt{EXIT\_FAILURE}\index{EXIT\_FAILURE@\texttt{EXIT\_FAILURE}}を返すことでエラーを通知できる。
+
+\begin{lstlisting}[language={C++}]
+// 必ず実行が失敗したと通知するプログラム
+int main()
+{
+    return EXIT_FAILURE ;
+}
+\end{lstlisting}
+
+\texttt{EXIT\_SUCCESS}と\texttt{EXIT\_FAILURE}はマクロだ。
+
+\begin{lstlisting}[language=c++]
+#define EXIT_SUCCESS
+#define EXIT_FAILURE
+\end{lstlisting}
+
+その中身はC++標準規格では規定されていない。どうしても値を知りたい場合は以下のプログラムを実行してみるとよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::cout
+        << "EXIT_SUCCESS: "s << EXIT_SUCCESS << "\n"s
+        << "EXIT_FAILURE: "s   << EXIT_FAILURE ;  
+}
+\end{lstlisting}
+
+文法エラーというのは厄介なバグだ。というのも、コンパイラーというのは正しい文法のソースファイルを処理するように作られている。文法を間違えた場合、ソースファイル全体が正しくないということになる。コンパイラーは文法違反に遭遇した場合、なるべく人間がよく間違えそうなパターンをヒューリスティックに指摘することもしている。そのため、エラーメッセージに指摘された行番号と列番号は、必ずしも人間にとっての問題の箇所と一致しない。
+
+もう1つ例を見てみよう。
+
+\begin{lstlisting}[language=c++]
+int main()
+{
+    // 引数を3つ取って足して返す関数
+    auto f = [](auto a, auto b, auto c)
+    { return a + b + c ; } ;
+
+(@\ifTombow\pagebreak\fi@)
+    std::cout << f(1+(2*3),4-5,6/(7-8))) ;
+}
+\end{lstlisting}
+
+GCCによるコンパイルエラーメッセージだけ抜粋すると以下のとおり。
+
+\begin{lstlisting}[style=terminal]
+main.cpp: In function ‘int main()’:
+main.cpp:7:40: error: expected ‘;’ before ‘)’ token
+     std::cout << f(1+(2*3),4-5,6/(7-8))) ;
+                                        ^
+\end{lstlisting}
+
+さてさっそく読んでみよう。すでに学んだように、GCCのメッセージのフォーマットは以下のとおりだ。
+
+\begin{lstlisting}[style=grammar]
+ソースファイル名:行番号:列番号: メッセージの種類: メッセージの内容
+\end{lstlisting}
+
+これに当てはめると、問題はソースファイル\texttt{main.cpp}の7行目の40列目にある。
+
+エラーメッセージは、「\texttt{';'}\,がトークン\,\texttt{')'}\,の前にあるべき」だ。
+
+トークン（token）というのは\,\texttt{'std'}\,とか\,\texttt{'::'}\,とか\,\texttt{'cout'}\,といったソースファイルの空白文字で区切られた最小の文字列の単位のことだ。
+
+抜粋されたソースコードに示された問題の箇所、つまり7行目40列目にあるトークンは\,\texttt{')'}\,だ。この前に\,\texttt{';'}\,が必要とはどういうことだろう。
+
+問題を探るため、7行目のトークンを詳しく分解してみよう。以下は7行目と同じソースコードだが、トークンをわかりやすく分解してある。
+
+\begin{lstlisting}[language=c++]
+std::cout << // 標準出力
+f // 関数名
+    ( // 開き括弧
+        1+(2*3),    // 第1引数
+        4-5,        // 第2引数
+        6/(7-8)     // 第3引数
+    ) // 開き括弧に対応する閉じ括弧
+    ) // ???
+    ; // 終端文字
+\end{lstlisting}
+
+これを見ると、閉じ括弧が1つ多いことがわかる。
+
+\clearpage
+\hypersection{ch0402}{意味エラー}
+
+意味エラー\index{いみえら@意味エラー}とは、ソースファイルは文法的に正しいが、意味的に間違っているコンパイルエラーのことだ。
+
+さっそく例を見ていこう。
+
+\begin{lstlisting}[language=c++]
+int main()
+{
+    auto x = 1.0 % 1.0 ;
+}
+\end{lstlisting}
+
+このコードをコンパイルすると出力されるエラーメッセージは以下のとおり。
+
+\begin{lstlisting}[style=terminal]
+main.cpp: In function ‘int main()’:
+main.cpp:3:18: error: invalid operands of types ‘double’ and ‘double’ to binary
+    ‘operator%’
+     auto x = 1.0 % 1.0 ;
+              ~~~~^~~~~
+\end{lstlisting}
+
+問題の箇所は3行目の18列目、\texttt{'\%'}\,だ。
+
+エラーメッセージは、「二項\,\texttt{'operator\%'}\,に対して不適切なオペランドである型\,\texttt{'double'}\,と{\allowbreak}\,\texttt{'double'}」とある。
+
+前の章を読み直すとわかるとおり、\texttt{operator \%}は剰余を計算する演算子だが、この演算子には\texttt{double}型を渡すことはできない。
+
+このコードはどうだろう。
+
+\begin{lstlisting}[language=c++]
+// 引数を1つ取る関数
+void f( int x ) { }
+
+int main()
+{
+    // 引数を2つ渡す
+    f( 1, 2 ) ;
+}
+\end{lstlisting}
+
+このようなエラーメッセージになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=terminal]
+main.cpp: In function ‘int main()’:
+main.cpp:7:13: error: too many arguments to function ‘void f(int)’
+     f( 1, 2 ) ;
+             ^
+main.cpp:2:6: note: declared here
+ void f( int x ) { }
+      ^
+\end{lstlisting}
+
+問題の箇所は7行目。「関数\,\texttt{'void f(int)'}\,に対して実引数が多すぎる」とある。\texttt{関数f}は引数を1つしか取らないのに、2つの引数を渡しているのがエラーの原因だ。
+
+2つ目のメッセージはエラーではなくて、エラーを補足説明するための注記（note）メッセージだ。ここで言及している\texttt{関数f}とは、2行目に宣言されていることを説明してくれている。
+
+意味エラーはときとしておぞましいほどのエラーメッセージを生成することがある。例えば以下の一見無害そうなコードだ。
+
+\begin{lstlisting}[language=c++]
+int main()
+{
+    "hello"s << 1 ;
+}
+\end{lstlisting}
+
+このコードは文法的に正しいが、意味的に間違っているコードだ。このコードをコンパイルすると膨大なエラーメッセージが出力される。しかも問題の行番号特定以外、大して役に立たない。
+
+\hypersection{ch0403}{コンパイラーのバグ}
+
+C++コンパイラーもソフトウェアであり、バグがある。コンパイラーにバグがある場合、正しいC++のソースファイルがコンパイルできないことがある。
+
+読者がそのようなコンパイラーの秘孔を突くコードを書くことはまれだ。しかし、もしそのようなコードを偶然にも書いてしまった場合、GCCは、
+\begin{lstlisting}[style=terminal]
+gcc: internal compiler error: エラー内容
+Please submit a full bug report,
+with preprocessed source if appropriate.
+See <ドキュメントへのファイルパス> for instructions.
+\end{lstlisting}
+のようなメッセージを出力する。
+
+これはGCCのバグなので、見つけた読者は適切な方法でバグ報告をしよう。

@@ -1,0 +1,485 @@
+\hyperchapter{ch26}{傲慢なエラー処理：\\例外}{傲慢なエラー処理：例外}
+\index{れいがい@例外}\index{えらしより@エラー処理}
+
+\hypersection{ch2601}{例外を投げる}
+
+\texttt{std::array}の実装方法はほとんど解説した。読者は\texttt{std::array}の実装方法を知り、確固たる自信の元に\texttt{std::array}を使えるようになった。ただし、1つだけ問題がある。
+
+\texttt{"std::array"}\,のユーザーはあらかじめ設定した要素数を超える範囲の要素にアクセスすることができてしまう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 妥当な要素はa[0]のみ
+    std::array<int, 1> a = {1} ;
+
+    // エラー、 範囲外
+    a[1000] = 0 ;
+}
+\end{lstlisting}
+
+\texttt{array}を自力で実装できる傲慢な読者としては、ユーザーごときが間違った使い方をできるのが許せない。間違いを起こした時点でエラーを発生させ、問題を知らしめ、対処できるようにしたい。
+
+\texttt{operator []}に範囲外チェックを入れるのは簡単だ。問題は、エラーをユーザーに通知する方法がない。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+reference array::operator [] ( std::size_t i )
+{
+    // 範囲外チェック
+    if ( i >= size() )
+    {
+        // エラー検出
+        // しかし何をreturnすればいいのだろう
+    }
+
+    return storage[i] ;
+}
+\end{lstlisting}
+
+\texttt{operator []}は伝統的にエラーチェックをしない要素アクセスをするものだ。
+
+\texttt{vector}で一番最初に説明した要素アクセスの方法であるメンバー関数\texttt{at}を覚えているだろうか。実はメンバー関数\texttt{at}はエラーチェック\index{えらちえつく@エラーチェック}をする。試してみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 1> a = {1} ;
+
+    std::cout << a.at(1000) = 0 ;
+}
+\end{lstlisting}
+
+以下が実行結果だ。
+
+\begin{lstlisting}[style=terminal]
+terminate called after throwing an instance of 'std::out_of_range'
+  what():  array::at: __n (which is 1000) >= _Nm (which is 1)
+\end{lstlisting}
+
+何やらよくわからないがエラーのようだ。以下のような意味であることがわかる。
+
+\begin{lstlisting}[style=terminal]
+`std::out_of_range`がthrowされたあとにterminateが呼ばれた
+  what(): array_at: __n(値は1000) >= _Nm (値は1)
+\end{lstlisting}
+
+どうやらエラーメッセージのようだ。わかりづらいメッセージだが、なんとなく言わんとすることはわかる。\texttt{\_Nm}が\texttt{array}の要素数で、\texttt{\_\_n}がメンバー関数\texttt{at}に渡した実引数だ。要素数\,\texttt{\_Nm}よりも\,\texttt{\_\_n}が大きい。
+
+このエラー処理は、「例外」\index{れいがい@例外}を使って行われる。
+
+例外は通常の処理をすっ飛ばして特別なエラー処理をする機能だ。何もエラー処理をしない場合、プログラムは終了する。例外を発生させることを、「例外を投げる」という。
+
+例外は文字どおり投げるという意味の\texttt{throw}キーワードを使い、何らかの値を投げる（throw）。
+\index{throw@\texttt{throw}}
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// int型の値123を投げる
+throw 123 ;
+
+// double型の値3.14を投げる
+throw 3.14 ;
+
+std::array<int, 5> value = {1,2,3,4,5} ;
+
+// std::array<int,5>型の変数valueの値を投げる
+throw value ;
+\end{lstlisting}
+
+この例では、\texttt{int}型、\texttt{double}型、\texttt{std::array<int,5>}\,型の値を投げている。
+
+一度例外が投げられると、通常の実行はすっ飛ばされる。
+
+以下は\texttt{0}を入力すると例外を投げるプログラムだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 0を入力するなよ、 絶対するなよ
+    std::cout << "Don't type 0. >"s ;
+
+    int input {} ;
+    std::cin >> input ;
+
+    /// 入力が0なら例外を投げる
+    if ( input == 0 )
+        throw 0 ;
+
+    // 通常の処理
+    std::cout << "Success!\n"s ;
+}
+\end{lstlisting}
+
+このプログラムを実行すると、非\texttt{0}を入力した場合、\texttt{"Success!{\textbackslash}n"}\,が出力される。\texttt{0}を入力した場合、例外が投げられる。例外が投げられると、通常の実行はすっ飛ばされる。エラー処理はしていないので、プログラムは終了する。
+
+\texttt{std::array}や\texttt{std::vector}のメンバー関数\texttt{at(n)}は\texttt{n}が要素数を超える場合、例外を投げている。
+
+\begin{lstlisting}[language={C++}]
+array::reference array::at( std::size_t n )
+{
+    if ( n >= size() )
+        throw 何らかの値
+
+    return storage[n] ;
+}
+\end{lstlisting}
+
+投げる例外は、\texttt{std::out\_of\_range}\index{out\_of\_range@\texttt{out\_of\_range}}というクラスの値だ。このクラスを完全に説明するのは現時点では難しいが、以下のように振る舞うと考えておこう。
+
+\begin{lstlisting}[language={C++}]
+namespace std {
+
+struct out_of_range
+{
+    // エラー内容の文字列を受け取るコンストラクター
+    out_of_range( std::string const & ) ;
+    // エラー内容の文字列を返すメンバー関数
+    auto what() ;
+} ;
+
+}
+\end{lstlisting}
+
+とりあえず使ってみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::out_of_range err("I am error.") ;
+
+    // I am error.
+    std::cout << err.what() ;
+}
+\end{lstlisting}
+
+コンストラクターでエラー内容を表現した文字列を受け取り、メンバー関数\texttt{what}\index{what@\texttt{what}}でエラー内容の文字列を取得する。
+
+必要な情報はすべて学んだ。あとはメンバー関数\texttt{at}を実装するだけだ。
+
+\begin{lstlisting}[language={C++}]
+array::reference array::at( std::size_t n )
+{
+    if ( n >= size() )
+        throw std::out_of_range("Error: Out of Range") ;
+
+    return storage[n] ;
+}
+\end{lstlisting}
+
+\clearpage
+\hypersection{ch2602}{例外を捕まえる}
+
+現状では、エラーを発見して例外を投げたら即座にプログラムが終了してしまう。投げた例外を途中で捕まえて、プログラムを通常の実行に戻す機能がほしい。その機能が「例外のキャッチ」\index{れいがい@例外!きやつち@キャッチ}だ。
+
+例外のキャッチには\texttt{try}キーワードと\texttt{catch}キーワードを使う。
+\index{try@\texttt{try}}\index{catch@\texttt{catch}}
+
+\begin{lstlisting}[style=grammar]
+try {
+    // 例外を投げるコード
+} catch( 型 名前 )
+{
+    エラー処理
+}
+\end{lstlisting}
+
+\texttt{try \{\}}ブロックの中で投げられた例外は、\texttt{catch}で型が一致する場合にキャッチされる。例外がキャッチされた場合、\texttt{catch}のブロックが実行される。そして実行が再開される。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+
+    try {
+        throw 123 ; // int型
+    }
+    // キャッチする
+    catch( int e )
+    {
+        std::cout << e ;
+    }
+
+    // 実行される
+    std::cout << "resumed.\n"s ;
+}
+\end{lstlisting}
+
+\texttt{catch}の型と投げられた例外の型が一致しない場合は、キャッチしない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    try {
+        throw 3.14 ; // double型
+    }
+    // キャッチしない
+    catch( int e ) { }
+
+(@\ifTombow\pagebreak\fi@)
+    // 実行されない
+    std::cout << "You won't read this.\n"s ;
+}
+\end{lstlisting}
+
+\texttt{catch}は複数書くことができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    try {
+        throw "error"s ; // std::string型
+    }
+    // キャッチしない
+    catch( int e ) { }
+    // キャッチしない
+    catch( double e ) { }
+    // キャッチする
+    catch( std::string & e )
+    {
+        std::cout << e ;
+    }
+}
+\end{lstlisting}
+
+\texttt{tryブロック}の中で投げられた例外は、たとえ複雑な関数呼び出しの奥底にある例外でもあますところなくキャッチされる。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    throw 123 ;
+}
+
+void g() { f() ; } 
+void h() { g() ; }
+
+
+int main()
+{
+    try {
+        h() ;
+    }
+    // キャッチされる
+    catch( int e ) { }
+}
+\end{lstlisting}
+
+関数\texttt{h}は関数\texttt{g}を呼び出し、関数\texttt{g}は関数\texttt{f}を呼び出し、関数\texttt{f}は例外を投げる。このように複雑な関数呼び出しの結果として投げられる例外もキャッチできる。
+
+すでに学んだように、\texttt{std::array<T>::at}に範囲外のインデックスを渡したときは\texttt{std::out\_of\_range}\index{out\_of\_range@\texttt{out\_of\_range}}クラスが例外として投げられる。これをキャッチしてみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 1> a = {0} ;
+
+    try { a[1000] ; }
+    catch( std::out_of_range & e )
+    {
+        // エラー内容を示す文字列
+        std::cout << e.what() ;
+    }
+}
+\end{lstlisting}
+
+\hypersection{ch2603}{例外による巻き戻し}
+\index{れいがい@例外!まきもどし@巻き戻し}
+
+例外が投げられた場合、その例外が投げられた場所を囲む\texttt{try}ブロックと対応する\texttt{catch}に到達するまで、関数呼び出しが巻き戻される。これを\texttt{スタックアンワインディング}（stack unwinding）\index{すたつくあんわいんでいんぐ@スタックアンワインディング}\index{れいがい@例外!すたつくあんわいんでいんぐ@スタックアンワインディング}という。
+
+\begin{lstlisting}[language={C++}]
+void f() { throw 0 ; } 
+void g() { f() ; }
+void h() { g() ; }
+
+int main()
+{
+    try { h() ; }
+    catch( int e ) { }
+
+}
+\end{lstlisting}
+
+この例では、関数\texttt{main}が関数\texttt{h}を呼び出し、その結果として最終的に関数\texttt{f}の中で例外が投げられる。投げられた例外は関数呼び出しを巻き戻して関数\texttt{main}の中の\texttt{try}ブロックまで到達し、対応する\texttt{catch}に捕まる。
+
+もし関数\texttt{main}を抜けてもなお対応する\texttt{catch}がない場合はどうなるのか。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    throw 0 ;
+    // 対応するcatchがない
+}
+\end{lstlisting}
+
+その場合、\texttt{std::terminate()}\index{terminate@\texttt{terminate}}という関数が呼ばれる。この関数が呼ばれた場合、プログラムは終了する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // プログラムは終了する
+    std::terminate() ;
+}
+\end{lstlisting}
+
+\texttt{tryブロック}はネストできる。その場合、対応する\texttt{catch}が見つかるまで巻き戻しが起こる。
+\index{try@\texttt{try}!ねすと@ネスト}
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    try { throw 0 ; }
+    catch ( double e ) { }
+}
+
+int main()
+{
+    try { // try 1
+        try { // try 2
+            f() ;
+        } catch( std::string & e ) { }
+    } catch ( int e )
+    {
+        // ここで捕まる
+    }
+}
+\end{lstlisting}
+
+上のコードは複雑な\texttt{tryブロック}のネストが行われている。プログラムがどのように実行されるのかを考えてみよう。
+
+まず関数\texttt{main}が関数\texttt{f}を呼び出す。関数\texttt{f}は例外を投げる。関数\texttt{f}の中の\texttt{try}ブロックは対応する\texttt{catch}がないので関数\texttt{main}に巻き戻る。関数\texttt{main}の内側の\texttt{try}ブロック、ソースコードでは\texttt{//{\nobreak} try 2} とコメントをしている\texttt{try}ブロックの\texttt{catch}には対応しない。さらに上の\texttt{try}ブロックに巻き戻る。\texttt{// try 1}の\texttt{tryブロック}の\texttt{catch}は\texttt{int}型なので、この\texttt{catch}に捕まる。
+
+例外が投げられ、\texttt{スタックアンワインディング}による巻き戻しが発生した場合、通常のプログラムの実行は行われない。例えば以下のプログラムは何も出力しない。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    throw 0 ;
+    // 例外を投げたあとの実行
+    std::cout << "function f\n"s ;
+}
+
+void g()
+{
+    f() ;
+    // 関数fを呼んだあとの実行
+    std::cout << "function g\n"s ;
+}
+
+int main()
+{
+    g() ;
+    // 関数gを呼んだあとの実行
+    std::cout << "function main\n"s ;
+}
+\end{lstlisting}
+
+\texttt{スタックアンワインディング}中に通常の実行は行われないが、変数の破棄は行われる。これはとても重要だ。変数が破棄されるとき、デストラクターが実行されるのを覚えているだろうか。
+
+\begin{lstlisting}[language={C++}]
+struct Object
+{
+    std::string name ;
+    // コンストラクター
+    Object( std::string const & name ) : name(name) 
+    { std::cout << name << " is constructed.\n"s ; }
+
+    // デストラクター
+    ~Object()
+    { std::cout << name << " is destructed.\n"s ; }
+} ;
+
+int main()
+{
+    // 変数objが構築される
+    Object obj("obj"s) ;
+
+    // 変数objが破棄される
+}
+\end{lstlisting}
+
+実行結果
+
+\begin{lstlisting}[style=terminal]
+obj is constructed.
+obj is destructed.
+\end{lstlisting}
+
+例外のスタックアンワインディングでは関数内の変数が破棄される。つまりデストラクターが実行される。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    Object obj("f"s) ;
+    throw 0 ;
+}
+
+void g()
+{
+    Object obj("g"s) ;
+    f() ;
+}
+
+int main()
+{
+    Object obj("main"s) ;
+
+    try {
+        g() ;
+    } catch( int e )
+    {
+        std::cout << "caught.\n"s ;
+    }
+
+}
+\end{lstlisting}
+
+このプログラムを実行した結果は以下のようになる。
+
+\begin{lstlisting}[style=terminal]
+main is constructed.
+g is constructed.
+f is constructed.
+f is destructed.
+g is destructed.
+caught.
+main is destructed.
+\end{lstlisting}
+
+なぜこの順番に出力されるか考えてみよう。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  プログラムの実行は関数\texttt{main}から始まる。そのためまず\texttt{main}が構築される
+\item
+  関数\texttt{main}は関数\texttt{g}を呼ぶ。\texttt{g}が構築される
+\item
+  関数\texttt{g}は関数\texttt{f}を呼ぶ。\texttt{f}が構築される
+\item
+  関数\texttt{f}は例外を投げるので、\texttt{f}は破棄される
+\item
+  関数\texttt{g}に巻き戻ったが\texttt{catch}がないのでさらに巻き戻る。\texttt{g}が破棄される
+\item
+  関数\texttt{main}に巻き戻ったところ対応する\texttt{catch}があるのでスタックアンワインディングは停止する
+\item
+  \texttt{caught.}が出力される
+\item
+  \texttt{main}が破棄される
+\end{enumerate}
+
+例外が投げられると通常の実行は飛ばされるので、例外が投げられるかもしれない処理のあとに、例外の有無にかかわらず絶対に実行したい処理がある場合は、クラスのデストラクターに書くとよい。
+
+C++20以降では、標準ライブラリに\texttt{std::scope\_exit}\index{scope\_exit@\texttt{scope\_exit}}が追加される予定だ。\texttt{std::scope\_exit}は渡した関数オブジェクトをデストラクターで実行してくれる。
+
+\begin{lstlisting}[language={C++}]
+int f()
+{
+    auto ptr = new ;
+    std::scope_exit e( [&]{ delete ptr ; } ) ;
+
+    // 処理
+}
+\end{lstlisting}
+
+このように書くと、後続の処理で\texttt{return}で関数から戻ろうが、\texttt{throw}しようが、\texttt{delete ptr}が実行される。

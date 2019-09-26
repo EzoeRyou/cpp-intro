@@ -1,0 +1,255 @@
+\hyperchapter{ch17}{ラムダ式}{ラムダ式}
+
+実は以下の形の関数は、「関数」\index{かんすう@関数}ではない。
+
+\begin{lstlisting}[language={C++}]
+auto function = []( auto value ) { return value } ;
+\end{lstlisting}
+
+これは\texttt{ラムダ式}\index{らむだしき@ラムダ式}と呼ばれるC++の機能で、関数のように振る舞うオブジェクトを作るための式だ。
+
+\hypersection{ch1701}{基本}
+
+\texttt{ラムダ式}の基本の文法は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+[](){} ;
+\end{lstlisting}
+
+これを細かく分解すると以下のようになる。
+
+\begin{lstlisting}[style=grammar]
+[]  // ラムダ導入子
+()  // 引数リスト
+{}  // 複合文
+;   // 文末
+\end{lstlisting}
+
+\texttt{ラムダ導入子}はさておく。
+
+\texttt{引数リスト}\index{ひきすうりすと@引数リスト}\index{らむだしき@ラムダ式!ひきすうりすと@引数リスト}は通常の関数と同じように型名と名前を書ける。
+
+\begin{lstlisting}[language={C++}]
+void f( int x, double d ) { }
+
+[]( int x, double d ) { } ;
+\end{lstlisting}
+
+\texttt{ラムダ式}では、\texttt{引数リスト}に\texttt{auto}キーワードが使える。
+
+\begin{lstlisting}[language={C++}]
+[]( auto x ) { } ;
+\end{lstlisting}
+
+このように書くとどんな型でも受け取れるようになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto f = []( auto x )
+    { std::cout << x ; } ;
+
+    f(0) ; // int
+    f(1.0) ; // double
+    f("hello"s) ; // std::string
+}
+\end{lstlisting}
+
+\texttt{複合文}\index{ふくごうぶん@複合文}\index{らむだしき@ラムダ式!ふくごうぶん@複合文}は\,\texttt{\{\}}\,\index{\{\}@\texttt{\{\}}}だ。この\,\texttt{\{\}}\,の中に通常の関数と同じように複数の文を書くことができる。
+
+\begin{lstlisting}[language={C++}]
+[]()
+{
+    std::cout << "hello"s ;
+    int x = 1 + 1 ;
+} ;
+\end{lstlisting}
+
+最後の\texttt{文末}\index{ぶんまつ@文末}\index{らむだしき@ラムダ式!ぶんまつ@文末}は\texttt{文}の最後に付けるセミコロンだ。これは\,\texttt{"1+1 ;"}\,とするのと変わらない。\texttt{"1+1"}\,や\,\texttt{"[]()\{\}"}\,は\texttt{式}で、\texttt{文}は\texttt{式}を使うことができる。\texttt{式}だけが入った\texttt{文}を専門用語では\texttt{式文}と呼ぶが特に覚える必要はない。
+
+\begin{lstlisting}[language={C++}]
+1 + 1 ; // OK、式文
+[](){} ; // OK、式文
+\end{lstlisting}
+
+\texttt{ラムダ式}は\texttt{式}なので\texttt{式文}の中に書くことができる。
+
+\texttt{ラムダ式}は\texttt{式}なので、そのまま\texttt{関数呼び出し}することもできる。
+
+\begin{lstlisting}[language={C++}]
+void f( std::string x )
+{
+    std::cout << x ;
+}
+
+int main()
+{
+    f( "hello"s ) ;
+    []( auto x ){ std::cout << x ; }( "hello"s ) ;
+}
+\end{lstlisting}
+
+これはわかりやすくインデントすると以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+f               // 関数
+( "hello"s ) ;  // 関数呼び出し
+
+// ラムダ式
+[]( auto x ){ std::cout << x ; }
+( "hello"s ) ;  // 関数呼び出し
+\end{lstlisting}
+
+ラムダ式が引数を1つも取らない場合、\texttt{引数リスト}は省略できる。
+
+\begin{lstlisting}[language={C++}]
+// 引数を取らないラムダ式
+[](){} ;
+// 引数リストは省略できる
+[]{} ;
+\end{lstlisting}
+
+ラムダ式の戻り値の型は\texttt{return}文\index{return@\texttt{return}文}から推定される。
+
+\begin{lstlisting}[language={C++}]
+// int
+[]{ return 0 ; } ;
+// double
+[]{ return 0.0 ; } ;
+// std::string
+[]{ return "hello"s ; } ;
+\end{lstlisting}
+
+\texttt{return}文で複数の型を返した場合は推定ができないのでエラーになる。
+
+\begin{lstlisting}[language={C++}]
+[]( bool b )
+{
+    if ( b )
+        return 0 ;
+    else
+        return 0.0 ;
+} ;
+\end{lstlisting}
+
+戻り値の型を指定したい場合は\texttt{引数リスト}のあとに\,\texttt{->}\,\index{->@\texttt{->}}を書き、型名を書く。
+
+\begin{lstlisting}[language={C++}]
+[]( bool b ) -> int
+{
+    if ( b )
+        return 0 ;
+    else
+        // doubleからintへの変換
+        return 0.0 ;
+} ;
+\end{lstlisting}
+
+戻り値の型の推定は通常の関数も同じだ。
+
+\begin{lstlisting}[language={C++}]
+// int
+auto f() { return 0 ; }
+
+// 戻り値の型の明示的な指定
+auto f() -> int { return 0 ; }
+\end{lstlisting}
+
+\hypersection{ch1702}{キャプチャー}
+\index{きやぷちや@キャプチャー}\index{らむだしき@ラムダ式!きやぷちや@キャプチャー}
+
+\texttt{ラムダ式}は書かれている関数のローカル変数を使うことができる。これを\texttt{キャプチャー}という。\texttt{キャプチャー}は通常の関数にはできない\texttt{ラムダ式}の機能だ。
+
+\begin{lstlisting}[language={C++}]
+void f()
+{
+    // ローカル関数
+    auto message = "hello"s ;
+
+    [=](){ std::cout << message ; } ;
+}
+\end{lstlisting}
+
+\texttt{キャプチャー}には\texttt{コピーキャプチャー}と\texttt{リファレンスキャプチャー}がある。
+
+\hypersubsection{ch170201}{コピーキャプチャー}
+\index{こぴきやぷちや@コピーキャプチャー}\index{らむだしき@ラムダ式!こぴきやぷちや@コピーキャプチャー}
+
+\texttt{コピーキャプチャー}は変数をコピーによってキャプチャーする。
+
+\texttt{コピーキャプチャー}をするには、\texttt{ラムダ式}を\texttt{[=]}\index{[=]@\texttt{[=]}}\index{らむだしき@ラムダ式![=]@\texttt{[=]}}と書く。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    // コピーキャプチャー
+    [=]{ return x ; } ;
+}
+\end{lstlisting}
+
+\texttt{コピーキャプチャー}した変数はラムダ式の中で変更できない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    // エラー
+    [=]{ x = 0 ; } ;
+}
+\end{lstlisting}
+
+変更できるようにする方法もあるのだが、通常は使われない。
+
+\hypersubsection{ch170202}{リファレンスキャプチャー}
+\index{りふあれんすきやぷちや@リファレンスキャプチャー}\index{らむだしき@ラムダ式!りふあれんすきやぷちや@リファレンスキャプチャー}
+
+\texttt{リファレンスキャプチャー}は変数をリファレンスによってキャプチャーする。
+
+\texttt{リファレンス}を覚えているだろうか。リファレンスは初期化時の元の変数を参照する変数だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    // 通常の変数
+    int y = x ;
+
+    // 変数を変更
+    y = 1 ;
+    // xの値は変わらない
+
+    // リファレンス
+    int & ref = x ;
+
+    // リファレンスを変更
+    ref = 1 ;
+    // xの値が変わる
+}
+\end{lstlisting}
+
+\texttt{リファレンスキャプチャー}を使うには、\texttt{ラムダ式}を\texttt{[\&]}\index{[\&]@\texttt{[\&]}}\index{らむだしき@ラムダ式![\&]@\texttt{[\&]}}と書く。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    [&] { return x ; } ;
+}
+\end{lstlisting}
+
+\texttt{リファレンスキャプチャー}した変数を\texttt{ラムダ式}の中で変更すると、元の変数が変更される。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    auto f = [&]{ ++x ; } ;
+
+    f() ; // x == 1
+    f() ; // x == 2
+    f() ; // x == 3
+}
+\end{lstlisting}
+
+ラムダ式についてはまだいろいろな機能があるが、本書での解説はここまでとする。

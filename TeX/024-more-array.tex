@@ -1,0 +1,459 @@
+\hyperchapter{ch24}{arrayをさらに実装}{arrayをさらに実装}
+
+\texttt{'std::array'}\,をもっと実装していこう。前章では以下のような簡単な\,\texttt{'array'}\,を実装した。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    T & operator [] ( std::size_t i )
+    {
+        return storage[i] ;
+    }
+} ;
+\end{lstlisting}
+
+実は\texttt{std::array}はこのように書かれていない。この章では、\texttt{'array'}\,の実装を\,\texttt{'std::array'}\,に近づけていく。
+
+\hypersection{ch2401}{ネストされた型名}
+
+エイリアス宣言\index{えいりあすせんげん@エイリアス宣言}を覚えているだろうか。型名に別名\index{かためい@型名!べつめい@別名}を付ける機能だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using number = int ;
+    number x = 123 ;
+}
+\end{lstlisting}
+
+エイリアス宣言はクラスの中でも使うことができる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    using number = int ;
+    number data ;
+} ;
+
+int main()
+{
+    S s{123} ;
+
+    S::number x = s.data ;
+}
+\end{lstlisting}
+
+クラスの中で宣言されたエイリアス宣言による型名を、\texttt{ネストされた型名}\index{かためい@型名!ねすとされた@ネストされた〜}という。\texttt{std::array}ではテンプレート引数を直接使う代わりに、\texttt{ネストされた型名}が使われている。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using value_type = T ;
+    using reference = T & ;
+
+    using size_type = std::size_t ;
+
+    value_type storage[N] ;
+
+    reference operator [] ( size_type i )
+    {
+        return storage[i] ;
+    }
+} ;
+\end{lstlisting}
+
+こうすると、\texttt{T \&}のようなわかりにくい型ではなく\texttt{reference}のようにわかりやすい名前を使える。さらに、クラス外部から使うこともできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using array_type = std::array<int, 5> ;
+    array_type a = {1,2,3,4,5} ;
+    array_type::value_type x = 0 ;
+    array_type::reference ref = a[0] ;
+}
+\end{lstlisting}
+
+もちろんこれは\texttt{auto}で書くこともできるが、
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    using array_type = std::array<int, 5> ;
+    array_type a = {1,2,3,4,5} ;
+    auto x = 0 ;
+    auto ref = a[0] ;
+}
+\end{lstlisting}
+信じられないことに昔のC++には\texttt{auto}がなかったのだ。その他、さまざまな利点があるのだが、そのすべてを理解するには、まだ読者のC++力が足りない。
+
+\hypersection{ch2402}{要素数の取得: size()}
+\index{array@\texttt{array}!ようそすう@要素数}
+
+\texttt{std::array<T,N>}\,には\texttt{size()}というメンバー関数がある。要素数を返す。
+
+\texttt{array}の場合、\texttt{N}を返せばよい。
+\index{array@\texttt{array}!size@\texttt{size}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a ;
+    a.size() ; // 5
+
+    std::array<int, 10> b ;
+    b.size() ; // 10
+}
+\end{lstlisting}
+
+さっそく実装しよう。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    using size_type = std::size_t ;
+
+    size_type size() ;
+    // ... 省略
+} ;
+\end{lstlisting}
+
+ここでは\texttt{size}の宣言だけをしている。
+
+関数は宣言と定義が分割できる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=grammar]
+// 関数の宣言
+void f() ;
+// 関数の定義
+void f() { }
+\end{lstlisting}
+
+メンバー関数も宣言と定義が分割できる。
+
+\begin{lstlisting}[style=grammar]
+// クラスの宣言
+struct S
+{
+    // メンバー関数の宣言
+    void f() ;
+} ;
+
+// メンバー関数の定義
+void S::f() { }
+\end{lstlisting}
+
+メンバー関数の定義をクラス宣言の外で書くには、関数名がどのクラスに属するのかを指定しなければならない。これには\texttt{クラス名::}を使う。この場合、\texttt{S::f}だ。
+\index{くらす@クラス!::@\texttt{::}}
+
+\hypersection{ch2403}{メンバー関数のconst修飾}
+\index{くらす@クラス!const@\texttt{const}修飾}\index{const@\texttt{const}修飾}\index{めんばかんすう@メンバー関数!const@\texttt{const}修飾}
+
+\texttt{const}を付けた変数は値を変更できなくなることはすでに学んだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int x = 0 ;
+    x = 1 ;
+    int const cx = 0 ;
+    cx = 0 ; // エラー
+}
+\end{lstlisting}
+
+\texttt{const}は変更する必要のない場面でうっかり変更することを防いでくれるとても便利な機能だ。\texttt{'array'}\,は大きいので関数の引数として渡すときにコピーするのは非効率的だ。なのでコピーを防ぐリファレンスで渡したい。
+
+\texttt{std::array<T,N>}\,を受け取って要素をすべて出力する関数を書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+template < typename Array >
+void print( Array & c )
+{
+    for ( std::size_t i = 0 ; i != c.size() ; ++i )
+    {
+        std::cout << c[i] ;
+    }
+}
+
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+    print( a ) ;
+}
+\end{lstlisting}
+
+関数\texttt{print}がテンプレートなのは任意の\texttt{T}と\texttt{N}を使った\texttt{std::array<T,N>}\,を受け取れるようにするためだ。
+
+関数のリファレンスを引数として渡すと、関数の中で変更できてしまう。しかし、上の例のような関数\texttt{print}では、引数を書き換える必要はない。この関数を使う人間も、引数を勝手に書き換えないことを期待している。この場合、\texttt{const}を付けることで値の変更を防ぐことができる。
+
+\begin{lstlisting}[language={C++}]
+template < typename Container >
+void print( Container const & c )
+{
+    for ( std::size_t i = 0 ; i != c.size() ; ++i )
+    {
+        std::cout << c[i] ;
+    }
+}
+\end{lstlisting}
+
+ではさっそくこれまで実装してきた自作の\texttt{array}クラスを使ってみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    array<int, 5> a = {1,2,3,4,5} ;
+
+    print( a ) ; // エラー
+}
+\end{lstlisting}
+
+なぜかエラーになってしまう。
+
+この理由はメンバー関数を呼び出しているからだ。
+
+クラスのメンバー関数はデータメンバーを変更できる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+    void f()
+    {
+        ++data ;
+    }
+} ;
+
+int main()
+{
+    S s ;
+    s.f() ; // s.dataを変更
+}
+\end{lstlisting}
+
+ということは、\texttt{const S}はメンバー関数\texttt{f()}を呼び出すことができない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    S s ;
+    S const & ref = s ;
+
+    ++ref.data ;  // エラー
+    ref.f() ;     // エラー
+}
+\end{lstlisting}
+
+ではメンバー関数\texttt{f()}がデータメンバーを変更しなければいいのだろうか。試してみよう。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+    void f()
+    {
+        // 何もしない
+    }
+} ;
+
+int main()
+{
+    S const s ;
+    s.f() ; // エラー
+}
+\end{lstlisting}
+
+まだエラーになる。この理由を完全に理解するためには、まだ説明していない\texttt{ポインター}という機能について学ばなければならない。ポインターの説明はこの次の章で行うとして、いまはさしあたり必要な機能である\texttt{メンバー関数のconst修飾}を説明する。
+\index{const@\texttt{const}修飾}\index{めんばかんすう@メンバー関数!const@\texttt{const}修飾}
+
+\texttt{const}を付けていないメンバー関数を\texttt{const}なクラスのオブジェクトから呼び出せない理由は、メンバー関数がデータメンバーを変更しない保証がないからだ。その保証を付けるのが\texttt{メンバー関数のconst修飾}だ。
+
+メンバー関数は関数の引数のあと、関数の本体の前に\texttt{const}を書くことで\texttt{const}修飾できる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void f() const
+    { }
+} ;
+
+int main()
+{
+    S s ;
+    s.f() ; // OK
+
+    S const cs ;
+    cs.f() ; // OK
+
+}
+\end{lstlisting}
+
+\texttt{const}修飾されたメンバー関数は\texttt{const}なクラスのオブジェクトからでも呼び出すことができる。
+
+\texttt{const}修飾されたメンバー関数と、\texttt{const}修飾されていないメンバー関数が両方ある場合、クラスのオブジェクトの\texttt{const}の有無によって適切なメンバー関数が呼び出される。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void f() { }        // 1
+    void f() const { }  // 2
+} ;
+
+int main()
+{
+    S s ;
+    s.f() ;     // 1
+
+    S const cs ;
+    cs.f() ;    // 2
+}
+\end{lstlisting}
+
+そしてもう1つ重要なのは、\texttt{const}修飾されたメンバー関数がデータメンバーへのリファレンスを返す場合、
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+    // データメンバーへのリファレンスを返す
+    int & get()
+    {
+        return data ;
+    }
+} ;
+\end{lstlisting}
+\texttt{const}修飾されたメンバー関数は自分のデータメンバーを変更できないので、データメンバーの値を変更可能なリファレンスを返すことはできない。そのため以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    int data {} ;
+    int & get()
+    {
+        return data ;
+    }
+
+    // const版
+    // constリファレンスを返すので変更不可
+    int const & get() const
+    {
+        return data ;
+    }
+} ;
+\end{lstlisting}
+
+自作の\,\texttt{'array'}\,の\texttt{operator []}を\texttt{const}に対応させよう。\texttt{'std::array'}\,は\texttt{const}なリファレンスを\texttt{const\_reference}というネストされた型名にしている。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    using reference = T & ;
+    using const_reference = T const & ;
+
+    // 非const版
+    reference operator [] ( std::size_t i )
+    {
+        return storage[i] ;
+    }
+    // const版
+    const_reference operator [] ( std::size_t i ) const
+    {
+        return storage[i] ;
+    }
+} ;
+\end{lstlisting}
+
+これで\texttt{const array}にも対応できるようになった。
+
+\clearpage
+\hypersection{ch2404}{先頭と末尾の要素：front/back}
+\index{array@\texttt{array}!せんとうのようそ@先頭の要素}\index{array@\texttt{array}!まつびのようそ@末尾の要素}
+
+メンバー関数\texttt{front}は最初の要素へのリファレンスを返す。\texttt{back}は最後の要素へのリファレンスを返す。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+
+    int & f = a.front() ;   // 1
+    int & b = a.back() ;    // 5
+}
+\end{lstlisting}
+
+\texttt{front/back}には\texttt{reference}を返すバージョンと\texttt{const\_reference}を返すバージョンがある。
+\index{front@\texttt{front}}\index{array@\texttt{array}!front@\texttt{front}}
+\index{back@\texttt{back}}\index{array@\texttt{array}!back@\texttt{back}}
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    using reference = T & ;
+    using const_reference = T const & ;
+
+    reference front()
+    { return storage[0] ; }
+    const_reference front() const
+    { return storage[0] ; }
+
+    reference back()
+    { return storage[N-1] ; }
+    const_reference back() const
+    { return storage[N-1] ; }
+
+} ;
+\end{lstlisting}
+
+\clearpage
+\hypersection{ch2405}{全要素に値を代入: fill}
+\index{array@\texttt{array}!あたいをだいにゆう@値を代入}
+\index{fill@\texttt{fill}}\index{array@\texttt{array}!fill@\texttt{fill}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::array<int, 5> a = {1,2,3,4,5} ;
+    a.fill(0) ;
+    // aは{0,0,0,0,0}
+}
+\end{lstlisting}
+
+すでにアルゴリズムで実装した\,\texttt{'std::fill'}\,と同じだ。
+
+\begin{lstlisting}[language={C++}]
+template < typename T, std::size_t N >
+struct array
+{
+    T storage[N] ;
+
+    void fill( T const & u )
+    {
+        for ( std::size_t i = 0 ; i != N ; ++i )
+        {
+            storage[i] = u ;
+        }
+    }
+
+} ;
+\end{lstlisting}
+
+しかし、せっかく\texttt{std::fill}があるのだから以下のように書きたい。
+
+\begin{lstlisting}[language={C++}]
+void fill( T const & u )
+{
+    std::fill( begin(), end(), u ) ;
+}
+\end{lstlisting}
+
+残念ながらこれは動かない。なぜならば、自作の\texttt{array}はまだ\texttt{begin()/end()}と\texttt{イテレーター}に対応していないからだ。これは次の章で学ぶ。

@@ -1,0 +1,233 @@
+\hyperchapter{ch22}{配列}{配列}
+\index{はいれつ@配列}
+
+\hypersection{ch2201}{ナイーブなarray実装}
+
+\texttt{std::array}\index{array@\texttt{array}}を実装してみよう。すでにクラスを作る方法については学んだ。
+
+\texttt{std::array<T,N>}\,は\texttt{T}型の要素を\texttt{N}個保持するクラスだ。この\,\texttt{<T,N>}\,についてはまだ学んでいないので、今回は\texttt{int}型を3個確保する。いままでに学んだ要素だけで実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+struct array_int_3
+{
+    int m0 ;
+    int m1 ;
+    int m2 ;
+} ;
+\end{lstlisting}
+
+そして\texttt{operator []}\index{[]@\texttt{[]}}を実装しよう。引数が\texttt{0}なら\texttt{m0}を、\texttt{1}なら\texttt{m1}を、\texttt{2}なら\texttt{m2}を返す。それ以外の値の場合、プログラムを強制的に終了させる標準ライブラリ、\texttt{std::abort}\index{abort@\texttt{abort}}を呼び出す。
+
+\begin{lstlisting}[language={C++}]
+struct array_int_3
+{
+    int m0 ; int m1 ; int m2 ;
+
+    int & operator []( std::size_t i )
+    {
+        switch(i)
+        {
+            case 0 :
+                return m0 ;
+            case 1 :
+                return m1 ;
+            case 2 :
+                return m2 ;
+            default :
+                // 間違った引数
+                // 強制終了
+                std::abort() ;
+        }
+    }
+} ;
+\end{lstlisting}
+
+これは動く。では要素数を10個に増やした\texttt{array\_int\_10}はどうなるだろうか。要素数100個はどう書くのだろうか。この方法で実装するとソースコードが膨大になり、ソースコードを出力するソースコードを書かなければならなくなる。これは怠惰で短気なプログラマーには耐えられない作業だ。
+
+\hypersection{ch2202}{配列}
+\index{はいれつ@配列}
+
+\texttt{std::array}\index{array@\texttt{array}}を実装するには、\texttt{配列（array）}を使う。
+
+\texttt{int}型の要素数10の配列\texttt{a}は以下のように書く。
+\index{はいれつ@配列!ようそ@要素}
+
+\begin{lstlisting}[language={C++}]
+int a[10] ;
+\end{lstlisting}
+
+\texttt{double}型の要素数5の配列\texttt{b}は以下のように書く。
+
+\begin{lstlisting}[language={C++}]
+double b[5] ;
+\end{lstlisting}
+
+\texttt{配列}の要素数は\texttt{std::array<T,N>}\,の\texttt{N}と同じようにコンパイル時定数でなければならない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::size_t size ;
+    std::cin >> size ;
+    // エラー
+    int a[size] ;
+}
+\end{lstlisting}
+
+配列は\,\texttt{=\{1,2,3\}}\,のように初期化できる。
+\index{はいれつ@配列!しよきか@初期化}
+
+\begin{lstlisting}[language={C++}]
+int a[5] = {1,2,3,4,5} ;
+double b[3] = {1.0, 2.0, 3.0 } ;
+\end{lstlisting}
+
+配列の要素にアクセスするには\texttt{operator []}を使う。
+\index{はいれつ@配列![]@\texttt{[]}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a[5] = {1,2,3,4,5} ;
+
+    // 4
+    std::cout << a[3] ;
+
+    a[2] = 0 ;
+    // {1,2,0,4,5}
+}
+\end{lstlisting}
+
+配列にはメンバー関数はない。\texttt{at(i)}や\texttt{size()}のような便利なメンバー関数はない。
+
+配列のサイズは\texttt{sizeof}で取得できる。配列のサイズは配列の要素の型のサイズ掛けることの要素数のサイズになる。
+\index{はいれつ@配列!さいず@サイズ}\index{sizeof@\texttt{sizeof}}\index{はいれつ@配列!sizeof@\texttt{sizeof}}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto print = [](auto s){ std::cout << s << "\n"s ; } ;
+    int a[5] ;
+    print( sizeof(a) ) ;
+    print( sizeof(int) * 5 ) ;
+
+    double b [5] ;
+    print( sizeof(b) ) ;
+    print( sizeof(double) * 5 ) ;
+}
+\end{lstlisting}
+
+\texttt{sizeof}は型やオブジェクトのバイト数を取得するのに対し、\texttt{vector}や\texttt{array}のメンバー関数\texttt{size()}は要素数を取得する。この違いに注意すること。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    auto print = [](auto s){ std::cout << s << "\n"s ; } ;
+    std::array<int, 5> a ;
+
+    // aのバイト数
+    print( sizeof(a) ) ;
+    // 要素数: 5
+    print( a.size() ) ;
+
+}
+\end{lstlisting}
+
+\texttt{配列}はとても低級な機能だ。その実装はある型を連続してストレージ上に並べたものになっている。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int a[5] ;
+\end{lstlisting}
+のような配列があり、\texttt{int}型が4バイトの環境では、20バイトのストレージが確保され、その先頭の4バイトが最初の0番目の要素に、その次の4バイトが1番目の要素になる。最後の4番目の要素は最後の4バイトになる。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=1.0]{fig/fig22-01.eps}
+  \label{fig:22-01}
+\end{figure}
+
+配列にはメンバー関数がない上、コピーもできない。\texttt{std::array}\index{array@\texttt{array}}はコピーできる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a[5] = {1,2,3,4,5} ;
+    // エラー、 コピーできない
+    int b[5] = a ;
+
+    std::array<int, 5> c = {1,2,3,4,5} ;
+    // OK、コピーできる
+    std::array<int, 5> d = c ;
+}
+\end{lstlisting}
+
+\texttt{配列}は低級で使いにくいので、\texttt{std::array}という配列をラップした高級なライブラリが標準で用意されている。
+
+さて、配列の使い方は覚えたので、さっそく\texttt{std::array\_int\_10}を実装してみよう。
+
+まずクラスのデータメンバーとして配列を宣言する。
+
+\begin{lstlisting}[language={C++}]
+struct array_int_10
+{
+    int storage[10] ;
+} ;
+\end{lstlisting}
+
+配列はコピーできないが、クラスのデータメンバーとして宣言した配列は、クラスのコピーの際に、その対応する順番の要素がそれぞれコピーされる。
+
+\begin{lstlisting}[language={C++}]
+struct array_int_3 { int storage [3] ; } ;
+
+int main()
+{
+    array_int_10 a = { 0,1,2 } ;
+
+    array_int_10 b = a ;
+    // b.storage[0] == a.storage[0] 
+    // b.storage[1] == a.storage[1] 
+    // b.storage[2] == a.storage[2] 
+}
+\end{lstlisting}
+
+これはあたかも以下のように書いたかのように動く。
+
+\begin{lstlisting}[language={C++}]
+struct array_int_3
+{
+    int storage[3] ;
+
+    array_int_3( array_int_3 const & other )
+    {
+        std::copy(
+            std::begin(other.storage), std::end(other.storage),
+            std::begin(storage)
+        ) ;
+
+    }
+}
+\end{lstlisting}
+
+\texttt{operator []}も実装しよう。
+
+\begin{lstlisting}[language={C++}]
+struct array_int_10
+{
+    int storage[10] ;
+
+    int & operator [] ( std::size_t i )
+    {
+        return storage[i] ;
+    }
+} ;
+
+int main()
+{
+    array_int_10 a = {0,1,2,3,4,5,6,7,8,9} ;
+    a[3] = 0 ;
+    std::cout << a[6] ;
+}
+\end{lstlisting}
+
+\texttt{std::array}にはまださまざまなメンバーがある。1つずつ順番に学んでいこう。

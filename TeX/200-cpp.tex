@@ -1,0 +1,884 @@
+\hyperchapter{ch40}{Cプリプロセッサー}{Cプリプロセッサー}
+\index{Cぷりぷろせつさ@Cプリプロセッサー}
+
+CプリプロセッサーはC++がC言語から受け継いだ機能だ。CプリプロセッサーはソースコードをC++としてパースする前に、テキストをトークン単位で変形する処理のことだ。この処理はソースファイルをC++としてパースする前処理として行われる。CプリプロセッサーはC++ではなく別言語として認識すべきで、そもそもプログラミング言語ではなくマクロ言語だ。
+
+C++ではCプリプロセッサーが広く使われており、今後もしばらくは使われるだろう。読者がC++で書かれた既存のコードを読むとき、Cプリプロセッサーは避けて通れない。Cプリプロセッサーはいずれ廃止したい機能ではあるが、C++はいまだに廃止できていない。
+
+Cプリプロセッサーはプリプロセッシングディレクティブ（preprocessing directive）\index{ぷりぷろせつしんぐでいれくていぶ@プリプロセッシングディレクティブ}を認識し、トークン列を処理する。ディレクティブはソースファイルの文頭に文字\,\texttt{\#}\,\index{\#@\texttt{\#}}から始まり、改行文字で終わる。\texttt{\#}\,とディレクティブの間に空白文字を入れてもよい。
+
+\begin{lstlisting}[language={C++}]
+#define NOSPACE
+#    define SPACE
+\end{lstlisting}
+
+\hypersection{ch4001}{\#includeディレクティブ}
+\index{\#include@\texttt{\#include}}
+
+\texttt{\#include}は指定したファイルの内容をその場に挿入する。本質的にはコピペだ。C++では\,\texttt{\#include}はライブラリを利用するのに使われる。
+
+\texttt{\#include}は以下のいずれかの文法を持つ。
+
+\begin{lstlisting}[style=grammar]
+#include <ヘッダーファイルパス> 改行文字
+#include "(@\ifColor\textcolor[rgb]{0,0.533,0}{ヘッダーファイルパス}\else\textcolor{black}{ヘッダーファイルパス}\fi@)" 改行文字
+\end{lstlisting}
+
+\texttt{\#include}は指定したファイルパスのファイルの内容をその場所に挿入する。このファイルをヘッダーファイル\index{へつだふあいる@ヘッダーファイル}という。\texttt{<>}\,\index{<>@\texttt{<>}}によるファイルパスは、標準ライブラリやシステムのヘッダーファイルを格納したディレクトリーからヘッダーファイルを探す。\texttt{""}\,\index{\protect{""}@\texttt{\protect{""}}}によるファイルパスは、システム以外のディレクトリーからもヘッダーファイルを探す。例えばカレントディレクトリーなどだ。
+
+例えば、以下のようなヘッダーファイル\texttt{foo.h}があり、
+\begin{lstlisting}[language={C++}]
+// foo.h
+foo foo foo
+\end{lstlisting}
+以下のようなソースファイル\texttt{bar.cpp}がある場合、
+\begin{lstlisting}[language={C++}]
+// bar.cpp
+
+#include "foo.h"
+
+// end bar.cpp
+\end{lstlisting}
+\texttt{bar.cpp}をCプリプロセッサーにかけると、以下のようなソースファイルが出力される。
+
+\begin{lstlisting}[language={C++}]
+// bar.cpp
+
+// foo.h
+foo foo foo
+
+// end bar.h
+\end{lstlisting}
+
+このソースファイルはC++のソースファイルとしてはエラーとなるが、Cプリプロセッサーは単純にトークン列で分割したテキストファイルとしてソースファイルを処理するため、Cプリプロセッサーとしてはエラーにはならない。
+
+冒頭で述べたように、\texttt{\#include}の本質はコンパイラーによるコピペである。あるテキストファイルの内容をその場に挿入するコピペ機能を提供する。
+
+\texttt{\#include}は、ほかの言語でモジュール、importなどと呼ばれている機能を簡易的に提供する。C++の標準ライブラリを使うには、\texttt{<iostream>}\,や\,\texttt{<string>}\,や\,\texttt{<vector>}\,のようなヘッダーファイルを\,\texttt{\#include}する必要がある。
+
+\begin{lstlisting}[language={C++}]
+// iostreamライブラリを使う
+#include <iostream>
+// stringライブラリを使う
+#include <string>
+
+int main()
+{
+(@\ifTombow\pagebreak\fi@)
+    // <string>のライブラリ
+    std::string s("hello") ;
+    // iostreamのライブラリ
+    std::cout << s ;
+}
+\end{lstlisting}
+
+すでに述べたように\,\texttt{\#include}はファイルの内容をその場に挿入するだけであり、ほかの言語にあるモジュールのための高級な機能ではない。本書を執筆時点で規格策定中のC++20では、より高級なモジュール機能を追加する予定がある。
+
+同じヘッダーファイルを複数回\,\texttt{\#include}すると、当然複数回挿入される。
+
+以下のような\texttt{val.h}を、
+\begin{lstlisting}[language={C++}]
+// val.h
+inline int val ;
+\end{lstlisting}
+以下のように複数回\,\texttt{\#include}すると、
+\begin{lstlisting}[language={C++}]
+#include "val.h"
+#include "val.h"
+\end{lstlisting}
+以下のように置換される。
+\begin{lstlisting}[language={C++}]
+// val.h
+inline int val ;
+// val.h
+inline int val ;
+\end{lstlisting}
+
+これは\texttt{val}の定義が重複しているためエラーとなる。
+
+しかし、ヘッダーファイルを一度しか\,\texttt{\#include}しないようにするのは困難だ。なぜならば、ヘッダーファイルはほかのヘッダーファイルから間接的に\,\texttt{\#include}されることもあるからだ。
+
+\begin{lstlisting}[language={C++}]
+// lib_f.h
+
+#include "val.h"
+
+int f() ;
+\end{lstlisting}
+
+\begin{lstlisting}[language={C++}]
+// lib_g.h
+
+#include "val.h"
+
+int g() ;
+\end{lstlisting}
+
+\begin{lstlisting}[language={C++}]
+// main.cpp
+
+#include "lib_f.h"
+#include "lib_g.h"
+
+int main()
+{
+    int result = f() + g() ;
+}
+\end{lstlisting}
+
+この\texttt{main.cpp}をCプリプロセッサーにかけると以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+// main.cpp
+
+// lib_f.h
+
+// val.h
+inline int val ;
+
+int f() ;
+
+// lib_g.h
+
+// val.h
+inline int val ;
+
+int g() ;
+
+int main()
+{
+    int result = f() + g() ;
+}
+\end{lstlisting}
+
+これは\texttt{val}の定義が重複しているためエラーとなる。
+
+この問題に対処するためには、複数回\,\texttt{\#include}されると困るヘッダーファイルでは、インクルードガード（include guard）\index{いんくるどがど@インクルードガード}と呼ばれている方法を使う。
+
+\begin{lstlisting}[language={C++}]
+// val.h
+
+#ifndef INCLUDE_GUARD_HEADER_VAL_H
+#define INCLUDE_GUARD_HEADER_VAL_H
+
+inline int val ;
+
+#endif
+\end{lstlisting}
+
+このように記述した\texttt{val.h}を複数回\,\texttt{\#include}しても、最初の\texttt{ifndef}のみがコンパイル対象になるため、問題は起こらない。
+
+インクルードガードは以下の様式を持つ。
+
+\begin{lstlisting}[style=grammar]
+#ifndef 十分にユニークなマクロ名
+#define 十分にユニークなマクロ名 
+
+// 重複してコンパイルされたくないコードをここに書く
+
+#endif
+\end{lstlisting}
+
+\texttt{十分にユニークなマクロ名}は全ソースファイル中で衝突しないそのヘッダーに固有のマクロ名を使う。慣習的に推奨される方法としてはすべて大文字を使い、十分に長いマクロ名にすることだ。
+
+\hypersection{ch4002}{\#define}
+\index{\#define@\texttt{\#define}}
+
+\texttt{\#define}はマクロ置換を行う。マクロにはオブジェクト風マクロ（object--like macro）と関数風マクロ（function--like macro）がある。風というのは、マクロはオブジェクトでも関数でもないからだ。ただ、文法上オブジェクトや関数の似ているだけで、実態はトークン列の愚直な置換だ。
+
+\hypersubsection{ch400201}{オブジェクト風マクロ}
+\index{おぶじえくとふうまくろ@オブジェクト風マクロ}
+
+オブジェクト風マクロの文法は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+#define マクロ名 置換リスト　改行文字
+\end{lstlisting}
+
+\texttt{\#define}以降の行では、マクロ名が置換リストに置き換わる。
+
+\begin{lstlisting}[language={C++}]
+#define ONE             1
+#define ONE_PLUS_ONE    ONE + ONE
+#define (@\textcolor{black}{\texttt{GNU GNU's is NOT UNIX}}@)
+
+ONE
+ONE_PLUS_ONE
+\end{lstlisting}
+
+これをプリプロセスすると以下のソースコードになる。
+
+\begin{lstlisting}[language={C++}]
+1
+1 + 1
+\end{lstlisting}
+
+マクロ名\texttt{ONE}は\texttt{1}に置換される。
+
+マクロ名\texttt{ONE\_PLUS\_ONE}は\texttt{ONE + ONE}に置換される。置換された結果に別のマクロ名があれば、そのマクロ名も置換される。
+
+あるマクロ名を置換した結果、そのマクロ名が現れても再帰的に置換されることはない。
+
+\begin{lstlisting}[language={C++}]
+#define GNU (@\textcolor{black}{\texttt{GNU's NOT UNIX!}}@)
+
+GNU
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+(@\textcolor{black}{\texttt{GNU's NOT UNIX!}}@)
+\end{lstlisting}
+
+マクロ名\texttt{GNU}を展開するとトークン`GNU'が現れるが、これは置換されたマクロ名と同じなので、再帰的に置換されることはない。
+
+\hypersubsection{ch400202}{関数風マクロ}
+\index{かんすうふうまくろ@関数風マクロ}
+
+関数風マクロの文法は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+#define マクロ名( 識別子リスト ) 置換リスト 改行文字
+\end{lstlisting}
+
+関数風マクロはあたかも関数のように記述できる。関数風マクロに実引数として渡したトークン列は、置換リスト内で仮引数としての識別子で参照できる。
+
+\begin{lstlisting}[language={C++}]
+#define NO_ARGUMENT()           No argument
+#define ONE_ARGUMENT( ARG )     begin ARG end
+#define MAKE_IT_DOUBLE( ARG )   ONE_ARGUMENT( ARG ARG )
+
+NO_ARGUMENT()
+ONE_ARGUMENT( foo bar )
+MAKE_IT_DOUBLE( foo bar )
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+No argument
+begin foo bar end
+begin foo bar foo bar end
+\end{lstlisting}
+
+複数の引数を取るマクロへの実引数は、カンマで区切られたトークン列を渡す。
+
+\begin{lstlisting}[language={C++}]
+#define TWO( A, B ) A B
+#define THREE( A, B, C ) C B A
+
+TWO( 1 2, 3 4 )
+THREE( 1, 2, 3 )
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+1 2 3 4
+3 2 1
+\end{lstlisting}
+
+ただし、括弧で囲まれたトークン列の中にあるカンマは、マクロの実引数の区切りとはみなされない。
+
+\begin{lstlisting}[language={C++}]
+#define MACRO( A ) A
+
+MACRO( (a,b) )
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+(a,b)
+\end{lstlisting}
+
+\hypersubsection{ch400203}{\texttt{\_}\texttt{\_}VA\texttt{\_}ARGS\texttt{\_}\texttt{\_} (可変長引数マクロ)}
+\index{\_\_VA\_ARGS\_\_@\texttt{\_\_VA\_ARGS\_\_}}\index{かへんちようひきすう@可変長引数マクロ}
+
+\texttt{\#define}の識別子リストを\texttt{...}だけにしたマクロは、可変長引数マクロになる。このときマクロの実引数のトークン列は、置換リストの中で\,\texttt{\_\_VA\_ARGS\_\_}\,として参照できる。
+
+\begin{lstlisting}[language={C++}]
+#define MACRO(...) __VA_ARGS__
+
+MACRO( You can write , and ,, or even ,,,, )
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+You can write , and ,, or even ,,,,
+\end{lstlisting}
+
+カンマも含めてすべてのトークン列がそのまま\,\texttt{\_\_VA\_ARGS\_\_}\,で参照できる。
+
+可変長引数マクロの識別子リストに仮引数と\texttt{...}を書いたマクロの置換リストでは、仮引数の数だけの実引数は仮引数で参照され、残りが\,\texttt{\_\_VA\_ARGS\_\_}\,で参照される。
+
+\begin{lstlisting}[language={C++}]
+#define MACRO( X, Y, Z, ... ) X Y Z and __VA_ARGS__
+
+MACRO( 1,2,3,4,5,6 )
+\end{lstlisting}
+
+これは以下のように置換される
+
+\begin{lstlisting}[language={C++}]
+1 2 3 and 4,5,6
+\end{lstlisting}
+
+\texttt{X}, \texttt{Y}, \texttt{Z}にそれぞれ\texttt{1}, \texttt{2}, \texttt{3}が入り、\texttt{\_\_VA\_ARGS\_\_}には\texttt{4}, \texttt{5}, \texttt{6}が入る。
+
+\hypersubsection{ch400204}{\texttt{\_}\texttt{\_}VA\texttt{\_}OPT\texttt{\_}\texttt{\_}}
+\index{\_\_VA\_OPT\_\_@\texttt{\_\_VA\_OPT\_\_}}
+
+\texttt{\_\_VA\_OPT\_\_}は可変長引数マクロで\,\texttt{\_\_VA\_ARGS\_\_}\,にトークン列が渡されたかどうかで置換結果を変えることができる。
+
+\texttt{\_\_VA\_OPT\_\_}は可変引数マクロの置換リストでのみ使える。\texttt{\_\_VA\_OPT\_\_(content)}は\,\texttt{\_\_VA\_ARGS\_\_}\,{\allowbreak}にトークンがない場合はトークンなしに置換され、トークンがある場合はトークン列\texttt{content}に置換される。
+
+\begin{lstlisting}[language={C++}]
+#define MACRO( X, ... ) f( X __VA_OPT__(,) __VA_ARGS__ )
+
+MACRO(1)
+MACRO(1,2)
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+f( 1 )
+f( 1, 2 )
+\end{lstlisting}
+
+\texttt{MACRO(1)}は\texttt{X}が\texttt{1}になり、\texttt{\_\_VA\_ARGS\_\_}にはトークンがないので、\texttt{\_\_VA\_OPT\_\_(,)}は空に置換される。結果として\texttt{f(1)}となる。
+
+\texttt{MACRO(1,2)}は、\texttt{X}が\texttt{1}になり、\texttt{\_\_VA\_ARGS\_\_}にはトークン\texttt{2}が入るので、\texttt{\_\_VA\_OPT\_\_(,)}は\,\texttt{,}\,に置換される。結果として\texttt{f(1,2)}となる。
+
+\texttt{\_\_VA\_OPT\_\_}は\,\texttt{\_\_VA\_ARGS\_\_}\,に実引数となるトークン列がなければ空に置換されるので、このようにトークン列の有無によってカンマなどの文法上必須のトークン列の有無を切り替えたい場合に使うことができる。
+
+\hypersubsection{ch400205}{\#演算子}
+\index{\#@\texttt{\#}}
+
+\texttt{\#}\,はマクロ実引数を文字列リテラルにする。
+
+\texttt{\#}\,は関数風マクロの置換リストの中のみで使うことができる。\texttt{\#}\,は関数風マクロの仮引数の識別子の直前に書くことができる。\texttt{\#}\,が直前に書かれた識別子は、マクロ実引数のトークン列の文字列リテラルになる。
+
+\begin{lstlisting}[language={C++}]
+#define STRING( X ) # X
+
+STRING( hello )
+STRING( hello world )
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+"hello"
+"hello world"
+\end{lstlisting}
+
+また、可変長マクロと組み合わせた場合、
+
+\begin{lstlisting}[language={C++}]
+#define STRING( ... ) # __VA_ARGS__
+
+STRING()
+STRING( hello,world )
+\end{lstlisting}
+
+以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+""
+"hello,world"
+\end{lstlisting}
+
+\hypersubsection{ch400206}{\#\#演算子}
+\index{\#\#@\texttt{\#\#}}
+
+\texttt{\#\#}\,はマクロ実引数の結合を行う。
+
+\texttt{\#\#}\,は関数風マクロの置換リストの中にしか書けない。\texttt{\#\#}\,は両端にマクロの仮引数の識別子を書かなければならない。\texttt{\#\#}\,は両端の識別子の参照するマクロ実引数のトークン列を結合した置換を行う。
+
+\begin{lstlisting}[language={C++}]
+#define CONCAT( A, B ) A ## B
+
+CONCAT( foo, bar )
+CONCAT( aaa bbb, ccc ddd)
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+foobar
+aaa bbbccc ddd
+\end{lstlisting}
+
+結合した結果のトークンはさらにマクロ置換の対象となる。
+
+\begin{lstlisting}[language={C++}]
+#define CONCAT( A, B ) A ## B
+#define FOOBAR hello
+
+CONCAT( FOO, BAR )
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+hello
+\end{lstlisting}
+
+\texttt{CONCAT(FOO,BAR)}は\texttt{FOOBAR}に置換され、\texttt{FOOBAR}という名前のマクロ名があるためにさらに\texttt{hello}に置換される。
+
+\hypersubsection{ch400207}{複数行の置換リスト}
+
+\texttt{\#define}ディレクティブの置換リストは複数行に渡って書くことができない。これは文法上の制約によるものだ。\texttt{\#define}ディレクティブは改行文字で終端される。
+
+しかし、関数やクラスを生成するような複雑なマクロは、複数行に分けて書きたい。
+
+\begin{lstlisting}[language={C++}]
+#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE
+#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )
+
+#define DEFINE_LIST( TYPE ) struct LIST_NAME(TYPE){TYPE value ;LIST_NAME(TYPE) * prev ;LIST_NAME(TYPE) * next ;} ; 
+
+DEFINE_LIST(int)
+DEFINE_LIST(double)
+\end{lstlisting}
+
+この場合、行末にバックスラッシュに続けて改行を書くと、バックスラッシュと改行がプリプロセッサーによって削除される。
+
+上の例は以下のように、プリプロセッサーとしては比較的わかりやすく書くことができる。
+
+\begin{lstlisting}[language={C++}]
+#define LIST_NAME2( PREFIX, TYPE ) PREFIX ## TYPE
+#define LIST_NAME( TYPE ) LIST_NAME2( list_, TYPE )
+
+#define DEFINE_LIST( TYPE )\
+struct LIST_NAME(TYPE)\
+{\
+    TYPE value ;\
+    LIST_NAME(TYPE) * prev ;\
+    LIST_NAME(TYPE) * next ;\
+} ; 
+
+DEFINE_LIST(int)
+DEFINE_LIST(double)
+\end{lstlisting}
+
+C++ではテンプレートがあるために、このようなマクロを書く必要はない。
+
+\hypersubsection{ch400208}{\#undefディレクティブ}
+\index{\#undef@\texttt{\#undef}}
+
+\texttt{\#undef}はそれ以前に定義されたマクロを削除する。
+
+\begin{lstlisting}[language={C++}]
+#define FOO BAR
+FOO
+#undef FOO
+FOO
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+BAR
+FOO
+\end{lstlisting}
+
+\hypersection{ch4003}{条件付きソースファイル選択}
+
+\texttt{\#if}, \texttt{\#elif}, \texttt{\#else}, \texttt{\#endif}, \texttt{\#ifdef}, \texttt{\#ifndef}は条件付きのソースファイルの選択（conditional inclusion）を行う。これは条件付きコンパイル\index{じようけんつきこんぱいる@条件付きコンパイル}に近い機能を提供する。
+
+\hypersubsection{ch400301}{プリプロセッサーの定数式}
+\index{ぷりぷろせつさ@プリプロセッサー!ていすうしき@定数式}
+
+プリプロセッサーで使える条件式は、C++の条件式と比べてだいぶ制限がある。基本的には整数定数式で、\texttt{true}, \texttt{false}が使えるほか、\texttt{123}, \texttt{1+1}, \texttt{1 == 1}, \texttt{1 < 1}のような式も使える。ただし、識別子はすべてマクロ名として置換できるものは置換され、置換できない識別子は、\texttt{true}, \texttt{false}以外はキーワードも含めてすべて\texttt{0}に置換される。
+
+したがって、プリプロセッサーで以下のように書くと、
+\begin{lstlisting}[language={C++}]
+#if UNDEFINED
+#endif
+\end{lstlisting}
+以下のように書いたものと同じになる。
+\begin{lstlisting}[language={C++}]
+#if 0
+#endif
+\end{lstlisting}
+
+プリプロセッサーであるので、C++としての\texttt{constexpr}変数や\texttt{constexpr}関数も使えない。
+
+\begin{lstlisting}[language={C++}]
+constexpr int x = 1 ;
+
+#if x
+hello
+#endif
+\end{lstlisting}
+
+これは以下のように置換される。
+
+\begin{lstlisting}[language={C++}]
+constexpr int x = 1 ;
+\end{lstlisting}
+
+プリプロセッサーはC++の文法と意味を理解しない。単にトークン列として処理する。
+
+以下の例はエラーになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+constexpr int f() { return 1 ; }
+
+#if f()
+#endif
+\end{lstlisting}
+
+なぜならば、\texttt{0()}は整数定数式として合法なコードではないからだ。何度も言うように、プリプロセッサーはC++の文法と意味を理解しない。
+
+プリプロセッサーの定数式では、特殊なマクロ風の式を使うことができる。\texttt{defined}\index{defined@\texttt{defined}}と\,\texttt{\_\_has\_include}\index{\_\_has\_include@\texttt{\_\_has\_include}}だ。
+
+\texttt{defined}は以下の文法を持つ。
+
+\begin{lstlisting}[style=grammar]
+defined 識別子
+defined ( 識別子 )
+\end{lstlisting}
+
+\texttt{defined}は識別子がそれ以前の行で\,\texttt{\#define}でマクロとして定義されていて\,\texttt{\#undef}で取り消されていない場合\texttt{1}になり、それ以外の場合\texttt{0}になる。
+
+\begin{lstlisting}[language={C++}]
+// #if 0
+#if defined MACRO
+#endif
+
+#define MACRO
+
+// #if 1
+#if defined MACRO
+#endif
+
+#undef MACRO
+
+// #if 0
+#if defined MACRO
+#endif
+\end{lstlisting}
+
+\texttt{\_\_has\_include}は以下の文法を持つ。
+
+\begin{lstlisting}[style=grammar]
+__has_include ( < ヘッダーファイル名 > )
+__has_include ( " ヘッダーファイル名 " )
+__has_include ( 文字列リテラル )
+__has_include ( < マクロ > )
+\end{lstlisting}
+
+1番目と2番目は、指定されたヘッダーファイル名がシステムに存在する場合\texttt{1}に、そうでない場合\texttt{0}になる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// <filesystem>の存在を確認してから#includeする
+#if __has_include(<filesystem>)
+#   include <filesystem>
+#endif
+
+// "mylibrary.h"の存在を確認してから#includeする
+#if __has_include("mylibrary.h")
+#   include "mylibrary.h"
+#endif
+\end{lstlisting}
+
+3番目と4番目は、1番目と2番目が適用できない場合に初めて考慮される。その場合、まず通常通りにプリプロセッサーのマクロ置換が行われる。
+
+\begin{lstlisting}[language={C++}]
+#define STDIO "stdio.h"
+
+#if __has_include( STDIO )
+#endif
+
+#define STDLIB stdlib.h
+
+#if __has_include( <STDLIB> )
+#endif
+\end{lstlisting}
+
+\hypersubsection{ch400302}{\#ifディレクティブ}
+\index{\#if@\texttt{\#if}}
+
+\texttt{\#if}ディレクティブは以下の文法を持つ。
+
+\begin{lstlisting}[style=grammar]
+#if 定数式 改行文字
+
+#endif
+\end{lstlisting}
+
+もし定数式がゼロの場合、\texttt{\#if}と\,\texttt{\#endif}で囲まれたトークン列は処理されない。定数式が非ゼロの場合、処理される。
+
+\begin{lstlisting}[language={C++}]
+#if 0
+This line will be skipped.
+#endif
+
+#if 1
+This line will be processed.
+#endif
+\end{lstlisting}
+
+これをプリプロセスすると以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+This line will be processed.
+\end{lstlisting}
+
+\texttt{\#if 0}は処理されないので、\texttt{\#endif}までのトークン列は消える。
+
+\hypersubsection{ch400303}{\#elifディレクティブ}
+\index{\#elif@\texttt{\#elif}}
+
+\texttt{\#elif}ディレクティブは、C++でいう\texttt{else if}に相当する。
+
+\begin{lstlisting}[style=grammar]
+#elif 定数式 改行文字
+\end{lstlisting}
+
+\texttt{\#elif}ディレクティブは\,\texttt{\#if}ディレクティブと\,\texttt{\#endif}ディレクティブの間に複数書くことができる。\texttt{\#elif}のある\,\texttt{\#if}が処理される場合、\texttt{\#if}から\,\texttt{\#elif}の間のトークン列が処理される、\texttt{\#if}が処理されない場合、\texttt{\#elif}が\,\texttt{\#if}と同じように定数式を評価して処理されるかどうかが判断される。\texttt{\#elif}が処理される場合、処理されるトークン列は次の\,\texttt{\#elif}もしくは\,\texttt{\#endif}までの間のトークン列になる。
+
+以下の例は、すべて\texttt{YES}のトークンがある行のみ処理される。
+
+\begin{lstlisting}[language={C++}]
+#if 1
+YES
+#elif 1
+NO
+#endif
+
+#if 0
+NO
+#elif 1
+YES
+#endif
+
+#if 0
+NO
+#elif 1
+YES
+#elif 1
+NO
+#endif
+
+#if 0
+NO
+#elif 0
+NO
+#elif 1
+YES
+#endif
+\end{lstlisting}
+
+プリプロセスした結果は以下のとおり。
+
+\begin{lstlisting}[language={C++}]
+YES
+YES
+YES
+YES
+\end{lstlisting}
+
+\hypersubsection{ch400304}{\#elseディレクティブ}
+\index{\#else@\texttt{\#else}}
+
+\texttt{\#else}ディレクティブはC++でいう\texttt{else}に相当する。
+
+\texttt{\#else}ディレクティブは\,\texttt{\#if}ディレクティブと\,\texttt{\#endif}ディレクティブの間に書くことができる。もし\,\texttt{\#if}と\,\texttt{\#elif}ディレクティブが処理されない場合で\,\texttt{\#else}ディレクティブがある場合、\texttt{\#else}から\,\texttt{\#endif}までのトークン列が処理される。
+
+以下の例は、\texttt{YES}のトークンがある行のみ処理される。
+
+\begin{lstlisting}[language={C++}]
+#if 1
+YES
+#else
+NO
+#endif
+
+#if 0
+NO
+#else
+YES
+#endif
+
+#if 0
+NO
+#elif 1
+YES
+#else
+NO
+#endif
+\end{lstlisting}
+
+\hypersubsection{ch400305}{\#ifdef, \#ifndefディレクティブ}
+\index{\#ifdef@\texttt{\#ifdef}}\index{\#ifndef@\texttt{\#ifndef}}
+
+\begin{lstlisting}[style=grammar]
+#ifdef 識別子
+#ifndef 識別子
+\end{lstlisting}
+は、それぞれ以下と同じ意味になる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[style=grammar]
+#if defined 識別子
+#if !defined 識別子
+\end{lstlisting}
+
+例、
+
+\begin{lstlisting}[language={C++}]
+#ifdef MACRO
+#endif
+
+// 上と同じ
+#if defined MACRO
+#endif
+
+
+#ifndef MACRO
+#endif
+
+// 上と同じ
+#if !defined MACRO
+#endif
+\end{lstlisting}
+
+\hypersection{ch4004}{\#lineディレクティブ}
+\index{\#line@\texttt{\#line}}
+
+\texttt{\#line}ディレクティブはディレクティブの次の行の行番号と、ソースファイル名を変更する。これは人間が使うのではなく、ツールによって生成されることを想定した機能だ。
+
+以下の文法の\,\texttt{\#line}ディレクティブは、\texttt{\#line}ディレクティブの次の行の行番号をあたかも数値で指定した行番号であるかのように振る舞わせる。
+
+\begin{lstlisting}[style=grammar]
+#line 数値 改行文字
+\end{lstlisting}
+
+数値として0もしくは2147483647より大きい数を指定した場合の挙動は未定義となる。
+
+以下の例はコンパイルエラーになるが、コンパイルエラーメッセージはあたかも102行目に問題があるかのように表示される。
+
+\begin{lstlisting}[language={C++}]
+// 1行目
+// 2行目
+#line 100 // 3行目
+// 100行目
+// 101行目
+ill-formed line // 102行目
+\end{lstlisting}
+
+以下の例は\texttt{999}を出力するコードだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+#include <iostream>
+int main()
+{
+#line 999
+    std::cout << __LINE__ ;
+}
+\end{lstlisting}
+
+以下の文法の\,\texttt{\#line}ディレクティブは、次の行の行番号を数値にした上で、ソースファイル名をソースファイル名にする。
+
+\begin{lstlisting}[style=grammar]
+#line 数値 "(@\ifColor\textcolor[rgb]{0,0.533,0}{ソースファイル名}\else\textcolor{black}{ソースファイル名}\fi@)" 改行文字
+\end{lstlisting}
+
+例、
+
+\begin{lstlisting}[language={C++}]
+#line 42 "answer.cpp"
+\end{lstlisting}
+
+以下の文法の\,\texttt{\#line}ディレクティブは、プリプロセッサートークン列をプリプロセスし、上の2つの文法のいずれかに合致させる。
+
+\begin{lstlisting}[style=grammar]
+#line プリプロセッサートークン列 改行文字
+\end{lstlisting}
+
+例、
+
+\begin{lstlisting}[language={C++}]
+#define LINE_NUMBER 123
+#line LINE_NUMBER
+\end{lstlisting}
+
+\hypersection{ch4005}{\#errorディレクティブ}
+\index{\#error@\texttt{\#error}}
+
+\texttt{\#error}ディレクティブはコンパイルエラーを引き起こす。
+
+\begin{lstlisting}[style=grammar]
+#error 改行文字
+#error トークン列 改行文字
+\end{lstlisting}
+
+\texttt{\#error}によるコンパイラーのエラーメッセージには\,\texttt{\#error}のトークン列を含む。
+
+\texttt{\#error}の利用例としては、\texttt{\#if}と組み合わせるものがある。以下の例は\texttt{CHAR\_BIT}が8でなければコンパイルエラーになるソースファイルだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+#include <climits>
+
+#if CHAR_BIT != 8
+#error CHAR_BIT != 8 implementation is not supported.
+#endif
+\end{lstlisting}
+
+\texttt{\#if}が処理されなければ、その中にある\,\texttt{\#error}も処理されないので、コンパイルエラーにはならない。
+
+\hypersection{ch4006}{\#pragma}
+\index{\#pragma@\texttt{\#pragma}}
+
+\texttt{\#pragma}ディレクティブは実装依存の処理を行う。\texttt{\#pragma}はコンパイラー独自の拡張機能を追加する文法として使われている。
+
+文法は以下のとおり。
+
+\begin{lstlisting}[style=grammar]
+#pragma プリプロセッサートークン列 改行文字
+\end{lstlisting}
+
+C++では属性が追加されたために、\texttt{\#pragma}を使う必要はほとんどなくなっている。
+
+\hypersection{ch4007}{Nullディレクティブ}
+
+\texttt{Null}ディレクティブとは何もしないプリプロセッサーディレクティブだ。
+
+\begin{lstlisting}[style=grammar]
+# 改行文字
+\end{lstlisting}
+
+つまり、単に\,\texttt{\#}\,とだけ書いた行はエラーにはならない。
+
+\hypersection{ch4008}{定義済みマクロ名}
+\index{ていぎずみまくろめい@定義済みマクロ名}
+
+いくつかのマクロ名がプリプロセッサーによってあらかじめ定義されている。
+
+\begin{small}
+%\begin{longtable}[l]{@{}lcc@{}}
+\begin{longtable}[l]{p{54mm}p{22mm}p{60mm}}
+\hline%\toprule
+\textsf{マクロ名} & \textsf{値} & \textsf{意味}\tabularnewline
+\hline%\midrule
+\endhead
+\texttt{\_\_cplusplus} & \texttt{201703L} & C++17時点での値{\newline}将来の規格で増やされる\tabularnewline
+\texttt{\_\_DATE\_\_} & \texttt{"Mmm dd yyyy"} & ソースファイルがプリプロセスされた日付{\newline}\texttt{Mmm}は月、\texttt{dd}は日、\texttt{yyyy}は年{\newline}月の文字列は\texttt{asctime}が生成するものと同じ{\newline}日が1桁の場合、\texttt{dd}の最初の文字は空白文字\tabularnewline
+\texttt{\_\_FILE\_\_} & 文字列リテラル & ソースファイルの名前の文字列リテラル\tabularnewline
+\texttt{\_\_LINE\_\_} & 整数リテラル & ソースファイルの現在の行番号\tabularnewline
+\texttt{\_\_STDC\_HOSTED\_\_} & 整数リテラル & ホスト実装の場合1{\newline}フリースタンディング実装の場合0\tabularnewline
+\texttt{\_\_STDCPP\_DEFAULT\_NEW\_ALIGNMENT\_\_} & 整数リテラル & アライメント\tabularnewline
+\hline%\bottomrule
+\end{longtable}
+\end{small}

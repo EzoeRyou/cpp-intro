@@ -1,0 +1,1406 @@
+\hypersection{ch2702}{文法上のポインター}
+\index{ぽいんた@ポインター!ぶんぽうじようの@文法上の〜}
+
+ポインターが難しいと言われる理由の1つに、ポインターの文法が難しい問題がある。
+
+\hypersubsection{ch270201}{ポインターとconstの関係}
+
+型としてのポインターは、ある型\texttt{T}があるときに、\texttt{T}へのポインター型となる。
+
+\texttt{T}へのポインター型は\texttt{T *}\,と書く。
+\index{ぽいんたがた@ポインター型}\index{\protect{*}@\texttt{\protect{*}}}\index{ぽいんた@ポインター!*@\texttt{*}}
+
+\begin{lstlisting}[language={C++}]
+// intへのポインター型
+using t1 = int * ;
+// doubleへのポインター型
+using t2 = double * ;
+// std::stringへのポインター型
+using t3 = std::string * ;
+// std::array<int,5>へのポインター型
+using t4 = std::array<int,5> * ;
+// std::array<double,10>へのポインター型
+using t5 = std::array<double,10> * ;
+\end{lstlisting}
+
+リファレンスや\texttt{const}も同じだ。
+\index{const@\texttt{const}}
+
+\begin{lstlisting}[language={C++}]
+// int型へのポインター型
+using t1 = int * ;
+// int型へのリファレンス型
+using t2 = int & ;
+// どちらも同じconstなint型
+using t3 = const int ;
+using t4 = int const ;
+\end{lstlisting}
+
+\texttt{const int}と\texttt{int const}は同じ型だ。この場合、\texttt{const}は\texttt{int}型のあとに付いても前に付いても同じ意味になる。
+
+すると当然の疑問が生じる。組み合わせるとどうなるのかということだ。
+
+ポインター型へのリファレンス型はできる。
+\index{りふあれんすがた@リファレンス型}
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// int *型へのリファレンス
+using type = int * & ;
+\end{lstlisting}
+
+リファレンス型へのポインター型はできない。
+
+\begin{lstlisting}[language={C++}]
+// エラー、 できない
+using error = int & * ;
+\end{lstlisting}
+
+理由は、リファレンスへのポインターというのは意味がないからだ。ポインターへのリファレンスは意味がある。
+
+リファレンスからポインターの値を得るには、参照先のオブジェクトと同じく\,\texttt{\&}\,\index{\&@\texttt{\&}}を使う。
+
+\begin{lstlisting}[language={C++}]
+int data { } ;
+int & ref = data ;
+// &dataと同じ
+int * ptr = &ref ;
+\end{lstlisting}
+
+リファレンスは参照先のオブジェクトとまったく同じように振る舞うのでリファレンス自体のポインターの値を得ることはできない。
+
+ポインターのリファレンスを得るのは、ポインター以外の値とまったく同じだ。
+
+\begin{lstlisting}[language={C++}]
+int * ptr = nullptr ;
+// ptrを参照する
+int * & ref = ptr ;
+
+int data { } ;
+// ptrの値が&dataになる。
+ref = &data ;
+\end{lstlisting}
+
+\texttt{const}とポインターの組み合わせは難しい。
+
+まず型\texttt{T}とその\texttt{const}版がある。
+\index{T@\texttt{T}!const@\texttt{const}版}
+
+\begin{lstlisting}[language={C++}]
+using T = int ;
+using const_T = const T ;
+\end{lstlisting}
+
+そして型\texttt{T}とそのポインター版がある。
+\index{T@\texttt{T}!ぽいんたばん@ポインター版}
+
+\begin{lstlisting}[language={C++}]
+using T = int ;
+using T_pointer = T * ;
+\end{lstlisting}
+
+これを組み合わせると、以下のようになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// 型T
+using T = int ;
+// どちらもconstなT
+using const_T_1 = const T ;
+using const_T_2 = T const ;
+// Tへのポインター
+using T_pointer = T * ;
+
+// どちらもconstなTへのポインター
+using const_T_pointer_1 = const T * ;
+using const_T_pointer_2 = T const * ;
+
+// Tへのconstなポインター
+using T_const_pointer = T * const ;
+
+// どちらもconstなTへのconstなポインター
+using const_T_const_pointer_1 = const T * const ;
+using const_T_const_pointer_2 = T const * const ;
+\end{lstlisting}
+
+順番に見ていこう。まずは組み合わせない型から。
+
+\begin{lstlisting}[language={C++}]
+using T = int ;
+// どちらもconstなT
+using const_T_1 = const T ;
+using const_T_2 = T const ;
+// Tへのポインター
+using T_pointer = T * ;
+\end{lstlisting}
+
+\texttt{T}はここでは\texttt{int}型だ。\texttt{T}型はどんな型でもよい。
+
+\texttt{const T}と\texttt{T const}が同じ型であることを思い出せば、\texttt{const\_T\_1}と\texttt{const\_T\_2}は同じ型であることがわかるだろう。
+
+\texttt{T\_pointer}は\texttt{T}へのポインターだ。
+
+次を見ていこう。
+
+\begin{lstlisting}[language={C++}]
+// どちらもconstなTへのポインター
+using const_T_pointer_1 = const T * ;
+using const_T_pointer_2 = T const * ;
+\end{lstlisting}
+
+これはどちらも同じ型だ。\texttt{const}な\texttt{T}へのポインターとなる。わかりにくければ以下のように書いてもよい。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// constなT
+using const_T = const int ;
+// constなTへのポインター
+using const_T_pointer = const_T * ;
+\end{lstlisting}
+
+実際に使ってみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    const int data = 123 ;
+    // int const *でもよい
+    const int * ptr = &data ;
+
+    // 読み込み
+    int read = *ptr ;
+}
+\end{lstlisting}
+
+\texttt{const}な\texttt{int}へのポインターなので、このポインターの参照先を変更することはできない。ポインターは変更できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    const int x {} ;
+    const int * ptr = &x ;
+
+    // エラー
+    // constな参照先を変更できない
+    *ptr = 0 ;
+
+    int y {} ;
+    // OK
+    // ポインターはconstではないので値が変更できる
+    ptr = &y ;
+}
+\end{lstlisting}
+
+\texttt{const}なのは\texttt{int}であってポインターではない。\texttt{const int *}、もしくは\texttt{int const *}\,は参照先の\texttt{int}が\texttt{const}なので、参照先を変更することができない。ポインターは\texttt{const}ではないので、ポインターの値は変更できる。
+
+\texttt{const}な\texttt{T}型へのリファレンスで\texttt{const}ではない\texttt{T}型のオブジェクトを参照できるように、\texttt{const}な\texttt{T}型へのポインターから\texttt{const}ではない\texttt{T}型のオブジェクトを参照できる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // constではない
+    int data { } ;
+
+    // OK
+    const int & ref = data ;
+    // OK
+    const int * ptr = &data ;
+}
+\end{lstlisting}
+
+この場合、リファレンスやポインターは\texttt{const int}扱いなので、リファレンスやポインターを経由して読むことはできるが変更はできない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int data = 123 ;
+    const int * ptr = &data ;
+    // エラー
+    // 変更できない
+    *ptr = 0 ;
+
+    // 変更できる
+    data = 0 ;
+}
+\end{lstlisting}
+
+その次は\texttt{const}なポインターだ。
+
+\begin{lstlisting}[language={C++}]
+// Tへのconstなポインター
+using T_const_pointer = T * const ;
+\end{lstlisting}
+
+これはポインターが\texttt{const}なのであって、\texttt{T}は\texttt{const}ではない。したがってポインターを経由して参照先を変更することはできるが、ポインターの値自体は変更できない型だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int data { } ;
+
+    // constなポインター
+    int * const ptr = &data ;
+
+    // OK、参照先は変更できる
+    *ptr = 1 ;
+
+(@\ifTombow\pagebreak\fi@)
+    // エラー、 値は変更できない
+    ptr = nullptr ;
+}
+\end{lstlisting}
+
+最後は\texttt{const}な\texttt{T}への\texttt{const}なポインターだ。
+
+\begin{lstlisting}[language={C++}]
+// どちらもconstなTへのconstなポインター
+using const_T_const_pointer_1 = const T * const ;
+using const_T_const_pointer_2 = T const * const ;
+\end{lstlisting}
+
+これは\texttt{const}な\texttt{T}なので、ポインターを経由して参照先を変更できないし、\texttt{const}なポインターなのでポインターの値も変更できない。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int data = 123 ;
+
+    int const * const ptr = &data ;
+
+    // OK、参照先は読める
+    int read = *ptr ;
+    // エラー、 参照先は変更できない
+    *ptr = 0 ;
+    // エラー、 ポインターは変更できない
+    ptr = nullptr ;
+}
+\end{lstlisting}
+
+\hypersubsection{ch270202}{ポインターのポインター}
+\index{ぽいんた@ポインター!へのぽいんた@〜へのポインター}
+
+ポインター型というのは、「ある型\texttt{T}へのポインター」という形で表現できる。この型\texttt{T}にはどんな型でも使うことができる。ところで、ポインターというのは型だ。もし\texttt{T}がポインター型の場合はどうなるのだろう。
+
+例えば、「\texttt{T}型へのポインター型」で、型\texttt{T}が「\texttt{U}型へのポインター型」の場合、全体としては「\texttt{U}型へのポインター型へのポインター型」になる。これはC++の文法では\texttt{U **}\,となる。
+
+C++のコードで確認しよう。
+
+\ifTombow\enlargethispage{3mm}\fi
+\begin{lstlisting}[language={C++}]
+// 適当なU型
+using U = int ;
+// ポインターとしてのT型
+using T = U * ;
+// T型へのポインター型
+// つまりU型へのポインター型へのポインター型
+// つまりU **
+using type = T * ;
+\end{lstlisting}
+
+具体的に書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // int
+    int x = 123 ;
+    // intへのポインター
+    int * p = &x ;
+    // intへのポインターのポインター
+    int ** pp = &p ;
+
+
+    // 123
+    // ポインターを経由したポインターを経由したxの読み込み
+    int value1 = **pp ; 
+
+    int y = 456 ;
+    // ポインターを経由した変数pの変更
+    *pp = &y ;
+
+    // 456
+    // ポインターを経由したポインターを経由したyの読み込み
+    int value2 = **pp ;
+}
+\end{lstlisting}
+
+\texttt{x}は\texttt{int}だ。\texttt{p}は\texttt{int}へのポインターだ。ここまではいままでどおりだ。
+
+\texttt{pp}は\texttt{int **}\,\index{\protect{**}@\texttt{\protect{**}}}\index{ぽいんた@ポインター!\protect{**}@\texttt{\protect{**}}}という型で、「\texttt{int}へのポインターへのポインター」型だ。このポインターの値のためには「\texttt{int}へのポインターのポインター」が必要だ。変数\texttt{p}のポインターは\,\texttt{\&p}で得られる。この場合、変数\texttt{p}は「\texttt{int}へのポインター」でなければならない。そうした場合、変数\texttt{p}のポインターは「\texttt{int}へのポインターのポインター」型の値になる。
+
+変数\texttt{pp}は「\texttt{int}へのポインターのポインター」だ。変数\texttt{pp}の参照先の変数\texttt{p}を読み書きするには、\texttt{*pp}と書く。これはまだ「\texttt{int}へのポインター」だ。ここからさらに参照先の\texttt{int}型のオブジェクトにアクセスするには、その結果にさらに\,\texttt{*}\,を書く。結果として\,\texttt{**pp}となる。
+
+わかりにくければ変数に代入するとよい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int object { } ;
+
+    int *   a = &object ;
+    int **  b = &a ;
+
+    // cとaは同じ値
+    int * c = *pointer_to_pointer_to_object ;
+
+    // objectに1が代入される
+    *c = 1 ;
+    // objectに2が代入される
+    **b = 2 ;
+}
+\end{lstlisting}
+
+リファレンスを使うという手もある。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int object { } ;
+
+    int *   a = &object ;
+    int **  b = &a ;
+
+    int & r1 = *a ;
+
+    // objectに1が代入される
+    r1 = 1 ;
+
+    int &r2 = **b ;
+
+    // objectに2が代入される
+    r2 = 2 ;
+}
+\end{lstlisting}
+
+「ポインターへのポインター」があるということは、「ポインターへのポインターへのポインター」もあるということだろうか。もちろんある。
+\index{ぽいんた@ポインター!へのぽいんたへのぽいんた@〜へのポインターへのポインター}
+
+\begin{lstlisting}[language={C++}]
+// intへのポインターへのポインターへのポインター型
+using type = int *** ;
+
+// intへのポインターへのポインターへのポインターへのポインター型
+// int ****
+using pointer_to_type = type * ;
+\end{lstlisting}
+
+もちろん\texttt{const}も付けられる。
+
+\begin{lstlisting}[language={C++}]
+using type = int const * const * const * const ;
+\end{lstlisting}
+
+\clearpage
+\hypersubsection{ch270203}{関数へのポインター}
+\index{かんすう@関数!へのぽいんた@〜へのポインター}\index{ぽいんた@ポインター!かんすうへの@関数への〜}
+
+関数へのポインターを説明する前に、まず型としての関数を説明しなければならない。
+
+関数にも型\index{かんすう@関数!かた@型}がある。例えば以下のような関数、
+\begin{lstlisting}[language={C++}]
+int f( int ) ;
+double g( double, double ) ;
+\end{lstlisting}
+の型は、
+\begin{lstlisting}[language={C++}]
+using f_type = int ( int ) ;
+using g_type = double ( double, double ) ;
+\end{lstlisting}
+となる。関数から関数名を取り除いたものが関数の型だ。すると関数へのポインター型は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+using f_pointer = f_type * ;
+using g_pointer = g_type * ;
+\end{lstlisting}
+
+さっそく試してみよう。
+
+\begin{lstlisting}[language={C++}]
+// 実引数を出力して返す関数
+int f( int x )
+{
+    std::cout << x ;
+    return x ;
+}
+
+int main()
+{
+    using f_type = int ( int ) ;
+    using f_pointer = f_type * ;
+
+    f_pointer ptr = &f ;
+
+    // 関数へのポインターを経由した関数呼び出し
+    (*ptr)(123) ;
+}
+\end{lstlisting}
+
+動くようだ。最後の関数呼び出しはまず参照先を得て\texttt{(*ptr)}、その後に関数呼び出し\texttt{(123)}をしている。これは面倒なので、C++では特別に関数へのポインターはそのまま関数呼び出しすることができるようになっている。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// 関数へのポインターを経由した関数呼び出し
+ptr(123) ;
+\end{lstlisting}
+
+ところで、変数\texttt{ptr}の宣言を、\texttt{f\_pointer}というエイリアス宣言を使わずに書くと、以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+// 適当な関数
+int f( int ) { return 0 ; }
+
+// 変数ptrの宣言
+// int (int)へのポインター
+int (*ptr)(int) = &f ;
+\end{lstlisting}
+
+なぜこうなるのか。これを完全に理解するためにはC++の宣言子（declarator）という文法の詳細な理解が必要だ。
+\index{せんげんし@宣言子}\index{C++!せんげんし@宣言子}
+
+ここでは詳細を飛ばして重要な部分だけ伝えるが、型名のうちポインターであることを指定する\,\texttt{*}\,\index{\protect{*}@\texttt{\protect{*}}}は、名前にかかる。
+
+\begin{lstlisting}[language={C++}]
+// この*はnameにかかる
+int * name ;
+\end{lstlisting}
+
+つまり以下のような意味だ。
+
+\begin{lstlisting}[language={C++}]
+int (*name) ;
+\end{lstlisting}
+
+型名だけを指定する場合、名前が省略される。
+
+\begin{lstlisting}[language={C++}]
+// 名前が省略されている
+using type = int * ;
+\end{lstlisting}
+
+つまり以下のような意味だ。
+
+\begin{lstlisting}[language={C++}]
+using type = int (*) ;
+\end{lstlisting}
+
+そのため、\texttt{int * name( int )}と書いた場合、これは「\texttt{int}型の引数を取り、\texttt{int}型へのポインターを戻り値として返す関数」となる。
+
+\begin{lstlisting}[language={C++}]
+int * f( int ){ return nullptr ; }
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+そうではなく、「\texttt{int}型の引数を取り\texttt{int}型の戻り値を返す関数へのポインター」を書きたい場合は、
+
+\begin{lstlisting}[language={C++}]
+using type = int (*)(int) ;
+\end{lstlisting}
+としなければならない。
+
+変数の名前を入れる場所は以下のとおり。
+
+\begin{lstlisting}[language={C++}]
+using type =
+int
+( * // ポインター
+// ここに変数が省略されている
+)(int) ;
+\end{lstlisting}
+
+なので、
+\begin{lstlisting}[language={C++}]
+int (*ptr)(int) = nullptr ;
+\end{lstlisting}
+となる。あるいは以下のように書いてもいい。
+
+\begin{lstlisting}[language={C++}]
+using function_type = int (int) ;
+using function_pointer_type = function_type * ;
+
+function_pointer_type ptr = nullptr ;
+\end{lstlisting}
+
+関数へのポインターは型であり、値でもある。値であるということは、関数は引数として関数へのポインターを受け取ったり、関数へのポインターを返したりできるということだ。
+
+さっそく書いてみよう。
+
+\begin{lstlisting}[language={C++}]
+int f( int x ) { return x ; }
+using f_ptr = int (*) (int ) ;
+// 関数へのポインターを引数に取り
+// 関数へのポインターを戻り値として返す
+// 関数g
+f_ptr g( f_ptr p )
+{
+    p(0) ;
+    return p ;
+}
+
+int main()
+{
+    g(&f) ;
+}
+\end{lstlisting}
+
+これは動く。ところでこの関数\texttt{g}へのポインターはどう書けばいいのだろうか。つまり、
+\begin{lstlisting}[language={C++}]
+auto ptr = &g ;
+\end{lstlisting}
+を\texttt{auto}を使わずに書くとどうなるのだろうか。
+
+以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+int (*(*ptr)(int (*)(int)))(int) = &g ;
+\end{lstlisting}
+
+なぜこうなるのか。分解すると以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+int (* // 戻り値型前半
+    (*ptr) // 変数名
+    (// 関数の引数
+        int (*)(int) // 引数としての関数へのポインター
+    )// 関数の引数
+
+)(int) // 戻り値の型後半
+
+ = &g ; // 初期化子
+\end{lstlisting}
+
+これはわかりにくい。戻り値の型を後ろに書く文法を使うと少し読みやすくなる。
+
+\begin{lstlisting}[language={C++}]
+auto (*ptr)( int (*)(int) ) -> int (*)(int) = &g ;
+\end{lstlisting}
+
+これを分解すると以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+auto // プレイスホルダー
+(*ptr) // 変数名
+( int (*)(int) ) // 引数
+-> int (*)(int) // 戻り値の型
+= &g ; // 初期化子
+\end{lstlisting}
+
+もちろん、これでもまだわかりにくいので、エイリアス宣言を使った方がよい。
+
+\begin{lstlisting}[language={C++}]
+using func_ptr = int(*)(int) ;
+
+auto (*ptr)(func_ptr) -> func_ptr = &g ;
+\end{lstlisting}
+
+\clearpage
+\hypersubsection{ch270204}{配列へのポインター}
+\index{はいれつ@配列!へのぽいんた@〜へのポインター}\index{ぽいんた@ポインター!はいれつへの@配列への〜}
+
+配列へのポインターについて学ぶ前に、配列の型について学ぶ必要がある。
+\index{かた@型}\index{はいれつ@配列!かた@型}
+
+配列の型は、要素の型を\texttt{T}、要素数を\texttt{N}とすると、\texttt{T [N]}となる。
+
+\begin{lstlisting}[language={C++}]
+// 要素型int、要素数5の配列型
+using int5 = int [5] ;
+// 要素型double、要素数10の配列型
+using double10 = double [10] ;
+\end{lstlisting}
+
+関数型と同じく、ポインター宣言子である\,\texttt{*}\,は名前に付く。
+
+\begin{lstlisting}[language={C++}]
+// 要素型int、要素数5の配列へのポインター型
+using pointer_to_array_type = int (*)[5] ;
+
+int main()
+{
+    int a[5] ;
+    pointer_to_array_type ptr = &a ;
+}
+\end{lstlisting}
+
+エイリアス宣言を使わない変数の宣言は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a[5] ;
+    int (*p)[5] = &a ;
+}
+\end{lstlisting}
+
+配列とポインターは密接に関係している。そのため、配列名は配列の先頭要素へのポインターに暗黙に変換される。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int a[5] = {1,2,3,4,5} ;
+
+    // &a[0]と同じ
+    int * ptr = a ;
+}
+\end{lstlisting}
+
+配列とポインターの関係については、ポインターの詳細で詳しく説明する。
+
+\hypersubsection{ch270205}{ポインター型の作り方}
+
+\texttt{T}型へのポインター型は\texttt{T *}\,で作ることができる。
+\index{ぽいんた@ポインター!かた@型}\index{T*@\texttt{T *}}
+
+ただし、\texttt{T}が\texttt{int (int)}のような関数型である場合は、\texttt{int (*)(int)}になる。配列型の場合は要素数\texttt{N}まで必要で\texttt{T (*)[N]}になる。
+
+エイリアス宣言で型に別名を付けると\texttt{T *}\,でよくなる。
+
+\begin{lstlisting}[language={C++}]
+using function_type = int (int) ;
+using pointer_to_function_type = function_type * ;
+\end{lstlisting}
+
+ポインターの型を書く際に、このようなことをいちいち考えるのは面倒だ。ここで必要のなのは、ある型\texttt{T}を受け取ったときに型\texttt{T *}\,を得るような方法だ。ところで、物覚えのいい読者は前にも似たような文章を読んだことに気が付くだろう。そう、テンプレートだ。
+
+テンプレートは型を引数化できる機能だ。いままではクラスや関数にしか使っていなかったが、実はエイリアス宣言にも使えるのだ。
+\index{てんぷれと@テンプレート}
+
+\begin{lstlisting}[language={C++}]
+template < typename T >
+using type = T ;
+\end{lstlisting}
+
+これは引数と同じ型になるエイリアステンプレートだ。使ってみよう。
+\index{えいりあすてんぷれと@エイリアステンプレート}\index{てんぷれと@テンプレート!えいりあす@エイリアス〜}
+
+\begin{lstlisting}[language={C++}]
+template < typename T > using type = T ;
+
+// aはint
+type<int> a = 123 ;
+// bはdouble
+type<double> b = 1.23 ;
+// cはstd::vector<int>
+type<std::vector<int>> c = {1,2,3,4,5} ;
+\end{lstlisting}
+
+\texttt{using type = int ;}というエイリアス宣言があるとき\texttt{type}の型は\texttt{int}だ。エイリアス宣言は新しい\texttt{type}という型を作るわけではない。
+
+同様に、上のエイリアステンプレート\texttt{type}による\texttt{type<int>}\,の型は\texttt{int}だ。新しい\texttt{type<int>}\,という型ができるわけではない。
+
+もう少し複雑な使い方もしてみよう。
+
+\begin{lstlisting}[language={C++}]
+// int
+type<type<int>> a = 0 ;
+// int
+type<type<type<int>>> b = 0 ;
+\end{lstlisting}
+
+\texttt{type<int>}\,の型は\texttt{int}なので、それを引数に渡した\texttt{type< type<int> >}\,も\texttt{int}だ。\texttt{type<T>}\,をいくつネストしようとも\texttt{int}になる。
+
+\begin{lstlisting}[language={C++}]
+// std::vector<int>
+std::vector< type<int> > a = {1,2,3,4,5} ;
+// std::vector<int>
+type<std::vector<type<int>>> b = {1,2,3,4,5} ;
+\end{lstlisting}
+
+\texttt{type<int>}\,は\texttt{int}なので、\texttt{std::vector<type<int{>}{>}}\,は\texttt{std::vector<int>}\,になる。それをさらに\texttt{type<T>}\,で囲んでも同じ型だ。
+
+\texttt{type<T>}\,は面白いが何の役に立つのだろうか。\texttt{type<T>}\,は型として使える。つまり\texttt{type<T> *}\,はポインターとして機能するのだ。
+\index{type<T>@\texttt{type<T>}}
+
+\begin{lstlisting}[language={C++}]
+template < typename T > using type = T ;
+
+// int *
+type<int> * a = nullptr ;
+// int (*)(int)
+type<int(int)> * b = nullptr ;
+// int (*) [5]
+type<int [5]> * c = nullptr ;
+\end{lstlisting}
+
+\texttt{type<int> *}\,は\texttt{int *}\,型だ。\texttt{type<int(int)> *}\,は\texttt{int(*)(int)}型だ。\texttt{type<int [5]> *}\,は\texttt{int (*) [5]}型だ。これでもう\,\texttt{*}\,をどこに書くかという問題に悩まされることはなくなった。
+
+しかしわざわざ\texttt{type<T> *}\,と書くのは依然として面倒だ。\texttt{T}型は引数で受け取っているのだから、最初からポインターを返してどうだろうか。
+
+\begin{lstlisting}[language={C++}]
+template < typename T >
+using add_pointer_t = T * ;
+\end{lstlisting}
+
+さっそく試してみよう。
+
+\begin{lstlisting}[language={C++}]
+// int *
+add_pointer_t<int> a = nullptr ;
+// int **
+add_pointer_t<int *> b = nullptr ;
+// int(*)(int)
+add_pointer_t<int(int)> c = nullptr ;
+// int(*)[5]
+add_pointer_t<int [5]> d = nullptr ;
+\end{lstlisting}
+
+どうやら動くようだ。もっと複雑な例も試してみよう。
+
+\begin{lstlisting}[language={C++}]
+// int **
+add_pointer_t<add_pointer_t<int>> a = nullptr ;
+\end{lstlisting}
+
+\texttt{add\_pointer\_t<int>}\,は\texttt{int *}\,なので、その型を\texttt{add\_pointer\_t<T>}\,で囲むとその型へのポインターになる。結果として\texttt{int **}\,になる。
+
+ここで実装した\texttt{add\_pointer\_t<T>}\,は\texttt{T}がリファレンスのときにエラーになる。
+
+\begin{lstlisting}[language={C++}]
+template < typename T > using add_pointer_t = T * ;
+// エラー
+add_pointer_t<int &> ptr = nullptr ;
+\end{lstlisting}
+
+実は標準ライブラリにも\texttt{std::add\_pointer\_t<T>}\,\index{add\_pointer\_t<T>@\texttt{add\_pointer\_t<T>}}があり、こちらはリファレンス\texttt{U \&}\,を渡しても、\texttt{U *}\,になる。
+
+\begin{lstlisting}[language={C++}]
+// OK
+// int *
+std::add_pointer_t<int &> ptr = nullptr ;
+\end{lstlisting}
+
+標準ライブラリ\texttt{std::add\_pointer\_t<T>}\,は、\texttt{T}がリファレンス型の場合、リファレンスは剝がしてポインターを付与するという実装になっている。これをどうやって実装するかについてだが、まだ読者の知識では実装できない。テンプレートについて深く学ぶ必要がある。いまは標準ライブラリに頼っておこう。
+
+標準ライブラリにはほかにも、ポインターを取り除く\texttt{std::remove\_pointer\_t<T>}\,もある。
+
+\begin{lstlisting}[language={C++}]
+// int
+std::remove_pointer_t<int * > a = 0 ;
+// int
+std::remove_pointer_t<
+    std::add_pointer_t<int>
+    > b = 0 ;
+\end{lstlisting}
+
+\hypersubsection{ch270206}{クラスへのポインター}
+
+クラスへのポインターはいままでに学んだものと同じ文法だ。
+\index{ぽいんた@ポインター!くらすへの@クラスへの〜}\index{くらす@クラス!へのぽいんた@〜へのポインター}
+
+\begin{lstlisting}[language={C++}]
+struct C { } ;
+
+int main()
+{
+    C object ;
+    C * pointer = &object ;
+} 
+\end{lstlisting}
+
+ただし、ポインターを経由してメンバーにアクセスするのが曲者だ。
+
+以下のようなメンバーにアクセスするコードがある。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int data_member ;
+    void member_function() {}
+} ;
+
+int main()
+{
+    C object ;
+
+    object.data_member = 0 ;
+    object.member_function() ;
+}
+\end{lstlisting}
+
+これをポインターを経由して書いてみよう。
+
+以下のように書くとエラーだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    C object ;
+    C * pointer = &object ;
+
+    // エラー
+    *pointer.data_member = 0 ;
+    // エラー
+    *pointer.member_function() ;
+}
+\end{lstlisting}
+
+この理由は演算子の優先順位の問題だ。上の式は以下のように解釈される。
+
+\begin{lstlisting}[language={C++}]
+*(pointer.data_member) = 0 ;
+*(pointer.member_function()) ;
+\end{lstlisting}
+
+ポインターを参照する演算子\,\texttt{*}\,よりも、演算子ドット（\,\texttt{'.'}\,）の方が演算子の優先順位が高い。
+
+このような式を可能にする変数\texttt{pointer}とは以下のようなものだ。
+
+\begin{lstlisting}[language={C++}]
+struct Pointer
+{
+    int data  = 42 ;
+    int * data_member = &data ;
+    int * member_function()
+    {
+        return &data ;
+    }
+} ;
+
+int main()
+{
+    Pointer pointer ;
+
+    *pointer.data_member = 0;
+    *pointer.member_function() ;
+}
+\end{lstlisting}
+
+\texttt{pointer.data\_member}はポインターなのでそれに演算子\,\texttt{*}\,を適用して参照した上で\texttt{0}を代入している。
+
+\texttt{pointer.member\_function()}は関数呼び出しで戻り値としてポインターを返すのでそれに演算子\,\texttt{*}\,を適用している。
+
+演算子\,\texttt{*}\,を先にポインターの値である\texttt{pointer}に適用するには、括弧を使う。
+
+\begin{lstlisting}[language={C++}]
+(*pointer).data_member = 0 ;
+(*pointer).member_function() ;
+\end{lstlisting}
+
+リファレンスを使ってポインターを参照した結果をリファレンスに束縛して使うこともできる。
+
+\begin{lstlisting}[language={C++}]
+C & ref = *pointer ;
+ref.data_member = 0 ;
+ref.member_function() ;
+\end{lstlisting}
+
+ただし、ポインターを介してクラスを扱う際に、毎回括弧を使ったりリファレンスを使ったりするのは面倒なので、簡単なシンタックスシュガーとして演算子\,\texttt{->}\,が用意されている。
+\index{->@\texttt{->}}
+
+\begin{lstlisting}[language={C++}]
+pointer->data_member = 0 ;
+pointer->member_function() ;
+\end{lstlisting}
+
+\texttt{a->b}は、\texttt{(*(a))->b}と同じ意味になる。そのため、上は以下のコードと同じ意味になる。
+
+\begin{lstlisting}[language={C++}]
+(*(pointer)).data_member = 0 ;
+(*(pointer)).member_function() ;
+\end{lstlisting}
+
+\clearpage
+\hypersubsection{ch270207}{thisポインター}
+\index{thisぽいんた@thisポインター}\index{ぽいんた@ポインター!this}
+
+メンバー関数はクラスのデータメンバーにアクセスできる。このときのデータメンバーはメンバー関数が呼ばれたクラスのオブジェクトのサブオブジェクトになる。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int data { } ;
+
+    void set( int n )
+    {
+        data = n ;
+    }
+} ;
+
+int main()
+{
+    C a ;
+    C b ;
+
+    // a.dataを変更
+    a.set(1) ;
+    // b.dataを変更
+    b.set(2) ;
+}
+\end{lstlisting}
+
+すでに説明したように、メンバー関数が自分を呼び出したクラスのオブジェクトのサブオブジェクトを参照できるのは、クラスのオブジェクトへの参照を知っているからだ。内部的には以下のような隠し引数を持つコードが生成されたかのような挙動になる。
+
+\begin{lstlisting}[language={C++}]
+// コンパイラーが生成するコードのたとえ
+struct C
+{
+    int data { } ;
+} ;
+
+// 隠し引数
+void set( C & obj, int n )
+{
+    obj.data = n ;
+}
+\end{lstlisting}
+
+つまり、メンバー関数は自分を呼び出したクラスのオブジェクトへの参照を知っている。その参照にアクセスする方法が\texttt{this}キーワード\index{this@\texttt{this}}だ。
+
+\texttt{this}キーワードはクラスのメンバー関数の中で使うと、メンバー関数を呼び出したクラスのオブジェクトへのポインターとして扱われる。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int data { } ;
+
+    void set( int n )
+    {
+        // このメンバー関数を呼び出したクラスのオブジェクトへのポインター
+        C * pointer = this ;
+        this->data = n ;
+    }
+} ;
+\end{lstlisting}
+
+先ほど、関数\texttt{C::set}の中で\texttt{data = n ;}と書いたのは、\texttt{this->data = n ;}と書いたのと同じ意味になる。
+
+\texttt{this}はリファレンスではなくてポインターだ。この理由は歴史的なものだ。本来ならばリファレンスの方がよいのだが、いまさら変更できないのでポインターになっている。わかりにくければリファレンスに束縛してもよい。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void f()
+    {
+        auto & this_ref = *this ;
+    }
+} ;
+\end{lstlisting}
+
+\texttt{const}なメンバー関数の中では、\texttt{this}の型も\texttt{const}なクラス型へのポインターになる。
+
+\begin{lstlisting}[language={C++}]
+struct S
+{
+    void f()
+    {
+        // thisの型はS *
+        S * pointer = this ;
+    }
+
+    void f() const
+    {
+        // thisの型はS const *
+        S const * pointer = this ;
+    }
+} ;
+\end{lstlisting}
+
+この理由は、\texttt{const}なメンバー関数はクラスのオブジェクトへの参照として\texttt{const}なリファレンスを隠し引数として持つからだ。
+
+\begin{lstlisting}[language={C++}]
+// コンパイラーが生成するコードのたとえ
+struct S { } ;
+
+// 非constなメンバー関数
+void f( S & obj ) ;
+
+// constなメンバー関数
+void f( S const & obj ) ;
+\end{lstlisting}
+
+\hypersubsection{ch270208}{メンバーへのポインター}
+\index{ぽいんた@ポインター!めんばへの@メンバーへの〜}\index{めんば@メンバー!ぽいんた@ポインター}
+
+メンバーへのポインターはかなり文法的にややこしい。そもそも、通常のポインターとは概念でも実装でも異なる。
+
+ここで取り扱うのはメンバーへのポインターという概念で、クラスのオブジェクトのサブオブジェクトへのポインターではない。サブオブジェクトへのポインターは通常のポインターと同じだ。
+
+\begin{lstlisting}[language={C++}]
+struct Object
+{
+    // サブオブジェクト
+    int subobject ;
+} ;
+
+int main()
+{
+    // クラスのオブジェクト
+    Object object ;
+
+    // サブオブジェクトへのポインター
+    int * pointer = &object.subobject ;
+
+    *pointer = 123 ;
+    int read = object.subobject ;
+}
+\end{lstlisting}
+
+メンバーへのポインターとは、クラスのデータメンバーやメンバー関数を参照するもので、クラスのオブジェクトとともに使うことでそのデータメンバーやメンバー関数を参照できるものだ。
+
+細かい文法の解説はあとにして例を見せよう。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+struct Object
+{
+    int data_member ;
+    void member_function()
+    { std::cout << data_member ; }
+} ;
+
+int main()
+{
+    // Object::data_memberメンバーへのポインター
+    int Object::* int_ptr = &Object::data_member ;
+    // Object::member_functionメンバーへのポインター
+    void (Object::* func_ptr)() = &Object::member_function ;
+
+    // クラスのオブジェクト
+    Object object ;
+
+    // objectに対するメンバーポインターを介した参照
+    object.*int_ptr = 123 ;
+    // objectに対するメンバーポインターを介した参照
+    // 123
+    (object.*func_ptr)() ;
+
+    // 別のオブジェクト
+    Object another_object ;
+    another_object.data_member = 456 ;
+    // 456
+    (another_object.*func_ptr)() ;
+}
+\end{lstlisting}
+
+細かい文法はあとで学ぶとして、肝心の機能としてはこうだ。クラスのオブジェクトからは独立したデータメンバーやメンバー関数自体へのポインターを取得する。
+
+\begin{lstlisting}[language={C++}]
+struct Object
+{
+    int data_member ;
+} ;
+
+// メンバーへのポインター
+int Object::*int_ptr = &Object::data_member ; 
+\end{lstlisting}
+
+このポインターをクラスのオブジェクトと組み合わせることで、ポインターが参照するクラスのメンバーで、かつオブジェクトのサブオブジェクトの部分を参照できる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+Object object ;
+
+// メンバーへのポインターをオブジェクトに適用してサブオブジェクトを参照する
+object.*int_ptr = 123 ;
+\end{lstlisting}
+
+では文法の説明に入ろう。
+
+メンバーへのポインターは文法がややこしい。
+
+あるクラス名\texttt{C}の型名\texttt{T}のメンバーへのポインター型は以下のようになる。
+
+\begin{lstlisting}[style=grammar]
+型名 クラス名::*
+T C::*
+\end{lstlisting}
+
+以下のクラスの各データメンバーへの型はそれぞれコメントのとおりになる。
+
+\begin{lstlisting}[language={C++}]
+struct ABC
+{
+    // int ABC::*
+    int x ;
+    // int ABC::*
+    int y ;
+    // double ABC::*
+    double d ;
+    // int * ABC::*
+    int * ptr ;
+} ;
+
+struct DEF
+{
+    // ABC * DEF::*
+    ABC * abc ;
+} ;
+\end{lstlisting}
+
+順を追って説明していこう。まずクラス\texttt{ABC}のメンバー、
+\begin{lstlisting}[language={C++}]
+// int ABC::*
+int x ;
+// int ABC::*
+int y ;
+\end{lstlisting}
+このメンバーへのポインターの型はどちらも\texttt{int ABC::*}\,になる。データメンバーの型は\texttt{int}で、クラス名が\texttt{ABC}なので、\texttt{型名 クラス名::*}\,に当てはめると\texttt{int ABC::*}\,になる。
+
+\begin{lstlisting}[language={C++}]
+// double ABC::*
+double d ;
+\end{lstlisting}
+
+このメンバーへのポインターの型は\texttt{double ABC::*}\,になる。
+
+最後のクラス\texttt{ABC}のメンバー、
+\begin{lstlisting}[language={C++}]
+// int * ABC::*
+int * ptr ;
+\end{lstlisting}
+これが\texttt{int * ABC::*}\,になる理由も、最初に説明した\texttt{型名 クラス名::*}\,のルールに従っている。型名が\texttt{int *}、クラス名が\texttt{ABC}なので、\texttt{int * ABC::*}\,だ。
+
+最後の例はクラス\texttt{DEF}のメンバーとしてクラス\texttt{ABC}のポインター型のメンバーだ。\texttt{ABC DEF::*}\,になる。
+
+クラス名\texttt{C}のメンバー名\texttt{M}のメンバーへのポインターを得るには以下の文法を使う。
+
+\begin{lstlisting}[style=grammar]
+&クラス名::メンバー名
+&C::M
+\end{lstlisting}
+
+具体的な例を見てみよう。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int x = 1 ;
+    int y = 2 ;
+} ;
+
+int main()
+{
+    int C::* x_ptr = &C::x ;
+    int C::* y_ptr = &C::y ;
+
+    C object ;
+
+    // 1
+    std::cout << object.*x_ptr ;
+    // 2 
+    std::cout << object.*y_ptr ;
+}
+\end{lstlisting}
+
+わかりづらければエイリアス宣言を使うとよい。
+
+\begin{lstlisting}[language={C++}]
+using type = int C::* ;
+type x_ptr = &C::x ;
+\end{lstlisting}
+
+あるいは\texttt{auto}を使うという手もある。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+// int C::*
+auto x_ptr = &C::x ;
+\end{lstlisting}
+
+メンバー関数へのポインターは、メンバーへのポインターと関数へのポインターを組み合わせた複雑な文法となるので、とてもわかりづらい。
+
+復習すると、\texttt{int}型の引数を1つ受け取り\texttt{int}型の戻り値を返す関数へのポインターの型は\texttt{int (*)(int)}だ。
+
+\begin{lstlisting}[language={C++}]
+int f(int) { return 0 ; }
+int (*ptr)(int) = &f ;
+\end{lstlisting}
+
+この関数がクラス\texttt{C}のメンバー関数の場合、以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int f(int) { return 0 ; }
+} ;
+\end{lstlisting}
+
+ところで、メンバーへのポインターは\texttt{型名 クラス名::*}\,だった。この2つを組み合わせると、以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int f(int) { return 0 ; }
+} ;
+
+int main()
+{
+    // メンバー関数へのポインター
+    int (C::*ptr)(int) = &C::f ;
+    // クラスのオブジェクト
+    C object ;
+
+    // オブジェクトを指定したメンバー関数へのポインターを介した関数呼び出し
+    (object.*ptr)( 123 ) ;
+}
+\end{lstlisting}
+
+メンバー関数へのポインターは難しい。
+
+関数\texttt{f}の型は\texttt{int (int)}で、そのポインターの型は\texttt{int (*)(int)}だ。するとクラス名\texttt{C}のメンバー関数\texttt{f}へのポインターの型は、\texttt{int (C::*)(int)}になる。
+
+メンバー関数へのポインター型の変数を宣言してその値を\texttt{C::f}へのポインターに初期化しているのが以下の行だ。
+
+\begin{lstlisting}[language={C++}]
+// メンバー関数へのポインター
+int (C::*ptr)(int) = &C::f ;
+\end{lstlisting}
+
+この\texttt{ptr}を経由したメンバー関数\texttt{f}の呼び出し方だが、まずクラスのオブジェクトが必要になるので作る。
+
+\begin{lstlisting}[language={C++}]
+C object ;
+\end{lstlisting}
+
+そして演算子の\texttt{operator .*}\,を使う。
+\index{{.}*@\texttt{.*}}
+
+\begin{lstlisting}[language={C++}]
+(object.*ptr)(123) ;
+\end{lstlisting}
+
+\texttt{object.*ptr}を括弧で囲んでいるのは、演算子の優先順位のためだ。もしこれを以下のように書くと、
+\begin{lstlisting}[language={C++}]
+object.*ptr(123)
+\end{lstlisting}
+これは\texttt{ptr(123)}という式を評価した結果をメンバーへのポインターと解釈してクラスのオブジェクトを介して参照していることになる。例えば以下のようなコードだ。
+
+\begin{lstlisting}[language={C++}]
+struct C { int data { } ; } ;
+
+auto ptr( int ) -> int C::*
+{ return &C::data ; }
+
+int main()
+{
+    C object ;
+    object.*ptr(123) ;
+}
+\end{lstlisting}
+
+演算子の優先順位の問題のために、\texttt{(object.*ptr)}と括弧で包んで先に評価させ、その後に関数呼び出し式である\texttt{(123)}を評価させる。
+
+実は演算子\texttt{operator .*}\,のほかに、\texttt{operator ->*}\,という演算子がある。
+\index{->*@\texttt{->*}}
+
+\texttt{.*}\,はクラスのオブジェクトがリファレンスの場合の演算子だが、\texttt{->*}\,はクラスのオブジェクトがポインターの場合の演算子だ。
+
+\begin{lstlisting}[language={C++}]
+struct C{ int data { } ; } ;
+
+int main()
+{
+    auto data_ptr = &C::data ;
+
+    C object ;
+    auto c_ptr = &object ;
+
+    c_ptr->*data_ptr = 123 ;
+}
+\end{lstlisting}
+
+演算子\texttt{a->b}が\texttt{(*(a)).b}となるように、演算子\texttt{a->*b}も\texttt{(*(a)).*b}と置き換えられるシンタックスシュガーだ。
+
+上の例で、
+\begin{lstlisting}[language={C++}]
+c_ptr->*object = 123 ;
+\end{lstlisting}
+は、以下と同じだ。
+
+\begin{lstlisting}[language={C++}]
+(*(c_ptr)).*object = 123 ;
+\end{lstlisting}
+
+\texttt{.*}\,や\,\texttt{->*}\,の文法を覚えるのが面倒な場合、標準ライブラリに\texttt{std::invoke( f, t1, ... )}という便利な関数が用意されている。
+
+\texttt{f}がデータメンバーへのポインターで、\texttt{t1}がクラスのオブジェクトの場合、\texttt{std::invoke(f, t1)}は以下のような関数になる。
+
+\begin{lstlisting}[language={C++}]
+template < typename F, typename T1 >
+適切な戻り値の型 std::invoke( F f, T1 t1 )
+{
+    return t1.*f ;
+}
+\end{lstlisting}
+
+なので以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+struct C { int data { } ; } ;
+
+int main()
+{
+    auto data_ptr = &C::data ;
+
+    C object ;
+
+    // どちらも同じ意味
+    object.*data_ptr = 123 ;
+    std::invoke( data_ptr, object ) = 123 ;
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+便利なことに\texttt{t1}がポインターの場合は、
+\begin{lstlisting}[language={C++}]
+template < typename F, typename T1 >
+適切な戻り値の型 std::invoke( F f, T1 t1 )
+{
+    return (*(t1)).*f ;
+}
+\end{lstlisting}
+という関数として振る舞う。そのため、リファレンスでもポインターでも気にせずに使うことができる。
+
+\begin{lstlisting}[language={C++}]
+C * c_ptr = &object ;
+
+// どちらも同じ意味
+c_ptr->*data_ptr = 123 ;
+std::invoke( data_ptr, c_ptr ) = 123 ;
+\end{lstlisting}
+
+\texttt{std::invoke}がさらにすごいことに、メンバー関数へのポインターにも対応している。
+
+\texttt{std::invoke( f, t1, ... )}で、\texttt{f}がメンバー関数へのポインターで、\texttt{t1}がクラスのオブジェクトへのリファレンスで、\texttt{...}が関数呼び出しの際の引数の場合、以下のような関数として振る舞う。
+
+\begin{lstlisting}[language={C++}]
+template < typename F, typename T1,
+    // まだ知らない機能
+    typename ... Ts >
+適切な戻り値の型
+invoke( F f, T1 t1,
+// まだ知らない機能
+Ts ... ts )
+{
+    return (t1.*f)(ts...)
+}
+\end{lstlisting}
+
+厳密にはこの宣言は間違っているのだが、まだ知らない機能を使っているので気にしなくてもよい。大事なことは、\texttt{std::invoke}の第三引数以降の実引数が、関数呼び出しの実引数として使われるということだ。
+
+\begin{lstlisting}[language={C++}]
+struct C
+{
+    int f0() { return 0 ; }
+    int f1(int) { return 1 ; } 
+    int f2( int, int ) { return 2 ; }
+} ;
+
+(@\ifTombow\pagebreak\fi@)
+int main()
+ {
+    C object ;
+
+    // 同じ
+    (object.*&C::f0)() ;
+    std::invoke( &C::f0, object ) ;
+    // 同じ
+    (object.*&C::f1)(1) ;
+    std::invoke( &C::f1, object, 1) ;
+    // 同じ
+    (object.*&C::f2)(1,2) ;
+    std::invoke( &C::f2, object, 1,2) ;
+}
+\end{lstlisting}
+
+この場合も、\texttt{object}が\texttt{C}へのリファレンスではなく、\texttt{C}へのポインターでも自動で認識していいように処理してくれる。

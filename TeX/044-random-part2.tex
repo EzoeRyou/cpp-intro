@@ -1,0 +1,281 @@
+\hypersection{ch3911}{ポアソン分布}
+\index{ぽあそんぶんぷ@ポアソン分布}\index{らんすうぶんぷ@乱数分布!ぽあそんぶんぷ@ポアソン分布}
+
+ポアソン分布（Poisson distribution）とは、シメオン・ドニ・ポアソン（Sim\'eon Denis Poisson 1781--1840）\index{Poisson, Sim\'eon Denis}が1837年に発表した論文、「刑事民事の判決における確率の調査」で初めて公開されたものだ。この論文でポアソンは、ある国における冤罪の数について、ある時間間隔における冤罪の発生数を乱数とし、そのような乱数の分布について考察した。その結果がポアソン分布だ。
+
+ある時間間隔に発生する離散的な事象の多くがポアソン分布に従う。例えば以下は具体的な例だ。
+
+\begin{itemize}
+\item
+  1年間に発生する冤罪の数
+\item
+  1ヶ月に発生する交通事故の数
+\item
+  1年間で地球に飛来する隕石の数
+\item
+  1時間である放射性同位体が放射性崩壊する回数
+\end{itemize}
+
+冤罪や交通事故の発生件数は乱数ではないように考えるかもしれない。しかし、結果的にみれば乱数のように振る舞っている。1ヶ月に発生する交通事故が10件であったとする。これは平均すると約3日に1回交通事故が起こっていることになるが、実際に3日に1回交通事故が起こったわけではない。交通事故の発生は離散的で、1日に複数件起こることもあれば、1週間無事故のときもある。なので3日に1回交通規制を敷いても交通事故を防ぐことはできない。
+
+ポアソン分布に従う乱数の特徴としてもう1つ、無記憶性というものがある。3日間に1件の割合で交通事故が起こっているとしよう。その場合、常にいまから3日以内に1件の交通事故が起きることが期待できるだけであって、3日以内に必ず起こるわけではない。そして、2日待ったから明日交通事故が起こるというわけでもない。交通事故が起こる確率は常にいまから3日間につき1件だ。ポアソン分布は無記憶性なので、すでに2日間待っているという過去は未来に影響しない。
+
+具体的なC++ライブラリのポアソン分布の使い方としては、ある所定の時間に平均して起こる事象の回数\texttt{mean}を指定すると、その所定の時間に起こった事象が乱数で返される。
+
+\hypersubsection{ch391101}{ポアソン分布(poisson\texttt{\_}distribution)}
+\index{ぽあそんぶんぷ@ポアソン分布}
+
+ポアソン分布の\texttt{std::poisson\_distribution<T>}\,\index{std::poisson\_distribution@\texttt{std::poisson\_distribution}}は整数型\texttt{T}の乱数\(i\), \(i \geq 0\)を以下の離散確率関数に従って分布する。
+\[
+P(i\,|\,\mu) = \frac{e^{-\mu} \mu^{i}}{i\,!} \text{ .}
+\]
+
+ここで\(\mu\)を\texttt{mean}とする。\(\mu > 0\)ではない場合未定義だ。
+
+\vskip 1.0zw
+\noindent
+\textsf{変数の宣言:}
+
+\begin{lstlisting}[style=grammar]
+std::poisson_distribution<T> d( mean ) ;
+\end{lstlisting}
+
+\texttt{T}は整数型でデフォルトは\texttt{int}、\texttt{mean}は\texttt{RealType}型。\(\mu\)と同じで浮動小数点数型の値で所定の時間に平均して発生する事象の回数だ。値の範囲は\(0 < mean\)。
+
+\ifTombow\pagebreak\else{\vskip 1.0zw}\fi
+\noindent
+\textsf{使い方:}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::poisson_distribution d( 1.0 ) ;
+    d.mean() ; // 1.0
+
+    std::mt19937 e ;
+    d(e) ;
+}
+\end{lstlisting}
+
+ポアソン分布が生成する乱数は0以上の事象が発生した回数となる。
+
+例えば、1ヶ月に交通事故が平均して10件発生するとする。1ヶ月に発生した交通事故の件数は平均が10件になるように増減するはずだ。1ヶ月の交通事故の発生件数を乱数で返す関数\texttt{traffic\_accidents}は以下のようになる。
+
+\begin{lstlisting}[language={C++}]
+template < typename Engine >
+auto traffic_accidents( Engine & e )
+{
+    std::poisson_distribution d(10.0) ;
+    return d(e) ;
+}
+\end{lstlisting}
+
+これを10回呼び出すと以下のような乱数列が生成された。
+
+\begin{lstlisting}[style=terminal]
+14, 6, 11, 8, 8, 14, 7, 16, 12, 17, 
+\end{lstlisting}
+
+だいぶばらつきがある。ポアソン分布とはこういうものだ。離散的に起こる事象を乱数として取ると、このようにばらつく。現実でも、1ヶ月に交通事故が平均して10件起きている場合、20件起きる月や無事故の月が存在する可能性があるのだ。
+
+これを合計すると113となり、10で割って平均を取ると、10.0に近い値になる。もっと多くの乱数を生成して平均を取るとより近くなる。
+
+\hypersubsection{ch391102}{指数分布(std::exponential\texttt{\_}distribution\texttt{<}RealType\texttt{>})}
+\index{しすうぶんぷ@指数分布}\index{らんすうぶんぷ@乱数分布!しすうぶんぷ@指数分布}
+
+指数分布（exponential distribution）とは、ポアソン分布に従う事象が起こる時間間隔の分布だ。
+
+ポアソン分布がある時間間隔における事象の発生回数の分布であることを思い出そう。
+
+ポアソン分布による乱数は例えば、
+\begin{itemize}
+\item
+  1ヶ月に平均して10件発生する交通事故がある1ヶ月に発生した件数
+\end{itemize}
+が乱数だった。1ヶ月が時間間隔で、交通事故が事象だ。10件が平均だ。
+
+\ifTombow\pagebreak\fi
+抽象的に書くと、
+\begin{itemize}
+\item
+  時間間隔に平均して\(N\)回発生する事象があるとき、ある時間間隔における事象発生の回数
+\end{itemize}
+の分布だ。
+
+指数分布では具体的には以下のようになる。
+
+\begin{itemize}
+\item
+  1ヶ月に平均して10件発生する交通事故が発生してから、次の交通事故が発生するまでの時間間隔
+\end{itemize}
+
+ポアソン分布に従う離散的な事象のある時間間隔における平均の発生回数が与えられているとする。例えば上の場合、交通事故が事象で、「1ヶ月」が時間間隔で、「平均して10件」が平均の発生回数だ。平均して約3日に1件ほど発生していることになる。ところでいままさに交通事故が発生したとする。このとき、次の交通事故が発生するまでの時間間隔はどのくらいだろうか。平均すると約3日に1件だが、交通事故は離散的な事象なので、1時間後にまた起きるかもしれないし、1週間交通事故が起こらないかもしれない。長期的に統計を取ると月に平均して10件発生している場合、次の交通事故が発生するまでの時間間隔を集計して平均すると約3日に1件発生する確率になる。
+
+指数分布が扱うのはこの次の交通事故が発生するまでの時間間隔だ。抽象的にもう一度書くと、ポアソン分布に従う離散的な事象の平均回数が与えられている場合に、ある事象から次の事象が発生するまでの時間間隔を分布する。
+
+\texttt{std::exponential\_distribution<RealType>}\,\index{exponential\_distribution@\texttt{exponential\_distribution}}は浮動小数点型\texttt{RealType}の乱数\(x \geq 0\)を以下の確率密度関数に従って分布させる。
+\[
+p(x\,|\,\lambda) = \lambda e^{-\lambda x} \text{ .}
+\]
+
+\vskip 1.0zw
+\noindent
+\textsf{変数の宣言:}
+
+\begin{lstlisting}[style=grammar]
+std::exponential_distribution<RealType> d( lambda ) ;
+\end{lstlisting}
+
+\texttt{RealType}は浮動小数点数型でデフォルトは\texttt{double}、\texttt{lambda}は\texttt{RealType}型。ポアソン分布の\texttt{mean}と同じで、ある時間間隔における事象の発生回数だ。値の範囲は\(0 < lambda\)。
+
+\texttt{std::exponential\_distribution}の生成する乱数は\texttt{1.0}のとき、ある時間間隔に等しくなる。\texttt{0.5}なら半分の時間間隔、\texttt{2.0}なら2倍の時間間隔だ。
+
+\vskip 1.0zw
+\noindent
+\textsf{使い方:}
+ 
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::exponential_distribution d( 1.0 ) ;
+    d.lambda() ; // 1.0 ;
+
+    std::mt19937 e ;
+    d(e) ;
+}
+\end{lstlisting}
+
+1ヶ月に10件の交通事故がポアソン分布に従って発生する場合に、ある交通事故から次の交通事故までの時間間隔の乱数を日数で得る関数\texttt{until\_next\_traffic\_accident}は以下のように書く。
+
+\begin{lstlisting}[language={C++}]
+template < typename Engine >
+auto until_next_traffic_accident( Engine & e )
+{
+    std::exponential_distribution d(10.0) ;
+    return d(e) * 30.0 ;
+}
+\end{lstlisting}
+
+ある時間間隔に10回起こるので、\texttt{lambda}には\texttt{10.0}を指定する。ここでは簡単のために1ヶ月を30日とする。結果の乱数は1.0がある時間間隔に等しいので、つまり1.0は30日に等しい。結果に\texttt{30.0}を掛けることで日数を計算する。
+
+この関数を10回呼び出すと以下のようになった。
+
+\begin{lstlisting}[style=terminal]
+0.436732, 5.40559, 10.4085, 0.749364, 1.10523, 2.37705, 0.626176, 14.8351, 16.932, 10.2976,
+\end{lstlisting}
+
+早いときは1日も立たずして次の交通事故が起きるが、遅いときは10日を超えてもなかなか交通事故が起きない。平均すると3日に1件交通事故が起きる確率の乱数が生成される。
+
+\hypersubsection{ch391103}{ガンマ分布(std::gamma\texttt{\_}distribution\texttt{<}RealType\texttt{>})}
+\index{がんまぶんぷ@ガンマ分布}\index{らんすうぶんぷ@乱数分布!がんまぶんぷ@ガンマ分布}
+
+\texttt{std::gamma\_distribution<RealType>}\,\index{gamma\_distribution@\texttt{gamma\_distribution}}は浮動小数点数型の乱数\(x > 0\)を以下の確率密度関数に従って分布する。
+\[
+ p(x\,|\,\alpha,\beta) =
+     \frac{e^{-x/\beta}}{\beta^{\alpha} \cdot \Gamma(\alpha)} \, \cdot \, x^{\, \alpha-1}
+     \text{ .} 
+\]
+
+\(\alpha\)を\texttt{alpha}、\(\beta\)を\texttt{beta}とする。
+
+\vskip 1.0zw
+\noindent
+\textsf{変数の宣言:}
+
+\begin{lstlisting}[style=grammar]
+std::gamma_distribution<RealType> d( alpha, beta ) ;
+\end{lstlisting}
+
+\texttt{RealType}は浮動小数点数型でデフォルトは\texttt{double}。\texttt{alpha}, \texttt{beta}は\texttt{RealType}型。値の範囲は\(0 < alpha\), \(0 < beta\)。
+
+\vskip 1.0zw
+\noindent
+\textsf{使い方:}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::gamma_distribution d( 1.0, 1.0 ) ;
+    d.alpha() ; // 1.0
+    d.beta() ; // 1.0
+
+    std::mt19937 e ;
+    d(e) ;
+}
+\end{lstlisting}
+
+\hypersubsection{ch391104}{ウェイブル分布(std::weibull\texttt{\_}distribution\texttt{<}RealType\texttt{>})}
+\index{うえいぶるぶんぷ@ウェイブル分布}\index{らんすうぶんぷ@乱数分布!うえいぶるぶんぷ@ウェイブル分布}
+
+\texttt{std::weibull\_distribution<RealType>}\,\index{weibull\_distribution@\texttt{weibull\_distribution}}は浮動小数点数型の乱数\(x > 0\)を以下の確率密度関数に従って分布する。
+\[
+p(x\,|\,a,b) = \frac{a}{b}
+     \cdot \left(\frac{x}{b}\right)^{a-1}
+     \cdot \, \exp\left( -\left(\frac{x}{b}\right)^a\right)
+     \text{ .}
+\]
+
+\vskip 1.0zw
+\noindent
+\textsf{変数の宣言:}
+
+\begin{lstlisting}[style=grammar]
+std::weibull_distribution<RealType> d( a, b ) ;
+\end{lstlisting}
+
+\texttt{RealType}は浮動小数点数型でデフォルトは\texttt{double}。\texttt{a}, \texttt{b}は\texttt{RealType}型。値の範囲は\(0 < a\), \(0 < b\)。
+
+\vskip 1.0zw
+\noindent
+\textsf{使い方:}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::weibull_distribution d( 1.0, 1.0 ) ;
+    d.a() ; // 1.0
+    d.b() ; // 1.0
+
+    std::mt19937 e ;
+    d(e) ;
+}
+\end{lstlisting}
+
+\hypersection{ch3912}{極値分布(std::extreme\texttt{\_}value\texttt{\_}distribution{\allowbreak}\texttt{<}RealType\texttt{>})}
+\index{きよくちぶんぷ@極値分布}\index{らんすうぶんぷ@乱数分布!きよくちぶんぷ@極値分布}
+
+\texttt{std::extreme\_value\_distribution<RealType>}\,\index{extreme\_value\_distribution@\texttt{extreme\_value\_distribution}}は浮動小数点数型の乱数\(x\)を以下の確率密度関数に従って分布する。
+\[
+p(x\,|\,a,b) = \frac{1}{b}
+     \cdot \exp\left(\frac{a-x}{b} - \exp\left(\frac{a-x}{b}\right)\right)
+     \text{ .}
+\]
+
+極値分布（extreme value distribution）は、ガンベルI型（Gumbel Type I）、対数ウェイブル（log-Weibull）、フィッシャー＝ティペットI型（Fisher-Tippett Type I）という名前の分布と呼ばれることもある。
+
+\ifTombow\pagebreak\else{\vskip 1.0zw}\fi
+\noindent
+\textsf{変数の宣言:}
+
+\begin{lstlisting}[style=grammar]
+std::extreme_value_distribution<RealType> d( a, b ) ;
+\end{lstlisting}
+
+\texttt{RealType}は浮動小数点数型でデフォルトは\texttt{double}。\texttt{a}, \texttt{b}は\texttt{RealType}型。値の範囲は\(0 < b\)。
+
+\vskip 1.0zw
+\noindent
+\textsf{使い方:}
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::extreme_value_distribution d( 1.0, 1.0 ) ;
+    d.a() ; // 1.0
+    d.b() ; // 1.0
+
+    std::mt19937 e ;
+    d(e) ;
+}
+\end{lstlisting}
+

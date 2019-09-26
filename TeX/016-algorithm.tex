@@ -1,0 +1,1204 @@
+\hyperchapter{ch16}{アルゴリズム}{アルゴリズム}
+
+アルゴリズム\index{あるごりずむ@アルゴリズム}は難しい。アルゴリズム自体の難しさに加え、アルゴリズムを正しくコードで表記するのも難しい。そこでC++ではアルゴリズム自体をライブラリにしている。ライブラリとしてのアルゴリズムを使うことで、読者はアルゴリズムを自前で実装することなく、すでに正しく実装されたアルゴリズムを使うことができる。
+
+\hypersection{ch1601}{for\texttt{\_}each}
+\index{for\_each@\texttt{for\_each}}
+
+例えば\texttt{vector}の要素を先頭から順番に標準出力するコードを考えよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    for (
+        auto i = std::begin(v),
+             j = std::end(v) ;
+        i != j ;
+        ++i  )
+    {
+        std::cout << *i ;
+    }
+}
+\end{lstlisting}
+
+このコードを書くのは難しい。このコードを書くには、イテレーターで要素の範囲を取り、ループを実行するごとにイテレーターを適切にインクリメントし、イテレーターが範囲内であるかどうかの判定をしなければならない。
+
+アルゴリズムを理解するだけでも難しいのに、正しくコード書くのはさらに難しい。例えば以下はコンパイルが通る完全に合法なC++だが間違っている。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    for (
+        auto i = std::begin(v),
+             j = std::end(v) ;
+        i == j ;
+        ++i  )
+    {
+        std::cout << i ;
+    }
+}
+\end{lstlisting}
+
+間違っている箇所がわかるだろうか。
+
+まず比較の条件が間違っている。\texttt{i != j}となるべきところが\texttt{i == j}となっている。出力する部分も間違っている。イテレーター\texttt{i}が指し示す値を得るには\,\texttt{*i}\,としなければならないところ、単に\texttt{i}としている。
+
+毎回このようなイテレーターのループをする\texttt{for}文を書くのは間違いの元だ。ここで重要なのは、要素のそれぞれに対して\texttt{std::cout {<}{<} *i ;}を実行するということだ。要素を先頭から末尾まで順番に処理するというのはライブラリにやってもらいたい。
+
+そこでこの処理を関数に切り出してみよう。イテレーター\texttt{[first,last)}を渡すと、イテレーターを先頭から末尾まで順番に処理してくれる関数は以下のように書ける。
+
+\begin{lstlisting}[language={C++}]
+auto print_all = []( auto first, auto last )
+{
+    // ループ
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        // 重要な処理
+        std::cout << *iter ;
+    }
+} ; 
+
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    print_all( std::begin(v), std::end(v) ) ;
+}
+\end{lstlisting}
+
+関数\texttt{print\_all}は便利だが、重要な処理がハードコードされている。例えば要素の集合のうち100以下の値だけ出力したいとか、値を2倍して出力したいとか、値を出力するたびに改行を出力したいという場合、それぞれに関数を書く必要がある。
+
+\begin{lstlisting}[language={C++}]
+// 値が100以下なら出力
+auto print_if_le_100 = []( auto first, auto last )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    { // 特別な処理
+        if ( *iter <= 100 )
+            std::cout << *iter ;
+    }
+} ;
+
+// 値を2倍して出力
+auto print_twice = []( auto first, auto last )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    { // 特別な処理
+        std::cout << 2 * (*iter) ;
+    }
+} ;
+
+// 値を出力するたびに改行を出力
+auto print_with_newline = []( auto first, auto last )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    { // 特別な処理
+        std::cout << *iter << "\n"s ;
+    }
+} ;
+\end{lstlisting}
+
+これを見ると、\texttt{for}文によるイテレーターのループはまったく同じコードだとわかる。
+
+まったく同じ\texttt{for}文を手で書くのは間違いの元だ。同じコードはできれば書きたくない。ここで必要なのは、共通な処理は一度書くだけで済ませ、特別な処理だけを記述すれば済むような方法だ。
+
+この問題を解決するには、問題を分割することだ。問題を「\texttt{for}文によるループ」と「特別な処理」に分けることだ。
+
+ところで、関数は変数に代入できる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 変数に代入された関数
+    auto print = []( auto x ) { std::cout << x ; } ;
+
+    // 変数に代入された関数の呼び出し
+    print(123) ;
+}
+\end{lstlisting}
+
+変数に代入できるということは、関数の引数として関数に渡せるということだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 関数を引数に取り呼び出す関数
+    auto call_func = []( auto func )
+    {
+        func(123) ;
+    } ;
+
+    // 引数を出力する関数
+    auto print = []( auto x ) { std::cout << x ; } ;
+
+    call_func( print ) ;
+
+    // 引数を2倍して出力する関数
+    auto print_twice = []( auto x ) { std::cout << 2*x ; } ;
+
+    call_func( print_twice ) ;
+}
+\end{lstlisting}
+
+すると、要素ごとの特別な処理をする関数を引数で受け取り、要素ごとに関数を適用する関数を書くとどうなるのか。
+
+\begin{lstlisting}[language={C++}]
+auto for_each = []( auto first, auto last, auto f )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        f( *iter ) ;
+    }
+} ;
+\end{lstlisting}
+
+この関数はイテレーターをループで回す部分だけを実装していて、要素ごとの処理は引数に取った関数に任せている。さっそく使ってみよう。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 引数を出力する関数
+    auto print_value = []( auto value ) { std::cout << value ; } ;
+
+    for_each( std::begin(v), std::end(v), print_value ) ;
+
+    // 引数を2倍して出力する関数
+    auto print_twice = []( auto value ) { std::cout << 2 * value ; } ;
+
+    for_each( std::begin(v), std::end(v), print_twice ) ;
+
+    // 引数を出力したあとに改行を出力する関数
+    auto print_with_newline = []( auto value ) { std::cout << value << "\n"s ; } ;
+
+    for_each( std::begin(v), std::end(v), print_with_newline ) ;
+}
+\end{lstlisting}
+
+関数は変数に代入しなくても使えるので、上のコードは以下のようにも書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 引数を出力する
+    for_each( std::begin(v), std::end(v),
+        []( auto value ) { std::cout << value ; } ) ;
+
+    // 引数を2倍して出力する
+    for_each( std::begin(v), std::end(v),
+        []( auto value ) { std::cout << 2 * value ; } ) ;
+
+    // 引数を出力したあとに改行を出力する関数
+    for_each( std::begin(v), std::end(v),
+        []( auto value ) { std::cout << value << "\n"s ; } ) ;
+}
+\end{lstlisting}
+
+わざわざ\texttt{for}文を書かずに、問題の本質的な処理だけを書くことができるようになった。
+
+このイテレーターを先頭から末尾までループで回し、要素ごとに関数を呼び出すという処理はとても便利なので、標準ライブラリには\texttt{std::for\_each( first, last, f)}\index{for\_each@\texttt{for\_each}}がある。使い方は同じだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    std::for_each( std::begin(v), std::end(v),
+        []( auto value ) { std::cout << value ; } ) ;
+}
+\end{lstlisting}
+
+C++17の時点ではまだ使えないが、将来のC++では、イテレーターを渡さずに、\texttt{vector}を直接渡すことができるようになる予定だ。
+
+\begin{lstlisting}[language={C++}]
+// C++20予定
+
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    std::for_each( v, []( auto value ) { std::cout << value ; } ) ;
+}
+\end{lstlisting}
+
+ところでもう一度\texttt{for\_each}の実装を見てみよう。
+
+\begin{lstlisting}[language={C++}]
+auto for_each = []( auto first, auto last, auto f )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        f( *iter ) ;
+    }
+} ;
+\end{lstlisting}
+
+\texttt{f(*iter)}がとても興味深い。もし関数\texttt{f}がリファレンスを引数に取っていたらどうなるだろうか。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 引数をリファレンスで取って2倍にする関数
+    auto twice = [](auto & value){ value = 2 * value ; } ;
+
+    std::for_each( std::begin(v), std::end(v), twice ) ;
+
+    // 引数を出力する関数
+    auto print = [](auto & value){ std::cout << value << ", "s ; } ;
+
+(@\ifTombow\pagebreak\fi@)
+    // 2, 4, 6, 8, 10, 
+    std::for_each( std::begin(v), std::end(v), print ) ;
+}
+\end{lstlisting}
+
+元の\texttt{vector}を書き換えることもできる。
+
+\hypersection{ch1602}{all\texttt{\_}of/any\texttt{\_}of/none\texttt{\_}of}
+\index{all\_of@\texttt{all\_of}}\index{any\_of@\texttt{any\_of}}\index{none\_of@\texttt{none\_of}}
+
+ほかのアルゴリズムも実装していくことで学んでいこう。
+
+\texttt{all\_of(first, last, pred)}は、\texttt{[first,last)}の間のイテレーター\texttt{iter}のそれぞれに対して、\texttt{pred(*iter)}がすべて\texttt{true}を返すならば\texttt{true}、そうではないならば\texttt{false}を返すアルゴリズムだ。
+
+この\texttt{all\_of}は要素がすべて条件を満たすかどうかを調べるのに使える。
+
+\begin{lstlisting}[language={C++}]
+// 要素がすべて偶数かどうか調べる関数
+auto is_all_of_odd = []( auto first, auto last )
+{
+    return std::all_of( first, last,
+        []( auto value ) { return value % 2 == 0 ; } ) ;
+} ;
+
+// 要素がすべて100以下かどうか調べる関数
+auto is_all_of_le_100 = []( auto first, auto last )
+{
+    return std::all_of( first, last,
+        []( auto value ) { return value <= 100; } ) ;
+} ;
+\end{lstlisting}
+
+ところで、もし要素がゼロ個の、つまり空のイテレーターを渡した場合どうなるのだろうか。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 空のvector
+    std::vector<int> v ;
+
+    bool b = std::all_of( std::begin(v), std::end(v),
+        // 特に意味のない関数
+        [](auto value){ return false ; } ) ;
+}
+\end{lstlisting}
+
+この場合、\texttt{all\_of}は\texttt{true}を返す。
+
+実装は以下のようになる。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+auto all_of = []( auto first, auto last, auto pred )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        if ( pred( *iter ) == false )
+            return false ;
+    }
+
+    return true ;
+} ;
+\end{lstlisting}
+
+\texttt{[first,last)}が空かどうかを確認する必要はない。というのも、空であればループは一度も実行されないからだ。
+
+\texttt{any\_of(first, last, pred)}は\texttt{[first,last)}の間のイテレーター\texttt{iter}それぞれに対して、\texttt{pred(*iter)}が1つでも\texttt{true}ならば\texttt{true}を返す。空の場合、すべて\texttt{false}の場合は\texttt{false}を返す。
+
+\texttt{any\_of}は要素に1つでも条件を満たすものがあるかどうかを調べるのに使える。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 要素に1つでも3が含まれているか？
+    // true
+    bool has_3 = std::any_of( std::begin(v), std::end(v),
+        []( auto x ) { return x == 3 ;}  ) ;
+
+    // 要素に1つでも10が含まれているか？
+    // false
+    bool has_10 = std::any_of( std::begin(v), std::end(v),
+        []( auto x ) { return x == 10 ;}  ) ;
+}
+\end{lstlisting}
+
+これも実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+auto any_of = []( auto first, auto last, auto pred )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        if ( pred( *iter ) )
+            return true ;
+    }
+    return false ;
+} ;
+\end{lstlisting}
+
+\texttt{none\_of(first, last, pred)}は\texttt{[first,last)}の間のイテレーター\texttt{iter}それぞれに対して、\texttt{pred(*iter)}がすべて\texttt{false}ならば\texttt{true}を返す。空の場合は\texttt{true}を返す。それ以外は\texttt{false}を返す。
+
+\texttt{none\_of}はすべての要素が条件を満たさない判定に使える。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 値は100か？
+    auto is_100 = [](auto x){ return x == 100 ; } ;
+
+    bool b = std::none_of( std::begin(v), std::end(v), is_100 ) ;
+}
+\end{lstlisting}
+
+これも実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+auto none_of = []( auto first, auto last, auto pred )
+{
+    for ( auto iter = first ; first != last ; ++iter )
+    {
+        if ( pred(*iter) )
+            return false ;
+    }
+    return true ;
+} ;
+\end{lstlisting}
+
+\hypersection{ch1603}{find/find\texttt{\_}if}
+\index{find@\texttt{find}}\index{find\_if@\index{find\_if}}
+
+\texttt{find( first, last, value )}はイテレーター\texttt{[first,last)}から\texttt{value}に等しい値を見つけて、そのイテレーターを返すアルゴリズムだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 3を指すイテレーター
+    auto pos = std::find( std::begin(v), std::end(v), 3 ) ;
+
+    std::cout << *pos ;
+}
+\end{lstlisting}
+
+要素が見つからない場合は\texttt{last}が返る。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    auto pos = std::find( std::begin(v), std::end(v), 0 ) ;
+
+    if ( pos != std::end(v) )
+    {
+        std::cout << "Found."s ; 
+    }
+    else
+    {
+        std::cout << "Not found."s ;
+    }
+}
+\end{lstlisting}
+
+イテレーターが\texttt{last}かどうかは実際に\texttt{last}と比較すればよい。
+
+アルゴリズムを理解するには、自分で実装してみるとよい。さっそく\texttt{find}を実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+auto find = []( auto first, auto last, auto const & value )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        // 値を発見したらそのイテレーターを返す
+        if ( *iter == value )
+            return iter ;
+    }
+    // 値が見つからなければ最後のイテレーターを返す
+    return last ;
+} ;
+\end{lstlisting}
+
+\texttt{value}が\texttt{auto const \& value}になっているのは、リファレンスによってコピーを回避するためと、変更が必要ないためだ。しかし、\texttt{int}や\texttt{double}のような単純な型については、わざわざ\texttt{const}な\texttt{lvalue}リファレンスを使う必要はない。
+
+\texttt{find\_if(first, last, pred)}はイテレーター\texttt{[first,last)}から、要素を関数\texttt{pred}に渡したときに\texttt{true}を返す要素へのイテレーターを探すアルゴリズムだ。
+
+関数\texttt{pred}についてはもう少し解説が必要だ。\texttt{pred}\index{pred@\texttt{pred}}とは\texttt{predicate}の略で、以下のような形をしている。
+
+\begin{lstlisting}[language={C++}]
+auto pred = []( auto const & value ) -> bool
+{
+    return true ;
+} ;
+\end{lstlisting}
+
+関数\texttt{pred}は値を1つ引数に取り、\texttt{bool}型を返す関数だ。
+
+さっそく使ってみよう。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,3,5,7,9,11,13,14,15,16} ;
+
+    // 偶数ならばtrueを返す
+    auto is_even = []( auto value )
+    {
+        return value % 2 == 0 ;
+    } ;
+    // 奇数ならばtrueを返す
+    auto is_odd = []( auto value )
+    {
+        return value % 2 == 1 ;
+    } ;
+
+    // 最初の偶数の要素
+    auto even = std::find_if( std::begin(v), std::end(v), is_even ) ;
+    // 最初の奇数の要素
+    auto odd = std::find_if( std::begin(v), std::end(v), is_odd ) ;
+}
+\end{lstlisting}
+
+実装はどうなるだろうか。
+
+\begin{lstlisting}[language={C++}]
+auto find_if = []( auto first, auto last, auto pred )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        // predがtrueを返した最初のイテレーターを返す
+        if ( pred( *iter ) )
+            return iter ;
+    }
+
+    return last ;
+} ;
+\end{lstlisting}
+
+値との比較が関数になっただけだ。
+
+つまりある値と比較する関数を渡したならば、\texttt{find\_if}は\texttt{find}と同じ動きをするということだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 引数が3の場合にtrueを返す関数
+    auto is_3 = []( auto x ) { return x == 3 ; } ;
+
+    // 最初に関数がtrueを返す要素へのイテレーターを探すfind_if
+    auto i = std::find_if( std::begin(v), std::end(v), is_3 ) ;
+
+    // 最初に3と等しい要素へのイテレーターを返すfind
+    auto j = std::find( std::begin(v), std::end(v), 3 ) ;
+
+    // 同じイテレーター
+    bool b = (i == j) ;
+}
+\end{lstlisting}
+
+実は、関数は特別な\texttt{[=]}を使うことで、関数の外側の値をコピーして使うことができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int value = 123 ;
+
+    auto f = [=]{ return value ; } ;
+
+    f() ; // 123
+}
+\end{lstlisting}
+
+特別な\texttt{[\&]}を使うことで、関数の外側の値をリファレンスで使うことができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    int value = 123 ;
+
+    auto f = [&]{ ++value ; } ; 
+
+    f() ;
+    std::cout << value ; // 124
+}
+\end{lstlisting}
+
+ということは、\texttt{find}は\texttt{find\_if}で実装することもできるということだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+auto find = []( auto first, auto last, auto value )
+{
+    return std::find_if( first, last,
+        [&]( auto elem ) { return value == elem ; } ) ;
+} ;
+\end{lstlisting}
+
+\hypersection{ch1604}{count/count\texttt{\_}if}
+\index{count@\texttt{count}}\index{count\_if@\texttt{count\_if}}
+
+\texttt{count(first, last, value)}は\texttt{[first,last)}の範囲のイテレーター\texttt{i}から\,\texttt{*i == value}\,になるイテレーター\texttt{i}の数を数える。
+
+\texttt{count}は指定した値と同じ要素の数を数える関数だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,1,1,3,3} ;
+
+    // 3
+    auto a = std::count( std::begin(v), std::end(v), 1 ) ;
+    // 1
+    auto b = std::count( std::begin(v), std::end(v), 2 ) ;
+    // 2
+    auto c = std::count( std::begin(v), std::end(v), 3 ) ;
+}
+\end{lstlisting}
+
+実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+auto count = []( auto first, auto last, auto value )
+{
+    auto counter = 0u ;
+    for ( auto i = first ; i != last ; ++i )
+    {
+        if ( *i == value )
+            ++counter ;  
+    }
+    return counter ;
+} ;
+\end{lstlisting}
+
+\texttt{count\_if(first, last, pred)}は\texttt{[first, last)}の範囲のイテレーター\texttt{i}から\texttt{pred(*i) != false}になるイテレーター\texttt{i}の数を返す。
+
+\texttt{count\_if}は要素を数える対象にするかどうかを判定する関数を渡せる\texttt{count}だ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,1,1,3,3} ;
+
+    // 奇数の数: 5
+    auto a = std::count_if( std::begin(v), std::end(v),
+        [](auto x){ return x%2 == 1 ; } ) ;
+
+    // 偶数の数: 1
+    auto b = std::count_if( std::begin(v), std::end(v),
+        [](auto x){ return x%2 == 0 ; } ) ;
+
+    // 2以上の数: 3
+    auto c = std::count_if( std::begin(v), std::end(v),
+        [](auto x){ return x >= 2 ; } ) ;
+}
+\end{lstlisting}
+
+実装してみよう。
+
+\begin{lstlisting}[language={C++}]
+auto count = []( auto first, auto last, auto pred )
+{
+    auto counter = 0u ;
+    for ( auto i = first ; i != last ; ++i )
+    {
+        if ( pred(*i) != false )
+            ++counter ;  
+    }
+    return counter ;
+} ;
+\end{lstlisting}
+
+\hypersection{ch1605}{equal}
+\index{equal@\texttt{equal}}
+
+これまでのアルゴリズムは1つのイテレーターの範囲だけを扱ってきた。アルゴリズムの中には複数の範囲を取るものもある。
+
+\texttt{equal(first1, last1, first2, last2)}は\texttt{[first1, last1)}と\texttt{[first2, last2)}が等しい場合に\texttt{true}を返す。「等しい」というのは、要素の数が同じで、各要素がそれぞれ等しい場合を指す。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> a = {1,2,3,4,5} ;
+    // aと等しい
+    std::vector<int> b = {1,2,3,4,5} ;
+    // aと等しくない
+    std::vector<int> c = {1,2,3,4,5,6} ;
+    // aと等しくない
+    std::vector<int> d = {1,2,2,4,6} ;
+
+    // true
+    bool ab = std::equal(
+        std::begin(a), std::end(a),
+        std::begin(b), std::end(b) ) ;
+
+    // false
+    bool ac = std::equal(
+        std::begin(a), std::end(a),
+        std::begin(c), std::end(c) ) ;
+
+    // false
+    bool ad = std::equal(
+        std::begin(a), std::end(a),
+        std::begin(d), std::end(d) ) ;
+}
+\end{lstlisting}
+
+実装は、まず要素数を比較し、等しくなければ\texttt{false}を返す。次に各要素を1つずつ比較し、途中で等しくない要素が見つかれば\texttt{false}を、最後まで各要素が等しければ\texttt{true}を返す。
+
+イテレーターの範囲\texttt{[first, last)}の要素数は\texttt{last-first}で取得できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 最初の要素
+    auto first = std::begin(v) ;
+    // 最後の1つ次の要素
+    auto last = std::end(v) ;
+
+    // 要素数: 5
+    auto size = last - first ;
+
+    // 最初の次の要素
+    auto next = first + 1 ;
+
+    // 4
+    auto size_from_next = last - next ;
+}
+\end{lstlisting}
+
+\texttt{last-first}という表記はわかりにくいので、C++には\texttt{distance(first, last)}というライブラリが用意されている。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+auto distance = []( auto first, auto last )
+{
+    return last - first ;
+} ;
+\end{lstlisting}
+
+これを使えばわかりやすく書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+
+    // 最初の要素
+    auto first = std::begin(v) ;
+    // 最後の1つ次の要素
+    auto last = std::end(v) ;
+
+    // 要素数: 5
+    auto size = std::distance( first, last ) ;
+
+    // 4
+    auto size_from_next = std::distance( first + 1, last ) ;
+}
+\end{lstlisting}
+
+あとは実装するだけだ（この実装は最も効率のいい実装ではない。理由についてはイテレーターの章を参照）。
+
+\begin{lstlisting}[language={C++}]
+auto equal = []( auto first1, auto last1, auto first2, auto last2)
+{
+    // 要素数が等しいことを確認
+    auto size1 = std::distance( first1, last1 ) ;
+    auto size2 = std::distance( first2, last2 ) ;
+
+    if ( size1 != size2 )
+        // 要素数が等しくなかった
+        return false ;
+
+    // 各要素が等しいことを確認
+    for (   auto i = first1, j = first2 ;
+            i != last1 ; ++i, ++j )
+    {
+        if ( *i != *j )
+            // 等しくない要素があった
+            return false ;
+    }
+(@\ifTombow\pagebreak\fi@)
+    // 各要素がすべて等しかった
+    return true ;
+} ;
+\end{lstlisting}
+
+\texttt{for}文の終了条件では\texttt{i != last1}だけを見ていて、\texttt{j != last2}は見ていないが、これは問題がない。なぜならば、この\texttt{for}文が実行されるのは、要素数が等しい場合だけだからだ。
+
+関数\texttt{pred}を取る\texttt{equal(first1, last1, first2, last2, pred)}もある。この\texttt{pred}は\texttt{pred(a, b)}で、\texttt{a}と\texttt{b}が等しい場合に\texttt{true}、そうでない場合に\texttt{false}を返す関数だ。つまり\texttt{a == b}の\texttt{operator ==}\,の代わりに使う関数を指定する。
+
+\texttt{equal}に関数を渡すことにより、例えば小数点以下の値を誤差として切り捨てるような処理が書ける。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<double> v = {1.3, 2.2, 3.0, 4.9, 5.7} ;
+    std::vector<double> w = {1.9, 2.4, 3.8, 4.5, 5.0} ;
+
+    // 小数点以下は誤差として切り捨てる比較
+    auto comp = []( auto a, auto b )
+    {
+        return std::floor(a) == std::floor(b) ;
+    } ;
+
+    bool b = std::equal(
+        std::begin(v), std::end(v),
+        std::begin(w), std::end(w),
+        comp ) ;
+}
+\end{lstlisting}
+
+\texttt{std::floor(x)}は浮動小数点数\texttt{x}の小数点数以下を切り捨てた結果を返す関数だ。\texttt{floor(0.999)}は\texttt{0.0}に、\texttt{floor(1.999)}は\texttt{1.0}になる。
+
+本書をここまで読んできた読者であれば実装は自力でできるだろう。
+
+\hypersection{ch1606}{search}
+\index{search@\texttt{search}}
+
+\texttt{search(first1, last1, first2, last2)}はイテレーター\texttt{[first2, last2)}の範囲で示された連続した要素の並びがイテレーター\texttt{[first1, last1)}の範囲に存在すれば\texttt{true}、そうでない場合は\texttt{false}を返す。
+
+こう書くと難しいが、例を見るとわかりやすい。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v1 = {1,2,3,4,5,6,7,8,9} ;
+    std::vector<int> v2 = {4,5,6} ;
+
+    // true
+    bool a = std::search( std::begin(v1), std::end(v1), std::begin(v2), std::end(v2) ) ;
+
+    std::vector<int> v3 = {1,3,5} ;
+    // false 
+    bool a = std::search( std::begin(v1), std::end(v1), std::begin(v3), std::end(v3) ) ;
+}
+\end{lstlisting}
+
+この例では、\texttt{v1}の中に\texttt{v2}と同じ並びの\,\texttt{\{4,5,6\}}\,が存在するので\texttt{true}、\texttt{v3}と同じ並びの\,\texttt{\{1,3,5\}}\,は存在しないので\texttt{false}になる。
+
+\texttt{search}の実装例はいまの読者にはまだ理解できない。\texttt{equal}や\texttt{search}を効率的に実装するにはイテレーターの詳細な理解が必要だ。
+
+\hypersection{ch1607}{copy}
+\index{copy@\texttt{copy}}
+
+これまでのアルゴリズムは\texttt{for\_each}を除き要素の変更をしてこなかった。\texttt{copy}は要素の変更をするアルゴリズムだ。
+
+イテレーター\texttt{i}は\,\texttt{*i}で参照する要素の値として使うことができるほか、\texttt{*i = x}で要素に値\texttt{x}を代入できる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1} ;
+
+    auto i = std::begin(v) ;
+
+    // 参照する要素を値として使う
+    std::cout << *i ;
+    // 参照する要素に値を代入する。
+    *i = 2 ;
+}
+\end{lstlisting}
+
+\texttt{copy(first, last, result)}はイテレーター\texttt{[first, last)}の範囲の値を、先頭から順番にイテレーター\texttt{result}に書き込んでいくアルゴリズムだ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> source = {1,2,3,4,5} ;
+    // 要素数5のvector
+    std::vector<int> destination(5) ;
+
+    std::copy( std::begin(source), std::end(source), std::begin(destination) ) ;
+
+    // destinationの中身は{1,2,3,4,5}
+}
+\end{lstlisting}
+
+これは実質的に以下のような操作をしたのと等しい。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> source = {1,2,3,4,5} ;
+    std::vector<int> destination(5) ;
+    // 要素をそれぞれコピー 
+   destination[0] = source[0] ;
+   destination[1] = source[1] ;
+   destination[2] = source[2] ;
+   destination[3] = source[3] ;
+   destination[4] = source[4] ;
+   
+}
+\end{lstlisting}
+
+イテレーター\texttt{result}は先頭のイテレーターのみで末尾のイテレーターは渡さない。イテレーター\texttt{result}はイテレーター\texttt{[first, last)}の範囲の要素数をコピーできるだけの要素数の範囲を参照していなければならない。
+
+例えば以下の例はエラーになる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> source = {1,2,3,4,5} ;
+    // 要素数3のvector
+    std::vector<int> destination(3) ;
+
+    // エラー
+    std::copy( std::begin(source), std::end(source), std::begin(destination) ) ;
+}
+\end{lstlisting}
+
+要素数が3しかない\texttt{vector}に5個の要素をコピーしようとしている。
+
+\texttt{copy}の戻り値は\texttt{[first,last)}の要素数だけ進めたイテレーター\texttt{result}になる。これはつまり、\texttt{result + (last - first)}だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> source = {1,2,3,4,5} ;
+    std::vector<int> destination(5) ;
+    
+    auto first = std::begin(source) ;
+    auto last = std::end(source) ;
+    auto result = std::begin(destination) ;
+    
+    auto returned = std::copy( first, last, result ) ;
+
+    // true
+    bool b = (returned == (result + (last - first)) ;
+}
+\end{lstlisting}
+
+ここで、\texttt{last-first}は\texttt{source}の要素数の\texttt{5}なので、\texttt{result + 5}は\texttt{copy}の戻り値のイテレーターと等しい。
+
+\texttt{copy}には\texttt{[first,last)}の範囲が\texttt{result}から続く範囲とオーバーラップしてはいけないという制約がある。
+
+オーバーラップ\index{おばらつぷ@オーバーラップ}というのは、同じ要素を参照しているという意味だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+
+    // [first,last)とresultがオーバーラップしている
+    std::copy( std::begin(v), std::end(v), std::begin(v) ) ;
+}
+\end{lstlisting}
+
+オーバーラップした場合、\texttt{copy}の動作は保証されない。
+
+実装例。
+
+\begin{lstlisting}[language={C++}]
+auto copy = []( auto first, auto last, auto result )
+{
+    for ( auto iter = first ; iter != last ; ++iter, ++result )
+    { *result = *iter ; }
+
+    return result ;
+} ;
+\end{lstlisting}
+
+\clearpage
+\hypersection{ch1608}{transform}
+\index{transform@\texttt{transform}}
+
+\texttt{transform(first, last, result, op)}は\texttt{copy}に似ているが、\texttt{result}へのコピーが\,\texttt{*result = *iter;}\,ではなく、\texttt{*result = op(*iter);}になる。\texttt{op}は関数だ。
+
+以下が実装例だ。\texttt{copy}とほぼ同じだ。
+
+\begin{lstlisting}[language={C++}]
+auto transform = []( auto first, auto last, auto result, auto op )
+{
+    for ( auto iter = first ; iter != last ; ++iter, ++result )
+    { *result = op(*iter) ; }
+
+    return result ;
+} ;
+\end{lstlisting}
+
+使い方は\texttt{copy}と似ているが、値をコピーをする際に関数を適用することができる。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> a = {1,2,3,4,5} ;
+
+    std::vector<int> b(5) ;
+    std::transform( std::begin(a), std::end(a), std::begin(b),
+        [](auto x){ return 2*x ; } ) ;
+    // bは{2,4,6,8,10}
+
+
+    std::vector<int> c(5) ;
+    std::transform( std::begin(a), std::end(a), std::begin(c),
+        [](auto x){ return x % 3 ; } ) ;
+    // cは{1,2,0,1,2}
+
+    
+    std::vector<bool> d(5) ;
+    std::transform( std::begin(a), std::end(a), std::begin(d),
+        [](auto x){ return x < 3 ; } ) ;
+    // dは{true,true,false,false,false}
+}
+\end{lstlisting}
+
+\texttt{result}に代入されるのは関数\texttt{op}の戻り値だ。関数\texttt{op}は値を1つの引数で受け取り値を返す関数だ。
+
+\clearpage
+\hypersection{ch1609}{replace}
+\index{replace@\texttt{replace}}
+
+\texttt{replace(first, last, old\_value, new\_value)}はイテレーター\texttt{[first,last)}の範囲のイテレーターが指す要素の値が\texttt{old\_value}に等しいものを\texttt{new\_value}に置換する関数だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> a = {1,2,3,3,4,5,3,4,5} ;
+    std::replace( std::begin(a), std::end(a), 3, 0 ) ;
+    // aは{1,2,0,0,4,5,0,4,5}
+}
+\end{lstlisting}
+
+実装も簡単。
+
+\begin{lstlisting}[language={C++}]
+auto replace = []( auto first, auto last, auto old_value, auto new_value )
+{
+    for ( auto iter = first ; first != last ; ++iter )
+    {
+        if ( *iter == old_value )
+            *iter = new_value ;
+    }
+} ;
+\end{lstlisting}
+
+\hypersection{ch1610}{fill}
+\index{fill@\texttt{fill}}
+
+\texttt{fill(first, last, value)}はイテレーター\texttt{[first,last)}の範囲をイテレーターが参照する要素に\texttt{value}を代入する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    std::fill( std::begin(v), std::end(v), 0 ) ;
+    // vは{0,0,0,0,0}
+}
+\end{lstlisting}
+
+\texttt{fill\_n(first, n, value)}はイテレーター\texttt{[first, first+n)}の範囲のイテレーターが参照する要素に\texttt{value}を代入する関数だ。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    std::fill_n( std::begin(v), 5, 0 ) ;
+    // vは{0,0,0,0,0}
+}
+\end{lstlisting}
+
+実装例。
+
+\begin{lstlisting}[language={C++}]
+auto fill_n = []( auto first, auto n, auto value )
+{
+    for ( auto i = 0 ; i != n ; ++i, ++first )
+    {
+        *first = value ;
+    }
+} ;
+\end{lstlisting}
+
+\hypersection{ch1611}{generate}
+\index{generate@\texttt{generate}}
+
+\texttt{generate}は\texttt{fill}に似ているが、値として\texttt{value}を取るのではなく、関数\texttt{gen}\index{gen@\texttt{gen}}を取る。
+
+\texttt{generate(first, last, gen)}はイテレーター\texttt{[first, last)}の範囲のイテレーターが参照する要素に\texttt{gen()}を代入する。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    auto gen_zero = [](){ return 0 ; } ;
+    std::generate( std::begin(v), std::end(v), gen_zero ) ;
+    // vは{0,0,0,0,0}
+}
+\end{lstlisting}
+
+\texttt{generate\_n(first, n, gen)}は\texttt{fill\_n}の\texttt{generate}版だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3,4,5} ;
+    auto gen_zero = []{ return 0 ; } ;
+    std::generate_n( std::begin(v), 5, gen_zero ) ;
+    // vは{0,0,0,0,0}
+}
+\end{lstlisting}
+
+\ifTombow\pagebreak\fi
+実装例は単純だ。
+
+\begin{lstlisting}[language={C++}]
+auto generate = []( first, last, gen )
+{
+    for ( auto iter = first ; iter != last ; ++iter )
+    {
+        *iter = gen() ;
+    }
+} ;
+
+auto generate_n = []( first, n, gen )
+{
+    for ( auto i = 0u ; i != n ; ++i, ++iter )
+    {
+        *iter = gen() ;
+    }
+} ;
+\end{lstlisting}
+
+\hypersection{ch1612}{remove}
+\index{remove@\texttt{remove}}
+
+\texttt{remove(first, last, value)}はイテレーター\texttt{[first,last)}の範囲の参照する要素から、値\texttt{value}に等しいものを取り除く。そして新しい終端イテレーターを返す。
+
+アルゴリズム\texttt{remove}が値を取り除くというとやや語弊がある。例えば以下のような数列があり、
+\begin{lstlisting}[style=terminal]
+1, 2, 3
+\end{lstlisting}
+この中から値\texttt{2}を\texttt{remove}のように取り除く場合、以下のようになる。
+\begin{lstlisting}[style=terminal]
+1, 3, ?
+\end{lstlisting}
+
+\texttt{remove}は取り除くべき値の入った要素を、後続の値で上書きする。この場合、1番目の\texttt{2}を2番目の\texttt{3}で上書きする。2番目は不定な状態になる。これは、\texttt{remove}アルゴリズムは2番目がどのような値になるかを保証しないという意味だ。
+
+以下のような数列で値\texttt{2}を\texttt{remove}したとき
+\begin{lstlisting}[style=terminal]
+1,2,2,3,2,2,4
+\end{lstlisting}
+以下のようになる。
+\begin{lstlisting}[style=terminal]
+1,3,4,?,?,?,?
+\end{lstlisting}
+
+\texttt{remove}の戻り値は、新しいイテレーターの終端を返す。
+
+\ifTombow\pagebreak\fi
+\begin{lstlisting}[language={C++}]
+auto last2 = remove( first, last, value ) ;
+\end{lstlisting}
+
+この例では、\texttt{remove}は\texttt{[first, last)}から値\texttt{value}に等しい要素を取り除いたイテレーターの範囲を戻り値として返す。その戻り値が\texttt{last2}だ。\texttt{[first, last2)}が値を取り除いたあとの新しいイテレーターの範囲だ。
+
+\texttt{remove}を呼び出しても元の\texttt{vector}の要素数が変わることはない。\texttt{remove}は\texttt{vector}の要素の値を変更するだけだ。
+
+以上を踏まえて、以下が\texttt{remove}を使う例だ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    std::vector<int> v = {1,2,3} ;
+
+    auto last = std::remove( std::begin(v), std::end(v), 2 ) ;
+
+    // "13"
+    std::for_each( std::begin(v), last,
+        [](auto x) { std::cout << x ; } ) ;
+
+    std::vector<int> w = {1,2,2,3,2,2,4} ;
+
+    auto last2 = std::remove( std::begin(w), std::end(w), 2 ) ;
+
+    // "134"
+    std::for_each( std::begin(w), last2,
+        [](auto x) { std::cout << x ; } ) ;
+   
+}
+\end{lstlisting}
+
+\texttt{remove\_if(first, last, pred)}は、\texttt{[first, last)}の範囲の要素を指すイテレーター\texttt{i}のうち、関数\texttt{pred}に渡した結果\texttt{pred(*i)}が\texttt{true}になる要素を取り除くアルゴリズムだ。
+
+\begin{lstlisting}[language={C++}]
+int main()
+{
+    // 偶数の場合true、奇数の場合falseを返す関数
+    auto is_even = []( auto x ) { return x%2 == 0 ; } ;
+
+    std::vector v = { 1,2,3,4,5,6,7,8,9 } ;
+    // 偶数を取り除く
+    auto last = std::remove_if( std::begin(v), std::end(v), is_even ) ;
+
+    // [ std::begin(v), last)は{1,3,5,7,9}
+}
+\end{lstlisting}
+
+\texttt{remove}は現在知っている知識だけではまだ完全に実装できない。以下は不完全な実装の例だ。\texttt{remove}を完全に理解するためには\texttt{ムーブセマンティクス}の理解が必要だ。
+
+\begin{lstlisting}[language={C++}]
+auto remove_if = []( auto first, auto last, auto pred )
+{
+    // removeする最初の要素
+    auto removing = std::find_if( first, last, pred ) ;
+    // removeする要素がなかった
+    if ( removing == last )
+        return last ;
+
+    // removeする要素の次の要素
+    auto remaining = removing ;
+    ++remaining ;
+
+    // removeする要素に上書きする
+    for (  ; remaining != last ; ++remaining )
+    {
+        // 上書き元も取り除くのであればスキップ
+        if ( pred( *remaining ) == false )
+        {
+            *removing = *remaining ;
+            ++removing ;
+        }
+
+    }
+    // 新しい終端イテレーター
+    return removing ;
+} ;
+\end{lstlisting}
+
