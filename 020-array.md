@@ -54,7 +54,7 @@ int main()
 ~~~cpp
 int main()
 {
-    std::size_T N{} ;
+    std::size_t N{} ;
     std::cin >> N ;
 
     // エラー

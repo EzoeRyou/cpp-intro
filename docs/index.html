@@ -1177,7 +1177,7 @@ make: &#39;hello&#39; is up to date.</code></pre>
 <a class="sourceLine" id="cb62-8" title="8"><span class="ot">.PHONY</span> <span class="ot">:</span><span class="dt"> run clean</span></a></code></pre></div>
 <p><code>make</code>でコンパイル。<code>make run</code>で実行。<code>make clean</code>でコンパイル結果の削除。</p>
 <p><code>Makefile</code>全体は以下のようになる。</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode makefile"><code class="sourceCode makefile"><a class="sourceLine" id="cb63-1" title="1"><span class="dt">gcc_options </span><span class="ch">=</span><span class="st"> -std=c++17 -Wall --pedantic-error</span></a>
+<div class="sourceCode" id="cb63"><pre class="sourceCode makefile"><code class="sourceCode makefile"><a class="sourceLine" id="cb63-1" title="1"><span class="dt">gcc_options </span><span class="ch">=</span><span class="st"> -std=c++17 -Wall --pedantic-errors</span></a>
 <a class="sourceLine" id="cb63-2" title="2"></a>
 <a class="sourceLine" id="cb63-3" title="3"><span class="dv">program :</span><span class="dt"> main.cpp all.h all.h.gch</span></a>
 <a class="sourceLine" id="cb63-4" title="4">    g++ <span class="ch">$(</span><span class="dt">gcc_options</span><span class="ch">)</span> -include all.h <span class="ch">$&lt;</span> -o <span class="ch">$@</span></a>
@@ -2900,7 +2900,7 @@ false</code></pre>
 <p>これは<code>&quot;hello&quot;</code>と標準出力するだけの簡単なプログラムだ。このプログラムをコンパイルしたプログラム名を<code>program</code>としよう。標準出力の出力先はデフォルトで、ユーザーのターミナルになる。</p>
 <pre><code>$ ./program
 hello</code></pre>
-<p>リダイレクトを使えば、この出力先をファイルにできる。リダイレクトを使うには<code>&quot;プログラム \&gt; ファイル名&quot;</code>とする</p>
+<p>リダイレクトを使えば、この出力先をファイルにできる。リダイレクトを使うには<code>&quot;プログラム \&gt; ファイル名&quot;</code>とする。</p>
 <pre><code>$ ./program &gt; hello.txt
 $ cat hello.txt
 hello</code></pre>
@@ -2916,7 +2916,7 @@ hello</code></pre>
 <a class="sourceLine" id="cb241-8" title="8"></a>
 <a class="sourceLine" id="cb241-9" title="9">    <span class="bu">std::</span>cout &lt;&lt; mass / (height*height) ;</a>
 <a class="sourceLine" id="cb241-10" title="10">}</a></code></pre></div>
-<p>このプログラム名を<code>bmi</code>として、通常通り実行すると以下のようになる。</p>
+<p>このプログラム名を<code>bmi</code>として、通常どおり実行すると以下のようになる。</p>
 <pre><code>$　./bmi
 1.63
 73
@@ -3081,7 +3081,7 @@ hello
 <ol type="1">
 <li>関数<code>hello</code>が呼ばれる</li>
 <li><code>goto</code>文でラベル<code>loop</code>まで飛ぶ</li>
-<li>1に戻る</li>
+<li>1.に戻る</li>
 </ol>
 <p>という処理を行う。</p>
 <h3 id="終了条件付きループ">終了条件付きループ</h3>
@@ -3421,7 +3421,7 @@ hello
 <a class="sourceLine" id="cb297-16" title="16">        <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb297-17" title="17">    }</a>
 <a class="sourceLine" id="cb297-18" title="18">}</a></code></pre></div>
-<p>重要なのは以下の4行だ。</p>
+<p>重要なのは以下の5行だ。</p>
 <div class="sourceCode" id="cb298"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb298-1" title="1"><span class="cf">while</span>( <span class="kw">true</span> )</a>
 <a class="sourceLine" id="cb298-2" title="2">{</a>
 <a class="sourceLine" id="cb298-3" title="3">    sum += input() ;</a>
@@ -5891,7 +5891,7 @@ int: 2147483647</code></pre>
 <p>スコープ(scope)というのはやや説明が難しい概念だ。名前空間や関数はスコープを持っている。とてもおおざっぱに説明するとカーリブラケット<code>{}</code>で囲まれた範囲がスコープだ。</p>
 <div class="sourceCode" id="cb544"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb544-1" title="1"><span class="kw">namespace</span> ns</a>
 <a class="sourceLine" id="cb544-2" title="2">{ <span class="co">// 名前空間スコープの始まり</span></a>
-<a class="sourceLine" id="cb544-3" title="3">} <span class="co">// 関数スコープの終わり</span></a>
+<a class="sourceLine" id="cb544-3" title="3">} <span class="co">// 名前空間スコープの終わり</span></a>
 <a class="sourceLine" id="cb544-4" title="4"></a>
 <a class="sourceLine" id="cb544-5" title="5"><span class="dt">void</span> f()</a>
 <a class="sourceLine" id="cb544-6" title="6">{ <span class="co">// 関数スコープの始まり</span></a>
@@ -6193,7 +6193,7 @@ int: 2147483647</code></pre>
 <a class="sourceLine" id="cb567-4" title="4"></a>
 <a class="sourceLine" id="cb567-5" title="5">    output_all( first, last ) ;</a>
 <a class="sourceLine" id="cb567-6" title="6">}</a></code></pre></div>
-<p><code>関数output_all</code>のコードは何も変えていないのに、さまざまなイテレーターに対応できる。イテレーターというお作法に乗っ取ることで、さまざまな処理が可能になるのだ。</p>
+<p><code>関数output_all</code>のコードは何も変えていないのに、さまざまなイテレーターに対応できる。イテレーターというお作法にのっとることで、さまざまな処理が可能になるのだ。</p>
 <p>これは出力にも言えることだ。<code>関数output_all</code>は<code>std::cout</code>に出力していた。これをイテレーターに対する書き込みに変えてみよう。</p>
 <div class="sourceCode" id="cb568"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb568-1" title="1"><span class="kw">auto</span> output_all = []( <span class="kw">auto</span> first, <span class="kw">auto</span> last, <span class="kw">auto</span> output_iter )</a>
 <a class="sourceLine" id="cb568-2" title="2">{</a>
@@ -6531,7 +6531,7 @@ d) 1 \lt i \lt 13
 <a class="sourceLine" id="cb596-3" title="3">    <span class="co">// constの付いている型のオブジェクト</span></a>
 <a class="sourceLine" id="cb596-4" title="4">    <span class="at">const</span> <span class="dt">int</span> x = <span class="dv">0</span> ;</a>
 <a class="sourceLine" id="cb596-5" title="5"></a>
-<a class="sourceLine" id="cb596-6" title="6">    <span class="co">// エラー、constがない。</span></a>
+<a class="sourceLine" id="cb596-6" title="6">    <span class="co">// エラー、constがない</span></a>
 <a class="sourceLine" id="cb596-7" title="7">    <span class="dt">int</span> &amp; ref = x ;</a>
 <a class="sourceLine" id="cb596-8" title="8"></a>
 <a class="sourceLine" id="cb596-9" title="9">    <span class="co">// OK、constが付いている</span></a>
@@ -7380,7 +7380,7 @@ d) 1 \lt i \lt 13
 <a class="sourceLine" id="cb664-4" title="4"></a>
 <a class="sourceLine" id="cb664-5" title="5">    <span class="kw">auto</span> last = <span class="bu">std::</span>remove( <span class="bu">std::</span>begin(v), <span class="bu">std::</span>end(v), <span class="dv">2</span> ) ;</a>
 <a class="sourceLine" id="cb664-6" title="6"></a>
-<a class="sourceLine" id="cb664-7" title="7">    <span class="co">// &quot;12&quot;</span></a>
+<a class="sourceLine" id="cb664-7" title="7">    <span class="co">// &quot;13&quot;</span></a>
 <a class="sourceLine" id="cb664-8" title="8">    <span class="bu">std::</span>for_each( <span class="bu">std::</span>begin(v), last,</a>
 <a class="sourceLine" id="cb664-9" title="9">        [](<span class="kw">auto</span> x) { <span class="bu">std::</span>cout &lt;&lt; x ; } ) ;</a>
 <a class="sourceLine" id="cb664-10" title="10"></a>
@@ -7701,7 +7701,7 @@ d) 1 \lt i \lt 13
 <p><code>クラス</code>の<code>データメンバー</code>の定義は変数ではない。オブジェクトではない。つまり、それ自体にストレージが割り当てられてはいない。</p>
 <div class="sourceCode" id="cb697"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb697-1" title="1"><span class="kw">struct</span> S</a>
 <a class="sourceLine" id="cb697-2" title="2">{</a>
-<a class="sourceLine" id="cb697-3" title="3">    <span class="co">// これは変数ではない。</span></a>
+<a class="sourceLine" id="cb697-3" title="3">    <span class="co">// これは変数ではない</span></a>
 <a class="sourceLine" id="cb697-4" title="4">    <span class="dt">int</span> data ;</a>
 <a class="sourceLine" id="cb697-5" title="5">} ;</a></code></pre></div>
 <p>クラスの変数を定義したときに、その変数のオブジェクトに紐付いたストレージが使われる。</p>
@@ -8655,7 +8655,7 @@ delegating constructor</code></pre>
 <p>一方、<code>array</code>はコンパイル時に要素数を決める。標準入力から得た値は実行時のものなので、使うことはできない。</p>
 <div class="sourceCode" id="cb786"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb786-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb786-2" title="2">{</a>
-<a class="sourceLine" id="cb786-3" title="3">    <span class="bu">std::</span>size_T N{} ;</a>
+<a class="sourceLine" id="cb786-3" title="3">    <span class="bu">std::</span>size_t N{} ;</a>
 <a class="sourceLine" id="cb786-4" title="4">    <span class="bu">std::</span>cin &gt;&gt; N ;</a>
 <a class="sourceLine" id="cb786-5" title="5"></a>
 <a class="sourceLine" id="cb786-6" title="6">    <span class="co">// エラー</span></a>
@@ -8743,7 +8743,7 @@ delegating constructor</code></pre>
 <dd><p>コンピューターが怠惰であるときにプログラマーが感ずる怒り。短気によって書かれたプログラムは、単に労力を削減するばかりではなく、事前に解決しておく。少なくとも、すでに解決済みのように振る舞う。これがプログラマーの第二の美徳である。</p>
 </dd>
 <dt>傲慢</dt>
-<dd><p>ゼウスも罰したもう過剰なまでの奢り。他人がそしりを入れられぬほどのプログラムを書く推進剤。これがプログラマーの第三の美徳である。</p>
+<dd><p>ゼウスも罰したもう過剰なまでの驕り。他人がそしりを入れられぬほどのプログラムを書く推進剤。これがプログラマーの第三の美徳である。</p>
 </dd>
 </dl>
 <p>これから学ぶ<code>array</code>を実装するためのC++の機能を学ぶときに、このプログラマーの三大美徳のことを頭に入れておこう。</p>
@@ -8938,7 +8938,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb808-19" title="19">    <span class="dt">double</span> storage[<span class="dv">1</span>] ;</a>
 <a class="sourceLine" id="cb808-20" title="20">    <span class="dt">double</span> &amp; <span class="kw">operator</span> []( <span class="bu">std::</span>size_t i )</a>
 <a class="sourceLine" id="cb808-21" title="21">    { <span class="cf">return</span> storage[i] ; }</a>
-<a class="sourceLine" id="cb808-22" title="22">}</a>
+<a class="sourceLine" id="cb808-22" title="22">} ;</a>
 <a class="sourceLine" id="cb808-23" title="23"></a>
 <a class="sourceLine" id="cb808-24" title="24"><span class="co">// array_double_2, array_double_3, ...</span></a></code></pre></div>
 <p>これは怠惰で短気なプログラマーには耐えられない作業だ。C++にはこのような退屈なコードを書かなくても済む機能がある。しかしその前に、引数について考えてみよう。</p>
@@ -9862,7 +9862,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb885-6" title="6">    <span class="bu">std::</span>cout &lt;&lt; ++i ;  <span class="co">// 1</span></a>
 <a class="sourceLine" id="cb885-7" title="7">    <span class="co">// 後置</span></a>
 <a class="sourceLine" id="cb885-8" title="8">    <span class="bu">std::</span>cout &lt;&lt; i++ ;  <span class="co">// 1</span></a>
-<a class="sourceLine" id="cb885-9" title="9">    <span class="bu">std::</span>cout &lt;&lt; i      <span class="co">// 2</span></a>
+<a class="sourceLine" id="cb885-9" title="9">    <span class="bu">std::</span>cout &lt;&lt; i ;    <span class="co">// 2</span></a>
 <a class="sourceLine" id="cb885-10" title="10">}</a></code></pre></div>
 <p><code>int</code>型では、前置<code>operator ++</code>はオペランドの値を1加算した値にする。後置<code>operator ++</code>はオペランドの値を1加算するが、式を評価した結果は前のオペランドの値になる。</p>
 <div class="sourceCode" id="cb886"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb886-1" title="1">++i ; <span class="co">// i+1</span></a>
@@ -10368,7 +10368,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb929-4" title="4">    <span class="cf">if</span> ( i &gt;= size() )</a>
 <a class="sourceLine" id="cb929-5" title="5">    {</a>
 <a class="sourceLine" id="cb929-6" title="6">        <span class="co">// エラー検出</span></a>
-<a class="sourceLine" id="cb929-7" title="7">        <span class="co">// しかし何をreturnすればいいのだろう。</span></a>
+<a class="sourceLine" id="cb929-7" title="7">        <span class="co">// しかし何をreturnすればいいのだろう</span></a>
 <a class="sourceLine" id="cb929-8" title="8">    }</a>
 <a class="sourceLine" id="cb929-9" title="9"></a>
 <a class="sourceLine" id="cb929-10" title="10">    <span class="cf">return</span> storage[i] ;</a>
@@ -12170,30 +12170,29 @@ sizeof(Object): 12</code></pre>
 8</code></pre>
 <p>筆者の環境では、<code>x</code>はクラスの先頭アドレスからオフセット0バイトに、<code>y</code>はオフセット4バイトに、<code>z</code>はオフセット8バイトに配置されているようだ。</p>
 <p>確かめてみよう。</p>
-<div class="sourceCode" id="cb1121"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1121-1" title="1"></a>
-<a class="sourceLine" id="cb1121-2" title="2"><span class="kw">struct</span> Object</a>
-<a class="sourceLine" id="cb1121-3" title="3">{</a>
-<a class="sourceLine" id="cb1121-4" title="4">    <span class="dt">int</span> x = <span class="dv">123</span> ;</a>
-<a class="sourceLine" id="cb1121-5" title="5">    <span class="dt">int</span> y = <span class="dv">456</span> ;</a>
-<a class="sourceLine" id="cb1121-6" title="6">    <span class="dt">int</span> z = <span class="dv">789</span> ;</a>
-<a class="sourceLine" id="cb1121-7" title="7">} ;</a>
-<a class="sourceLine" id="cb1121-8" title="8"></a>
-<a class="sourceLine" id="cb1121-9" title="9"><span class="dt">int</span> main()</a>
-<a class="sourceLine" id="cb1121-10" title="10">{</a>
-<a class="sourceLine" id="cb1121-11" title="11"></a>
-<a class="sourceLine" id="cb1121-12" title="12">    Object object ;</a>
-<a class="sourceLine" id="cb1121-13" title="13"></a>
-<a class="sourceLine" id="cb1121-14" title="14">    <span class="co">// クラスのオブジェクトの先頭アドレス</span></a>
-<a class="sourceLine" id="cb1121-15" title="15">    <span class="bu">std::</span>byte * start = bit_cast&lt;<span class="bu">std::</span>byte *&gt;(&amp;object) ;</a>
-<a class="sourceLine" id="cb1121-16" title="16">    <span class="co">// オフセット0</span></a>
-<a class="sourceLine" id="cb1121-17" title="17">    <span class="dt">int</span> * x = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">0</span>) ;</a>
-<a class="sourceLine" id="cb1121-18" title="18">    <span class="co">// オフセット4</span></a>
-<a class="sourceLine" id="cb1121-19" title="19">    <span class="dt">int</span> * y = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">4</span>) ;</a>
-<a class="sourceLine" id="cb1121-20" title="20">    <span class="co">// オフセット8</span></a>
-<a class="sourceLine" id="cb1121-21" title="21">    <span class="dt">int</span> * z = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">8</span>) ;</a>
-<a class="sourceLine" id="cb1121-22" title="22"></a>
-<a class="sourceLine" id="cb1121-23" title="23">    <span class="bu">std::</span>cout &lt;&lt; *x &lt;&lt; *y &lt;&lt; *z ;</a>
-<a class="sourceLine" id="cb1121-24" title="24">}</a></code></pre></div>
+<div class="sourceCode" id="cb1121"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1121-1" title="1"><span class="kw">struct</span> Object</a>
+<a class="sourceLine" id="cb1121-2" title="2">{</a>
+<a class="sourceLine" id="cb1121-3" title="3">    <span class="dt">int</span> x = <span class="dv">123</span> ;</a>
+<a class="sourceLine" id="cb1121-4" title="4">    <span class="dt">int</span> y = <span class="dv">456</span> ;</a>
+<a class="sourceLine" id="cb1121-5" title="5">    <span class="dt">int</span> z = <span class="dv">789</span> ;</a>
+<a class="sourceLine" id="cb1121-6" title="6">} ;</a>
+<a class="sourceLine" id="cb1121-7" title="7"></a>
+<a class="sourceLine" id="cb1121-8" title="8"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb1121-9" title="9">{</a>
+<a class="sourceLine" id="cb1121-10" title="10"></a>
+<a class="sourceLine" id="cb1121-11" title="11">    Object object ;</a>
+<a class="sourceLine" id="cb1121-12" title="12"></a>
+<a class="sourceLine" id="cb1121-13" title="13">    <span class="co">// クラスのオブジェクトの先頭アドレス</span></a>
+<a class="sourceLine" id="cb1121-14" title="14">    <span class="bu">std::</span>byte * start = bit_cast&lt;<span class="bu">std::</span>byte *&gt;(&amp;object) ;</a>
+<a class="sourceLine" id="cb1121-15" title="15">    <span class="co">// オフセット0</span></a>
+<a class="sourceLine" id="cb1121-16" title="16">    <span class="dt">int</span> * x = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">0</span>) ;</a>
+<a class="sourceLine" id="cb1121-17" title="17">    <span class="co">// オフセット4</span></a>
+<a class="sourceLine" id="cb1121-18" title="18">    <span class="dt">int</span> * y = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">4</span>) ;</a>
+<a class="sourceLine" id="cb1121-19" title="19">    <span class="co">// オフセット8</span></a>
+<a class="sourceLine" id="cb1121-20" title="20">    <span class="dt">int</span> * z = bit_cast&lt;<span class="dt">int</span> *&gt;(start + <span class="dv">8</span>) ;</a>
+<a class="sourceLine" id="cb1121-21" title="21"></a>
+<a class="sourceLine" id="cb1121-22" title="22">    <span class="bu">std::</span>cout &lt;&lt; *x &lt;&lt; *y &lt;&lt; *z ;</a>
+<a class="sourceLine" id="cb1121-23" title="23">}</a></code></pre></div>
 <p>筆者の環境では以下のように出力される</p>
 <pre><code>123456789</code></pre>
 <p>このプログラムの実行結果は環境によって変わる。読者の使っている環境でデータメンバーへのポインターが筆者の環境と同じように実装されているとは限らない。</p>
@@ -12457,7 +12456,7 @@ sizeof(Object): 12</code></pre>
 <div class="sourceCode" id="cb1142"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1142-1" title="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> OutputIterator &gt;</a>
 <a class="sourceLine" id="cb1142-2" title="2"><span class="dt">void</span> f( OutputIterator i )</a>
 <a class="sourceLine" id="cb1142-3" title="3">{</a>
-<a class="sourceLine" id="cb1142-4" title="4">    <span class="co">// 意味がない。</span></a>
+<a class="sourceLine" id="cb1142-4" title="4">    <span class="co">// 意味がない</span></a>
 <a class="sourceLine" id="cb1142-5" title="5">    <span class="kw">auto</span> value = *i ;</a>
 <a class="sourceLine" id="cb1142-6" title="6">}</a></code></pre></div>
 <h2 id="iterator_traits">iterator_traits</h2>
@@ -13209,7 +13208,7 @@ sizeof(Object): 12</code></pre>
 <a class="sourceLine" id="cb1197-7" title="7"><span class="co">// iは移動しない</span></a>
 <a class="sourceLine" id="cb1197-8" title="8"><span class="bu">std::</span>advance(i, <span class="dv">0</span>) ;</a></code></pre></div>
 <p><code>n</code>が正数の場合は前方(<code>i+1</code>の方向)に、<code>n</code>が負数の場合は後方(<code>i-1</code>の方向)に、それぞれ<code>n</code>回移動させる。</p>
-<p><code>advance(i,n)</code>はi自体が書き換わる。</p>
+<p><code>advance(i,n)</code>は<code>i</code>自体が書き換わる。</p>
 <div class="sourceCode" id="cb1198"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1198-1" title="1">i ; <span class="co">// n番目を指す</span></a>
 <a class="sourceLine" id="cb1198-2" title="2"><span class="bu">std::</span>advance( i, <span class="dv">1</span> ) ;</a>
 <a class="sourceLine" id="cb1198-3" title="3">i ; <span class="co">// n+1番目を指す</span></a></code></pre></div>
@@ -13951,7 +13950,7 @@ Alice is destructed.</code></pre>
 <a class="sourceLine" id="cb1279-3" title="3">{</a>
 <a class="sourceLine" id="cb1279-4" title="4"><span class="kw">public</span> :</a>
 <a class="sourceLine" id="cb1279-5" title="5">    <span class="kw">using</span> <span class="dt">allocator_type</span> = Allocator ;</a>
-<a class="sourceLine" id="cb1279-6" title="6">}</a></code></pre></div>
+<a class="sourceLine" id="cb1279-6" title="6">} ;</a></code></pre></div>
 <p><code>size_type</code>は要素数を表現する型だ。</p>
 <div class="sourceCode" id="cb1280"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1280-1" title="1"><span class="dt">void</span> f( <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; &amp; v )</a>
 <a class="sourceLine" id="cb1280-2" title="2">{</a>
@@ -14528,9 +14527,9 @@ Alice is destructed.</code></pre>
 <p>つまり動的メモリー確保をしたあとに、既存の要素を新しいストレージにコピーしなければならないということだ。</p>
 <p>まとめよう。</p>
 <ol type="1">
-<li>すでに指定された要素数以上に予約されているなら何もしない。</li>
-<li>まだ動的メモリー確保が行われていなければ動的メモリー確保をする。</li>
-<li>有効な要素がある場合は新しいストレージにコピーする。</li>
+<li>すでに指定された要素数以上に予約されているなら何もしない</li>
+<li>まだ動的メモリー確保が行われていなければ動的メモリー確保をする</li>
+<li>有効な要素がある場合は新しいストレージにコピーする</li>
 </ol>
 <p>古いストレージから新しいストレージに要素をコピーするとき、古いストレージと新しいストレージが一時的に同時に存在しなければならない。</p>
 <p>疑似コード風に記述すると以下のようになる。</p>
@@ -14606,7 +14605,7 @@ Alice is destructed.</code></pre>
 <a class="sourceLine" id="cb1346-38" title="38">    {</a>
 <a class="sourceLine" id="cb1346-39" title="39">        destroy( &amp;*riter ) ;</a>
 <a class="sourceLine" id="cb1346-40" title="40">    }</a>
-<a class="sourceLine" id="cb1346-41" title="41">    <span class="co">// scope_exitによって自動的にストレージが破棄される。</span></a>
+<a class="sourceLine" id="cb1346-41" title="41">    <span class="co">// scope_exitによって自動的にストレージが破棄される</span></a>
 <a class="sourceLine" id="cb1346-42" title="42">}</a></code></pre></div>
 <p>ここではまだ学んでいないムーブの概念が出てくる。これはムーブセマンティクスの章で詳しく学ぶ。</p>
 <h2 id="resize">resize</h2>
@@ -14672,9 +14671,9 @@ destructed.</code></pre>
 <a class="sourceLine" id="cb1352-6" title="6">}</a></code></pre></div>
 <p>まとめると<code>resize</code>は以下のように動作する。</p>
 <ol type="1">
-<li>現在の要素数より少なくリサイズする場合、末尾から要素を破棄する。</li>
-<li>現在の要素数より大きくリサイズする場合、末尾に要素を追加する。</li>
-<li>現在の要素数と等しくリサイズする場合、何もしない。</li>
+<li>現在の要素数より少なくリサイズする場合、末尾から要素を破棄する</li>
+<li>現在の要素数より大きくリサイズする場合、末尾に要素を追加する</li>
+<li>現在の要素数と等しくリサイズする場合、何もしない</li>
 </ol>
 <p>実装しよう。</p>
 <div class="sourceCode" id="cb1353"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1353-1" title="1">    <span class="dt">void</span> resize( <span class="dt">size_type</span> sz )</a>
@@ -14699,7 +14698,7 @@ destructed.</code></pre>
 <p>要素を破棄する場合、破棄する要素数だけ末尾から順番に破棄する。</p>
 <p>要素を増やす場合、<code>reserve</code>を呼び出してメモリーを予約してから、追加の要素を構築する。</p>
 <p><code>sz == size()</code>の場合は、どちらの<code>if</code>文の条件にも引っかからないので、何もしない。</p>
-<p><code>size(sz, value)</code>は、追加の引数を取るほか、<code>construct( iter )</code>の部分が<code>constrcut( iter, value )</code>に変わるだけだ。</p>
+<p><code>size(sz, value)</code>は、追加の引数を取るほか、<code>construct( iter )</code>の部分が<code>construct( iter, value )</code>に変わるだけだ。</p>
 <div class="sourceCode" id="cb1354"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1354-1" title="1"><span class="dt">void</span> resize( <span class="dt">size_type</span> sz, const_reference value )</a>
 <a class="sourceLine" id="cb1354-2" title="2">{</a>
 <a class="sourceLine" id="cb1354-3" title="3">    <span class="co">// ...</span></a>
@@ -14920,7 +14919,7 @@ destructed.</code></pre>
 <a class="sourceLine" id="cb1374-4" title="4">    <span class="co">// x, y, zに0を代入</span></a>
 <a class="sourceLine" id="cb1374-5" title="5">    x = y = z = <span class="dv">0</span> ;</a>
 <a class="sourceLine" id="cb1374-6" title="6">}</a></code></pre></div>
-<p>これはまず<code>z = 0</code>が評価される。変数<code>z</code>の値は<code>0</code>になり、式を評価した結果の値は<code>z</code>へのlvalueリファレンスだ。なので、<code>y = z = 0</code>というのは、<code>y = (z=0)</code>となる。<code>z=0</code>については<code>z</code>であるので、<code>y = z</code>となる。ここでの<code>z</code>は<code>0</code>を代入されたあとの<code>z</code>なので、値は<code>0</code>だ。その結果変数<code>y</code>の値は<code>0</code>になる。変数<code>x</code>の場合も同様だ。</p>
+<p>これはまず<code>z = 0</code>が評価される。変数<code>z</code>の値は<code>0</code>になり、式を評価した結果の値は<code>z</code>への<code>lvalue</code>リファレンスだ。なので、<code>y = z = 0</code>というのは、<code>y = (z=0)</code>となる。<code>z=0</code>については<code>z</code>であるので、<code>y = z</code>となる。ここでの<code>z</code>は<code>0</code>を代入されたあとの<code>z</code>なので、値は<code>0</code>だ。その結果変数<code>y</code>の値は<code>0</code>になる。変数<code>x</code>の場合も同様だ。</p>
 <p>以下のような例も見てみよう。</p>
 <div class="sourceCode" id="cb1375"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1375-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1375-2" title="2">{</a>
@@ -15561,7 +15560,7 @@ destructed.</code></pre>
 <a class="sourceLine" id="cb1425-13" title="13"></a>
 <a class="sourceLine" id="cb1425-14" title="14">    <span class="co">// コピーコンストラクター</span></a>
 <a class="sourceLine" id="cb1425-15" title="15">    dynamic_array( <span class="at">const</span> dynamic_array &amp; r ) ;</a>
-<a class="sourceLine" id="cb1425-16" title="16">}</a></code></pre></div>
+<a class="sourceLine" id="cb1425-16" title="16">} ;</a></code></pre></div>
 <p>このクラスのコピーコンストラクターの定義は以下のように書ける。</p>
 <div class="sourceCode" id="cb1426"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1426-1" title="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> T &gt;</a>
 <a class="sourceLine" id="cb1426-2" title="2">dynamic_array&lt;T&gt;::dynamic_array( <span class="at">const</span> dynamic_array &amp; r )</a>
@@ -15770,7 +15769,7 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1449-4" title="4">{</a>
 <a class="sourceLine" id="cb1449-5" title="5">    X x{} ;</a>
 <a class="sourceLine" id="cb1449-6" title="6">    <span class="dt">int</span> &amp;&amp; r = <span class="kw">static_cast</span>&lt;X &amp;&amp;&gt;(x).data_member ;</a>
-<a class="sourceLine" id="cb1449-7" title="7">} ;</a></code></pre></div>
+<a class="sourceLine" id="cb1449-7" title="7">}</a></code></pre></div>
 <ul>
 <li>式<code>.*</code>で最初のオペランドが<code>xvalue</code>で次のオペランドがデータメンバーへのポインターの場合</li>
 </ul>
@@ -15791,7 +15790,7 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1451-3" title="3">    <span class="co">// lvalueなオブジェクト</span></a>
 <a class="sourceLine" id="cb1451-4" title="4">    <span class="dt">int</span> lvalue { } ;</a>
 <a class="sourceLine" id="cb1451-5" title="5"></a>
-<a class="sourceLine" id="cb1451-6" title="6">    <span class="co">// OK、lvalueリファレンスはlvalueで初期化できる。</span></a>
+<a class="sourceLine" id="cb1451-6" title="6">    <span class="co">// OK、lvalueリファレンスはlvalueで初期化できる</span></a>
 <a class="sourceLine" id="cb1451-7" title="7">    <span class="dt">int</span> &amp; l_ref = lvalue ;</a>
 <a class="sourceLine" id="cb1451-8" title="8"></a>
 <a class="sourceLine" id="cb1451-9" title="9">    <span class="co">// OK、rvalueリファレンスはrvalueで初期化できる</span></a>
@@ -16695,7 +16694,7 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1530-6" title="6">    {</a>
 <a class="sourceLine" id="cb1530-7" title="7">        *ptr = -*ptr ;</a>
 <a class="sourceLine" id="cb1530-8" title="8">    }</a>
-<a class="sourceLine" id="cb1530-9" title="9">}</a></code></pre></div>
+<a class="sourceLine" id="cb1530-9" title="9">} ;</a></code></pre></div>
 <p>幸い、クラス<code>Integer</code>はムーブコンストラクターを実装しているので、</p>
 <div class="sourceCode" id="cb1531"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1531-1" title="1"><span class="kw">auto</span> b = -a ;</a></code></pre></div>
 <p>というコードは、式<code>-a</code>によって生成された一時オブジェクトが変数<code>b</code>にムーブされる。</p>
@@ -17436,7 +17435,7 @@ baz</code></pre>
 <a class="sourceLine" id="cb1622-3" title="3">    <span class="co">// 少なくともchar [5]を格納できるだけのストレージを動的確保する</span></a>
 <a class="sourceLine" id="cb1622-4" title="4">    <span class="bu">std::</span>string hello(<span class="st">&quot;hello&quot;</span>) ;</a>
 <a class="sourceLine" id="cb1622-5" title="5">    <span class="co">// helloが破棄される</span></a>
-<a class="sourceLine" id="cb1622-6" title="6">    <span class="co">// デストラクターはストレージを解放する。</span></a>
+<a class="sourceLine" id="cb1622-6" title="6">    <span class="co">// デストラクターはストレージを解放する</span></a>
 <a class="sourceLine" id="cb1622-7" title="7">}</a></code></pre></div>
 <p>コピーはストレージの動的確保、ムーブはストレージの所有権の移動になる。</p>
 <div class="sourceCode" id="cb1623"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1623-1" title="1"><span class="dt">int</span> main()</a>
@@ -17911,7 +17910,7 @@ X_{n+1} = (a \times X_{n} + c) \bmod m
 <p>「これはぜんぜん乱数ではない。予測可能じゃないか」と考えるかもしれない。しかし中でどのように乱数が生成されているかわからなければ、外部からは乱数のように見える。これが擬似乱数の考え方だ。</p>
 <h2 id="乱数エンジン">乱数エンジン</h2>
 <p><code>乱数エンジン</code>は生の乱数を生成するライブラリだ。クラスで実装されている。</p>
-<p>乱数エンジンはメンバー関数<code>min()</code>で最小値を、メンバー関数<code>max()</code>で最大値を、<code>operator()</code>で最小値から最大値の間の乱数を返す</p>
+<p>乱数エンジンはメンバー関数<code>min()</code>で最小値を、メンバー関数<code>max()</code>で最大値を、<code>operator()</code>で最小値から最大値の間の乱数を返す。</p>
 <div class="sourceCode" id="cb1671"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1671-1" title="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
 <a class="sourceLine" id="cb1671-2" title="2"><span class="dt">void</span> f( Engine &amp; e )</a>
 <a class="sourceLine" id="cb1671-3" title="3">{</a>
@@ -18201,7 +18200,7 @@ n = r \bmod |b-a| + a
 <ol type="1">
 <li>3bitの生の乱数rを得る</li>
 <li><code>r</code>が<span class="math inline">\(0 \leq r \leq 5\)</span>なら`<code>r</code>+1’が分布された乱数</li>
-<li>それ以外の場合、1に戻る</li>
+<li>それ以外の場合、1.に戻る</li>
 </ol>
 <p>これを実装すると以下のようになる。</p>
 <div class="sourceCode" id="cb1696"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1696-1" title="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Engine &gt;</a>
@@ -18503,7 +18502,7 @@ P(i\,|\,t,p) = \binom{t}{i} \cdot p^i \cdot (1-p)^{t-i} \text{ .}
 <li>6面ダイスを1の目が出るまで振った回数</li>
 <li>確率1%で当たるくじ引きをアタリが出るまで引いた回数</li>
 </ul>
-<p>コイントスの例で考えよう。コイントス1回をベルヌーイ試行とし、成功を表とする。表が出るまでコイントスをしてみよう。コイントスを何回する必要があるだろうか。運がよければ1回で表がでるので1回だ。運が悪ければ、5回コイントスをしても全部裏なこともあるだろう。100回コイントスをして表が一度も出ないことは、確率的にはあり得る。ただしその確率は<span class="math inline">\(\frac{1}{2^{100}}\)</span>なので、およそあり得ない確率ではある。</p>
+<p>コイントスの例で考えよう。コイントス1回をベルヌーイ試行とし、成功を表とする。表が出るまでコイントスをしてみよう。コイントスを何回する必要があるだろうか。運がよければ1回で表が出るので1回だ。運が悪ければ、5回コイントスをしても全部裏なこともあるだろう。100回コイントスをして表が一度も出ないことは、確率的にはあり得る。ただしその確率は<span class="math inline">\(\frac{1}{2^{100}}\)</span>なので、およそあり得ない確率ではある。</p>
 <p><code>std::geometric_distribution&lt;IntType&gt;</code>は<code>IntType</code>型の乱数<span class="math inline">\(i\)</span>, <span class="math inline">\(i \geq 0\)</span>を以下の離散確率関数に従って分布する。</p>
 <p><span class="math display">\[
 P(i\,|\,p) = p \cdot (1-p)^{i} \text{ .}
@@ -18555,7 +18554,7 @@ P(i\,|\,p) = p \cdot (1-p)^{i} \text{ .}
 <p>確率1%のくじを当てるには、運が悪いと何百回も引かなければならない。</p>
 <h3 id="負の二項分布stdnegative_binomial_distribution">負の二項分布(std::negative_binomial_distribution<IntType>)</h3>
 <p>負の二項分布(negative binomial distribution)は幾何分布に似ている。幾何分布がベルヌーイ試行が1回成功するまでに行ったベルヌーイ試行の回数を乱数として分布するのに対し、負の二項分布はベルヌーイ試行が<span class="math inline">\(k\)</span>回成功するまでに行ったベルヌーイ試行の回数を乱数として分布する。</p>
-<p>負の二項分布を具体的な例で考えよう</p>
+<p>負の二項分布を具体的な例で考えよう。</p>
 <ul>
 <li>コイントスを、10回、表が出るまで行った回数</li>
 <li>6面ダイスを、10回、1の目が出るまで振った回数</li>
@@ -19128,11 +19127,11 @@ p(x \,|\, b_0, \dotsc, b_n, \; \rho_0, \dotsc, \rho_{n-1}) = \rho_i
 <p><code>densities()</code>の結果が正規化されているのは、ユーザーが指定した確率は<span class="math inline">\(w_k\)</span>だが、ここで返すのは<span class="math inline">\(p_k\)</span>だからだ。</p>
 <h3 id="区分線形分布stdpiecewise_linear_distributionrealtype">区分線形分布(<code>std::piecewise_linear_distribution&lt;RealType&gt;</code>)</h3>
 <h4 id="簡単な説明-2">簡単な説明</h4>
-<p>区分線形分布(piecewise linear distribution)は区分定数分布と同じく、区間と確率（又の名を密度、ウエイト）を指定する。</p>
+<p>区分線形分布(piecewise linear distribution)は区分定数分布と同じく、区間と確率（またの名を密度、ウエイト）を指定する。</p>
 <p>区間の指定は区分定数分布と同じだ。内部境界の集合で指定する。例えば<code>{1.0, 2.0, 3.0}</code>は2つの区間<code>[1.0, 2.0)</code>と<code>[2.0, 3.0)</code>を指定する。</p>
 <p>区分線形分布における確率は、区間に対してではなく、内部境界に対して指定する。指定した全区間における値の出現確率は、内部境界から内部境界に向かって指定した確率の差の方向に線形に増加、もしくは減少する。</p>
 <p>例えば区分<code>{0.0, 1.0}</code>と確率<code>{1.0, 2.0}</code>を指定した場合、これは1つの区間<code>[0.0, 1.0)</code>について、内部境界<code>0.0</code>の確率は<span class="math inline">\(\frac{1}{3}\)</span>、内部境界<code>1.0</code>の確率は<code>\frac{2}{3}</code>とし、<span class="math inline">\(0.0 \leq x &lt; 1.0\)</span>の範囲の乱数<code>x</code>を生成する。内部境界区間の範囲に注意。<code>1.0</code>未満なので、<code>1.0</code>は出ない。</p>
-<p>そして、区間の間の値は、区間を区切る2つの内部境界の確率の差によって、線形に増加、もしくは減少する。例えば値<code>0.25</code>が出る確率は<span class="math inline">\(\frac{1.25}{3}\)</span>、<code>0.5</code>が出る確率は<span class="math inline">\(\frac{1.5}{3}\)</span>、値<code>1.75</code>がでる確率は<span class="math inline">\(\frac{1.75}{3}\)</span>だ。</p>
+<p>そして、区間の間の値は、区間を区切る2つの内部境界の確率の差によって、線形に増加、もしくは減少する。例えば値<code>0.25</code>が出る確率は<span class="math inline">\(\frac{1.25}{3}\)</span>、<code>0.5</code>が出る確率は<span class="math inline">\(\frac{1.5}{3}\)</span>、値<code>1.75</code>が出る確率は<span class="math inline">\(\frac{1.75}{3}\)</span>だ。</p>
 <p>区分<code>{0.0, 1.0, 2.0}</code>と確率<code>{1.0, 2.0, 1.0}</code>の場合、2つの区間<code>[0.0, 1.0)</code>と<code>[1.0, 2.0)</code>の範囲について、<code>0.0</code>から<code>1.0</code>に向かう区間についての確率は<span class="math inline">\(\frac{1}{4}\)</span>から<span class="math inline">\(\frac{1}{2}\)</span>に増加し、<code>1.0</code>から<code>2.0</code>に向かう区間についての確率は<span class="math inline">\(\frac{1}{2}\)</span>から<span class="math inline">\(\frac{1}{4}\)</span>に減少する。</p>
 <p>結果として、乱数値の分布をグラフに描画すると、<code>1.0</code>が最も出やすく、その前後±1.0の範囲で徐々に減少していく山のようなグラフになる。</p>
 <p>TODO: グラフ、横軸が乱数値、縦軸が確率</p>
@@ -20056,7 +20055,7 @@ $ g++ -o program main.o print_int.o</code></pre>
 <a class="sourceLine" id="cb1905-3" title="3"></a>
 <a class="sourceLine" id="cb1905-4" title="4"><span class="co">// bar.cpp</span></a>
 <a class="sourceLine" id="cb1905-5" title="5"><span class="pp">#include </span><span class="im">&quot;library.h&quot;</span></a></code></pre></div>
-<p><code>inline</code>はODRを例外的に回避できるとは言え、強い制約がある。</p>
+<p><code>inline</code>はODRを例外的に回避できるとはいえ、強い制約がある。</p>
 <ol type="1">
 <li>異なる翻訳単位に限る</li>
 </ol>
@@ -20405,7 +20404,7 @@ Breakpoint 3, main () at main.cpp:5
 <p>4行目を実行し、5行目のブレイクポイントで止まる。4行目を実行したということは、変数<code>val</code>の値は<code>10</code>になっているはずだ。もう一度<code>print</code>コマンドで調べてみよう。</p>
 <pre><code>(gdb) print val
 $2 = 10</code></pre>
-<p>値は<code>10</code>だ。GDBは<code>print</code>の結果の履歴を記録している。<code>$1</code>や<code>$2</code>というのはその記録を参照するための名前だ。その値は<code>print</code>コマンドで確認できる</p>
+<p>値は<code>10</code>だ。GDBは<code>print</code>の結果の履歴を記録している。<code>$1</code>や<code>$2</code>というのはその記録を参照するための名前だ。その値は<code>print</code>コマンドで確認できる。</p>
 <pre><code>(gdb) print $1
 $3 = 0
 (gdb) print $2
