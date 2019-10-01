@@ -535,7 +535,7 @@ int main()
 
 ~~~cpp
 template < typename Container >
-struct back_inserter ;
+struct back_inserter
 {
     back_inserter( Container & c )
         : c(c) { }
@@ -555,7 +555,7 @@ template < typename Container >
 void f( Container const & c )
 {
     // cの全要素をコピーしたい
-    std:vector< typename Container::value_type > temp ;
+    std::vector< typename Container::value_type > temp ;
     auto out = back_inserter(temp) ;
     std::copy( std::begin(c), std::end(c), out ) ;
 }
