@@ -2769,7 +2769,7 @@ BMI = \frac{体重_{kg}}{身長^2_{m}}
 <a class="sourceLine" id="cb224-27" title="27">    <span class="co">// 状態の出力</span></a>
 <a class="sourceLine" id="cb224-28" title="28">    <span class="bu">std::</span>cout &lt;&lt; status(bmi) ;</a>
 <a class="sourceLine" id="cb224-29" title="29">}</a></code></pre></div>
-<p>ここまで問題なく読むことができただろうか。ここまでのコードはすべて、本書を始めから読めば理解できる機能しか使っていない。わからない場合、この先に進む前に本書をもう一度始めから読みなすべきだろう。</p>
+<p>ここまで問題なく読むことができただろうか。ここまでのコードはすべて、本書を始めから読めば理解できる機能しか使っていない。わからない場合、この先に進む前に本書をもう一度始めから読み直すべきだろう。</p>
 <h2 id="標準入力">標準入力</h2>
 <p>上のプログラムには実用にする上で1つ問題がある。身長と体重の値を変えたい場合、ソースコードを書き換えてコンパイルしなければならないのだ。</p>
 <p>例えば読者の身長が1.8mで体重が80kgの場合、以下のように書き換えなければならない。</p>
@@ -8868,9 +8868,9 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb804-2" title="2"></a>
 <a class="sourceLine" id="cb804-3" title="3"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb804-4" title="4">{</a>
-<a class="sourceLine" id="cb804-5" title="5">    array_int_10 a = { <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span> } ;</a>
+<a class="sourceLine" id="cb804-5" title="5">    array_int_3 a = { <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span> } ;</a>
 <a class="sourceLine" id="cb804-6" title="6"></a>
-<a class="sourceLine" id="cb804-7" title="7">    array_int_10 b = a ;</a>
+<a class="sourceLine" id="cb804-7" title="7">    array_int_3 b = a ;</a>
 <a class="sourceLine" id="cb804-8" title="8">    <span class="co">// b.storage[0] == a.storage[0] </span></a>
 <a class="sourceLine" id="cb804-9" title="9">    <span class="co">// b.storage[1] == a.storage[1] </span></a>
 <a class="sourceLine" id="cb804-10" title="10">    <span class="co">// b.storage[2] == a.storage[2] </span></a>
@@ -10223,7 +10223,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb918-3" title="3">    <span class="kw">using</span> Array = <span class="bu">std::</span>array&lt;<span class="dt">int</span>,<span class="dv">5</span>&gt; ;</a>
 <a class="sourceLine" id="cb918-4" title="4">    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;</a>
 <a class="sourceLine" id="cb918-5" title="5"></a>
-<a class="sourceLine" id="cb918-6" title="6">    <span class="kw">auto</span> citer = a.begin() ;</a>
+<a class="sourceLine" id="cb918-6" title="6">    <span class="kw">auto</span> citer = a.cbegin() ;</a>
 <a class="sourceLine" id="cb918-7" title="7"></a>
 <a class="sourceLine" id="cb918-8" title="8">    <span class="co">// OK</span></a>
 <a class="sourceLine" id="cb918-9" title="9">    <span class="co">// イテレーター自体の変更</span></a>
@@ -10244,7 +10244,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb919-4" title="4">    Array a = {<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>} ;</a>
 <a class="sourceLine" id="cb919-5" title="5"></a>
 <a class="sourceLine" id="cb919-6" title="6">    <span class="co">// const const_iterator</span></a>
-<a class="sourceLine" id="cb919-7" title="7">    <span class="kw">auto</span> <span class="at">const</span> iter = a.begin() ;</a>
+<a class="sourceLine" id="cb919-7" title="7">    <span class="kw">auto</span> <span class="at">const</span> iter = a.cbegin() ;</a>
 <a class="sourceLine" id="cb919-8" title="8"></a>
 <a class="sourceLine" id="cb919-9" title="9">    <span class="co">// エラー</span></a>
 <a class="sourceLine" id="cb919-10" title="10">    <span class="co">// constなオブジェクトは変更できない</span></a>

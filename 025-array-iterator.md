@@ -979,7 +979,7 @@ int main()
     using Array = std::array<int,5> ;
     Array a = {1,2,3,4,5} ;
 
-    auto citer = a.begin() ;
+    auto citer = a.cbegin() ;
 
     // OK
     // イテレーター自体の変更
@@ -1005,7 +1005,7 @@ int main()
     Array a = {1,2,3,4,5} ;
 
     // const const_iterator
-    auto const iter = a.begin() ;
+    auto const iter = a.cbegin() ;
 
     // エラー
     // constなオブジェクトは変更できない
