@@ -284,8 +284,8 @@ int main()
     // OK、lvalueリファレンスはlvalueで初期化できる
     int & l_ref = lvalue ;
 
-    // OK、rvalueリファレンスはrvalueで初期化できる
-    // rvalueリファレンスにキャストした結果はrvalue
+    // OK、rvalueリファレンスはxvalueで初期化できる
+    // rvalueリファレンスにキャストした結果はxvalue
     int && r_ref = static_cast<int &&>(lvalue) ;
 }
 ~~~
