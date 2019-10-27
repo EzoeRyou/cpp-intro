@@ -106,7 +106,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </style>
 </head>
 <body>
-<header>
+<header id="title-block-header">
 <h1 class="title">江添亮のC++入門</h1>
 <p class="author">江添 亮</p>
 <p class="date">2018-02-27</p>
@@ -769,7 +769,7 @@ int main()
 <p>GCCを使って先ほどの<code>hello.cpp</code>をコンパイルするには以下のようにする。</p>
 <pre><code>$ g++ -o hello hello.cpp</code></pre>
 <p>GCCという名前のC++コンパイラーなのに<code>g++</code>なのは、<code>gcc</code>はC言語コンパイラーの名前としてすでに使われているからだ。この慣習はClangも引き継いでいて、ClangのC++コンパイラーは<code>clang++</code>だ。</p>
-<p>サンプルコードを間違いなくタイプしていれば、カレントディレクトリーに<code>hello</code>とぃう実行可能ファイルが作成されるはずだ。確認してみよう。</p>
+<p>サンプルコードを間違いなくタイプしていれば、カレントディレクトリーに<code>hello</code>という実行可能ファイルが作成されるはずだ。確認してみよう。</p>
 <pre><code>$ ls
 hello hello.cpp</code></pre>
 <h3 id="実行">実行</h3>
@@ -1232,7 +1232,7 @@ make: &#39;hello&#39; is up to date.</code></pre>
 <p>標準出力はプログラムの基本だ。C++で標準出力する方法はいくつもあるが、<code>&lt;iostream&gt;</code>ライブラリを利用するものが最も簡単だ。</p>
 <p><code>std::cout</code>は標準出力を使うためのライブラリだ。</p>
 <p><code>&lt;&lt;</code>は<code>operator &lt;&lt;</code>という演算子だ。C++では演算子にも名前が付いていて、例えば<code>+</code>は<code>operator +</code>となる。<code>&lt;&lt;</code>も演算子の一種だ。</p>
-<p><code>&quot;hello&quot;s</code>というのは文字列で、二重引用符で囲まれた中の文字列が標準出力に出力される。</p>
+<p><code>"hello"s</code>というのは文字列で、二重引用符で囲まれた中の文字列が標準出力に出力される。</p>
 <p>セミコロン<code>;</code>は文の区切り文字だ。C++では文の区切りは明示的にセミコロンを書く必要がある。ほかの言語では改行文字を文脈から判断して文の区切りとみなすこともあるが、C++では明示的に文の区切り文字としてセミコロンを書かなければならない。</p>
 <p>セミコロンを書き忘れるとエラーとなる。</p>
 <div class="sourceCode" id="cb71"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb71-1" title="1"><span class="dt">int</span> main()</a>
@@ -1249,7 +1249,7 @@ make: &#39;hello&#39; is up to date.</code></pre>
 <a class="sourceLine" id="cb72-6" title="6">}</a></code></pre></div>
 <p>C++はほかの多くの言語と同じように、逐次実行される。つまり、コードは書いた順番に実行される。そして標準出力のような外部への副作用は、実行された順番で出力される。このコードを実行した結果は以下のとおり。</p>
 <pre><code>one two three </code></pre>
-<p><code>&quot;three two one &quot;</code>や<code>&quot;two one three &quot;</code>のような出力結果にはならない。</p>
+<p><code>"three two one "</code>や<code>"two one three "</code>のような出力結果にはならない。</p>
 <p>C++を含む多くの言語で<code>a + b + c</code>と書けるように、<code>operator &lt;&lt;</code>も<code>a &lt;&lt; b &lt;&lt; c</code>と書ける。<code>operator &lt;&lt;</code>で標準出力をするには、左端は<code>std::cout</code>でなければならない。</p>
 <div class="sourceCode" id="cb74"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb74-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb74-2" title="2">{</a>
@@ -1339,7 +1339,7 @@ ccc</code></pre>
 <a class="sourceLine" id="cb87-2" title="2">{</a>
 <a class="sourceLine" id="cb87-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="dv">1</span> + <span class="st">&quot;234&quot;</span> ;</a>
 <a class="sourceLine" id="cb87-4" title="4">}</a></code></pre></div>
-<p>結果はなんと<code>34</code>になるではないか。C++では謎の数学により<code>1 + &quot;234&quot; = &quot;34&quot;</code>であることが判明した。この謎はいずれ解き明かすとして、いまは文字列には必ず末尾に<code>s</code>を付けることにしよう。その方が安全だ。</p>
+<p>結果はなんと<code>34</code>になるではないか。C++では謎の数学により<code>1 + "234" = "34"</code>であることが判明した。この謎はいずれ解き明かすとして、いまは文字列には必ず末尾に<code>s</code>を付けることにしよう。その方が安全だ。</p>
 <h2 id="変数variable">変数(variable)</h2>
 <p>さあどんどんプログラミング言語によくある機能を見ていこう。次は変数だ。</p>
 <div class="sourceCode" id="cb88"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb88-1" title="1"><span class="dt">int</span> main()</a>
@@ -1741,7 +1741,7 @@ main.cpp:4:6: error: expected unqualified-id before ‘auto’
     auto y = x + 1 ;</code></pre>
 <p>コンパイラーにとって、改行は空白文字と同じくソースファイル中の意味のあるトークン(キーワードや名前や記号)を区切る文字でしかない。コンパイラーにとって、このコードは実質以下のように見えている。</p>
 <pre><code>auto x=1+1 auto y=x+1;</code></pre>
-<p><code>&quot;1 auto&quot;</code>というのは文法エラーだ。なのでコンパイラーは文法エラーが発覚する最初の文字である<code>'auto'</code>の<code>'a'</code>を指摘したのだ。</p>
+<p><code>"1 auto"</code>というのは文法エラーだ。なのでコンパイラーは文法エラーが発覚する最初の文字である<code>'auto'</code>の<code>'a'</code>を指摘したのだ。</p>
 <p>人間にとって自然になるように修正すると、コンパイラーが指摘した行の1つ上の行の行末に<code>';'</code>を追加すべきだ。</p>
 <pre><code>    auto x = 1 + 1 ;
     auto y = x + 1 ;</code></pre>
@@ -2107,7 +2107,7 @@ See &lt;ドキュメントへのファイルパス&gt; for instructions.</code><
 <p>実行して確かめてみよう。ほとんどの読者の実行環境では以下のようになるはずだ。ほとんどの、というのは、そうではない環境も存在するからだ。読者がそのような稀有な環境を使っている可能性はまずないだろうが。</p>
 <pre><code>cat is smaller.
 Longcat is Looong.</code></pre>
-<p>なるほど。<code>&quot;cat&quot;s</code>は<code>&quot;dog&quot;s</code>よりも小さく(？)、<code>&quot;longcat&quot;s</code>は<code>&quot;cat&quot;s</code>よりも長い(大きい？)ようだ。なんだかよくわからない結果になった。</p>
+<p>なるほど。<code>"cat"s</code>は<code>"dog"s</code>よりも小さく(？)、<code>"longcat"s</code>は<code>"cat"s</code>よりも長い(大きい？)ようだ。なんだかよくわからない結果になった。</p>
 <p>これはどういうことなのか。もっと簡単な文字列で試してみよう。</p>
 <div class="sourceCode" id="cb170"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb170-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb170-2" title="2">{</a>
@@ -2122,7 +2122,7 @@ Longcat is Looong.</code></pre>
 <a class="sourceLine" id="cb170-11" title="11">    <span class="co">// 小さい方の文字が出力される</span></a>
 <a class="sourceLine" id="cb170-12" title="12">    <span class="bu">std::</span>cout &lt;&lt; x ;</a>
 <a class="sourceLine" id="cb170-13" title="13">}</a></code></pre></div>
-<p>これを実行すると<code>a</code>と出力される。すると<code>&quot;a&quot;s</code>は<code>&quot;b&quot;s</code>より小さいようだ。</p>
+<p>これを実行すると<code>a</code>と出力される。すると<code>"a"s</code>は<code>"b"s</code>より小さいようだ。</p>
 <p>もっと試してみよう。</p>
 <div class="sourceCode" id="cb171"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb171-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb171-2" title="2">{</a>
@@ -2135,22 +2135,22 @@ Longcat is Looong.</code></pre>
 <a class="sourceLine" id="cb171-9" title="9">    <span class="co">// 小さい文字列が出力される</span></a>
 <a class="sourceLine" id="cb171-10" title="10">    <span class="bu">std::</span>cout &lt;&lt; x ;</a>
 <a class="sourceLine" id="cb171-11" title="11">}</a></code></pre></div>
-<p>これを実行すると、<code>aa</code>と出力される。すると<code>&quot;aa&quot;s</code>は<code>&quot;ab&quot;s</code>より小さいことになる。</p>
+<p>これを実行すると、<code>aa</code>と出力される。すると<code>"aa"s</code>は<code>"ab"s</code>より小さいことになる。</p>
 <p>文字列の大小比較は文字単位で行われる。まず最初の文字が大小比較される。もし等しい場合は、次の文字が大小比較される。等しくない最初の文字の結果が、文字列の大小比較の結果となる。</p>
 <h2 id="条件式">条件式</h2>
 <h3 id="条件とは何だろう">条件とは何だろう</h3>
-<p><code>if文</code>の中で書く<code>条件</code>(condition)は、<code>条件式</code>(conditional expression)とも呼ばれている<code>式</code>(expression)の一種だ。<code>式</code>というのは例えば<code>&quot;1+1&quot;</code>のようなものだ。<code>式</code>は<code>文</code>の中に書くことができ、これを<code>式文</code>(expression statement)という。</p>
+<p><code>if文</code>の中で書く<code>条件</code>(condition)は、<code>条件式</code>(conditional expression)とも呼ばれている<code>式</code>(expression)の一種だ。<code>式</code>というのは例えば<code>"1+1"</code>のようなものだ。<code>式</code>は<code>文</code>の中に書くことができ、これを<code>式文</code>(expression statement)という。</p>
 <div class="sourceCode" id="cb172"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb172-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb172-2" title="2">{</a>
 <a class="sourceLine" id="cb172-3" title="3">    <span class="dv">1</span> + <span class="dv">1</span> ; <span class="co">// 式文</span></a>
 <a class="sourceLine" id="cb172-4" title="4">}</a></code></pre></div>
-<p><code>&quot;a==b&quot;</code>や<code>&quot;a\&lt;b&quot;</code>のような<code>条件</code>も<code>式</code>なので、<code>文</code>として書くことができる。</p>
+<p><code>"a==b"</code>や<code>"a\&lt;b"</code>のような<code>条件</code>も<code>式</code>なので、<code>文</code>として書くことができる。</p>
 <div class="sourceCode" id="cb173"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb173-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb173-2" title="2">{</a>
 <a class="sourceLine" id="cb173-3" title="3">    <span class="dv">1</span> == <span class="dv">1</span> ;</a>
 <a class="sourceLine" id="cb173-4" title="4">    <span class="dv">1</span> &lt; <span class="dv">2</span> ;</a>
 <a class="sourceLine" id="cb173-5" title="5">}</a></code></pre></div>
-<p>C++では多くの式には型がある。たとえば<code>&quot;123&quot;</code>は<code>int</code>型で、<code>&quot;123+4&quot;</code>も<code>int</code>型だ。</p>
+<p>C++では多くの式には型がある。たとえば<code>"123"</code>は<code>int</code>型で、<code>"123+4"</code>も<code>int</code>型だ。</p>
 <div class="sourceCode" id="cb174"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb174-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb174-2" title="2">{</a>
 <a class="sourceLine" id="cb174-3" title="3">    <span class="kw">auto</span> a = <span class="dv">123</span> ; <span class="co">// int</span></a>
@@ -2158,7 +2158,7 @@ Longcat is Looong.</code></pre>
 <a class="sourceLine" id="cb174-5" title="5">    <span class="kw">auto</span> c = <span class="fl">1.0</span> ; <span class="co">// double</span></a>
 <a class="sourceLine" id="cb174-6" title="6">    <span class="kw">auto</span> d = <span class="st">&quot;hello&quot;</span><span class="bu">s</span> ; <span class="co">// std::string</span></a>
 <a class="sourceLine" id="cb174-7" title="7">}</a></code></pre></div>
-<p>とすると、<code>&quot;1==2&quot;</code>や<code>&quot;3!=3&quot;</code>のような条件式にも型があるのではないか。型があるのであれば変数に入れられるはずだ。試してみよう。</p>
+<p>とすると、<code>"1==2"</code>や<code>"3!=3"</code>のような条件式にも型があるのではないか。型があるのであれば変数に入れられるはずだ。試してみよう。</p>
 <div class="sourceCode" id="cb175"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb175-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb175-2" title="2">{</a>
 <a class="sourceLine" id="cb175-3" title="3">    <span class="cf">if</span> (  <span class="dv">1</span> == <span class="dv">1</span> )</a>
@@ -2172,7 +2172,7 @@ Longcat is Looong.</code></pre>
 <a class="sourceLine" id="cb175-11" title="11">    <span class="cf">else</span></a>
 <a class="sourceLine" id="cb175-12" title="12">    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;1 == 1 is false.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ; }</a>
 <a class="sourceLine" id="cb175-13" title="13">}</a></code></pre></div>
-<p><code>&quot;if(x)&quot;</code>は<code>&quot;if(1==1)&quot;</code>と書いた場合と同じように動く。</p>
+<p><code>"if(x)"</code>は<code>"if(1==1)"</code>と書いた場合と同じように動く。</p>
 <p>変数に入れられるのであれば出力もできるのではないだろうか。試してみよう。</p>
 <div class="sourceCode" id="cb176"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb176-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb176-2" title="2">{</a>
@@ -2182,7 +2182,7 @@ Longcat is Looong.</code></pre>
 <a class="sourceLine" id="cb176-6" title="6">}</a></code></pre></div>
 <pre><code>1
 0</code></pre>
-<p>なるほど、条件が正しい場合<code>&quot;1&quot;</code>になり、条件が間違っている場合<code>&quot;0&quot;</code>になるようだ。</p>
+<p>なるほど、条件が正しい場合<code>"1"</code>になり、条件が間違っている場合<code>"0"</code>になるようだ。</p>
 <p>では<code>if文</code>の中に<code>1</code>や<code>0</code>を入れたらどうなるのだろうか。</p>
 <div class="sourceCode" id="cb178"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb178-1" title="1"><span class="co">// 条件が正しい値だけ出力される。</span></a>
 <a class="sourceLine" id="cb178-2" title="2"><span class="dt">int</span> main()</a>
@@ -2259,7 +2259,7 @@ false</code></pre>
 <h2 id="bool型の演算">bool型の演算</h2>
 <p><code>bool</code>型にはいくつかの演算が用意されている。</p>
 <h3 id="論理否定-operator">論理否定: operator !</h3>
-<p><code>&quot;!a&quot;</code>は<code>a</code>が<code>true</code>の場合<code>false</code>に、<code>false</code>の場合<code>true</code>になる。</p>
+<p><code>"!a"</code>は<code>a</code>が<code>true</code>の場合<code>false</code>に、<code>false</code>の場合<code>true</code>になる。</p>
 <div class="sourceCode" id="cb188"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb188-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb188-2" title="2">{</a>
 <a class="sourceLine" id="cb188-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;</a>
@@ -2324,15 +2324,15 @@ false</code></pre>
 <a class="sourceLine" id="cb191-14" title="14">    print( <span class="kw">false</span> != <span class="kw">true</span>  ) ; <span class="co">// true</span></a>
 <a class="sourceLine" id="cb191-15" title="15">    print( <span class="kw">false</span> != <span class="kw">false</span> ) ; <span class="co">// false</span></a>
 <a class="sourceLine" id="cb191-16" title="16">}</a></code></pre></div>
-<p>比較演算子の結果は<code>bool</code>値になるということを覚えているだろうか。<code>&quot;1 \&lt; 2&quot;</code>は<code>true</code>になり、<code>&quot;1 \&gt; 2&quot;</code>は<code>false</code>になる。</p>
-<p><code>bool</code>値同士も同値比較ができるということは、<code>&quot;(1 \&lt; 2) == true&quot;</code>のように書くことも可能だということだ。</p>
+<p>比較演算子の結果は<code>bool</code>値になるということを覚えているだろうか。<code>"1 \&lt; 2"</code>は<code>true</code>になり、<code>"1 \&gt; 2"</code>は<code>false</code>になる。</p>
+<p><code>bool</code>値同士も同値比較ができるということは、<code>"(1 \&lt; 2) == true"</code>のように書くことも可能だということだ。</p>
 <div class="sourceCode" id="cb192"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb192-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb192-2" title="2">{</a>
 <a class="sourceLine" id="cb192-3" title="3">    <span class="dt">bool</span> b = (<span class="dv">1</span> &lt; <span class="dv">2</span>) == <span class="kw">true</span> ;</a>
 <a class="sourceLine" id="cb192-4" title="4">}</a></code></pre></div>
-<p><code>&quot;(1\&lt;2)&quot;</code>は<code>true</code>なので、<code>&quot;(1\&lt;2)==true&quot;</code>は<code>&quot;true==true&quot;</code>と同じ意味になる。この結果はもちろん<code>&quot;true&quot;</code>だ。</p>
+<p><code>"(1\&lt;2)"</code>は<code>true</code>なので、<code>"(1\&lt;2)==true"</code>は<code>"true==true"</code>と同じ意味になる。この結果はもちろん<code>"true"</code>だ。</p>
 <h3 id="論理積-operator">論理積: operator &amp;&amp;</h3>
-<p><code>&quot;a &amp;&amp; b&quot;</code>は<code>a</code>と<code>b</code>がともに<code>true</code>のときに<code>true</code>となる。それ以外の場合は<code>false</code>となる。これを論理積という。</p>
+<p><code>"a &amp;&amp; b"</code>は<code>a</code>と<code>b</code>がともに<code>true</code>のときに<code>true</code>となる。それ以外の場合は<code>false</code>となる。これを論理積という。</p>
 <p>表にまとめると以下のようになる。</p>
 <table>
 <thead>
@@ -2399,7 +2399,7 @@ false</code></pre>
 <a class="sourceLine" id="cb195-8" title="8">    { <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Bad.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ; }</a>
 <a class="sourceLine" id="cb195-9" title="9">}</a></code></pre></div>
 <h3 id="論理和-operator">論理和: operator ||</h3>
-<p><code>&quot;a || b&quot;</code>は<code>a</code>と<code>b</code>がともに<code>false</code>のときに<code>false</code>となる。それ以外の場合は<code>true</code>となる。これを論理和という。</p>
+<p><code>"a || b"</code>は<code>a</code>と<code>b</code>がともに<code>false</code>のときに<code>false</code>となる。それ以外の場合は<code>true</code>となる。これを論理和という。</p>
 <p>表にまとめると以下のようになる。</p>
 <table>
 <thead>
@@ -2484,8 +2484,8 @@ false</code></pre>
 <p>これを実行すると以下のようになる。</p>
 <pre><code>a
 false</code></pre>
-<p>関数呼び出し<code>&quot;a()&quot;</code>の結果は<code>false</code>なので、<code>&quot;b()&quot;</code>は評価されない。評価されないということは関数呼び出しが行われず、当然標準出力も行われない。</p>
-<p>同様に、論理和では、<code>&quot;a || b&quot;</code>とある場合、<code>a</code>と<code>b</code>のどちらか片方でも<code>true</code>であれば、結果は<code>true</code>となる。もし、<code>a</code>が<code>true</code>であった場合、<code>b</code>の結果如何にかかわらず結果は<code>true</code>となるので、<code>b</code>は評価されない。</p>
+<p>関数呼び出し<code>"a()"</code>の結果は<code>false</code>なので、<code>"b()"</code>は評価されない。評価されないということは関数呼び出しが行われず、当然標準出力も行われない。</p>
+<p>同様に、論理和では、<code>"a || b"</code>とある場合、<code>a</code>と<code>b</code>のどちらか片方でも<code>true</code>であれば、結果は<code>true</code>となる。もし、<code>a</code>が<code>true</code>であった場合、<code>b</code>の結果如何にかかわらず結果は<code>true</code>となるので、<code>b</code>は評価されない。</p>
 <div class="sourceCode" id="cb201"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb201-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb201-2" title="2">{</a>
 <a class="sourceLine" id="cb201-3" title="3">    <span class="kw">auto</span> a = []()</a>
@@ -2505,10 +2505,10 @@ false</code></pre>
 <p>結果、</p>
 <pre><code>a
 true</code></pre>
-<p><code>&quot;b()&quot;</code>が評価されていないことがわかる。</p>
+<p><code>"b()"</code>が評価されていないことがわかる。</p>
 <h2 id="boolの変換">boolの変換</h2>
 <p><code>bool</code>型の値と演算はこれで全部だ。値は<code>true</code>/<code>false</code>の2つのみ。演算は<code>==</code>, <code>!=</code>, <code>!</code>と<code>&amp;&amp;</code>と<code>||</code>の5つだけだ。</p>
-<p>読者の中には納得のいかないものもいるだろう。ちょっと待ってもらいたい。<code>bool</code>の大小比較できないのだろうか。<code>bool</code>の四則演算はできないのか。<code>&quot;if(123)&quot;</code>などと書けてしまうのは何なのか。</p>
+<p>読者の中には納得のいかないものもいるだろう。ちょっと待ってもらいたい。<code>bool</code>の大小比較できないのだろうか。<code>bool</code>の四則演算はできないのか。<code>"if(123)"</code>などと書けてしまうのは何なのか。</p>
 <p>好奇心旺盛な読者は本書の解説を待たずしてすでに自分でいろいろとコードを書いて試してしまっていることだろう。</p>
 <p><code>bool</code>の大小比較はどうなるのだろうか。</p>
 <div class="sourceCode" id="cb203"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb203-1" title="1"><span class="dt">int</span> main()</a>
@@ -2518,7 +2518,7 @@ true</code></pre>
 <a class="sourceLine" id="cb203-5" title="5">    <span class="dt">bool</span> b = <span class="kw">true</span> &lt; <span class="kw">false</span> ;</a>
 <a class="sourceLine" id="cb203-6" title="6">    <span class="bu">std::</span>cout &lt;&lt; b ;</a>
 <a class="sourceLine" id="cb203-7" title="7">}</a></code></pre></div>
-<p>このコードを実行すると、出力は<code>&quot;false&quot;</code>だ。<code>&quot;true \&lt; false&quot;</code>の結果が<code>&quot;false&quot;</code>だということは、<code>true</code>は<code>false</code>より大きいということになる。</p>
+<p>このコードを実行すると、出力は<code>"false"</code>だ。<code>"true \&lt; false"</code>の結果が<code>"false"</code>だということは、<code>true</code>は<code>false</code>より大きいということになる。</p>
 <p>四則演算はどうか？</p>
 <div class="sourceCode" id="cb204"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb204-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb204-2" title="2">{</a>
@@ -2535,7 +2535,7 @@ true</code></pre>
 1
 1
 0</code></pre>
-<p>不思議な結果だ。<code>&quot;true+true&quot;</code>は<code>&quot;2&quot;</code>、<code>&quot;true+false&quot;</code>は<code>&quot;1&quot;</code>、<code>&quot;false+false&quot;</code>は<code>&quot;0&quot;</code>。これは<code>true</code>が<code>1</code>で<code>false</code>が<code>0</code>ならば納得のいく結果だ。大小比較の結果としても矛盾していない。</p>
+<p>不思議な結果だ。<code>"true+true"</code>は<code>"2"</code>、<code>"true+false"</code>は<code>"1"</code>、<code>"false+false"</code>は<code>"0"</code>。これは<code>true</code>が<code>1</code>で<code>false</code>が<code>0</code>ならば納得のいく結果だ。大小比較の結果としても矛盾していない。</p>
 <p>すでに見たように、<code>std::boolalpha</code>を出力していない状態で<code>bool</code>を出力すると<code>true</code>が<code>1</code>、<code>false</code>が<code>0</code>となる。</p>
 <div class="sourceCode" id="cb206"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb206-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb206-2" title="2">{</a>
@@ -2576,7 +2576,7 @@ true</code></pre>
 <a class="sourceLine" id="cb210-8" title="8">    <span class="dt">bool</span> minus_one = -<span class="dv">1</span> ;</a>
 <a class="sourceLine" id="cb210-9" title="9">    <span class="dt">bool</span> OneTwoThree = <span class="dv">123</span> ;  </a>
 <a class="sourceLine" id="cb210-10" title="10">}</a></code></pre></div>
-<p>したがって、<code>&quot;if (0)&quot;</code>は<code>&quot;if (false)&quot;</code>と等しく、<code>&quot;if (1)&quot;</code>や<code>&quot;if(-1)&quot;</code>など非ゼロな値は<code>&quot;if (true)&quot;</code>と等しい。</p>
+<p>したがって、<code>"if (0)"</code>は<code>"if (false)"</code>と等しく、<code>"if (1)"</code>や<code>"if(-1)"</code>など非ゼロな値は<code>"if (true)"</code>と等しい。</p>
 <div class="sourceCode" id="cb211"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb211-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb211-2" title="2">{</a>
 <a class="sourceLine" id="cb211-3" title="3">    <span class="co">// 出力されない</span></a>
@@ -2587,7 +2587,7 @@ true</code></pre>
 <a class="sourceLine" id="cb211-8" title="8">    <span class="cf">if</span> ( <span class="dv">1</span> )</a>
 <a class="sourceLine" id="cb211-9" title="9">        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Output.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb211-10" title="10">}</a></code></pre></div>
-<p>大小比較は単に<code>bool</code>を整数に変換した結果を比較しているだけだ。<code>&quot;true \&lt; false&quot;</code>は<code>&quot;1 \&lt; 0&quot;</code>と書くのと同じだ。</p>
+<p>大小比較は単に<code>bool</code>を整数に変換した結果を比較しているだけだ。<code>"true \&lt; false"</code>は<code>"1 \&lt; 0"</code>と書くのと同じだ。</p>
 <div class="sourceCode" id="cb212"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb212-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb212-2" title="2">{</a>
 <a class="sourceLine" id="cb212-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="bu">std::</span>boolalpha ;</a>
@@ -2595,7 +2595,7 @@ true</code></pre>
 <a class="sourceLine" id="cb212-5" title="5">    <span class="co">// 1 &lt; 0</span></a>
 <a class="sourceLine" id="cb212-6" title="6">    <span class="bu">std::</span>cout &lt;&lt; (<span class="kw">true</span> &lt; <span class="kw">false</span>) ;</a>
 <a class="sourceLine" id="cb212-7" title="7">}</a></code></pre></div>
-<p>同様に四則演算も<code>bool</code>型を整数型に変換した上で計算をしているだけだ。<code>&quot;true + true&quot;</code>は<code>&quot;1 + 1&quot;</code>と書くのと同じだ。</p>
+<p>同様に四則演算も<code>bool</code>型を整数型に変換した上で計算をしているだけだ。<code>"true + true"</code>は<code>"1 + 1"</code>と書くのと同じだ。</p>
 <div class="sourceCode" id="cb213"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb213-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb213-2" title="2">{</a>
 <a class="sourceLine" id="cb213-3" title="3">    <span class="co">// 1 + 1</span></a>
@@ -2643,7 +2643,7 @@ main.cpp:5:10: warning: unused variable ‘y’ [-Wunused-variable]
 <a class="sourceLine" id="cb218-9" title="9">    <span class="cf">else</span></a>
 <a class="sourceLine" id="cb218-10" title="10">        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;x is NOT 123.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb218-11" title="11">}</a></code></pre></div>
-<p>これを実行すると、<code>&quot;x is 123.\n&quot;</code>と出力される。しかし、変数<code>x</code>の値は<code>0</code>のはずだ。なぜか<code>0</code>と<code>123</code>は等しいと判断されてしまった。いったいどういうことだろう。</p>
+<p>これを実行すると、<code>"x is 123.\n"</code>と出力される。しかし、変数<code>x</code>の値は<code>0</code>のはずだ。なぜか<code>0</code>と<code>123</code>は等しいと判断されてしまった。いったいどういうことだろう。</p>
 <p>この謎は警告メッセージを読むと解ける。</p>
 <pre><code>g++ -std=c++17 -Wall --pedantic-error -include all.h main.cpp -o program
 main.cpp: In function ‘int main()’:
@@ -2675,7 +2675,7 @@ main.cpp:5:12: warning: suggest parentheses around assignment used as truth valu
 <a class="sourceLine" id="cb221-9" title="9">    <span class="dt">bool</span> b0 = x = <span class="dv">0</span> ;</a>
 <a class="sourceLine" id="cb221-10" title="10">    <span class="cf">if</span> ( x = <span class="dv">0</span> ) ;</a>
 <a class="sourceLine" id="cb221-11" title="11">}</a></code></pre></div>
-<p>つまり、<code>&quot;if(x=1)&quot;</code>というのは、<code>&quot;if(1)&quot;</code>と書くのと同じで、これは最終的に、<code>&quot;if(true)&quot;</code>と同じ意味になる。</p>
+<p>つまり、<code>"if(x=1)"</code>というのは、<code>"if(1)"</code>と書くのと同じで、これは最終的に、<code>"if(true)"</code>と同じ意味になる。</p>
 <p>警告メッセージの「括弧で囲むべき」というのは、括弧で囲んだ場合、この警告メッセージは出なくなるからだ。</p>
 <div class="sourceCode" id="cb222"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb222-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb222-2" title="2">{</a>
@@ -2712,7 +2712,7 @@ BMI = \frac{体重_{kg}}{身長^2_{m}}
 <a class="sourceLine" id="cb223-11" title="11">    <span class="co">// BMIの出力</span></a>
 <a class="sourceLine" id="cb223-12" title="12">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;BMI=&quot;</span><span class="bu">s</span> &lt;&lt; bmi &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb223-13" title="13">}</a></code></pre></div>
-<p>結果は<code>&quot;27.4756&quot;</code>となった。これだけでは太っているのか痩せているのかよくわからない。調べてみると、BMIの数値と肥満との関係は以下の表のとおりになるそうだ。</p>
+<p>結果は<code>"27.4756"</code>となった。これだけでは太っているのか痩せているのかよくわからない。調べてみると、BMIの数値と肥満との関係は以下の表のとおりになるそうだ。</p>
 <table>
 <thead>
 <tr class="header">
@@ -2855,7 +2855,7 @@ true
 $ make run
 -1
 true</code></pre>
-<p><code>&quot;true&quot;</code>, <code>&quot;false&quot;</code>という文字列で<code>true</code>, <code>false</code>の入力をしたい場合、<code>std::cin</code>に<code>std::boolalpha</code>を「入力」させる。</p>
+<p><code>"true"</code>, <code>"false"</code>という文字列で<code>true</code>, <code>false</code>の入力をしたい場合、<code>std::cin</code>に<code>std::boolalpha</code>を「入力」させる。</p>
 <div class="sourceCode" id="cb235"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb235-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb235-2" title="2">{</a>
 <a class="sourceLine" id="cb235-3" title="3">    <span class="co">// bool型</span></a>
@@ -2897,10 +2897,10 @@ false</code></pre>
 <a class="sourceLine" id="cb238-2" title="2">{</a>
 <a class="sourceLine" id="cb238-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span> ;</a>
 <a class="sourceLine" id="cb238-4" title="4">}</a></code></pre></div>
-<p>これは<code>&quot;hello&quot;</code>と標準出力するだけの簡単なプログラムだ。このプログラムをコンパイルしたプログラム名を<code>program</code>としよう。標準出力の出力先はデフォルトで、ユーザーのターミナルになる。</p>
+<p>これは<code>"hello"</code>と標準出力するだけの簡単なプログラムだ。このプログラムをコンパイルしたプログラム名を<code>program</code>としよう。標準出力の出力先はデフォルトで、ユーザーのターミナルになる。</p>
 <pre><code>$ ./program
 hello</code></pre>
-<p>リダイレクトを使えば、この出力先をファイルにできる。リダイレクトを使うには<code>&quot;プログラム \&gt; ファイル名&quot;</code>とする。</p>
+<p>リダイレクトを使えば、この出力先をファイルにできる。リダイレクトを使うには<code>"プログラム \&gt; ファイル名"</code>とする。</p>
 <pre><code>$ ./program &gt; hello.txt
 $ cat hello.txt
 hello</code></pre>
@@ -2924,7 +2924,7 @@ hello</code></pre>
 <p>このうち、<code>1.63</code>と<code>73</code>はユーザーによる入力だ。これを毎回手で入力するのではなく、ファイルから入力することができる。つまり以下のようなファイルを用意して、</p>
 <pre><code>1.63
 73</code></pre>
-<p>このファイルを例えば、<code>&quot;bodymass.txt&quot;</code>とする。手で入力する代わりに、このファイルを入力として使いたい。これにはリダイレクトとして<code>&quot;プログラム名 \&lt; ファイル名&quot;</code>とする。</p>
+<p>このファイルを例えば、<code>"bodymass.txt"</code>とする。手で入力する代わりに、このファイルを入力として使いたい。これにはリダイレクトとして<code>"プログラム名 \&lt; ファイル名"</code>とする。</p>
 <pre><code>$ ./bmi &lt; bodymass.txt
 27.4756</code></pre>
 <p>リダイレクトの入出力を組み合わせることも可能だ。</p>
@@ -2966,7 +2966,7 @@ $ cat index.txt
 $ ./bmi &lt; fixed_bodymass.txt
 27.4756</code></pre>
 <p>しかしこれではファイルが増えて面倒だ。この場合、パイプを使うとスッキリと書ける。</p>
-<p>パイプはプログラムの標準出力をプログラムの標準入力とするの使い方は、<code>&quot;プログラム名 | プログラム名&quot;</code>だ。</p>
+<p>パイプはプログラムの標準出力をプログラムの標準入力とするの使い方は、<code>"プログラム名 | プログラム名"</code>だ。</p>
 <pre><code>$ ./convert &lt; bodymass.txt | ./bmi
 27.4756</code></pre>
 <p>ところで、すでに何度か説明なしで使っているが、POSIX規格を満たすOSには<code>cat</code>というプログラムが標準で入っている。<code>cat ファイル名</code>は指定したファイル名の内容を標準出力する。標準出力はパイプで標準入力にできる。</p>
@@ -2998,7 +2998,7 @@ $ ls | ./program</code></pre>
 <a class="sourceLine" id="cb256-6" title="6">}</a></code></pre></div>
 <p>実行結果、</p>
 <pre><code>123</code></pre>
-<p>この実行結果が<code>&quot;123&quot;</code>以外の結果になることはない。C++ではプログラムは書かれた順番に実行されるからだ。</p>
+<p>この実行結果が<code>"123"</code>以外の結果になることはない。C++ではプログラムは書かれた順番に実行されるからだ。</p>
 <p>条件分岐は、プログラムの実行を条件付きで行うことができる。</p>
 <div class="sourceCode" id="cb258"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb258-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb258-2" title="2">{</a>
@@ -3020,7 +3020,7 @@ $ ls | ./program</code></pre>
 <h2 id="goto文">goto文</h2>
 <p>ここでは繰り返し(ループ)の基礎的な仕組みを理解するために、最も原始的で最も使いづらい繰り返しの機能である<code>goto文</code>を学ぶ。<code>goto文</code>で実用的な繰り返し処理をするのは面倒だが、恐れることはない。より簡単な方法もすぐに説明するからだ。なぜ本書で<code>goto文</code>を先に教えるかというと、あらゆる繰り返しは、けっきょくのところ<code>if文</code>と<code>goto文</code>へのシンタックスシュガーにすぎないからだ。<code>goto文</code>を学ぶことにより、繰り返しを恐れることなく使う本物のプログラマーになれる。</p>
 <h3 id="無限ループ">無限ループ</h3>
-<p><code>&quot;hello\n&quot;</code>と3回出力するプログラムはどうやって書くのだろうか。<code>&quot;hello\n&quot;</code>を1回出力するプログラムの書き方はすでにわかっているので、同じ文を3回書けばよい。</p>
+<p><code>"hello\n"</code>と3回出力するプログラムはどうやって書くのだろうか。<code>"hello\n"</code>を1回出力するプログラムの書き方はすでにわかっているので、同じ文を3回書けばよい。</p>
 <div class="sourceCode" id="cb260"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb260-1" title="1"><span class="co">// 1回&quot;hello\n&quot;を出力する関数</span></a>
 <a class="sourceLine" id="cb260-2" title="2"><span class="dt">void</span> hello()</a>
 <a class="sourceLine" id="cb260-3" title="3">{</a>
@@ -3034,7 +3034,7 @@ $ ls | ./program</code></pre>
 <a class="sourceLine" id="cb260-11" title="11">    hello() ;</a>
 <a class="sourceLine" id="cb260-12" title="12">}</a></code></pre></div>
 <p>10回出力する場合はどうするのだろう。10回書けばよい。コードは省略する。</p>
-<p>では100回出力する場合はどうするのだろう。100回書くのだろうか。100回も同じコードを書くのはとても面倒だ。読者がVimのような優秀なテキストエディターを使っていない限り100回も同じコードを間違えずに書くことは不可能だろう。Vimならば1回書いたあとにノーマルモードで<code>&quot;100.&quot;</code>するだけで100回書ける。</p>
+<p>では100回出力する場合はどうするのだろう。100回書くのだろうか。100回も同じコードを書くのはとても面倒だ。読者がVimのような優秀なテキストエディターを使っていない限り100回も同じコードを間違えずに書くことは不可能だろう。Vimならば1回書いたあとにノーマルモードで<code>"100."</code>するだけで100回書ける。</p>
 <p>実際のところ、100回だろうが、1000回だろうが、あらかじめ回数がコンパイル時に決まっているのであれば、その回数だけ同じ処理を書くことで実現可能だ。</p>
 <p>しかし、プログラムを外部から強制的に停止させるまで、無限に出力し続けるプログラムはどう書けばいいのだろうか。そういった停止しないプログラムを外部から強制的に停止させるには<code>Ctrl-C</code>を使う。</p>
 <p>以下はそのようなプログラムの実行例だ。</p>
@@ -3065,7 +3065,7 @@ hello
 <p>これを実行すると以下のようになる。</p>
 <pre><code>13</code></pre>
 <p><code>2</code>を出力すべき文の実行が飛ばされていることがわかる。</p>
-<p>これだけだと<code>&quot;if (false)&quot;</code>と同じように見えるが、<code>goto文</code>はソースコードの上に飛ぶこともできるのだ。</p>
+<p>これだけだと<code>"if (false)"</code>と同じように見えるが、<code>goto文</code>はソースコードの上に飛ぶこともできるのだ。</p>
 <div class="sourceCode" id="cb265"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb265-1" title="1"><span class="dt">void</span> hello()</a>
 <a class="sourceLine" id="cb265-2" title="2">{</a>
 <a class="sourceLine" id="cb265-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
@@ -3076,7 +3076,7 @@ hello
 <a class="sourceLine" id="cb265-8" title="8">    hello() ;</a>
 <a class="sourceLine" id="cb265-9" title="9">    <span class="cf">goto</span> loop ; </a>
 <a class="sourceLine" id="cb265-10" title="10">}</a></code></pre></div>
-<p>これは<code>&quot;hello\n&quot;</code>を無限に出力するプログラムだ。</p>
+<p>これは<code>"hello\n"</code>を無限に出力するプログラムだ。</p>
 <p>このプログラムを実行すると、</p>
 <ol type="1">
 <li>関数<code>hello</code>が呼ばれる</li>
@@ -3098,7 +3098,7 @@ hello
 780</code></pre>
 <p>このプログラムは、</p>
 <ol type="1">
-<li><code>&quot;\&gt;&quot;</code>と表示してユーザーから整数値を入力</li>
+<li><code>"\&gt;"</code>と表示してユーザーから整数値を入力</li>
 <li>これまでの入力との合計値を出力</li>
 <li>1.に戻る</li>
 </ol>
@@ -3120,9 +3120,9 @@ hello
 <a class="sourceLine" id="cb267-14" title="14">    <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb267-15" title="15">    <span class="cf">goto</span> loop ;</a>
 <a class="sourceLine" id="cb267-16" title="16">}</a></code></pre></div>
-<p>関数<code>input</code>は<code>&quot;\&gt;&quot;</code>を表示してユーザーからの入力を得て戻り値として返すだけの関数だ。</p>
-<p><code>&quot;sum = sum + input()&quot;</code>は、変数<code>sum</code>に新しい値を代入するもので、その代入する値というのは、代入する前の変数<code>sum</code>の値と関数<code>input</code>の戻り値を足した値だ。</p>
-<p>このような変数<code>x</code>に何らかの値<code>n</code>を足した結果を元の変数<code>x</code>に代入するという処理はとても多く使われるので、C++では<code>&quot;x = x + n&quot;</code>を意味する省略記法<code>&quot;x += n&quot;</code>がある。</p>
+<p>関数<code>input</code>は<code>"\&gt;"</code>を表示してユーザーからの入力を得て戻り値として返すだけの関数だ。</p>
+<p><code>"sum = sum + input()"</code>は、変数<code>sum</code>に新しい値を代入するもので、その代入する値というのは、代入する前の変数<code>sum</code>の値と関数<code>input</code>の戻り値を足した値だ。</p>
+<p>このような変数<code>x</code>に何らかの値<code>n</code>を足した結果を元の変数<code>x</code>に代入するという処理はとても多く使われるので、C++では<code>"x = x + n"</code>を意味する省略記法<code>"x += n"</code>がある。</p>
 <div class="sourceCode" id="cb268"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb268-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb268-2" title="2">{</a>
 <a class="sourceLine" id="cb268-3" title="3">    <span class="dt">int</span> x = <span class="dv">1</span> ;</a>
@@ -3159,7 +3159,7 @@ hello
 <a class="sourceLine" id="cb269-24" title="24">}</a></code></pre></div>
 <p>うまくいった。このループは、ユーザーが<code>0</code>を入力した場合に繰り返しを終了する、条件付きのループだ。</p>
 <h3 id="インデックスループ">インデックスループ</h3>
-<p>最後に紹介するループは、インデックスループだ。<span class="math inline">\(n\)</span>回<code>&quot;hello\n&quot;s</code>を出力するプログラムを書こう。問題は、この<span class="math inline">\(n\)</span>はコンパイル時には与えられず、実行時にユーザーからの入力で与えられる。</p>
+<p>最後に紹介するループは、インデックスループだ。<span class="math inline">\(n\)</span>回<code>"hello\n"s</code>を出力するプログラムを書こう。問題は、この<span class="math inline">\(n\)</span>はコンパイル時には与えられず、実行時にユーザーからの入力で与えられる。</p>
 <div class="sourceCode" id="cb270"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb270-1" title="1"><span class="co">// n回出力する関数の宣言</span></a>
 <a class="sourceLine" id="cb270-2" title="2"><span class="dt">void</span> hello_n( <span class="dt">int</span> n ) ;</a>
 <a class="sourceLine" id="cb270-3" title="3"></a>
@@ -3189,8 +3189,8 @@ hello
 <a class="sourceLine" id="cb272-6" title="6"></a>
 <a class="sourceLine" id="cb272-7" title="7"><span class="co">// 再宣言</span></a>
 <a class="sourceLine" id="cb272-8" title="8"><span class="dt">int</span> f( <span class="dt">int</span> x ) ;</a></code></pre></div>
-<p>関数の宣言というのは戻り値の型や関数名や引数リストだけで、<code>&quot;;&quot;</code>で終わる。</p>
-<p>関数の定義とは、関数の宣言のあとの<code>&quot;{}&quot;</code>だ。この場合、宣言のあとに<code>&quot;;&quot;</code>は書かない。</p>
+<p>関数の宣言というのは戻り値の型や関数名や引数リストだけで、<code>";"</code>で終わる。</p>
+<p>関数の定義とは、関数の宣言のあとの<code>"{}"</code>だ。この場合、宣言のあとに<code>";"</code>は書かない。</p>
 <div class="sourceCode" id="cb273"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb273-1" title="1"><span class="dt">int</span> f( <span class="dt">int</span> x ) { <span class="cf">return</span> x ; }</a></code></pre></div>
 <p>関数の定義は一度しか書けない。</p>
 <div class="sourceCode" id="cb274"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb274-1" title="1"><span class="co">// 定義</span></a>
@@ -3219,7 +3219,7 @@ hello
 <a class="sourceLine" id="cb276-9" title="9"></a>
 <a class="sourceLine" id="cb276-10" title="10"><span class="co">// 名前fの定義</span></a>
 <a class="sourceLine" id="cb276-11" title="11"><span class="dt">void</span> f() { }</a></code></pre></div>
-<p>さて、話を元に戻そう。これから学ぶのは<span class="math inline">\(n\)</span>回<code>&quot;hello\n&quot;s</code>と出力するプログラムの書き方だ。ただし<span class="math inline">\(n\)</span>はユーザーが入力するので実行時にしかわからない。すでに我々はユーザーから<span class="math inline">\(n\)</span>の入力を受け取る部分のプログラムは書いた。</p>
+<p>さて、話を元に戻そう。これから学ぶのは<span class="math inline">\(n\)</span>回<code>"hello\n"s</code>と出力するプログラムの書き方だ。ただし<span class="math inline">\(n\)</span>はユーザーが入力するので実行時にしかわからない。すでに我々はユーザーから<span class="math inline">\(n\)</span>の入力を受け取る部分のプログラムは書いた。</p>
 <div class="sourceCode" id="cb277"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb277-1" title="1"><span class="co">// n回出力する関数の宣言</span></a>
 <a class="sourceLine" id="cb277-2" title="2"><span class="dt">void</span> hello_n( <span class="dt">int</span> n ) ;</a>
 <a class="sourceLine" id="cb277-3" title="3"></a>
@@ -3231,8 +3231,8 @@ hello
 <a class="sourceLine" id="cb277-9" title="9">    <span class="co">// n回出力</span></a>
 <a class="sourceLine" id="cb277-10" title="10">    hello_n( n ) ;</a>
 <a class="sourceLine" id="cb277-11" title="11">}</a></code></pre></div>
-<p>あとは関数<code>hello_n(n)</code>が<span class="math inline">\(n\)</span>回<code>&quot;hello\n&quot;s</code>と出力するようなループを実行すればいいのだ。</p>
-<p>すでに我々は無限回<code>&quot;hello\n&quot;s</code>と出力する方法を知っている。まずは無限回ループを書こう。</p>
+<p>あとは関数<code>hello_n(n)</code>が<span class="math inline">\(n\)</span>回<code>"hello\n"s</code>と出力するようなループを実行すればいいのだ。</p>
+<p>すでに我々は無限回<code>"hello\n"s</code>と出力する方法を知っている。まずは無限回ループを書こう。</p>
 <div class="sourceCode" id="cb278"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb278-1" title="1"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )</a>
 <a class="sourceLine" id="cb278-2" title="2">{</a>
 <a class="sourceLine" id="cb278-3" title="3">loop :</a>
@@ -3282,7 +3282,7 @@ hello
 <p>ではどうやって書くのか。以下のようにする。</p>
 <ol type="1">
 <li>変数<code>i</code>を作り、値を<code>0</code>にする</li>
-<li>変数<code>i</code>と<code>&quot;, &quot;s</code>を出力する</li>
+<li>変数<code>i</code>と<code>", "s</code>を出力する</li>
 <li>変数<code>i</code>をインクリメントする</li>
 <li><code>goto</code> 2.</li>
 </ol>
@@ -3320,7 +3320,7 @@ hello
 <li>3回目の<code>if</code>文実行のとき、<code>i == 2</code></li>
 <li>4回目の<code>if</code>文実行のとき、<code>i == 3</code></li>
 </ol>
-<p>ここでは<code>n == 3</code>なので、3回まで実行してほしい。つまり3回目までは<code>true</code>になり、4回目の<code>if</code>文実行のときには<code>false</code>になるような式を書く。そのような式とは、ズバリ<code>&quot;i != n&quot;</code>だ。</p>
+<p>ここでは<code>n == 3</code>なので、3回まで実行してほしい。つまり3回目までは<code>true</code>になり、4回目の<code>if</code>文実行のときには<code>false</code>になるような式を書く。そのような式とは、ズバリ<code>"i != n"</code>だ。</p>
 <div class="sourceCode" id="cb288"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb288-1" title="1"><span class="dt">void</span> hello_n( <span class="dt">int</span> n )</a>
 <a class="sourceLine" id="cb288-2" title="2">{</a>
 <a class="sourceLine" id="cb288-3" title="3">    <span class="dt">int</span> i = <span class="dv">0</span> ;</a>
@@ -3478,7 +3478,7 @@ hello
 <a class="sourceLine" id="cb303-3" title="3">    sum += x ;</a>
 <a class="sourceLine" id="cb303-4" title="4">    <span class="bu">std::</span>cout &lt;&lt; sum &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb303-5" title="5">}</a></code></pre></div>
-<p>ここではちょっと難しいコードが出てくる。<code>while</code>の中の<code>条件</code>が、<code>&quot;( x = input() ) != 0&quot;</code>になっている。これはどういうことか。</p>
+<p>ここではちょっと難しいコードが出てくる。<code>while</code>の中の<code>条件</code>が、<code>"( x = input() ) != 0"</code>になっている。これはどういうことか。</p>
 <p>実は<code>条件</code>は<code>bool型</code>に変換さえできればどんな式でも書ける。</p>
 <div class="sourceCode" id="cb304"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb304-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb304-2" title="2">{</a>
@@ -3501,7 +3501,7 @@ hello
 <a class="sourceLine" id="cb305-7" title="7">    }</a></code></pre></div>
 <p><code>while文</code>の方が圧倒的に書きやすいことがわかる。</p>
 <h3 id="インデックスループ-1">インデックスループ</h3>
-<p><span class="math inline">\(n\)</span>回<code>&quot;hello\n&quot;s</code>と出力するプログラムを<code>while文</code>で書いてみよう。ただし<span class="math inline">\(n\)</span>はユーザーが入力するものとする。</p>
+<p><span class="math inline">\(n\)</span>回<code>"hello\n"s</code>と出力するプログラムを<code>while文</code>で書いてみよう。ただし<span class="math inline">\(n\)</span>はユーザーが入力するものとする。</p>
 <p>まずは<code>goto文</code>でも使ったループ以外の処理をするコードから。</p>
 <div class="sourceCode" id="cb306"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb306-1" title="1"><span class="dt">void</span> hello_n( <span class="dt">int</span> n ) ;</a>
 <a class="sourceLine" id="cb306-2" title="2"></a>
@@ -3581,7 +3581,7 @@ hello
 <a class="sourceLine" id="cb313-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;4</span><span class="sc">\t</span><span class="st">8</span><span class="sc">\t</span><span class="st">12</span><span class="sc">\n</span><span class="st">5</span><span class="sc">\t</span><span class="st">10</span><span class="sc">\t</span><span class="st">15&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb313-4" title="4">}</a></code></pre></div>
 <p>エスケープ文字<code>\n</code>が改行文字に置き換わるように、エスケープ文字<code>\t</code>はタブ文字に置き換わる。</p>
-<p>九九の表はどうやって出力すればよいだろうか。計算自体はC++では<code>&quot;a*b&quot;</code>でできる。上の表がどのように計算されているかを考えてみよう。</p>
+<p>九九の表はどうやって出力すればよいだろうか。計算自体はC++では<code>"a*b"</code>でできる。上の表がどのように計算されているかを考えてみよう。</p>
 <pre><code>1*1 1*2 1*3 1*4 1*5 1*6 1*7 1*8 1*9 
 2*1 2*2 2*3 2*4 2*5 2*6 2*7 2*8 2*9 
 3*1 3*2 3*3 3*4 3*5 3*6 3*7 3*8 3*9 
@@ -3591,7 +3591,7 @@ hello
 7*1 7*2 7*3 7*4 7*5 7*6 7*7 7*8 7*9 
 8*1 8*2 8*3 8*4 8*5 8*6 8*7 8*8 8*9 
 9*1 9*2 9*3 9*4 9*5 9*6 9*7 9*8 9*9</code></pre>
-<p>これを見ると、<code>&quot;a*b&quot;</code>のうちの<code>a</code>を<code>1</code>から<code>9</code>までインクリメントし、それに対して<code>b</code>を<code>1</code>から<code>9</code>までインクリメントさせればよい。つまり、9回のインデックスループの中で9回のインデックスループを実行することになる。ループの中のループだ。</p>
+<p>これを見ると、<code>"a*b"</code>のうちの<code>a</code>を<code>1</code>から<code>9</code>までインクリメントし、それに対して<code>b</code>を<code>1</code>から<code>9</code>までインクリメントさせればよい。つまり、9回のインデックスループの中で9回のインデックスループを実行することになる。ループの中のループだ。</p>
 <div class="sourceCode" id="cb315"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb315-1" title="1"><span class="cf">while</span> ( 条件 )</a>
 <a class="sourceLine" id="cb315-2" title="2">    <span class="cf">while</span> ( 条件 )</a>
 <a class="sourceLine" id="cb315-3" title="3">        文</a></code></pre></div>
@@ -3749,7 +3749,7 @@ hello
 <a class="sourceLine" id="cb329-3" title="3">    <span class="cf">for</span> (;;)</a>
 <a class="sourceLine" id="cb329-4" title="4">        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb329-5" title="5">}</a></code></pre></div>
-<p>このプログラムは<code>&quot;hello\n&quot;s</code>と無限に出力し続けるプログラムだ。<code>&quot;for(;;)&quot;</code>は<code>&quot;for(;true;)&quot;</code>と同じ意味であり、<code>&quot;while(true)&quot;</code>とも同じ意味だ。</p>
+<p>このプログラムは<code>"hello\n"s</code>と無限に出力し続けるプログラムだ。<code>"for(;;)"</code>は<code>"for(;true;)"</code>と同じ意味であり、<code>"while(true)"</code>とも同じ意味だ。</p>
 <h2 id="do文">do文</h2>
 <p><code>do文</code>は<code>while文</code>に似ている。</p>
 <div class="sourceCode" id="cb330"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb330-1" title="1"><span class="cf">do</span> 文 <span class="cf">while</span> ( 条件 ) ;</a></code></pre></div>
@@ -3902,7 +3902,7 @@ hello
 <a class="sourceLine" id="cb345-10" title="10">}</a></code></pre></div>
 <ol type="1">
 <li>関数<code>main</code>は関数<code>hello</code>を呼び出す</li>
-<li>関数<code>hello</code>は<code>&quot;hello\n&quot;</code>と出力して関数<code>hello</code>を呼び出す</li>
+<li>関数<code>hello</code>は<code>"hello\n"</code>と出力して関数<code>hello</code>を呼び出す</li>
 </ol>
 <p>関数<code>hello</code>は必ず関数<code>hello</code>を呼び出すので、この実行は無限ループする。</p>
 <p>関数が自分自身を呼び出すことを、<code>再帰</code>(recursion)という。</p>
@@ -4785,7 +4785,7 @@ debug: v = { 1, 1, 1, 1, 1, 1, 1, 1, 7, }
 <a class="sourceLine" id="cb415-8" title="8"><span class="co">// printfデバッグ</span></a>
 <a class="sourceLine" id="cb415-9" title="9">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;debug after : &quot;</span><span class="bu">s</span> &lt;&lt; v.at(head) &lt;&lt; <span class="st">&quot;, &quot;</span> &lt;&lt; v.at(min) &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb415-10" title="10"><span class="co">// printfデバッグ</span></a></code></pre></div>
-<p><code>&quot;debug before:&quot;</code>は交換前、<code>&quot;debug after:&quot;</code>は交換後の2つの要素の値だ。</p>
+<p><code>"debug before:"</code>は交換前、<code>"debug after:"</code>は交換後の2つの要素の値だ。</p>
 <p>以下は実行結果の一部だ。</p>
 <pre><code>debug: v = { 3, 8, 2, 5, 6, 9, 4, 1, 7, }
 debug before: 3,  1
@@ -4857,10 +4857,10 @@ standard error output</code></pre>
 standard error output
 $ ./program | grep error
 standard error output </code></pre>
-<p>標準出力には<code>&quot;standard output\n&quot;</code>しか出力されていない。通常のリダイレクトやパイプで扱われるのも標準出力だけだ。そのため、<code>/dev/null</code>にリダイレクトすると標準エラー出力しか見えないし、<code>grep</code>にパイプしても標準出力しか受け取らない。</p>
+<p>標準出力には<code>"standard output\n"</code>しか出力されていない。通常のリダイレクトやパイプで扱われるのも標準出力だけだ。そのため、<code>/dev/null</code>にリダイレクトすると標準エラー出力しか見えないし、<code>grep</code>にパイプしても標準出力しか受け取らない。</p>
 <p>標準出力と標準エラー出力を別々にリダイレクトする方法もある。</p>
 <pre><code>$ ./program &gt; cout.txt 2&gt; cerr.txt</code></pre>
-<p>これを実行すると、ファイル<code>cout.txt</code>には<code>&quot;standard output\n&quot;</code>が、ファイル<code>cerr.txt</code>には<code>&quot;standard error output\n&quot;</code>が出力されている。</p>
+<p>これを実行すると、ファイル<code>cout.txt</code>には<code>"standard output\n"</code>が、ファイル<code>cerr.txt</code>には<code>"standard error output\n"</code>が出力されている。</p>
 <p>これを使って先ほどのプログラムを書き直すと以下のようになる。</p>
 <div class="sourceCode" id="cb425"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb425-1" title="1"><span class="co">// 1 * 2 * 3 * ... * nを計算するプログラム</span></a>
 <a class="sourceLine" id="cb425-2" title="2"><span class="dt">int</span> main()</a>
@@ -5378,18 +5378,20 @@ int: 2147483647</code></pre>
 <a class="sourceLine" id="cb486-3" title="3">    <span class="dt">double</span> NaN = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::quiet_NaN() ;</a>
 <a class="sourceLine" id="cb486-4" title="4">    <span class="bu">std::</span>cout &lt;&lt; NaN ;</a>
 <a class="sourceLine" id="cb486-5" title="5">}</a></code></pre></div>
-<p>NaNとの比較結果はすべて<code>false</code>となる。</p>
+<p>NaNとの比較結果はNaNと非NaNの非同値比較以外はすべて<code>false</code>となる。</p>
 <div class="sourceCode" id="cb487"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb487-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb487-2" title="2">{</a>
 <a class="sourceLine" id="cb487-3" title="3">    <span class="dt">double</span> NaN = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">double</span>&gt;::quiet_NaN() ;</a>
 <a class="sourceLine" id="cb487-4" title="4"></a>
-<a class="sourceLine" id="cb487-5" title="5">    <span class="co">// すべてfalse</span></a>
-<a class="sourceLine" id="cb487-6" title="6">    <span class="dt">bool</span> a = NaN == <span class="fl">0.0</span> ;</a>
-<a class="sourceLine" id="cb487-7" title="7">    <span class="dt">bool</span> b = NaN != <span class="fl">0.0</span> ;</a>
-<a class="sourceLine" id="cb487-8" title="8">    <span class="dt">bool</span> c = NaN == NaN ;</a>
-<a class="sourceLine" id="cb487-9" title="9">    <span class="dt">bool</span> d = NaN != NaN ;</a>
-<a class="sourceLine" id="cb487-10" title="10">    <span class="dt">bool</span> e = NaN &lt; <span class="fl">0.0</span> ;</a>
-<a class="sourceLine" id="cb487-11" title="11">}</a></code></pre></div>
+<a class="sourceLine" id="cb487-5" title="5">    <span class="co">// true</span></a>
+<a class="sourceLine" id="cb487-6" title="6">    <span class="dt">bool</span> b = NaN != <span class="fl">0.0</span> ;</a>
+<a class="sourceLine" id="cb487-7" title="7"></a>
+<a class="sourceLine" id="cb487-8" title="8">    <span class="co">// false</span></a>
+<a class="sourceLine" id="cb487-9" title="9">    <span class="dt">bool</span> a = NaN == <span class="fl">0.0</span> ;</a>
+<a class="sourceLine" id="cb487-10" title="10">    <span class="dt">bool</span> c = NaN == NaN ;</a>
+<a class="sourceLine" id="cb487-11" title="11">    <span class="dt">bool</span> d = NaN != NaN ;</a>
+<a class="sourceLine" id="cb487-12" title="12">    <span class="dt">bool</span> e = NaN &lt; <span class="fl">0.0</span> ;</a>
+<a class="sourceLine" id="cb487-13" title="13">}</a></code></pre></div>
 <p>整数であれば、<code>'a == b'</code>が<code>false</code>であるならば、<code>'a != b'</code>なのだと仮定してもよいが、こと浮動小数点数の場合、NaNの存在があるために必ずしもそうとは限らない。上の例でわかるように、NaNとの比較はすべて<code>false</code>になる。</p>
 <h3 id="有効桁数">有効桁数</h3>
 <p>浮動小数点数は正確な値のすべての桁数を表現できない。表現できるのは仮数部が何桁を正確に表現できるかに依存している。この有効桁数は、<code>numeric_limits&lt;T&gt;::digits10</code>で取得できる。</p>
@@ -7467,7 +7469,7 @@ d) 1 \lt i \lt 13
 <a class="sourceLine" id="cb673-3" title="3">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;hello&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb673-4" title="4">    <span class="dt">int</span> x = <span class="dv">1</span> + <span class="dv">1</span> ;</a>
 <a class="sourceLine" id="cb673-5" title="5">} ;</a></code></pre></div>
-<p>最後の<code>文末</code>は<code>文</code>の最後に付けるセミコロンだ。これは<code>&quot;1+1 ;&quot;</code>とするのと変わらない。<code>&quot;1+1&quot;</code>や<code>&quot;[](){}&quot;</code>は<code>式</code>で、<code>文</code>は<code>式</code>を使うことができる。<code>式</code>だけが入った<code>文</code>を専門用語では<code>式文</code>と呼ぶが特に覚える必要はない。</p>
+<p>最後の<code>文末</code>は<code>文</code>の最後に付けるセミコロンだ。これは<code>"1+1 ;"</code>とするのと変わらない。<code>"1+1"</code>や<code>"[](){}"</code>は<code>式</code>で、<code>文</code>は<code>式</code>を使うことができる。<code>式</code>だけが入った<code>文</code>を専門用語では<code>式文</code>と呼ぶが特に覚える必要はない。</p>
 <div class="sourceCode" id="cb674"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb674-1" title="1"><span class="dv">1</span> + <span class="dv">1</span> ; <span class="co">// OK、式文</span></a>
 <a class="sourceLine" id="cb674-2" title="2">[](){} ; <span class="co">// OK、式文</span></a></code></pre></div>
 <p><code>ラムダ式</code>は<code>式</code>なので<code>式文</code>の中に書くことができる。</p>
@@ -8148,9 +8150,9 @@ destructed: 1</code></pre>
 <a class="sourceLine" id="cb733-21" title="21">    fractional b(<span class="dv">1</span>, <span class="dv">2</span>) ;</a>
 <a class="sourceLine" id="cb733-22" title="22">    fractional c{<span class="dv">1</span>, <span class="dv">2</span>} ;</a>
 <a class="sourceLine" id="cb733-23" title="23">}</a></code></pre></div>
-<p>複数の引数を取るコンストラクターを呼び出すには<code>&quot;=&quot;</code>は使えない。<code>&quot;()&quot;</code>か<code>&quot;{}&quot;</code>を使う必要がある。</p>
+<p>複数の引数を取るコンストラクターを呼び出すには<code>"="</code>は使えない。<code>"()"</code>か<code>"{}"</code>を使う必要がある。</p>
 <p>上のコードを見ると、コンストラクターは引数の数以外にやっていることはほとんど同じだ。こういう場合、コンストラクターを1つにする方法がある。</p>
-<p>実はコンストラクターに限らず、関数は<code>デフォルト実引数</code>を取ることができる。書き方は仮引数に<code>&quot;=&quot;</code>で値を書く。</p>
+<p>実はコンストラクターに限らず、関数は<code>デフォルト実引数</code>を取ることができる。書き方は仮引数に<code>"="</code>で値を書く。</p>
 <div class="sourceCode" id="cb734"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb734-1" title="1"><span class="dt">void</span> f( <span class="dt">int</span> x = <span class="dv">0</span> )</a>
 <a class="sourceLine" id="cb734-2" title="2">{ }</a>
 <a class="sourceLine" id="cb734-3" title="3"></a>
@@ -8238,7 +8240,7 @@ destructed: 1</code></pre>
 <p>このプログラムを実行すると、以下のように出力される。</p>
 <pre><code>constructor
 delegating constructor</code></pre>
-<p>まず<code>&quot;S()&quot;</code>が呼ばれるが、処理を<code>&quot;S(int)&quot;</code>にデリゲートする。<code>&quot;S(int)&quot;</code>の処理が終わり次第<code>&quot;S()&quot;</code>の関数の本体が実行される。そのためこのような出力になる。</p>
+<p>まず<code>"S()"</code>が呼ばれるが、処理を<code>"S(int)"</code>にデリゲートする。<code>"S(int)"</code>の処理が終わり次第<code>"S()"</code>の関数の本体が実行される。そのためこのような出力になる。</p>
 <p>コンストラクターを減らすのはよいが、減らしすぎても不便だ。以下の例を見てみよう。</p>
 <div class="sourceCode" id="cb742"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb742-1" title="1"><span class="kw">struct</span> A { } ;</a>
 <a class="sourceLine" id="cb742-2" title="2"><span class="kw">struct</span> B { B(<span class="dt">int</span>) { } } ;</a>
@@ -8418,7 +8420,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb761-15" title="15">    <span class="co">// operator +(Y,X)は存在しない</span></a>
 <a class="sourceLine" id="cb761-16" title="16">    y + x ;</a>
 <a class="sourceLine" id="cb761-17" title="17">}</a></code></pre></div>
-<p>そのため、上の例で<code>&quot;x+y&quot;</code>と<code>&quot;y+x&quot;</code>を両方使いたい場合は、</p>
+<p>そのため、上の例で<code>"x+y"</code>と<code>"y+x"</code>を両方使いたい場合は、</p>
 <div class="sourceCode" id="cb762"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb762-1" title="1"><span class="dt">void</span> <span class="kw">operator</span> +(Y,X) { }</a></code></pre></div>
 <p>も必要だ。</p>
 <p>現実のコードでは、二項演算子のオーバーロードは以下のように書くことが多い。</p>
@@ -10351,7 +10353,7 @@ delegating constructor</code></pre>
 <h1 id="傲慢なエラー処理-例外">傲慢なエラー処理: 例外</h1>
 <h2 id="例外を投げる">例外を投げる</h2>
 <p><code>std::array</code>の実装方法はほとんど解説した。読者は<code>std::array</code>の実装方法を知り、確固たる自信の元に<code>std::array</code>を使えるようになった。ただし、1つだけ問題がある。</p>
-<p><code>&quot;std::array&quot;</code>のユーザーはあらかじめ設定した要素数を超える範囲の要素にアクセスすることができてしまう。</p>
+<p><code>"std::array"</code>のユーザーはあらかじめ設定した要素数を超える範囲の要素にアクセスすることができてしまう。</p>
 <div class="sourceCode" id="cb928"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb928-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb928-2" title="2">{</a>
 <a class="sourceLine" id="cb928-3" title="3">    <span class="co">// 妥当な要素はa[0]のみ</span></a>
@@ -10419,7 +10421,7 @@ delegating constructor</code></pre>
 <a class="sourceLine" id="cb934-13" title="13">    <span class="co">// 通常の処理</span></a>
 <a class="sourceLine" id="cb934-14" title="14">    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;Success!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="bu">s</span> ;</a>
 <a class="sourceLine" id="cb934-15" title="15">}</a></code></pre></div>
-<p>このプログラムを実行すると、非<code>0</code>を入力した場合、<code>&quot;Success!\n&quot;</code>が出力される。<code>0</code>を入力した場合、例外が投げられる。例外が投げられると、通常の実行はすっ飛ばされる。エラー処理はしていないので、プログラムは終了する。</p>
+<p>このプログラムを実行すると、非<code>0</code>を入力した場合、<code>"Success!\n"</code>が出力される。<code>0</code>を入力した場合、例外が投げられる。例外が投げられると、通常の実行はすっ飛ばされる。エラー処理はしていないので、プログラムは終了する。</p>
 <p><code>std::array</code>や<code>std::vector</code>のメンバー関数<code>at(n)</code>は<code>n</code>が要素数を超える場合、例外を投げている。</p>
 <div class="sourceCode" id="cb935"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb935-1" title="1">array::reference array::at( <span class="bu">std::</span>size_t n )</a>
 <a class="sourceLine" id="cb935-2" title="2">{</a>
@@ -12577,7 +12579,7 @@ sizeof(Object): 12</code></pre>
 <p><code>ostream_iterator</code>は出力ストリーム(<code>ostream</code>)に対するイテレーターだ。コンストラクターに出力先の出力ストリームを渡すことで値を出力先に出力してくれる。今回は<code>std::cout</code>だ。</p>
 <p>上のような出力イテレーターが<code>operator =</code>で以下のようなことをしていたらどうだろう。</p>
 <div class="sourceCode" id="cb1151"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1151-1" title="1"><span class="kw">template</span> &lt; <span class="kw">typename</span> Container &gt;</a>
-<a class="sourceLine" id="cb1151-2" title="2"><span class="kw">struct</span> back_inserter ;</a>
+<a class="sourceLine" id="cb1151-2" title="2"><span class="kw">struct</span> back_inserter</a>
 <a class="sourceLine" id="cb1151-3" title="3">{</a>
 <a class="sourceLine" id="cb1151-4" title="4">    back_inserter( Container &amp; c )</a>
 <a class="sourceLine" id="cb1151-5" title="5">        : c(c) { }</a>
@@ -12597,7 +12599,7 @@ sizeof(Object): 12</code></pre>
 <a class="sourceLine" id="cb1151-19" title="19"><span class="dt">void</span> f( Container <span class="at">const</span> &amp; c )</a>
 <a class="sourceLine" id="cb1151-20" title="20">{</a>
 <a class="sourceLine" id="cb1151-21" title="21">    <span class="co">// cの全要素をコピーしたい</span></a>
-<a class="sourceLine" id="cb1151-22" title="22">    std:vector&lt; <span class="kw">typename</span> Container::<span class="dt">value_type</span> &gt; temp ;</a>
+<a class="sourceLine" id="cb1151-22" title="22">    <span class="bu">std::</span>vector&lt; <span class="kw">typename</span> Container::<span class="dt">value_type</span> &gt; temp ;</a>
 <a class="sourceLine" id="cb1151-23" title="23">    <span class="kw">auto</span> out = back_inserter(temp) ;</a>
 <a class="sourceLine" id="cb1151-24" title="24">    <span class="bu">std::</span>copy( <span class="bu">std::</span>begin(c), <span class="bu">std::</span>end(c), out ) ;</a>
 <a class="sourceLine" id="cb1151-25" title="25">}</a></code></pre></div>
@@ -12733,7 +12735,7 @@ sizeof(Object): 12</code></pre>
 <a class="sourceLine" id="cb1159-2" title="2">{</a>
 <a class="sourceLine" id="cb1159-3" title="3">    <span class="dt">bool</span> b = <span class="bu">std::</span>cin.fail() ;</a>
 <a class="sourceLine" id="cb1159-4" title="4">}</a></code></pre></div>
-<p><code>std:cin</code>が失敗状態になる理由はいくつかあるが、EOFが入力された場合や、指定した型の値を読み込めなかった場合、例えば<code>int</code>型を読み込むのに入力が<code>&quot;abcd&quot;</code>のような文字列だった場合に<code>true</code>になる。</p>
+<p><code>std:cin</code>が失敗状態になる理由はいくつかあるが、EOFが入力された場合や、指定した型の値を読み込めなかった場合、例えば<code>int</code>型を読み込むのに入力が<code>"abcd"</code>のような文字列だった場合に<code>true</code>になる。</p>
 <p><code>value</code>は<code>std::cin</code>から読み込んだ値だ。</p>
 <p>イテレーターから値を読み込むのは<code>operator *</code>の仕事だ。これは単に<code>value</code>を返す。</p>
 <div class="sourceCode" id="cb1160"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1160-1" title="1"><span class="at">const</span> reference <span class="kw">operator</span> *() <span class="at">const</span></a>
@@ -13342,7 +13344,7 @@ sizeof(Object): 12</code></pre>
 <div class="sourceCode" id="cb1214"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1214-1" title="1"><span class="co">// グローバル名前空間</span></a>
 <a class="sourceLine" id="cb1214-2" title="2"><span class="dt">void</span> *  <span class="kw">operator</span> <span class="kw">new</span>    ( <span class="bu">std::</span>size_t size );</a>
 <a class="sourceLine" id="cb1214-3" title="3"><span class="dt">void</span>    <span class="kw">operator</span> <span class="kw">delete</span> ( <span class="dt">void</span> * ptr ) ;</a></code></pre></div>
-<p>使い方は<code>malloc</code>とほぼ同じだ。<code>&quot;operator new&quot;</code>までが名前なので少し混乱するが、通常の関数呼び出しと同じだ。</p>
+<p>使い方は<code>malloc</code>とほぼ同じだ。<code>"operator new"</code>までが名前なので少し混乱するが、通常の関数呼び出しと同じだ。</p>
 <div class="sourceCode" id="cb1215"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1215-1" title="1"><span class="dt">void</span> * ptr = ::<span class="kw">operator</span> <span class="kw">new</span>( <span class="dv">5</span> ) ;</a></code></pre></div>
 <p>グローバル名前空間であることを明示するために<code>::</code>を使っている。</p>
 <p><code>operator new</code>で確保したメモリーは、<code>operator delete</code>で解放するまで有効だ。</p>
@@ -13484,7 +13486,7 @@ sizeof(Object): 12</code></pre>
 <a class="sourceLine" id="cb1229-13" title="13">    <span class="dt">void</span> * ptr = ::<span class="kw">operator</span> <span class="kw">new</span> ( <span class="kw">sizeof</span>( Logger ) ) ;</a>
 <a class="sourceLine" id="cb1229-14" title="14">    Logger * logger_ptr = <span class="kw">new</span> (ptr) Logger{<span class="st">&quot;Alice&quot;</span><span class="bu">s</span>} ;</a>
 <a class="sourceLine" id="cb1229-15" title="15">}</a></code></pre></div>
-<p>このプログラムを実行すると、<code>&quot;Alice is constructed.&quot;</code>と出力される。</p>
+<p>このプログラムを実行すると、<code>"Alice is constructed."</code>と出力される。</p>
 <p>クラスのオブジェクトを適切に破棄するためには、デストラクターを呼ばなければならない。通常の変数ならば、変数が寿命を迎えたときに自動的にデストラクターが呼ばれてくれる。</p>
 <div class="sourceCode" id="cb1230"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1230-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1230-2" title="2">{</a>
@@ -14633,7 +14635,7 @@ Alice is destructed.</code></pre>
 <a class="sourceLine" id="cb1348-8" title="8">    <span class="bu">std::</span>vector&lt;X&gt; v ;</a>
 <a class="sourceLine" id="cb1348-9" title="9">    v.resize(<span class="dv">5</span>) ;</a>
 <a class="sourceLine" id="cb1348-10" title="10">}</a></code></pre></div>
-<p>このプログラムを実行すると、<code>&quot;default constructed.\n&quot;</code>は5回標準出力される。</p>
+<p>このプログラムを実行すると、<code>"default constructed.\n"</code>は5回標準出力される。</p>
 <p><code>resize(sz, value)</code>は<code>resize</code>を呼び出した結果要素が増える場合、その要素を<code>value</code>で初期化する。</p>
 <div class="sourceCode" id="cb1349"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1349-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1349-2" title="2">{</a>
@@ -17104,11 +17106,11 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1573-21" title="21">    <span class="co">// 下位バイト</span></a>
 <a class="sourceLine" id="cb1573-22" title="22">    print( rep[<span class="dv">1</span>] ) ;</a>
 <a class="sourceLine" id="cb1573-23" title="23">}</a></code></pre></div>
-<p>筆者の環境では<code>&quot;21&quot;</code>と表示される。これはつまり、2つのバイトのうち、下位バイトの方が先に配置されているということだ。</p>
+<p>筆者の環境では<code>"21"</code>と表示される。これはつまり、2つのバイトのうち、下位バイトの方が先に配置されているということだ。</p>
 <p>世の中にはリトルエンディアン(Little Endian)とビッグエンディアン(Big Endian)がある。これは複数バイトの順序の違いだ。</p>
 <p>リトルエンディアンは下位バイトから配置する。</p>
 <p>ビッグエンディアンは上位バイトから配置する。</p>
-<p>リトルエンディアン環境では、上のプログラムは<code>&quot;21&quot;</code>と表示する。ビッグエンディアン環境では、<code>&quot;12&quot;</code>と表示する。</p>
+<p>リトルエンディアン環境では、上のプログラムは<code>"21"</code>と表示する。ビッグエンディアン環境では、<code>"12"</code>と表示する。</p>
 <p>エンディアンの存在により、UTF-16とUTF-32は2つのバイト列表現が存在することになる。</p>
 <h4 id="utf-8">UTF-8</h4>
 <p>UTF-8は最も後発のUnicodeのコードポイントの文字エンコードだ。</p>
@@ -17193,7 +17195,7 @@ lvalue     xvalue   prvalue</code></pre>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">二重引用符</td>
-<td style="text-align: left;"><code>\&quot;</code></td>
+<td style="text-align: left;"><code>\"</code></td>
 </tr>
 </tbody>
 </table>
@@ -17226,9 +17228,9 @@ lvalue     xvalue   prvalue</code></pre>
 <div class="sourceCode" id="cb1583"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1583-1" title="1"><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span> ;</a></code></pre></div>
 <p>という通常の文字列リテラルは、バックスラッシュとラテンアルファベットnではなく、改行文字1文字になる。</p>
 <p>通常の文字列リテラルは末尾にnull文字(<code>\0</code>)が付与される。このために、配列のサイズは文字数+1になる。</p>
-<p>具体的な例では、<code>&quot;abc&quot;</code>という通常の文字列リテラルの型は<code>const char [4]</code>になる。これは以下のような配列に等しい。</p>
+<p>具体的な例では、<code>"abc"</code>という通常の文字列リテラルの型は<code>const char [4]</code>になる。これは以下のような配列に等しい。</p>
 <div class="sourceCode" id="cb1584"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1584-1" title="1"><span class="at">const</span> <span class="dt">char</span> s[<span class="dv">4</span>] = {<span class="ch">&#39;a&#39;</span>, <span class="ch">&#39;b&#39;</span>, <span class="ch">&#39;c&#39;</span>, <span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span>} ;</a></code></pre></div>
-<p><code>&quot;hello&quot;</code>の型は<code>const char [6]</code>になる。</p>
+<p><code>"hello"</code>の型は<code>const char [6]</code>になる。</p>
 <div class="sourceCode" id="cb1585"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1585-1" title="1"><span class="at">const</span> <span class="dt">char</span> s[<span class="dv">6</span>] = {<span class="ch">&#39;h&#39;</span>, <span class="ch">&#39;e&#39;</span>, <span class="ch">&#39;l&#39;</span>, <span class="ch">&#39;l&#39;</span>, <span class="ch">&#39;o&#39;</span>, <span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span> } ;</a></code></pre></div>
 <p><code>char</code>型の配列の初期化に通常の文字列リテラルを使うことができる。</p>
 <div class="sourceCode" id="cb1586"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1586-1" title="1"><span class="dt">char</span> s[<span class="dv">6</span>] = <span class="st">&quot;hello&quot;</span> ;</a></code></pre></div>
@@ -17270,7 +17272,7 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1594-4" title="4"><span class="dt">char16_t</span> s2[] = <span class="st">u&quot;hello&quot;</span> ;</a>
 <a class="sourceLine" id="cb1594-5" title="5"><span class="co">// char32_t [6]</span></a>
 <a class="sourceLine" id="cb1594-6" title="6"><span class="dt">char32_t</span> s3[] = <span class="st">U&quot;hello&quot;</span> ;</a></code></pre></div>
-<p><code>&quot;いろは&quot;</code>をそれぞれの文字列リテラルで表現すると以下のようになる。</p>
+<p><code>"いろは"</code>をそれぞれの文字列リテラルで表現すると以下のようになる。</p>
 <div class="sourceCode" id="cb1595"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1595-1" title="1"><span class="co">// char8_t [10]</span></a>
 <a class="sourceLine" id="cb1595-2" title="2"><span class="dt">char8_t</span> s1[] = <span class="st">u8&quot;いろは&quot;</span> ;</a>
 <a class="sourceLine" id="cb1595-3" title="3"><span class="co">// char16_t [4]</span></a>
@@ -17289,7 +17291,7 @@ lvalue     xvalue   prvalue</code></pre>
 <a class="sourceLine" id="cb1597-3" title="3"><span class="dt">char32_t</span> s3[] = <span class="st">U&quot;𦥑&quot;</span> ;</a></code></pre></div>
 <p>以下のように解釈される。</p>
 <div class="sourceCode" id="cb1598"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1598-1" title="1"><span class="dt">char8_t</span> s1[<span class="dv">5</span>] = { <span class="bn">0xf0</span>, <span class="bn">0xa6</span>, <span class="bn">0xa5</span>, <span class="bn">0x91</span>, <span class="bn">0x0</span> } ;</a>
-<a class="sourceLine" id="cb1598-2" title="2"><span class="dt">char16_t</span> s2[<span class="dv">2</span>] = { <span class="bn">0xd85a</span>, <span class="bn">0xdd51</span>, <span class="bn">0x0</span> } ;</a>
+<a class="sourceLine" id="cb1598-2" title="2"><span class="dt">char16_t</span> s2[<span class="dv">3</span>] = { <span class="bn">0xd85a</span>, <span class="bn">0xdd51</span>, <span class="bn">0x0</span> } ;</a>
 <a class="sourceLine" id="cb1598-3" title="3"><span class="dt">char32_t</span> s3[<span class="dv">2</span>] = { <span class="bn">0x26951</span>, <span class="bn">0x0</span> } ;</a></code></pre></div>
 <p>文字<code>'が'</code>はUnicodeコードポイントでは結合済みコードポイントの<code>U+304C</code>で表現できるが、コードポイントU+304B(HIRAGANA LETTER KA)のあとに直ちに続いて、コードポイントU+3099(COMBINING KATAKANA-HIRAGANA VOICED SOUND MARK)を使って表現してもよい。</p>
 <div class="sourceCode" id="cb1599"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1599-1" title="1"><span class="co">// u8&quot;\u304C&quot;</span></a>
@@ -17300,7 +17302,7 @@ lvalue     xvalue   prvalue</code></pre>
 <div class="sourceCode" id="cb1600"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1600-1" title="1"><span class="dt">char8_t</span> ga1[<span class="dv">4</span>] = { <span class="bn">0xe3</span>, <span class="bn">0x81</span>, <span class="bn">0x8c</span>, <span class="bn">0x0</span> } ;</a>
 <a class="sourceLine" id="cb1600-2" title="2"><span class="dt">char8_t</span> ga2[<span class="dv">7</span>] = { <span class="bn">0xe3</span>, <span class="bn">0x81</span>, <span class="bn">0x8b</span>, <span class="bn">0xe3</span>, <span class="bn">0x82</span>, <span class="bn">0x99</span>, <span class="bn">0x0</span> } ;</a></code></pre></div>
 <p>変数<code>ga1, ga2</code>はどちらもUnicodeとして正しい「が」という1文字の表現だ。Unicodeでは複数のコードポイントで1文字を表現することもあるし、意味的に表示的に同じ文字に対して複数の表現方法がある。</p>
-<p>Apple macOSはUnicodeの正規化として一般的なNFC(Canonical Composition)ではなくNormalization Form D(NFD)を使っているので、濁点や半濁点は必ず分解される。Apple macOSでは<code>u8&quot;\u304B\u3099&quot;</code>が一般的な表現で、それ以外の環境では<code>u8&quot;\u304C&quot;</code>が一般的な表現だ。しかし、どちらも意味上は同じ表現だ。</p>
+<p>Apple macOSはUnicodeの正規化として一般的なNFC(Canonical Composition)ではなくNormalization Form D(NFD)を使っているので、濁点や半濁点は必ず分解される。Apple macOSでは<code>u8"\u304B\u3099"</code>が一般的な表現で、それ以外の環境では<code>u8"\u304C"</code>が一般的な表現だ。しかし、どちらも意味上は同じ表現だ。</p>
 <p>Unicodeの奇妙で面白い例は枚挙に暇がない。ここでは日本語を扱う際によくある注意点を説明したが、ほかにも絵文字、デーヴァナーガリー（ヒンディー語、マラーティー語、ネパール語）、モンゴル文字、アラビア文字、ヘブライ文字など扱いの難しい文字がたくさんある。</p>
 <p>重要な点をまとめると、</p>
 <ul>
@@ -17312,7 +17314,7 @@ lvalue     xvalue   prvalue</code></pre>
 <div class="sourceCode" id="cb1601"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1601-1" title="1"><span class="st">u8&quot;</span><span class="sc">\n</span><span class="st">は改行文字&quot;</span> ;</a></code></pre></div>
 <p>しかしエスケープシーケンスがあるために、バックスラッシュを普通に使うには、<code>\\</code>と書かなければならない。例えば上の文字列リテラルを改行文字に続いて「は改行文字」ではなく、本当に「<code>\n</code>は改行文字」という文字列にしたい場合、以下のように書かなければならない。</p>
 <div class="sourceCode" id="cb1602"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1602-1" title="1"><span class="st">u8&quot;</span><span class="sc">\\</span><span class="st">nは改行文字&quot;</span> ;</a></code></pre></div>
-<p>また、単一引用符<code>'</code>や二重引用符<code>&quot;</code>もエスケープシーケンスが必要だ。</p>
+<p>また、単一引用符<code>'</code>や二重引用符<code>"</code>もエスケープシーケンスが必要だ。</p>
 <div class="sourceCode" id="cb1603"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1603-1" title="1"><span class="st">u8&quot;</span><span class="sc">\&#39;</span><span class="st">は単一引用符&quot;</span> ;</a>
 <a class="sourceLine" id="cb1603-2" title="2"><span class="st">u8&quot;</span><span class="sc">\&quot;</span><span class="st">は二重引用符&quot;</span> ;</a></code></pre></div>
 <p>また、以下のような内容の文字列をリテラルとして書きたい場合、</p>
@@ -17557,7 +17559,7 @@ baz</code></pre>
 <a class="sourceLine" id="cb1636-6" title="6">    s[<span class="dv">5</span>] = <span class="ch">&#39;f&#39;</span> ;</a>
 <a class="sourceLine" id="cb1636-7" title="7">    s[<span class="dv">6</span>] = <span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span> ;</a>
 <a class="sourceLine" id="cb1636-8" title="8">}</a></code></pre></div>
-<p>このコードで、変数<code>s</code>は最終的に<code>&quot;abcdef&quot;</code>という文字列になる。最後のnull文字による終端を忘れてはならない。</p>
+<p>このコードで、変数<code>s</code>は最終的に<code>"abcdef"</code>という文字列になる。最後のnull文字による終端を忘れてはならない。</p>
 <p>ここで、配列<code>s</code>の要素数は7以上でなければならない。最終的なnull終端文字列を表現するには最低でも<code>char [7]</code>が必要だからだ。</p>
 <p>例えば2つのnull終端文字列を結合する場合で、どちらも<code>const</code>であったり、十分なサイズがなかった場合、2つの文字列を保持できるサイズのメモリーを確保して、コピーしなければならない。</p>
 <div class="sourceCode" id="cb1637"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1637-1" title="1"><span class="co">// s1, s2を結合して使う関数</span></a>
@@ -17685,7 +17687,7 @@ baz</code></pre>
 <a class="sourceLine" id="cb1649-7" title="7">    <span class="co">// 32</span></a>
 <a class="sourceLine" id="cb1649-8" title="8">    <span class="kw">auto</span> dog = text.find(<span class="st">&quot;dog&quot;</span><span class="bu">sv</span>) ;</a>
 <a class="sourceLine" id="cb1649-9" title="9">}</a></code></pre></div>
-<p>文字列<code>&quot;fox&quot;</code>に一致する部分文字列の先頭<code>'f'</code>の文字型の値へのインデックスは<code>12</code>で、<code>&quot;dog&quot;</code>の<code>'d'</code>は<code>36</code>だ。この結果は、上のソースコードに使っている文字が1文字につき1文字型の値を使うためだ。通常は文字数と連続した文字型の要素へのインデックスは等しくならない。</p>
+<p>文字列<code>"fox"</code>に一致する部分文字列の先頭<code>'f'</code>の文字型の値へのインデックスは<code>12</code>で、<code>"dog"</code>の<code>'d'</code>は<code>36</code>だ。この結果は、上のソースコードに使っている文字が1文字につき1文字型の値を使うためだ。通常は文字数と連続した文字型の要素へのインデックスは等しくならない。</p>
 <p>例えば以下のコードを実行すると、</p>
 <div class="sourceCode" id="cb1650"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1650-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1650-2" title="2">{</a>
@@ -17716,7 +17718,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1652-13" title="13">        <span class="co">// 見つからなかった</span></a>
 <a class="sourceLine" id="cb1652-14" title="14">        <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;not found.&quot;</span> ;</a>
 <a class="sourceLine" id="cb1652-15" title="15">}</a></code></pre></div>
-<p>この場合、変数<code>text</code>に文字列<code>&quot;abc&quot;</code>はないので、<code>npos</code>が返る。<code>npos</code>が返ったかどうかは<code>npos</code>と比較すればわかる。<code>npos</code>は<code>-1</code>と等しいので、以下のようにも書ける。</p>
+<p>この場合、変数<code>text</code>に文字列<code>"abc"</code>はないので、<code>npos</code>が返る。<code>npos</code>が返ったかどうかは<code>npos</code>と比較すればわかる。<code>npos</code>は<code>-1</code>と等しいので、以下のようにも書ける。</p>
 <div class="sourceCode" id="cb1653"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1653-1" title="1"><span class="cf">if</span> ( index != -<span class="dv">1</span> )</a>
 <a class="sourceLine" id="cb1653-2" title="2">    <span class="co">// ...</span></a></code></pre></div>
 <p><code>find</code>の亜種として、<code>rfind</code>がある。</p>
@@ -17789,7 +17791,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1659-4" title="4">    text.insert( text.find(<span class="st">&quot;cat&quot;</span><span class="bu">sv</span>), <span class="st">&quot;fat &quot;</span><span class="bu">sv</span> ) ;</a>
 <a class="sourceLine" id="cb1659-5" title="5">    <span class="co">// textは&quot;big fat cat&quot;</span></a>
 <a class="sourceLine" id="cb1659-6" title="6">}</a></code></pre></div>
-<p>これは<code>text.find(&quot;cat&quot;sv)</code>でまず部分文字列<code>&quot;cat&quot;</code>の先頭へのインデックスを探し、そこに文字列<code>&quot;fat &quot;</code>を挿入している。結果として変数<code>text</code>は<code>&quot;big fat cat&quot;</code>となる。</p>
+<p>これは<code>text.find("cat"sv)</code>でまず部分文字列<code>"cat"</code>の先頭へのインデックスを探し、そこに文字列<code>"fat "</code>を挿入している。結果として変数<code>text</code>は<code>"big fat cat"</code>となる。</p>
 <h4 id="部分文字列の削除">部分文字列の削除</h4>
 <p>文字列から部分文字列を削除するには<code>erase( pos, n )</code>を使う。<code>pos</code>は削除すべき先頭のインデックスで、<code>n</code>は削除すべきインデックス数だ。</p>
 <div class="sourceCode" id="cb1660"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1660-1" title="1"><span class="dt">int</span> main()</a>
@@ -17799,7 +17801,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1660-5" title="5">    text.erase( <span class="dv">0</span>, dirty.size() ) ;</a>
 <a class="sourceLine" id="cb1660-6" title="6">    <span class="co">// textは&quot;cat&quot;</span></a>
 <a class="sourceLine" id="cb1660-7" title="7">}</a></code></pre></div>
-<p>このプログラムは文字列<code>&quot;dirty cat&quot;</code>から<code>&quot;dirty &quot;</code>を削除し、<code>&quot;cat&quot;</code>にする。</p>
+<p>このプログラムは文字列<code>"dirty cat"</code>から<code>"dirty "</code>を削除し、<code>"cat"</code>にする。</p>
 <div class="sourceCode" id="cb1661"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1661-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1661-2" title="2">{</a>
 <a class="sourceLine" id="cb1661-3" title="3">    <span class="kw">auto</span> text = <span class="st">&quot;big fat cat&quot;</span><span class="bu">s</span> ;</a>
@@ -17807,7 +17809,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1661-5" title="5">    text.erase( text.find(fat), fat.size() ) ;</a>
 <a class="sourceLine" id="cb1661-6" title="6">    <span class="co">// textは&quot;big cat&quot;</span></a>
 <a class="sourceLine" id="cb1661-7" title="7">}</a></code></pre></div>
-<p>このプログラムは文字列<code>&quot;big fat cat&quot;</code>から部分文字列<code>&quot;fat&quot;</code>を検索し、その先頭から変数<code>fat</code>のサイズ文の部分文字列を削除する。結果として変数<code>text</code>は<code>&quot;big cat&quot;</code>になる。</p>
+<p>このプログラムは文字列<code>"big fat cat"</code>から部分文字列<code>"fat"</code>を検索し、その先頭から変数<code>fat</code>のサイズ文の部分文字列を削除する。結果として変数<code>text</code>は<code>"big cat"</code>になる。</p>
 <p>先頭から末尾までを削除すると、<code>clear()</code>と同じ意味になる。</p>
 <div class="sourceCode" id="cb1662"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1662-1" title="1"><span class="dt">int</span> main()</a>
 <a class="sourceLine" id="cb1662-2" title="2">{</a>
@@ -17825,7 +17827,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1663-6" title="6">    text.replace( text.find(ugly), ugly.size(), pretty ) ;</a>
 <a class="sourceLine" id="cb1663-7" title="7">    <span class="co">// textは&quot;pretty cat&quot;</span></a>
 <a class="sourceLine" id="cb1663-8" title="8">}</a></code></pre></div>
-<p>このコードは、文字列<code>text</code>から部分文字列<code>&quot;ugly&quot;</code>を探し、その先頭へのインデックスと文字列<code>&quot;ugly&quot;</code>のサイズを指定することで、部分文字列<code>&quot;ugly&quot;</code>を、文字列<code>pretty</code>の値である<code>&quot;pretty&quot;</code>に置換する。結果として<code>text</code>は<code>&quot;pretty cat&quot;</code>になる。</p>
+<p>このコードは、文字列<code>text</code>から部分文字列<code>"ugly"</code>を探し、その先頭へのインデックスと文字列<code>"ugly"</code>のサイズを指定することで、部分文字列<code>"ugly"</code>を、文字列<code>pretty</code>の値である<code>"pretty"</code>に置換する。結果として<code>text</code>は<code>"pretty cat"</code>になる。</p>
 <h4 id="その他の推奨できない操作">その他の推奨できない操作</h4>
 <p><code>basic_string</code>にはこのほかにさまざまな、現代では推奨できない操作がある。</p>
 <p>例えば<code>operator []</code>で文字列をインデックスでアクセスできる。これは基本実行文字セットに対しては動く。</p>
@@ -17848,7 +17850,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1665-4" title="4">    <span class="co">// 0xe3</span></a>
 <a class="sourceLine" id="cb1665-5" title="5">    <span class="kw">auto</span> c = text[<span class="dv">0</span>] ;</a>
 <a class="sourceLine" id="cb1665-6" title="6">}</a></code></pre></div>
-<p><code>text</code>のインデックス<code>0</code>にあたる文字型の値は<code>u8'い'</code>ではない。UTF-8は文字「い」を文字型1つで表現できないからだ。<code>u8&quot;いろは&quot;</code>というUTF-8文字列リテラルはすでに学んだように、以下のように表現される。</p>
+<p><code>text</code>のインデックス<code>0</code>にあたる文字型の値は<code>u8'い'</code>ではない。UTF-8は文字「い」を文字型1つで表現できないからだ。<code>u8"いろは"</code>というUTF-8文字列リテラルはすでに学んだように、以下のように表現される。</p>
 <div class="sourceCode" id="cb1666"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1666-1" title="1"><span class="co">// u8&quot;いろは&quot;</span></a>
 <a class="sourceLine" id="cb1666-2" title="2"><span class="dt">char8_t</span> iroha[<span class="dv">10</span>] = { <span class="bn">0xe3</span>, <span class="bn">0x81</span>, <span class="bn">0x84</span>, <span class="bn">0xe3</span>, <span class="bn">0x82</span>, <span class="bn">0x8d</span>, <span class="bn">0xe3</span>, <span class="bn">0x81</span>, <span class="bn">0xaf</span>, <span class="bn">0x0</span> } ;</a></code></pre></div>
 <p>文字「い」をUTF-8で表現するためには、<code>char8_t</code>型の値が3つ必要で、<code>0xe3, 0x81, 0x84</code>というシーケンスでなければならない。そのため、個々の文字型の値をインデックスでアクセスしても意味がない。また、<code>size()</code>は文字数を返すのではなく、インデックス数を返す。</p>
@@ -17860,7 +17862,7 @@ dog: 45</code></pre>
 <a class="sourceLine" id="cb1667-4" title="4">    <span class="co">// 3</span></a>
 <a class="sourceLine" id="cb1667-5" title="5">    <span class="kw">auto</span> i = text.find_first_of(<span class="st">&quot;abc&quot;</span><span class="bu">sv</span>) ;</a>
 <a class="sourceLine" id="cb1667-6" title="6">}</a></code></pre></div>
-<p><code>i</code>は<code>3</code>になる。なぜならば、<code>find_first_of(&quot;abc&quot;sv)</code>は<code>a</code>, <code>b</code>, <code>c</code>のうちいずれかの文字である最初のインデックスを返すからだ。</p>
+<p><code>i</code>は<code>3</code>になる。なぜならば、<code>find_first_of("abc"sv)</code>は<code>a</code>, <code>b</code>, <code>c</code>のうちいずれかの文字である最初のインデックスを返すからだ。</p>
 <p>この機能はUnicodeでは使えない。というのも1文字型で1文字を表現できないからだ。</p>
 <h3 id="basic_string_viewの操作">basic_string_viewの操作</h3>
 <p><code>basic_string_view</code>は<code>basic_string</code>とほぼ同じ操作が行える。ただし、<code>basic_string_view</code>は書き換えることができないので、一部の操作が使えない。<code>append, insert, erase, replace</code>は使えない。<code>basic_string_view</code>同士の<code>operator +</code>もない。</p>
@@ -19254,7 +19256,7 @@ p(x \,|\, b_0, \dotsc, b_n, \; \rho_0, \dotsc, \rho_n)
 <p><code>#include</code>は以下のいずれかの文法を持つ。</p>
 <div class="sourceCode" id="cb1799"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1799-1" title="1"><span class="pp">#include </span><span class="im">&lt;ヘッダーファイルパス&gt;</span><span class="pp"> </span><span class="er">改行文字</span></a>
 <a class="sourceLine" id="cb1799-2" title="2"><span class="pp">#include </span><span class="im">&quot;ヘッダーファイルパス&quot;</span><span class="pp"> </span><span class="er">改行文字</span></a></code></pre></div>
-<p><code>#include</code>は指定したファイルパスのファイルの内容をその場所に挿入する。このファイルをヘッダーファイルという。<code>&lt;&gt;</code>によるファイルパスは、標準ライブラリやシステムのヘッダーファイルを格納したディレクトリーからヘッダーファイルを探す。<code>&quot;&quot;</code>によるファイルパスは、システム以外のディレクトリーからもヘッダーファイルを探す。例えばカレントディレクトリーなどだ。</p>
+<p><code>#include</code>は指定したファイルパスのファイルの内容をその場所に挿入する。このファイルをヘッダーファイルという。<code>&lt;&gt;</code>によるファイルパスは、標準ライブラリやシステムのヘッダーファイルを格納したディレクトリーからヘッダーファイルを探す。<code>""</code>によるファイルパスは、システム以外のディレクトリーからもヘッダーファイルを探す。例えばカレントディレクトリーなどだ。</p>
 <p>例えば、以下のようなヘッダーファイル<code>foo.h</code>があり、</p>
 <div class="sourceCode" id="cb1800"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1800-1" title="1"><span class="co">// foo.h</span></a>
 <a class="sourceLine" id="cb1800-2" title="2">foo foo foo</a></code></pre></div>
@@ -19754,7 +19756,7 @@ p(x \,|\, b_0, \dotsc, b_n, \; \rho_0, \dotsc, \rho_n)
 </tr>
 <tr class="even">
 <td><code>__DATE__</code></td>
-<td style="text-align: center;"><code>&quot;Mmm dd yyyy&quot;</code></td>
+<td style="text-align: center;"><code>"Mmm dd yyyy"</code></td>
 <td style="text-align: center;">ソースファイルがプリプロセスされた日付 <code>Mmm</code>は月、<code>dd</code>は日、<code>yyyy</code>は年<br />
 月の文字列は<code>asctime</code>が生成するものと同じ<br />
 日が1桁の場合、<code>dd</code>の最初の文字は空白文字</td>

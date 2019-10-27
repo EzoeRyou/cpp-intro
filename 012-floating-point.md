@@ -225,16 +225,18 @@ int main()
 }
 ~~~
 
-NaNとの比較結果はすべて`false`となる。
+NaNとの比較結果はNaNと非NaNの非同値比較以外はすべて`false`となる。
 
 ~~~cpp
 int main()
 {
     double NaN = std::numeric_limits<double>::quiet_NaN() ;
 
-    // すべてfalse
-    bool a = NaN == 0.0 ;
+    // true
     bool b = NaN != 0.0 ;
+
+    // false
+    bool a = NaN == 0.0 ;
     bool c = NaN == NaN ;
     bool d = NaN != NaN ;
     bool e = NaN < 0.0 ;
