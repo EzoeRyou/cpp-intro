@@ -324,10 +324,10 @@ struct S
 
 int main()
 {
-    S s1(1) ;
+    S s1{1} ;
     s1.print() ; // 1
 
-    S s2(2) ;
+    S s2{2} ;
     s2.print() ; // 2
 }
 ~~~
