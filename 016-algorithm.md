@@ -1075,9 +1075,9 @@ auto generate = []( auto first, auto last, auto gen )
 
 auto generate_n = []( auto first, auto n, auto gen )
 {
-    for ( auto i = 0u ; i != n ; ++i, ++iter )
+    for ( auto i = 0u ; i != n ; ++i, ++first )
     {
-        *iter = gen() ;
+        *first = gen() ;
     }
 } ;
 ~~~
