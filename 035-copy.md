@@ -564,7 +564,7 @@ int main()
 コピー元よりコピー先の方がメモリーが多い場合、つまり`b = a`の場合は動的メモリー確保をしないという実装もできるが、その場合実際に確保したメモリーサイズと、クラスが認識しているメモリーサイズが異なることになる。今回はサイズが違う場合は必ず動的メモリー確保をすることにしよう。
 
 ~~~cpp
-dynamic_array & operator == ( const dynamic_array & r )
+dynamic_array & operator = ( const dynamic_array & r )
 {
     // 自分自身への代入ではない場合
     // かつ
@@ -580,7 +580,7 @@ dynamic_array & operator == ( const dynamic_array & r )
 `new`したメモリーは`delete`しなければならない。そこで、コピー代入演算子はまず自分の所有するメモリーを`delete`してから`new`し、値をコピーすることになる。
 
 ~~~cpp
-dynamic_array & operator == ( const dynamic_array & r )
+dynamic_array & operator = ( const dynamic_array & r )
 {
     if ( this != &r && size() != r.size() )
     {
