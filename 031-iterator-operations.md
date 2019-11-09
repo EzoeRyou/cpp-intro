@@ -893,6 +893,7 @@ struct iota_iterator
     // 要素の型
     using value_type = T ;
     using reference = T & ;
+    using const_reference = T const & ;
     using pointer = T * ;
     // イテレーターカテゴリーは前方イテレーター
     using iterator_category = std::forward_iterator_tag ;
@@ -931,7 +932,7 @@ int main()
 reference       operator *() noexcept
 { return value ; }
 // const版
-const reference operator *() const noexcept
+const_reference operator *() const noexcept
 { return value ; }
 ~~~
 
