@@ -949,7 +949,7 @@ int main()
     *non_const = 1 ;
 
     // constなオブジェクト
-    iota_iterator immutable(0) ;
+    const iota_iterator immutable(0) ;
     // const版のoperator *を呼び出す
     int const_value = *immutable ;
     // 変更はできない
