@@ -47,7 +47,7 @@ int main()
 
 ## `std::allocator<T>`の概要
 
-`std::allocator<T>`は`T`型を構築できる生のメモリーを確保するための以下のようになっている。
+`std::allocator<T>`は`T`型を構築できる生のメモリーを確保するために以下のようになっている。
 
 ~~~cpp
 namespace std {
