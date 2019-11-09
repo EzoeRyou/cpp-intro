@@ -21,7 +21,7 @@ e = source ;
 コピーにはコピー先とコピー元がある。
 
 ~~~cpp
-std::vector<int> v = {1,2,3} ;
+std::vector<int> source = {1,2,3} ;
 std::vector<int> destination = source ;
 // destinationは{1,2,3}
 ~~~
@@ -46,7 +46,7 @@ e = std::move(source) ;
 ムーブにもムーブ先とムーブ元がある。
 
 ~~~cpp
-std::vector<int> v = {1,2,3} ;
+std::vector<int> source = {1,2,3} ;
 // destinationはムーブ先
 // sourceはムーブ元
 std::vector<int> destination = std::move(source) ;
