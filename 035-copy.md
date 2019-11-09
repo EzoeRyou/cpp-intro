@@ -69,7 +69,7 @@ int main()
 struct Value
 {
     // コピーコンストラクター
-    X( const X & source )
+    Value( const Value & source )
     { }
 } ;
 
