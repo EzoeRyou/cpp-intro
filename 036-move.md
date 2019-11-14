@@ -127,7 +127,7 @@ a = 456 ;
 
 ~~~cpp
 int object { } ;
-int * source = object ;
+int * source = &object ;
 // 中身は単なるコピー
 int * destination = std::move(source) ;
 ~~~
