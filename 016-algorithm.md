@@ -1065,7 +1065,7 @@ int main()
 実装例は単純だ。
 
 ~~~cpp
-auto generate = []( first, last, gen )
+auto generate = []( auto first, auto last, auto gen )
 {
     for ( auto iter = first ; iter != last ; ++iter )
     {
@@ -1073,11 +1073,11 @@ auto generate = []( first, last, gen )
     }
 } ;
 
-auto generate_n = []( first, n, gen )
+auto generate_n = []( auto first, auto n, auto gen )
 {
-    for ( auto i = 0u ; i != n ; ++i, ++iter )
+    for ( auto i = 0 ; i != n ; ++i, ++first )
     {
-        *iter = gen() ;
+        *first = gen() ;
     }
 } ;
 ~~~
