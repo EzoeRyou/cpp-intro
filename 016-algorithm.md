@@ -625,7 +625,7 @@ int main()
 実装してみよう。
 
 ~~~cpp
-auto count = []( auto first, auto last, auto pred )
+auto count_if = []( auto first, auto last, auto pred )
 {
     auto counter = 0u ;
     for ( auto i = first ; i != last ; ++i )
