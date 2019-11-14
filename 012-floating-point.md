@@ -156,7 +156,7 @@ $$仮数 \times 2^{指数}$$
 
 ~~~cpp
 // 5496
-double a = 0xabc.0p0 ;
+double a = 0xabc.0p1 ;
 // 7134
 double b = 0xde.fp5 ;
 ~~~
