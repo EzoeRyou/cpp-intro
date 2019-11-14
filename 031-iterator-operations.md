@@ -325,7 +325,7 @@ void f( InputIterator i, InputIterator j )
 }
 ~~~
 
-入力イテレーターの参照は、読み込みことしか保証されていない。
+入力イテレーターの参照は、読み込むことしか保証されていない。
 
 ~~~cpp
 template < typename InputIterator >
