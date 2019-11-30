@@ -332,7 +332,7 @@ class own
     // その他のメンバー
 public :
     own( const own & ) = default ;
-    own & operator ==( const own & ) = default ;
+    own & operator = ( const own & ) = default ;
 }
 ~~~
 
