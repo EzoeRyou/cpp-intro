@@ -651,6 +651,8 @@ struct cin_iterator
     { ++*this ; }    
 
     // キャッシュした値を返す
+    reference operator *()
+    { return value; }
     const reference operator *() const
     { return value ; }
 
