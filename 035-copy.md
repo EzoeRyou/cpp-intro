@@ -332,7 +332,7 @@ class own
     // その他のメンバー
 public :
     own( const own & ) = default ;
-    own & operator ==( const own & ) = default ;
+    own & operator =( const own & ) = default ;
 }
 ~~~
 
@@ -543,7 +543,7 @@ int main()
 
 ~~~cpp
 dynamic_array( const dynamic_array & r )
-    : first( new T[r.size()]), last( first + r.size() ) 
+    : first( new T[r.size()]), last( first + r.size() )
 {
     std::copy( r.begin(), r.end(), begin() ) ;
 }
@@ -715,7 +715,7 @@ vector & operator = ( const vector & r )
         std::copy( r.begin(), r.end(), begin() ) ;
     }
     // 3. それ以外の場合で
-    else 
+    else
         // 予約数が十分ならば、
         if ( capacity() >= r.size() )
         {
