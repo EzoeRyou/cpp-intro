@@ -607,6 +607,7 @@ target :
 ~~~
 $ make
 echo target
+target
 ~~~
 
 #### `$<` 最初の事前要件
