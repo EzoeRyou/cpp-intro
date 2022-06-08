@@ -782,26 +782,37 @@ int main()
 
 ## search
 
-`search( first1, last1, first2, last2)`はイテレーター`[first2, last2)`の範囲で示された連続した要素の並びがイテレーター`[first1, last1)`の範囲に存在すれば`true`、そうでない場合は`false`を返す。
+`search( first1, last1, first2, last2)`はイテレーター`[first2, last2)`の範囲で示された連続した要素の並びがイテレーター`[first1, last1)`の範囲に存在すれば、その要素の並びの最初のイテレーター、'[first2, last2)'が空である場合は'first1'、連続した要素の並びが見つからない場合は'last1'を返す。
 
-こう書くと難しいが、例を見るとわかりやすい。
+こう書くと難しいが、例をみると
 
 ~~~cpp
 int main()
 {
-    std::vector<int> v1 = {1,2,3,4,5,6,7,8,9} ;
-    std::vector<int> v2 = {4,5,6} ;
+    std::vector v1 = {1,2,3,4,5,6,7,8,9} ;
+    std::vector v2 = {4,5,6} ;
 
+    // v1の中の最初の連続した4,5,6の4を指すイテレーターを返す
+    auto a = std::search( std::begin(v1), std::end(v1), std::begin(v2), std::end(v2) ) ;
     // true
-    bool a = std::search( std::begin(v1), std::end(v1), std::begin(v2), std::end(v2) ) ;
+    bool A = ( a == std::next( std::begin(v1), 3 ) ) ;
 
-    std::vector<int> v3 = {1,3,5} ;
-    // false 
-    bool a = std::search( std::begin(v1), std::end(v1), std::begin(v3), std::end(v3) ) ;
+    // [first2, last2)は空のイテレーター
+    // first1を返す
+    auto b = std::search( std::begin(v1), std::end(v1), std::end(v2), std::end(v2) ) ;
+    // true
+    bool B = ( b == std::begin(v1) ) ;
+
+    std::vector v3 = {3,2,1} ;
+    // [first2, last2)は[fist1, last1)に存在しない
+    // last1を返す
+    auto c = std::search( std::begin(v1), std::end(v1), std::begin(v3), std::end(v3) ) ;
+    // true
+    bool C = ( c == std::end(v1) ) ;
 }
 ~~~
 
-この例では、`v1`の中に`v2`と同じ並びの`{4,5,6}`が存在するので`true`、`v3`と同じ並びの`{1,3,5}`は存在しないので`false`になる。
+この例では、`v1`の中に`v2`と同じ並びの`{4,5,6}`が存在するので戻り値`a`は`std::bigin(v1)'から3つ先のイテレーターに等しく、`[first2, last2)`に空のイテレーターが渡されたので戻り値bは`std::begtin(v1)`と等しく、`v3`と同じ並びの`{3,2,1}`は`v1`に存在しないので戻り値cは`std::end(v1)`に等しくなる。
 
 `search`の実装例はいまの読者にはまだ理解できない。`equal`や`search`を効率的に実装するにはイテレーターの詳細な理解が必要だ。
 
