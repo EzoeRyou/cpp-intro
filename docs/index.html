@@ -7251,7 +7251,7 @@ d) 1 \lt i \lt 13
 <p><code>std::floor(x)</code>は浮動小数点数<code>x</code>の小数点数以下を切り捨てた結果を返す関数だ。<code>floor(0.999)</code>は<code>0.0</code>に、<code>floor(1.999)</code>は<code>1.0</code>になる。</p>
 <p>本書をここまで読んできた読者であれば実装は自力でできるだろう。</p>
 <h2 id="search">search</h2>
-<p><code>search( first1, last1, first2, last2)</code>はイテレーター<code>[first2, last2)</code>の範囲で示された連続した要素の並びがイテレーター<code>[first1, last1)</code>の範囲に存在すれば、その要素の並びの最初のイテレーター、‘[first2, last2)’が空である場合は’first1’、連続した要素の並びが見つからない場合は’last1’を返す。</p>
+<p><code>search(first1, last1, first2, last2)</code>はイテレーター<code>[first2, last2)</code>の範囲で示された連続した要素の並びがイテレーター<code>[first1, last1)</code>の範囲に存在すれば、その要素の並びの最初のイテレーター、<code>[first2, last2)</code>が空である場合は<code>first1</code>、連続した要素の並びが見つからない場合は<code>last1</code>を返す。</p>
 <p>こう書くと難しいが、例をみると</p>
 <div class="sourceCode" id="cb641"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb641-1"><a href="#cb641-1" aria-hidden="true"></a><span class="dt">int</span> main()</span>
 <span id="cb641-2"><a href="#cb641-2" aria-hidden="true"></a>{</span>
@@ -7276,7 +7276,7 @@ d) 1 \lt i \lt 13
 <span id="cb641-21"><a href="#cb641-21" aria-hidden="true"></a>    <span class="co">// true</span></span>
 <span id="cb641-22"><a href="#cb641-22" aria-hidden="true"></a>    <span class="dt">bool</span> C = ( c == <span class="bu">std::</span>end(v1) ) ;</span>
 <span id="cb641-23"><a href="#cb641-23" aria-hidden="true"></a>}</span></code></pre></div>
-<p>この例では、<code>v1</code>の中に<code>v2</code>と同じ並びの<code>{4,5,6}</code>が存在するので戻り値<code>a</code>は<code>std::bigin(v1)'から3つ先のイテレーターに等しく、</code>[first2, last2)<code>に空のイテレーターが渡されたので戻り値bは</code>std::begtin(v1)<code>と等しく、</code>v3<code>と同じ並びの</code>{3,2,1}<code>は</code>v1<code>に存在しないので戻り値cは</code>std::end(v1)`に等しくなる。</p>
+<p>この例では、<code>v1</code>の中に<code>v2</code>と同じ並びの<code>{4,5,6}</code>が存在するので戻り値<code>a</code>は<code>std::bigin(v1)</code>から3つ先のイテレーターに等しく、<code>[first2, last2)</code>に空のイテレーターが渡されたので戻り値bは<code>std::begtin(v1)</code>と等しく、<code>v3</code>と同じ並びの<code>{3,2,1}</code>は<code>v1</code>に存在しないので戻り値cは<code>std::end(v1)</code>に等しくなる。</p>
 <p><code>search</code>の実装例はいまの読者にはまだ理解できない。<code>equal</code>や<code>search</code>を効率的に実装するにはイテレーターの詳細な理解が必要だ。</p>
 <h2 id="copy">copy</h2>
 <p>これまでのアルゴリズムは<code>for_each</code>を除き要素の変更をしてこなかった。<code>copy</code>は要素の変更をするアルゴリズムだ。</p>
