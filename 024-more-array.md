@@ -192,8 +192,8 @@ int main()
 関数のリファレンスを引数として渡すと、関数の中で変更できてしまう。しかし、上の例のような関数`print`では、引数を書き換える必要はない。この関数を使う人間も、引数を勝手に書き換えないことを期待している。この場合、`const`を付けることで値の変更を防ぐことができる。
 
 ~~~cpp
-template < typename Container >
-void print( Container const & c )
+template < typename Array >
+void print( Array const & c )
 {
     for ( std::size_t i = 0 ; i != c.size() ; ++i )
     {
