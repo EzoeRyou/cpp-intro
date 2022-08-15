@@ -229,7 +229,7 @@ int main()
 {
     array_int_10 a = {0,1,2,3,4,5,6,7,8,9} ;
     a[3] = 0 ;
-    std::cout << a[6] ;
+    std::cout << a[3] ;
 }
 ~~~
 
