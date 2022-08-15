@@ -180,27 +180,28 @@ struct array_int_10
 配列はコピーできないが、クラスのデータメンバーとして宣言した配列は、クラスのコピーの際に、その対応する順番の要素がそれぞれコピーされる。
 
 ~~~cpp
-struct array_int_3 { int storage [3] ; } ;
+struct array_int_10 { int storage [10] ; } ;
 
 int main()
 {
-    array_int_3 a = { 0,1,2 } ;
+    array_int_10 a = {0,1,2,3,4,5,6,7,8,9} ;
 
-    array_int_3 b = a ;
+    array_int_10 b = a ;
     // b.storage[0] == a.storage[0] 
     // b.storage[1] == a.storage[1] 
     // b.storage[2] == a.storage[2] 
+    // ...
 }
 ~~~
 
 これはあたかも以下のように書いたかのように動く。
 
 ~~~cpp
-struct array_int_3
+struct array_int_10
 {
-    int storage[3] ;
+    int storage[10] ;
 
-    array_int_3( array_int_3 const & other )
+    array_int_10( array_int_10 const & other )
     {
         std::copy(
             std::begin(other.storage), std::end(other.storage),
