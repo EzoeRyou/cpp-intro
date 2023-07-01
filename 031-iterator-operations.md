@@ -226,7 +226,7 @@ void f( Iterator i )
     auto j = i ;
     i == j ;    // true
     ++j ;
-    i = j ;     // false
+    i == j ;     // false
 }
 ~~~
 
