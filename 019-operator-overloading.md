@@ -770,7 +770,7 @@ IntLike operator +( IntLike const & obj )
     return obj ;
 }
 
-IntLIke operator -( IntLike const & obj )
+IntLike operator -( IntLike const & obj )
 {
     return IntLike{ -obj.data } ;
 }
